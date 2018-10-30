@@ -1,28 +1,33 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import styled from "styled-components";
+import Note from "./Note";
 
 class App extends Component {
+  state = {
+    notes: [
+      {
+        body: "Sticky note",
+        position: { x: 100, y: 100 },
+        color: "#f9ffa5"
+      }
+    ]
+  };
+
   render() {
+    const {
+      state: { notes }
+    } = this;
+
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Container>
+        {notes.map((note, key) => (
+          <Note key={key} note={note} />
+        ))}
+      </Container>
     );
   }
 }
+
+const Container = styled.div``;
 
 export default App;

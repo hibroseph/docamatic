@@ -1,22 +1,30 @@
 const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
     "#0082c8", "#eac0c8", "#b9893c", "#ff3561", "#008080"]
 
+
+
 const notesApp = (state = [], action) => {
     switch (action.type) {
-
         case 'REMOVE_NOTE':
             console.log("Removing note with id: " + action.id)
+            
+            // Filter the id of the note that needs to be deleted out
+            let notes = state.notes.filter((note) => {
+                console.log("note id: " + note.id)
+                if (note.id != action.id) {
+                    console.log("note id: " + note.id + " is not equal to action.id: " + action.id)
+                    return note;
+                }
+            })
 
-            let notes = state.notes.slice(0, action.id)
-                .concat(state.notes.slice(action.id + 1));
-
+            // Create the new state
             let newState = Object.assign({}, state, {
                 notes
-            });
+            })
 
-            console.log("newState")
-            console.log(newState)
+            // Return that new state
             return newState;
+
 
         case 'ADD_NOTE':
 

@@ -3,11 +3,11 @@ import styled from "styled-components";
 
 const Note = ({ body, position, color, onClick }) => {
   console.log("ARE YOU RENDERING")
- 
+
   console.log("Body: " + body)
   console.log("position: " + position.x + " " + position.y)
   console.log("color: " + color)
-  
+
   return (
     <Container>
       style={{
@@ -17,7 +17,7 @@ const Note = ({ body, position, color, onClick }) => {
 
     <textarea defaultValue={body} />
 
-      <button> onClick={onClick} </button>
+      <button onClick={onClick} > </button>
     </Container>
   )
 }

@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 
 const NoteList = ({ notes, onDeleteClick }) => {
 
-    console.log("IS THIS GETTING CALLED?")
+    // console.log("IS THIS GETTING CALLED?")
 
     return (
         <Container>
@@ -36,7 +36,7 @@ NoteList.propTypes = {
 const Container = styled.div``;
 
 const mapStateToProps = state => {
-    console.log("WHAT ABOUT THIS")
+    // console.log("WHAT ABOUT THIS")
 
     return ({
         notes: state.notes

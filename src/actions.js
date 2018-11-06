@@ -15,8 +15,6 @@ let nextNoteId = 0
 
 
 export function addNote(text) {
-    console.log("addNote in actions.js was called")
-
     return {
         type: ADD_NOTE,
         id: nextNoteId++,

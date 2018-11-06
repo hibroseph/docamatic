@@ -27,11 +27,8 @@ NoteList.propTypes = {
             id: PropTypes.number.isRequired,
             body: PropTypes.string.isRequired,
             color: PropTypes.string.isRequired,
-            position: PropTypes.arrayOf({
-                x: PropTypes.number.isRequired,
-                y: PropTypes.number.isRequired
+            position: PropTypes.object.isRequired
             }).isRequired
-        }).isRequired
     ).isRequired,
     onDeleteClick: PropTypes.func.isRequired
 }

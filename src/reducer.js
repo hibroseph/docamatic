@@ -34,7 +34,7 @@ const notesApp = (state = [], action) => {
             let notes = state.notes.slice(0, action.id)
                 .concat(state.notes.slice(action.id + 1));
 
-            let newState = Object.assign(state, {
+            let newState = Object.assign({}, state, {
                 notes
             });
 
@@ -45,8 +45,8 @@ const notesApp = (state = [], action) => {
         case 'ADD_NOTE':
 
             console.log("ADD_NOTE was called in reducer");
-            
-            return Object.assign(state, {
+
+            return Object.assign({}, state, {
                 notes: [
                     ...state.notes,
                     {

@@ -7,7 +7,6 @@ const NewNote = ({ dispatch }) => {
         <div>
             <button type="submit" onClick={() => {
                 dispatch(addNote("Hello New Note"));
-                // console.log(store.getState())
             }
             }>Add Notey</button>
         </div>

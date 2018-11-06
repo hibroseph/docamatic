@@ -12,7 +12,6 @@ const NoteList = ({ notes, onDeleteClick }) => {
     return (
         <Container>
             {notes.map(note => {
-
                 return (
                     <Note key={note.id} {...note} onClick={() => onDeleteClick(note.id)} />
                 )

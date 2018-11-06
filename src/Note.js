@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { removeNote } from "./actions";
-import { connect } from 'react-redux';
 
 const Note = ({ body, position, color, onClick }) => {
   console.log("ARE YOU RENDERING")
  
+  console.log("Body: " + body)
+  console.log("position: " + position.x + " " + position.y)
+  console.log("color: " + color)
+  
   return (
     <Container>
       style={{

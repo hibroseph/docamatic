@@ -1,42 +1,23 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { removeNote } from "./actions";
+import { connect } from 'react-redux';
 
-class Note extends Component {
+const Note = ({ body, position, color, onClick }) => {
+  console.log("ARE YOU RENDERING")
+ 
+  return (
+    <Container>
+      style={{
+        backgroundColor: color,
+        transform: `translate(${position.x}px,${position.y}px)`
+      }}>
 
-  handleClick() {
-    console.log("You clicked the note");
-  }
+    <textarea defaultValue={body} />
 
-  deleteNote() {
-    console.log("You want to delete this note");
-  }
-
-  render() {
-    console.log("calling render")
-    const {
-      props: {
-        note: { body, color, position }
-      }
-    } = this;
-
-    console.log("body:" + body)
-    console.log("color:" + color)
-    console.log("position x:" + position.x)
-    console.log("position y:" + position.y)
-
-    return (
-      <Container
-        style={{
-          backgroundColor: color,
-          transform: `translate(${position.x}px,${position.y}px)`
-        }}
-
-      >
-        <textarea defaultValue={body} onClick={this.handleClick} />
-        <button onClick={this.deleteNote}>Delete</button>
-      </Container>
-    );
-  }
+      <button> onClick={onClick} </button>
+    </Container>
+  )
 }
 
 const Container = styled.div`
@@ -52,4 +33,4 @@ const Container = styled.div`
   }
 `;
 
-export default Note;
+export default Note

@@ -11,9 +11,13 @@ const notesApp = (state = [], action) => {
             console.log("with the current title: " + action.title)
 
             return Object.assign({}, state, {
-                notes: [
-                    
-                ]
+                notes: state.notes.map((note, index) => {
+                    if (index === action.id) {
+                        return Object.assign({}, note, {
+                            title: action.title
+                        })
+                    }
+                })
             })
 
             // Logic to add a title
@@ -23,24 +27,32 @@ const notesApp = (state = [], action) => {
             console.log("We are adding text to note with id: " + action.id);
             console.log("and the text: " + action.body)
 
-            let note = state.notes[action.id]
+            // let note = state.notes[action.id]
         
 
-            let newNote = note
-            newNote.body = action.body
+            // let newNote = note
+            // newNote.body = action.body
 
-            // add the new note to the new state
-            let newerState = Object.assign({}, state, {
-                notes: [
-                    ...state.notes
-                ]
-            })
+            // // add the new note to the new state
+            // let newerState = Object.assign({}, state, {
+            //     notes: [
+            //         ...state.notes
+            //     ]
+            // })
 
-            newerState.notes[action.id] = newNote
+            // newerState.notes[action.id] = newNote
 
-            console.log(newerState)
+            // console.log(newerState)
 
-            return newerState;
+            return Object.assign({}, state, {
+                notes: state.notes.map((note, index) => {
+                    if (index === action.id) {
+                        return Object.assign({}, note, {
+                            body: action.body
+                        })
+                    }
+                })
+            });
 
         case 'REMOVE_NOTE':
             console.log("Removing note with id: " + action.id);

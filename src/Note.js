@@ -10,7 +10,7 @@ onTitleChange}) => {
       transform: `translate(${position.x}px,${position.y}px)`
     }} >
 
-      <span class="inline">
+      <span className="inline">
         {/* Title */}
         <textarea id="note_title"
           defaultValue={(title) || "New Note"}

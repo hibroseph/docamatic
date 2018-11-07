@@ -33,7 +33,7 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange}) => {
 NoteList.propTypes = {
     notes: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
+            id: PropTypes.string.isRequired,
             body: PropTypes.string.isRequired,
             color: PropTypes.string.isRequired,
             position: PropTypes.object.isRequired

@@ -1,13 +1,50 @@
 const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
-    "#0082c8", "#eac0c8", "#b9893c", "#ff3561", "#008080"]
+    "#5bc0de", "#eac0c8", "#ff3561", "#ff3561", "#008080"]
 
 
 
 const notesApp = (state = [], action) => {
     switch (action.type) {
+       
+        case 'ADD_TITLE':
+            console.log("We are adding text to the title with id: " + action.id);
+            console.log("with the current title: " + action.title)
+
+            return Object.assign({}, state, {
+                notes: [
+                    
+                ]
+            })
+
+            // Logic to add a title
+            // return state;
+
+        case 'ADD_TEXT':
+            console.log("We are adding text to note with id: " + action.id);
+            console.log("and the text: " + action.body)
+
+            let note = state.notes[action.id]
+        
+
+            let newNote = note
+            newNote.body = action.body
+
+            // add the new note to the new state
+            let newerState = Object.assign({}, state, {
+                notes: [
+                    ...state.notes
+                ]
+            })
+
+            newerState.notes[action.id] = newNote
+
+            console.log(newerState)
+
+            return newerState;
+
         case 'REMOVE_NOTE':
-            console.log("Removing note with id: " + action.id)
-            
+            console.log("Removing note with id: " + action.id);
+
             // Filter the id of the note that needs to be deleted out
             let notes = state.notes.filter((note) => {
                 console.log("note id: " + note.id)
@@ -45,6 +82,7 @@ const notesApp = (state = [], action) => {
                         id: action.id,
                         position: { x: posx, y: posy },
                         body: action.text,
+                        title: action.title,
                         color: colorList[colorIndex]
                     }
                 ]

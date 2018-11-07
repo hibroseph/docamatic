@@ -8,13 +8,22 @@ import { Provider } from 'react-redux'
 import notesApp from './reducer';
 
 // See if we have previously saved a state and if not, insert an empty array
-const initialState = JSON.parse(localStorage.getItem('state') || '{"notes" : []}') 
+let initialState = JSON.parse(localStorage.getItem('state') || '{"notes" : []}') 
 
+console.log(initialState)
+
+// initialState = {notes: []}
 // Create the store
 const store = createStore(notesApp, initialState) 
 
-store.subscribe(()=>{ const serialized = JSON.stringify(store.getState()); localStorage.setItem('state', serialized) })
+store.subscribe(()=>{ 
+    const serialized = JSON.stringify(store.getState()); 
+    localStorage.setItem('state', serialized) 
+    console.log("New state:")
+    console.log(store.getState())
+})
 
+//
 ReactDOM.render(
     <Provider store={store}>
         <App/>

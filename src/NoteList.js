@@ -2,18 +2,27 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Note from "./Note"
 import styled from "styled-components";
-import { addNote, removeNote } from './actions'
+import { addNote, removeNote, addText, addTitle } from './actions'
 import { connect } from 'react-redux'
 
-const NoteList = ({ notes, onDeleteClick }) => {
+const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange}) => {
 
-    // console.log("IS THIS GETTING CALLED?")
 
     return (
         <Container>
             {notes.map(note => {
                 return (
-                    <Note key={note.id} {...note} onClick={() => onDeleteClick(note.id)} />
+                    <Note key={note.id} {...note}
+                        onClick={() => onDeleteClick(note.id)}
+                        onNoteChange={(event) => {
+                            // console.log("Body change to: " + event.target.value)
+                            onTextChange(note.id, event.target.value, note.title)
+                        }}
+                        onTitleChange={(event) => {
+                            // console.log("Title changed to: " + event.target.value)
+                            onTitleChange(note.id, event.target.value)
+                        }}
+                        />                        
                 )
             })}
         </Container>
@@ -28,7 +37,7 @@ NoteList.propTypes = {
             body: PropTypes.string.isRequired,
             color: PropTypes.string.isRequired,
             position: PropTypes.object.isRequired
-            }).isRequired
+        }).isRequired
     ).isRequired,
     onDeleteClick: PropTypes.func.isRequired
 }
@@ -36,8 +45,6 @@ NoteList.propTypes = {
 const Container = styled.div``;
 
 const mapStateToProps = state => {
-    // console.log("WHAT ABOUT THIS")
-
     return ({
         notes: state.notes
 
@@ -51,8 +58,16 @@ const mapDispatchToProps = dispatch => ({
 
     onDeleteClick: id => {
         dispatch(removeNote(id))
-    }
+    },
 
+    onTextChange: (id, text, title) => {
+        console.log("title: " + title)
+        dispatch(addText(id, text, title))
+    },
+
+    onTitleChange: (id, text) => {
+        dispatch(addTitle(id, text))
+    }
 })
 
 export default connect(

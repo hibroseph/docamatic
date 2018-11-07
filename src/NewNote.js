@@ -3,12 +3,14 @@ import { connect } from 'react-redux'
 import { addNote } from './actions'
 
 const NewNote = ({ dispatch }) => {
+
     return (
         <div>
             <button type="submit" onClick={() => {
-                dispatch(addNote("Hello New Note"));
+                dispatch(addNote("Hello New Note", "Note"));
             }
-            }>Add Notey</button>
+            }>Add Note</button>
+
         </div>
     )
 }

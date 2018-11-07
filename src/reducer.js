@@ -10,6 +10,8 @@ const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
 
 const notesApp = (state = [], action) => {
     switch (action.type) {
+        case 'MOVE_NOTE':
+            console.log("HOOOORAAAAY IT MADE IT")
 
         case 'ADD_TITLE':
             console.log("We are adding text to the title with id: " + action.id);

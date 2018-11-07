@@ -1,40 +1,82 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import clickdrag from "react-clickdrag";
 
-const Note = ({ title, body, position, color, id, onClick, onNoteChange,
-onTitleChange}) => {
+class Note extends Component {
 
-  return (
-    <Container style={{
-      backgroundColor: color,
-      transform: `translate(${position.x}px,${position.y}px)`
-    }} >
+  render() {
+    console.log("PROPS")
+    // console.log(this.props.dataDrag)
+    // console.log(this.props.dataDrag.isMouseDown)
 
-      <span className="inline">
-        {/* Title */}
-        <textarea id="note_title"
-          defaultValue={(title) || "New Note"}
-          onChange={onTitleChange}
-        />
+    let positionX = this.props.position.x + this.props.dataDrag.moveDeltaX;
+    let positionY = this.props.position.x + this.props.dataDrag.moveDeltaY;
 
-        {/* Note Area */}
-        <textarea id="note_bod"
-          defaultValue={body}
-          onChange={onNoteChange}
-        />
-      </span>
+    if (!this.props.dataDrag.isMouseDown) {
+      console.log("YOU ARE NOT MOVING");
+    
+      // update the position
+      // this.props.onPositionChange(this.props.id, positionX, positionY)
+    }
 
-      <button onClick={onClick} > Delete </button>
-    </Container>
-  )
+    return (
+      <Container
+        style={{
+          backgroundColor: this.props.color,
+          transform: `translate(${positionX}px,${positionY}px)`
+        }}
+        onDragEnd={() => {
+          console.log("YOU ENDED DRAGGING IT");
+        }}
+        onDragStart={() => {
+          console.log("You are starting to drag it");
+ 
+        }}
+        
+        onmouseup={() => {
+          console.log("ON MOUSE UP")
+        }}>
+
+        <span className="inline">
+          {/* Title */}
+          <textarea
+            id="note_title"
+            defaultValue={this.props.title || "New Note"}
+            onChange={this.props.onTitleChange}
+          />
+
+          {/* Note Area */}
+          <textarea
+            id="note_bod"
+            defaultValue={this.props.body}
+            onChange={this.props.onNoteChange}
+          />
+
+          <button onClick={this.props.onClick}> Delete </button>
+        </span>
+      </Container>
+    );
+  }
 }
 
+var draggableNote = clickdrag(Note, {
+  onDragStop: e => {
+    console.log("You stopped moving the component");
+    
+  }
+  // update the state
+
+});
+
 const Container = styled.div`
-  padding: 20px;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-right: 20px;
+  padding-bottom: 5px;
   display: inline-block;
   position: absolute;
   border-left: 6px solid red;
-  
+
   #note_title {
     height: 30px;
     width: 250px;
@@ -44,7 +86,6 @@ const Container = styled.div`
     background: transparent;
     font-size: 30px;
     padding-bottom: 10px;
-    
   }
 
   #note_bod {
@@ -53,13 +94,12 @@ const Container = styled.div`
     resize: none;
     border: 0px;
     background: transparent;
-    
   }
 
   .inline {
     display: inline-block;
     width: 250px;
   }
-`
+`;
 
-export default Note
+export default draggableNote;

@@ -2,10 +2,19 @@ export const REMOVE_NOTE = 'REMOVE_NOTE';
 export const ADD_NOTE = 'ADD_NOTE';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_TITLE = 'ADD_TITLE';
-
+export const MOVE_NOTE = 'MOVE_NOTE';
 /*
  * action creators
  */
+export function updateNotePosition(id, x, y) {
+    return {
+        type: MOVE_NOTE,
+        id,
+        x,
+        y
+    }
+}
+
 export function addTitle(id, text) {
     return {
         type: ADD_TITLE,

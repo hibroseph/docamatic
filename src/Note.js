@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import clickdrag from "react-clickdrag";
+import ColorButton from './ColorButton'
 
 class Note extends Component {
   render() {
@@ -41,6 +42,7 @@ class Note extends Component {
             onChange={this.props.onNoteChange}
           />
 
+          <ColorButton></ColorButton>
           <button onClick={this.props.onClick}> Delete </button>
         </span>
       </Container>

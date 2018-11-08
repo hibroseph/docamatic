@@ -3,20 +3,16 @@ import styled from "styled-components";
 import clickdrag from "react-clickdrag";
 
 class Note extends Component {
-
   render() {
-    console.log("PROPS")
-    // console.log(this.props.dataDrag)
-    // console.log(this.props.dataDrag.isMouseDown)
+    let positionX = this.props.position.x
+    let positionY = this.props.position.y
 
-    let positionX = this.props.position.x + this.props.dataDrag.moveDeltaX;
-    let positionY = this.props.position.x + this.props.dataDrag.moveDeltaY;
-
-    if (!this.props.dataDrag.isMouseDown) {
-      console.log("YOU ARE NOT MOVING");
-    
-      // update the position
-      // this.props.onPositionChange(this.props.id, positionX, positionY)
+    // This was added because the render was running 1 time after the position updating
+    // in the state, resulting in the note to jump by DeltaX and DeltaY since they were
+    // still the same but the position.x actually updated
+    if (this.props.dataDrag.isMoving) {
+      positionX = this.props.position.x + this.props.dataDrag.moveDeltaX;
+      positionY = this.props.position.y + this.props.dataDrag.moveDeltaY;
     }
 
     return (
@@ -25,18 +21,11 @@ class Note extends Component {
           backgroundColor: this.props.color,
           transform: `translate(${positionX}px,${positionY}px)`
         }}
-        onDragEnd={() => {
-          console.log("YOU ENDED DRAGGING IT");
+        onMouseUp={() => {
+          console.log("The mouse was released, updating position as: " + positionX + " ," + positionY)
+          this.props.onPositionChange(this.props.id, positionX, positionY);
         }}
-        onDragStart={() => {
-          console.log("You are starting to drag it");
- 
-        }}
-        
-        onmouseup={() => {
-          console.log("ON MOUSE UP")
-        }}>
-
+      >
         <span className="inline">
           {/* Title */}
           <textarea
@@ -59,15 +48,10 @@ class Note extends Component {
   }
 }
 
-var draggableNote = clickdrag(Note, {
-  onDragStop: e => {
-    console.log("You stopped moving the component");
-    
-  }
-  // update the state
+// Make the note draggable
+var draggableNote = clickdrag(Note);
 
-});
-
+// Styling for the note etc
 const Container = styled.div`
   padding-left: 20px;
   padding-top: 10px;

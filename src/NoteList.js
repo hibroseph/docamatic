@@ -24,8 +24,7 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositio
             }}
 
             onPositionChange={(id, x, y) => {
-                console.log("ONPOSITIONCHANGE");
-                console.log(id, x, y)
+                console.log("Position changed to: " + x + " ," + y)
                 onPositionChange(id, x, y)
             }}
           />
@@ -66,7 +65,6 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onTextChange: (id, text, title) => {
-    console.log("title: " + title);
     dispatch(addText(id, text, title));
   },
 

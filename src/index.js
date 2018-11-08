@@ -9,6 +9,9 @@ import App from './App'
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem('state') || '{"notes" : []}')
 
+// This is used to reset the state if something is saved as undefined
+// initialState = {notes:[]}
+
 // Create the store
 const store = createStore(notesApp, initialState)
 

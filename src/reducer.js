@@ -1,17 +1,24 @@
 const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
     "#5bc0de", "#eac0c8", "#ff3561", "#ff3561", "#008080"]
 
-// function getUUID() {
-//     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-//         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-//         return v.toString(16);
-//     });
-// }
-
 const notesApp = (state = [], action) => {
     switch (action.type) {
         case 'MOVE_NOTE':
-            console.log("HOOOORAAAAY IT MADE IT")
+            console.log("MOVE_NOTE")
+            console.log("Changing position to: " + action.x + " ," + action.y)
+
+            return Object.assign({}, state, {
+                notes: state.notes.map((note) => {
+                    if (note.id === action.id) {
+                        // let's change the position
+                        return Object.assign({}, note, {
+                            position: { x: action.x, y: action.y }
+                        })
+                    } else {
+                        return note;
+                    }
+                })
+            })
 
         case 'ADD_TITLE':
             console.log("We are adding text to the title with id: " + action.id);
@@ -31,29 +38,9 @@ const notesApp = (state = [], action) => {
                 })
             })
 
-        // Logic to add a title
-        // return state;
-
         case 'ADD_TEXT':
             console.log("We are adding text to note with id: " + action.id);
             console.log("and the text: " + action.body)
-
-            // let note = state.notes[action.id]
-
-
-            // let newNote = note
-            // newNote.body = action.body
-
-            // // add the new note to the new state
-            // let newerState = Object.assign({}, state, {
-            //     notes: [
-            //         ...state.notes
-            //     ]
-            // })
-
-            // newerState.notes[action.id] = newNote
-
-            // console.log(newerState)
 
             return Object.assign({}, state, {
                 notes: state.notes.map((note, id) => {
@@ -106,7 +93,7 @@ const notesApp = (state = [], action) => {
             // let guid = getUUID();
 
             console.log("The color: " + colorList[colorIndex] + " was choosen")
-            
+
             return Object.assign({}, state, {
                 notes: [
                     ...state.notes,

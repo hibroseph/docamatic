@@ -3,10 +3,18 @@ export const ADD_NOTE = 'ADD_NOTE';
 export const ADD_TEXT = 'ADD_TEXT';
 export const ADD_TITLE = 'ADD_TITLE';
 export const MOVE_NOTE = 'MOVE_NOTE';
+export const CHANGE_COLOR = 'CHANGE_COLOR';
 
 /*
  * action creators
  */
+export function changeNoteColor(id) {
+    return {
+        type: CHANGE_COLOR,
+        id
+    }
+}
+
 export function updateNotePosition(id, x, y) {
     return {
         type: MOVE_NOTE,

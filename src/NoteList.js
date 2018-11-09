@@ -2,10 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import Note from "./Note";
 import styled from "styled-components";
-import { addNote, removeNote, addText, addTitle, updateNotePosition } from "./actions";
+import {
+  addNote, removeNote, addText, 
+  addTitle, updateNotePosition, changeNoteColor
+} from "./actions";
 import { connect } from "react-redux";
 
-const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositionChange }) => {
+const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositionChange, onColorChange }) => {
   return (
     <Container>
       {notes.map(note => {
@@ -13,7 +16,10 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositio
           <Note
             key={note.id}
             {...note}
-            onClick={() => onDeleteClick(note.id)}
+            onDeleteClick={() => {
+              console.log("The delete button was pressed")
+              onDeleteClick(note.id)
+            }}
             onNoteChange={event => {
               // console.log("Body change to: " + event.target.value)
               onTextChange(note.id, event.target.value, note.title);
@@ -24,8 +30,12 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositio
             }}
 
             onPositionChange={(id, x, y) => {
-                console.log("Position changed to: " + x + " ," + y)
-                onPositionChange(id, x, y)
+              console.log("Position changed to: " + x + " ," + y)
+              onPositionChange(id, x, y)
+            }}
+
+            onColorChange={(id) => {
+              onColorChange(note.id)
             }}
           />
         );
@@ -74,6 +84,10 @@ const mapDispatchToProps = dispatch => ({
 
   onPositionChange: (id, x, y) => {
     dispatch(updateNotePosition(id, x, y))
+  },
+
+  onColorChange: (id) => {
+    dispatch(changeNoteColor(id))
   }
 });
 

@@ -3,9 +3,28 @@ const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
 
 const notesApp = (state = [], action) => {
     switch (action.type) {
+
+        case 'CHANGE_COLOR':
+            console.log("You want to change the color of note: " + action.id);
+
+            // Generates a random int for a random color for the note
+            let colorIndex = Math.floor(Math.random() * (9 + 1))
+
+            return Object.assign({}, state, {
+                notes: state.notes.map((note) => {
+                    if (note.id === action.id) {
+                        return Object.assign({}, note, {
+                            color: colorList[colorIndex]
+                        })
+                    } else {
+                        return note;
+                    }
+                })
+            })
+
         case 'MOVE_NOTE':
-            console.log("MOVE_NOTE")
-            console.log("Changing position to: " + action.x + " ," + action.y)
+            // console.log("MOVE_NOTE")
+            // console.log("Changing position to: " + action.x + " ," + action.y)
 
             return Object.assign({}, state, {
                 notes: state.notes.map((note) => {
@@ -21,49 +40,49 @@ const notesApp = (state = [], action) => {
             })
 
         case 'ADD_TITLE':
-            console.log("We are adding text to the title with id: " + action.id);
-            console.log("with the current title: " + action.title)
+            // console.log("We are adding text to the title with id: " + action.id);
+            // console.log("with the current title: " + action.title)
 
             return Object.assign({}, state, {
                 notes: state.notes.map((note) => {
                     if (note.id === action.id) {
-                        console.log("The note.id: " + note.id + " is equal to action.id: " + action.id)
+                        // console.log("The note.id: " + note.id + " is equal to action.id: " + action.id)
                         return Object.assign({}, note, {
                             title: action.title
                         })
                     } else {
-                        console.log("The note.id: " + note.id + " is NOT equal to the action id: " + action.id)
+                        // console.log("The note.id: " + note.id + " is NOT equal to the action id: " + action.id)
                         return note;
                     }
                 })
             })
 
         case 'ADD_TEXT':
-            console.log("We are adding text to note with id: " + action.id);
-            console.log("and the text: " + action.body)
+            // console.log("We are adding text to note with id: " + action.id);
+            // console.log("and the text: " + action.body)
 
             return Object.assign({}, state, {
                 notes: state.notes.map((note, id) => {
                     if (note.id === action.id) {
-                        console.log("index: " + note.id + " is equal to the action id: " + action.id)
+                        // console.log("index: " + note.id + " is equal to the action id: " + action.id)
                         return Object.assign({}, note, {
                             body: action.body
                         })
                     } else {
-                        console.log("index: " + note.id + " is NOT equal to the action id: " + action.id)
+                        // console.log("index: " + note.id + " is NOT equal to the action id: " + action.id)
                         return note;
                     }
                 })
             });
 
         case 'REMOVE_NOTE':
-            console.log("Removing note with id: " + action.id);
+            // console.log("Removing note with id: " + action.id);
 
             // Filter the id of the note that needs to be deleted out
             let notes = state.notes.filter((note) => {
-                console.log("note id: " + note.id)
+                // console.log("note id: " + note.id)
                 if (note.id != action.id) {
-                    console.log("note id: " + note.id + " is not equal to action.id: " + action.id)
+                    // console.log("note id: " + note.id + " is not equal to action.id: " + action.id)
                     return note;
                 }
             })
@@ -79,20 +98,18 @@ const notesApp = (state = [], action) => {
 
         case 'ADD_NOTE':
 
-            console.log("Adding note with id: " + action.id)
-
-            // console.log("GUID: " + getUUID())
+            // console.log("Adding note with id: " + action.id)
 
             // Generates a random position on the page
             const posx = Math.floor(Math.random() * (600 + 1));
             const posy = Math.floor(Math.random() * (600 + 1));
 
             // Generates a random int for a random color for the note
-            const colorIndex = Math.floor(Math.random() * (9 + 1))
+            colorIndex = Math.floor(Math.random() * (9 + 1))
 
             // let guid = getUUID();
 
-            console.log("The color: " + colorList[colorIndex] + " was choosen")
+            // console.log("The color: " + colorList[colorIndex] + " was choosen")
 
             return Object.assign({}, state, {
                 notes: [

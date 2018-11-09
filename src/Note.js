@@ -1,10 +1,13 @@
 import React, { Component } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import clickdrag from "react-clickdrag";
 import ColorButton from './ColorButton'
 
 class Note extends Component {
   render() {
+
+    console.log("Rerendering note")
+
     let positionX = this.props.position.x
     let positionY = this.props.position.y
 
@@ -23,8 +26,10 @@ class Note extends Component {
           transform: `translate(${positionX}px,${positionY}px)`
         }}
         onMouseUp={() => {
-          console.log("The mouse was released, updating position as: " + positionX + " ," + positionY)
-          this.props.onPositionChange(this.props.id, positionX, positionY);
+          if (this.props.dataDrag.isMoving) {
+            console.log("The mouse was released, updating position as: " + positionX + " ," + positionY)
+            this.props.onPositionChange(this.props.id, positionX, positionY);
+          }
         }}
       >
         <span className="inline">
@@ -42,8 +47,10 @@ class Note extends Component {
             onChange={this.props.onNoteChange}
           />
 
-          <ColorButton></ColorButton>
-          <button onClick={this.props.onClick}> Delete </button>
+          {/* <ColorButton onClick={this.props.onColorChange(this.props.id)}></ColorButton> */}
+
+          <Button color onClick={this.props.onColorChange}>Color</Button>
+          <Button onClick={this.props.onDeleteClick}> Delete </Button>
         </span>
       </Container>
     );
@@ -54,6 +61,26 @@ class Note extends Component {
 var draggableNote = clickdrag(Note);
 
 // Styling for the note etc
+
+const Button = styled.button`
+    background-color: #e74545;
+    color: white;
+    padding: 25px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 16px;
+    border-radius: 7px;
+    border: none;
+    float: right;
+    text-align: center;
+
+    ${props => props.color && css`
+      background-color: #4caf50;
+      float left;
+    `}
+
+`;
+
 const Container = styled.div`
   padding-left: 20px;
   padding-top: 10px;
@@ -61,7 +88,11 @@ const Container = styled.div`
   padding-bottom: 5px;
   display: inline-block;
   position: absolute;
-  border-left: 6px solid red;
+  // border-left: 6px solid red;
+
+  -webkit-box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
+  -moz-box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
+  box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
 
   #note_title {
     height: 30px;
@@ -85,6 +116,13 @@ const Container = styled.div`
   .inline {
     display: inline-block;
     width: 250px;
+  }
+
+
+  .colorChange {
+    background-color: #4caf50;
+    padding-left: 20px;
+    float: none;
   }
 `;
 

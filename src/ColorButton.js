@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 class ColorButton extends Component {
 
@@ -8,17 +8,59 @@ class ColorButton extends Component {
 
         // render the button
         return (
-            <button>Color Button</button>
+            <div style={{ display: "inline-block", paddingRight: "10px" }}>
+
+                <Button>Color</Button>
+
+                <Container>Hello</Container>
+            </div>
         )
     }
 }
 
+
+
+const ColorChooser = styled.div`
+    width:250px
+    height: 50px;
+    background-color: white;
+    border-radius: 8px;
+    position: absolute;
+    visibility: hidden;
+
+`
+
+const Button = styled.button`
+    background-color: #4caf50;
+    color: white;
+    padding: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 16px;
+    border-radius: 7px;
+    border: none;
+
+    &:hover {
+        background-color: #3c8c40;
+    }
+`;
+
+
 const Container = styled.div`
-    height: 20px;
-    width: 100px;
+    height: 50px;
+    width: 250px;
     padding: 3px;
-    background:blue;
-    display: inline-block;
+    background-color:#FFFFFF;
+    border-radius: 6px;
+    border-color: #000000;
+    border-width: 2px;
+    border-style: solid;
+    position: absolute;
+    visibility: hidden;
+
+    .dropbtn {
+        
+    }
 `;
 
 export default ColorButton

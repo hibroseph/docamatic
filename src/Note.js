@@ -73,6 +73,8 @@ const Button = styled.button`
     border: none;
     float: right;
     text-align: center;
+    
+  
 
     ${props => props.color && css`
       background-color: #4caf50;
@@ -88,11 +90,14 @@ const Container = styled.div`
   padding-bottom: 5px;
   display: inline-block;
   position: absolute;
-  // border-left: 6px solid red;
 
   -webkit-box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
   -moz-box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
   box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
+
+  height: 400px;
+  width: 250px;
+  
 
   #note_title {
     height: 30px;
@@ -106,8 +111,11 @@ const Container = styled.div`
   }
 
   #note_bod {
+    box-sizing: border-box;
     width: 250px;
-    height: 250px;
+    height: 315px;
+    
+
     resize: none;
     border: 0px;
     background: transparent;
@@ -123,6 +131,11 @@ const Container = styled.div`
     background-color: #4caf50;
     padding-left: 20px;
     float: none;
+  }
+
+  .resizeableText {
+    width: 100%;
+    height: 100%;
   }
 `;
 

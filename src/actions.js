@@ -40,11 +40,10 @@ export function addText(id, text) {
     }
 }
 
-export function addNote(text, title, id) {
+export function addNote(title, id) {
     return {
         type: ADD_NOTE,
         id: id,
-        text,
         title
     }
 }

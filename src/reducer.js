@@ -1,5 +1,24 @@
-const colorList = ["#0082C8", "#FFD03E", "#b3fedf", "#5a3791", "#2daa4b",
-    "#5bc0de", "#eac0c8", "#ff3561", "#ff3561", "#008080"]
+const colorList = [
+    "#0082C8",
+    "#FFD03E",
+    "#b3fedf",
+    "#5a3791",
+    "#2daa4b",
+    "#5bc0de",
+    "#eac0c8",
+    "#ff3561",
+    "#ff3561",
+    "#008080"]
+
+
+const NoteMessages = [
+    "Wanna Remember Something? Put it here!",
+    "Here is your new note! Enter text here",
+    "You should probably put something more useful than this message",
+    "CONGRATS! You made a note!",
+    "What do you want to remember today?",
+    "Ooo what a nice color",
+    "Wanna change the color? Press the color button"]
 
 const notesApp = (state = [], action) => {
     switch (action.type) {
@@ -107,7 +126,8 @@ const notesApp = (state = [], action) => {
             // Generates a random int for a random color for the note
             colorIndex = Math.floor(Math.random() * (9 + 1))
 
-            // let guid = getUUID();
+            // Generates a random int for random text
+            const noteTextIndex = Math.floor(Math.random() * (5 + 1))
 
             // console.log("The color: " + colorList[colorIndex] + " was choosen")
 
@@ -117,7 +137,7 @@ const notesApp = (state = [], action) => {
                     {
                         id: action.id,
                         position: { x: posx, y: posy },
-                        body: action.text,
+                        body: NoteMessages[noteTextIndex],
                         title: action.title,
                         color: colorList[colorIndex]
                     }

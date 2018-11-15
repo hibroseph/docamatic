@@ -1,3 +1,4 @@
+// Messages to appear when a note is created
 const colorList = [
     "#0082C8",
     "#FFD03E",
@@ -10,7 +11,7 @@ const colorList = [
     "#ff3561",
     "#008080"]
 
-
+// Messages to appear when a note is created 
 const NoteMessages = [
     "Wanna Remember Something? Put it here!",
     "Here is your new note! Enter text here",
@@ -23,8 +24,12 @@ const NoteMessages = [
 const notesApp = (state = [], action) => {
     switch (action.type) {
 
+        // case 'CLICKED_NOTE':
+        //     console.log("YOU CLICKED NOTE: " + action.id + "!!!!")
+        //     return state;
+
         case 'CHANGE_COLOR':
-            console.log("You want to change the color of note: " + action.id);
+            // console.log("You want to change the color of note: " + action.id);
 
             // Generates a random int for a random color for the note
             let colorIndex = Math.floor(Math.random() * (9 + 1))
@@ -45,7 +50,11 @@ const notesApp = (state = [], action) => {
             // console.log("MOVE_NOTE")
             // console.log("Changing position to: " + action.x + " ," + action.y)
 
-            return Object.assign({}, state, {
+            // return [   ...state.filter(note=>note.id !== action.id),
+            //    state.find(note=>note.id === action.id) ]
+
+
+            let stateNew = Object.assign({}, state, {
                 notes: state.notes.map((note) => {
                     if (note.id === action.id) {
                         // let's change the position
@@ -57,6 +66,20 @@ const notesApp = (state = [], action) => {
                     }
                 })
             })
+
+            return stateNew;
+            // return Object.assign({}, state, {
+            //     notes: state.notes.map((note) => {
+            //         if (note.id === action.id) {
+            //             // let's change the position
+            //             return Object.assign({}, note, {
+            //                 position: { x: action.x, y: action.y }
+            //             })
+            //         } else {
+            //             return note;
+            //         }
+            //     })
+            // })
 
         case 'ADD_TITLE':
             // console.log("We are adding text to the title with id: " + action.id);
@@ -127,10 +150,11 @@ const notesApp = (state = [], action) => {
             colorIndex = Math.floor(Math.random() * (9 + 1))
 
             // Generates a random int for random text
-            const noteTextIndex = Math.floor(Math.random() * (5 + 1))
+            const noteTextIndex = Math.floor(Math.random() * (NoteMessages.length))
 
             // console.log("The color: " + colorList[colorIndex] + " was choosen")
 
+            // console.log("length of noteMessages" + NoteMessages.length)
             return Object.assign({}, state, {
                 notes: [
                     ...state.notes,

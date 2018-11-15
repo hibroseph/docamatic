@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import styled, { css } from "styled-components";
 import clickdrag from "react-clickdrag";
-import ColorButton from './ColorButton'
-
 class Note extends Component {
   render() {
 
@@ -31,23 +29,28 @@ class Note extends Component {
             this.props.onPositionChange(this.props.id, positionX, positionY);
           }
         }}
+
+        onClick={() => {
+          console.log("You clicked the container somewhere!")
+          console.log("We should probably bring it to the top")
+          this.props.onPositionChange(this.props.id, positionX, positionY)
+        }}
       >
         <span className="inline">
           {/* Title */}
-          <textarea
-            id="note_title"
+          <input
+            type="text"
+            className="note_title"
             defaultValue={this.props.title || "New Note"}
             onChange={this.props.onTitleChange}
           />
 
           {/* Note Area */}
           <textarea
-            id="note_bod"
+            className="note_body"
             defaultValue={this.props.body}
-            onChange={this.props.onNoteChange}
+            onChange={this.props.onBodyChange}
           />
-
-          {/* <ColorButton onClick={this.props.onColorChange(this.props.id)}></ColorButton> */}
 
           <Button color onClick={this.props.onColorChange}>Color</Button>
           <Button onClick={this.props.onDeleteClick}> Delete </Button>
@@ -74,7 +77,6 @@ const Button = styled.button`
     float: right;
     text-align: center;
     
-  
 
     ${props => props.color && css`
       background-color: #4caf50;
@@ -95,13 +97,11 @@ const Container = styled.div`
   -moz-box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
   box-shadow: 5px 5px 13px -3px rgba(0,0,0,0.75);
 
-  height: 400px;
-  width: 250px;
+  width: 300px;
   
 
-  #note_title {
-    height: 30px;
-    width: 250px;
+  .note_title {
+    width: 100%;
     border: 0px;
     font-weight: bold;
     resize: none;
@@ -110,10 +110,10 @@ const Container = styled.div`
     padding-bottom: 10px;
   }
 
-  #note_bod {
+  .note_body {
     box-sizing: border-box;
-    width: 250px;
-    height: 315px;
+    width: 100%;
+    height: 270px;
     
 
     resize: none;
@@ -123,7 +123,7 @@ const Container = styled.div`
 
   .inline {
     display: inline-block;
-    width: 250px;
+    width: 100%;
   }
 
 

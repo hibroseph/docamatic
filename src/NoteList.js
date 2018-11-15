@@ -3,12 +3,24 @@ import PropTypes from "prop-types";
 import Note from "./Note";
 import styled from "styled-components";
 import {
-  addNote, removeNote, addText, 
-  addTitle, updateNotePosition, changeNoteColor
+  addNote,
+  removeNote,
+  addText,
+  addTitle,
+  updateNotePosition,
+  changeNoteColor
 } from "./actions";
 import { connect } from "react-redux";
 
-const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositionChange, onColorChange }) => {
+const NoteList = ({
+  notes,
+  onDeleteClick,
+  onTextChange,
+  onTitleChange,
+  onPositionChange,
+  onColorChange,
+  onNoteClicked
+}) => {
   return (
     <Container>
       {notes.map(note => {
@@ -17,10 +29,10 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositio
             key={note.id}
             {...note}
             onDeleteClick={() => {
-              console.log("The delete button was pressed")
-              onDeleteClick(note.id)
+              console.log("The delete button was pressed");
+              onDeleteClick(note.id);
             }}
-            onNoteChange={event => {
+            onBodyChange={event => {
               // console.log("Body change to: " + event.target.value)
               onTextChange(note.id, event.target.value, note.title);
             }}
@@ -28,14 +40,17 @@ const NoteList = ({ notes, onDeleteClick, onTextChange, onTitleChange, onPositio
               // console.log("Title changed to: " + event.target.value)
               onTitleChange(note.id, event.target.value);
             }}
-
             onPositionChange={(id, x, y) => {
-              console.log("Position changed to: " + x + " ," + y)
-              onPositionChange(id, x, y)
+              console.log("Position changed to: " + x + " ," + y);
+              onPositionChange(id, x, y);
             }}
+            // onNoteClicked={(id,) => {
+            //   // console.log("You clicked note: " + id)
+            //   onNoteClicked(id, )
+            // }}
 
-            onColorChange={(id) => {
-              onColorChange(note.id)
+            onColorChange={id => {
+              onColorChange(note.id);
             }}
           />
         );
@@ -83,11 +98,15 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onPositionChange: (id, x, y) => {
-    dispatch(updateNotePosition(id, x, y))
+    dispatch(updateNotePosition(id, x, y));
   },
 
-  onColorChange: (id) => {
-    dispatch(changeNoteColor(id))
+  onColorChange: id => {
+    dispatch(changeNoteColor(id));
+  },
+
+  onNoteClicked: id => {
+    dispatch(updateNotePosition(id));
   }
 });
 

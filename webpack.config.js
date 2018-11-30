@@ -1,14 +1,16 @@
-const path = require('path')
+const path = require("path");
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = "development";
 
 module.exports = {
   entry: {
-    app: ['./src/index.js']
+    popup: ['./src/popup/index.js'],
+    app: ["./index.js"]
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name]-bundle.js'
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name]-bundle.js"
   },
   module: {
     rules: [
@@ -16,15 +18,27 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: ['react-app']
+            presets: ["react-app"]
           }
         }
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        loader: "url-loader?name=app/images/[name].[ext]"
       }
     ]
   },
   optimization: {
     noEmitOnErrors: true
-  }
-}
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      inject: true,
+      chunks: ['popup'],
+      filename: 'index.html',
+      template: './src/popup/popup.html'
+    })
+  ]
+};

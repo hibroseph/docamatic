@@ -8,6 +8,9 @@
       "default_popup": "index.html",
       "default_title": "Open the popup"
     },
+    "icons": {
+	    "64": "blue_icon.png"
+    },
     "content_scripts": [
       {
         "matches": ["<all_urls>"],

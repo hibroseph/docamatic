@@ -33,12 +33,12 @@ module.exports = {
   optimization: {
     noEmitOnErrors: true
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      inject: true,
-      chunks: ['popup'],
-      filename: 'index.html',
-      template: './src/popup/popup.html'
-    })
-  ]
+  // plugins: [
+  //   new HtmlWebpackPlugin({
+  //     inject: true,
+  //     chunks: ['popup'],
+  //     filename: 'index.html',
+  //     template: './src/popup/popup.html'
+  //   })
+  // ]
 };

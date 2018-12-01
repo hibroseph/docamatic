@@ -5,6 +5,9 @@
 /.pnp
 .pnp.js
 
+/dist/*.bundle.js
+/dist/index.html
+
 # testing
 /coverage
 

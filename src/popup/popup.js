@@ -1,8 +1,13 @@
 import React, { Component } from "react";
+import NewNote from '../components/NewNote'
 
 class Popup extends Component {
   render() {
-    return <div>Hello World Dawg</div>;
+    return (
+      <div>
+        <p>This is from popup.js</p>
+      </div>
+    );
   }
 }
 

@@ -1,3 +1,6 @@
+const INITIAL_NOTE_WIDTH = 250;
+const INITIAL_NOTE_HEIGHT = 400;
+
 // Messages to appear when a note is created
 const colorList = [
   "#0082C8",
@@ -174,7 +177,7 @@ const notesApp = (state = [], action) => {
           {
             id: action.id,
             position: { x: posx, y: posy },
-            size: { width: 150, height: 300 },
+            size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
             body: NoteMessages[noteTextIndex],
             title: action.title,
             color: colorList[colorIndex]

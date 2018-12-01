@@ -38,7 +38,7 @@ export const Container = styled.div`
   .note_body {
     box-sizing: border-box;
     min-width: 120px;
-    width: 250px;
+    width: 150px; 
     height: 300px;
 
     /* resize: none; */

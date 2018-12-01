@@ -1,5 +1,6 @@
 import React from "react";
 import Popup from "./popup";
+import ReactDOM from 'react-dom';
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 
@@ -13,8 +14,6 @@ if (!root) {
 }
 
 ReactDOM.render(
-  <Provider>
-    <Popup />
-  </Provider>,
+    <Popup />,
   root
 );

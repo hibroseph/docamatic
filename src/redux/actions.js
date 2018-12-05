@@ -58,11 +58,12 @@ export function addText(id, text) {
   };
 }
 
-export function addNote(title, id) {
+export function addNote(title, id, y_position) {
   return {
     type: ADD_NOTE,
     id: id,
-    title
+    title,
+    y_position
   };
 }
 

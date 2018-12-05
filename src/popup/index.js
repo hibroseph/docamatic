@@ -1,8 +1,20 @@
 import React from "react";
-import Popup from "./popup";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
+import notesApp from "../redux/reducer";
+import { createStore } from "redux";
+import { Provider } from "react-redux";
+import NewNote from "../components/NewNote";
+import { Store } from "react-chrome-redux";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
+
+// let initialState = '{"notes" : []}'
+
+// const store = createStore(notesApp, initialState)
+
+const store = new Store({
+  portName: "NOTES_STORE"
+});
 
 if (!root) {
   console.log("There is no root mount point for us :(");
@@ -13,7 +25,18 @@ if (!root) {
   console.log("Yay, I found a mount point :)");
 }
 
-ReactDOM.render(
-    <Popup />,
-  root
-);
+store.ready().then(() => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <NewNote />
+    </Provider>,
+    root
+  );
+});
+
+// ReactDOM.render(
+//   <Provider store={store}>
+//     <NewNote></NewNote>
+//   </Provider>,
+//   root
+// );

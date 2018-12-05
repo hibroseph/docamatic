@@ -6,7 +6,8 @@ process.env.NODE_ENV = "development";
 module.exports = {
   entry: {
     popup: ['./src/popup/index.js'],
-    app: ["./index.js"]
+    app: ["./index.js"],
+    background: ["./src/background/background.js"]
   },
   output: {
     path: path.resolve(__dirname, "dist"),

@@ -160,7 +160,7 @@ const notesApp = (state = [], action) => {
 
       // Generates a random position on the page
       const posx = Math.floor(Math.random() * (600 + 1));
-      const posy = Math.floor(Math.random() * (600 + 1));
+      // const posy = Math.floor(Math.random() * (600 + 1));
 
       // Generates a random int for a random color for the note
       colorIndex = Math.floor(Math.random() * (7 + 1));
@@ -168,15 +168,15 @@ const notesApp = (state = [], action) => {
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);
 
-      // console.log("The color: " + colorList[colorIndex] + " was choosen")
-
+      console.log("THE Y POSITION: " + action.y_position)
+      
       // console.log("length of noteMessages" + NoteMessages.length)
       return Object.assign({}, state, {
         notes: [
           ...state.notes,
           {
             id: action.id,
-            position: { x: posx, y: posy },
+            position: { x: posx, y: action.y_position },
             size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
             body: NoteMessages[noteTextIndex],
             title: action.title,

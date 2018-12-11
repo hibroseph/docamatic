@@ -26,9 +26,8 @@ const NoteMessages = [
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
-
     case "RESIZE_NOTE":
-      console.log("New size: " + action.id + " " + action.x + " ," + action.y);
+      // console.log("New size: " + action.id + " " + action.x + " ," + action.y);
 
       return Object.assign({}, state, {
         notes: state.notes.map(note => {
@@ -40,9 +39,8 @@ const notesApp = (state = [], action) => {
             return note;
           }
         })
-      })
+      });
 
-      
     // case 'CLICKED_NOTE':
     //     console.log("YOU CLICKED NOTE: " + action.id + "!!!!")
     //     return state;
@@ -158,32 +156,72 @@ const notesApp = (state = [], action) => {
     case "ADD_NOTE":
       // console.log("Adding note with id: " + action.id)
 
+      console.log("Adding note @ page: " + action.page);
       // Generates a random position on the page
       const posx = Math.floor(Math.random() * (600 + 1));
       // const posy = Math.floor(Math.random() * (600 + 1));
 
+      let page = action.page;
       // Generates a random int for a random color for the note
       colorIndex = Math.floor(Math.random() * (7 + 1));
 
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);
 
-      console.log("THE Y POSITION: " + action.y_position)
-      
-      // console.log("length of noteMessages" + NoteMessages.length)
-      return Object.assign({}, state, {
-        notes: [
-          ...state.notes,
-          {
-            id: action.id,
-            position: { x: posx, y: action.y_position },
-            size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
-            body: NoteMessages[noteTextIndex],
-            title: action.title,
-            color: colorList[colorIndex]
+      // return {
+      //   ...state,
+      //   [page]: [
+      //     ...state.page.notes,
+      //     {
+      //       id: action.id,
+      //       position: { x: posx, y: action.y_position },
+      //       size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
+      //       body: NoteMessages[noteTextIndex],
+      //       title: action.title,
+      //       color: colorList[colorIndex]
+      //     }
+      //   ]
+      // };
+
+      console.log("is state[page] equal to null?");
+      console.log(state[page] == null);
+    
+      // If there are notes already on the page 
+      if(state[page] == null) {
+        return Object.assign({}, state, {
+          [page]: {
+            notes: [
+              {
+                id: action.id,
+                position: { x: posx, y: action.y_position },
+                size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
+                body: NoteMessages[noteTextIndex],
+                title: action.title,
+                color: colorList[colorIndex]
+              }  
+            ]
           }
-        ]
-      });
+        })
+      } else {
+        return Object.assign({}, state, {
+          [page]: {
+            notes: [
+              ...state[page].notes,
+              {
+                id: action.id,
+                position: { x: posx, y: action.y_position },
+                size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
+                body: NoteMessages[noteTextIndex],
+                title: action.title,
+                color: colorList[colorIndex]
+              }
+            ]
+          }
+        });  
+      }
+
+      // console.log("length of noteMessages" + NoteMessages.length)
+      
 
     default:
       return state;

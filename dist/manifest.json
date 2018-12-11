@@ -19,7 +19,9 @@
     }
   ],
   "background": {
-    "scripts": ["background-bundle.js"]
+    "scripts": ["background-bundle.js"],
+    "persistent": false
+
   },
   "permissions": []
 }

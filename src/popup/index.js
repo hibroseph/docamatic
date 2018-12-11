@@ -5,12 +5,9 @@ import { createStore } from "redux";
 import { Provider } from "react-redux";
 import NewNote from "../components/NewNote";
 import { Store } from "react-chrome-redux";
+import Popup from "./popup";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
-
-// let initialState = '{"notes" : []}'
-
-// const store = createStore(notesApp, initialState)
 
 const store = new Store({
   portName: "NOTES_STORE"
@@ -28,15 +25,8 @@ if (!root) {
 store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <NewNote />
+      <Popup></Popup>
     </Provider>,
     root
   );
 });
-
-// ReactDOM.render(
-//   <Provider store={store}>
-//     <NewNote></NewNote>
-//   </Provider>,
-//   root
-// );

@@ -2,8 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import Note from "./Note";
 import styled from "styled-components";
-import interact from 'interactjs';
-import NoteContainer from '../elements/NoteContainer'
+import { connect } from "react-redux";
+
+import interact from "interactjs";
+import NoteContainer from "../elements/NoteContainer";
 
 import {
   addNote,
@@ -14,8 +16,6 @@ import {
   changeNoteColor,
   updateNoteSize
 } from "../redux/actions";
-
-import { connect } from "react-redux";
 
 const NoteList = ({
   notes,
@@ -58,7 +58,6 @@ const NoteList = ({
             onColorChange={() => {
               onColorChange(note.id);
             }}
-
             onSizeChange={(id, x, y) => {
               onSizeChange(id, x, y);
             }}
@@ -85,9 +84,21 @@ NoteList.propTypes = {
 const Container = styled.div``;
 
 const mapStateToProps = state => {
-  return {
-    notes: state.notes
-  };
+  if (state[window.location.href] == null) {
+    console.log("NoteList.js. page == null");
+    return {
+      notes: []
+    };
+  } else {
+    console.log("NoteList.js. page != null");
+    return {
+      notes: state[window.location.href].notes
+    };
+  }
+
+  // return {
+  //   notes: state.window.location.href.notes
+  // };
 };
 
 const mapDispatchToProps = dispatch => ({

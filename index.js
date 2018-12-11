@@ -19,49 +19,36 @@ const notesStorageKey = `notes-${window.location.href}`;
 // const store = createStore(notesApp, initialState)
 
 // store.subscribe(() => {
-//     const serialized = JSON.stringify(store.getState());
-//     localStorage.setItem(notesStorageKey, serialized)
-//     console.log(store.getState())
+// //     const serialized = JSON.stringify(store.getState());
+// //     localStorage.setItem(notesStorageKey, serialized)
+// //     console.log(store.getState())
 // })
 
 // console.log("Inital state: ")
 // console.log(store.getState())
+
+console.log("Notes storage key: " + notesStorageKey);
+
 const store = new Store({
   portName: "NOTES_STORE"
 });
 
 store.subscribe(() => {
-  console.log("subscribe listener!");
+  console.log("Store Update");
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
-  console.log(store.getState());
-  console.log(document.documentElement.scrollTop);
+  //   console.log(store.getState());
+  //   console.log(document.documentElement.scrollTop);
 });
 
-console.log("INDEX.JS");
-console.log(window);
-
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//   console.log("We recieved a message from: " + request + " SENDER: " + sender);
-//   console.log("scrollTop: " + document.documentElement.scrollTop);
-
-//   console.log("sending response");
-//   sendResponse({ ScrollY: document.documentElement.scrollTop });
-// });
-
+// This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("We got a request from:");
-  console.log(sender);
-  console.log("containing: ");
-  console.log(request);
-
-  if (request.scrollPosition == "currentScrollPosition") {
-    console.log("The scrollPosition is being requested!")
-
-    console.log(
-      "We are going to send: " + document.documentElement.scrollTop + " back!"
-    );
-    sendResponse({ scrollPosition: document.documentElement.scrollTop });
+  // This is if the extension is requesting the current scroll position to position the new note
+  if (request.newNote == "") {
+    sendResponse({
+      scrollPosition: document.documentElement.scrollTop,
+      page: window.location.href
+    });
   }
 });
 
@@ -86,6 +73,7 @@ store.ready().then(() => {
     rootNode
   );
 });
+
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: http://bit.ly/CRA-PWA

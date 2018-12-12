@@ -10,12 +10,13 @@ export const RESIZE_NOTE = "RESIZE_NOTE";
 /*
  * action creators
  */
-export function updateNoteSize(id, x, y) {
+export function updateNoteSize(id, x, y, page) {
   return {
     type: RESIZE_NOTE,
     id,
     x,
-    y
+    y,
+    page
   };
 }
 
@@ -26,35 +27,41 @@ export function updateNoteDepth(id) {
   };
 }
 
-export function changeNoteColor(id) {
+export function changeNoteColor(id, page) {
   return {
     type: CHANGE_COLOR,
-    id
+    id,
+    page
   };
 }
 
-export function updateNotePosition(id, x, y) {
+export function updateNotePosition(id, x, y, page) {
   return {
     type: MOVE_NOTE,
     id,
     x,
-    y
+    y,
+    page
   };
 }
 
-export function addTitle(id, text) {
+export function addTitle(id, text, page) {
   return {
     type: ADD_TITLE,
     id: id,
-    title: text
+    title: text,
+    page
   };
 }
 
-export function addText(id, text) {
+export function addText(id, text, page) {
+  console.log("actions.js page: " + page);
+
   return {
     type: ADD_TEXT,
     id: id,
-    body: text
+    body: text,
+    currentPage : page
   };
 }
 
@@ -68,7 +75,7 @@ export function addNote(title, id, y_position, page) {
   };
 }
 
-export function removeNote(id) {
+export function removeNote(id, page) {
   return {
     type: REMOVE_NOTE,
     id

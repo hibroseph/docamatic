@@ -7,6 +7,8 @@ import { connect } from "react-redux";
 import interact from "interactjs";
 import NoteContainer from "../elements/NoteContainer";
 
+const PAGE = window.location.href;
+
 import {
   addNote,
   removeNote,
@@ -103,36 +105,38 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onSizeChange: (id, x, y) => {
-    dispatch(updateNoteSize(id, x, y));
+    console.log("PAGE: " + PAGE);
+    dispatch(updateNoteSize(id, x, y, PAGE));
   },
 
   onAddClick: text => {
-    dispatch(addNote(text));
+    dispatch(addNote(text, PAGE));
   },
 
   onDeleteClick: id => {
-    dispatch(removeNote(id));
+    dispatch(removeNote(id, PAGE));
   },
 
   onTextChange: (id, text, title) => {
-    dispatch(addText(id, text, title));
+    console.log("PAGE: " + PAGE);
+    dispatch(addText(id, text, title, PAGE));
   },
 
   onTitleChange: (id, text) => {
-    dispatch(addTitle(id, text));
+    dispatch(addTitle(id, text, PAGE));
   },
 
   onPositionChange: (id, x, y) => {
-    dispatch(updateNotePosition(id, x, y));
+    dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
   onColorChange: id => {
     console.log("Changing the color of note: " + id);
-    dispatch(changeNoteColor(id));
+    dispatch(changeNoteColor(id, PAGE));
   },
 
   onNoteClicked: id => {
-    dispatch(updateNotePosition(id));
+    dispatch(updateNotePosition(id, PAGE));
   }
 });
 

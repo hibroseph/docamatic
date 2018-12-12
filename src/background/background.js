@@ -26,7 +26,7 @@ const store = createStore(notesApp, initialState)
 store.subscribe(() => {
     // const serialized = JSON.stringify(store.getState());
     // localStorage.setItem(notesStorageKey, serialized)
-    console.log("New state:")
+    console.log("Subscriber New State:")
     console.log(store.getState())
 })
 

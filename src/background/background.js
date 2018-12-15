@@ -10,10 +10,10 @@ const notesStorageKey = `notes-${window.location.href}`
 console.log("NOTES STORAGE KEY: " + notesStorageKey)
 console.log(window)
 
-localStorage.setItem(notesStorageKey, '{"notes" : []}')
-
+// localStorage.setItem(notesStorageKey, '{"notes" : []}')
+localStorage.setItem(notesStorageKey, '{}')
 // See if we have previously saved a state and if not, insert an empty array
-let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{"notes" : []}')
+let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{}')
 // let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{"notes"}')
 
 

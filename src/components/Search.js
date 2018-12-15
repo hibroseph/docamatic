@@ -2,26 +2,16 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 class Search extends Component {
+
   render(notes) {
     console.log("render in Search")
 
     console.log(notes);
 
     return (
-      <div>
-        <form>
-          <input type="text" />
-        </form>
-        <button>Search</button>
- 
-         {/* if(notes)
-         {
-           <p>
-             {notes.map(note => {
-               return <p>{note.title}</p>;
-             })}
-           </p>
-         } */}
+      <div className="search_bar">
+        <input className="search_query_input" placeholder="Search Your Notes" onChange={event => this.props.onSearch(event.target.value)}></input>
+      
       </div>
     );
   }

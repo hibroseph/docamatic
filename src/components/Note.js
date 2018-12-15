@@ -20,7 +20,6 @@ class Note extends Component {
   }
 
   refCallback = element => {
-    // console.log("You are inside of the callback!");
     if (element) {
       console.log(element.clientHeight);
     }

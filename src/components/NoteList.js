@@ -4,9 +4,6 @@ import Note from "./Note";
 import styled from "styled-components";
 import { connect } from "react-redux";
 
-import interact from "interactjs";
-import NoteContainer from "../elements/NoteContainer";
-
 const PAGE = window.location.href;
 
 import {
@@ -30,7 +27,7 @@ const NoteList = ({
   onSizeChange
 }) => {
   return (
-    <Container>
+    <div>
       {notes.map(note => {
         return (
           <Note
@@ -66,7 +63,7 @@ const NoteList = ({
           />
         );
       })}
-    </Container>
+    </div>
   );
 };
 
@@ -83,7 +80,6 @@ NoteList.propTypes = {
   onDeleteClick: PropTypes.func.isRequired
 };
 
-const Container = styled.div``;
 
 const mapStateToProps = state => {
   if (state[window.location.href] == null) {

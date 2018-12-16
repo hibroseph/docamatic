@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import NewNote from "../components/NewNote";
 import Search from "../components/Search";
 import { connect } from "react-redux";
+import MiniSearchNote from "../components/MiniSearchNote";
 
 class Popup extends Component {
   constructor(props) {
@@ -21,13 +22,13 @@ class Popup extends Component {
     return (
       <div style={{ width: 200, height: 200 }}>
         <NewNote />
+
         <Search
           onSearch={value => {
-            console.log("Updating state with " + value);
-
+            // Update the component state of the search query
             if (value != "") {
               this.setState({
-                search_query: value.toLowerCase()
+                search_query: value
               });
             } else {
               this.setState({
@@ -45,15 +46,34 @@ class Popup extends Component {
             return this.props.state[key].notes.map(note => {
               if (this.state.search_query != null) {
                 if (
-                  note.body.toLowerCase().includes(this.state.search_query) ||
-                  note.title.toLowerCase().includes(this.state.search_query)
+                  note.body.includes(this.state.search_query) ||
+                  note.title.includes(this.state.search_query)
                 ) {
+                  console.log("We found a note that matches your search query");
+                  // Split the text to bold the part that is the search query
+                  let text = note.body.split(this.state.search_query);
+
                   return (
-                    <div style={{padding: 5}}>
-                      <div> Note ID: {note.id} </div>
-                      <div> Note Title: {note.title} </div>
-                      <div> Note Text: {note.body} </div>
-                    </div>
+                    // <div style={{ padding: 5 }}>
+                    //   <div> Note ID: {note.id} </div>
+                    //   <div> Note Title: {note.title} </div>
+                    //   <div>
+                    //     Note Text:
+                    //     <div>
+                    //       {text[0]}
+                    //       <span style={{ fontWeight: "bold" }}>
+                    //         {this.state.search_query}
+                    //       </span>
+                    //       {text[1]}
+                    //     </div>
+                    //   </div>
+                    // </div>
+
+                    <MiniSearchNote
+                      {...note}
+                      text={text}
+                      searchQuery={this.state.search_query}
+                    />
                   );
                 }
               } else {

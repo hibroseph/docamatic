@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import clickdrag from "react-clickdrag";
 import trash_can from "../assets/delete.png";
-import { Container } from "../elements/NoteContainer";
+import { NoteContainer } from "../elements/NoteContainer";
 import { Button } from "../elements/Button";
 import ReactResizeDetector from "react-resize-detector";
 import { Menu, Dropdown, Icon } from "antd";
@@ -63,7 +63,7 @@ class Note extends Component {
     }
 
     return (
-      <Container
+      <NoteContainer
         className={"dragable_note"}
         style={{
           backgroundColor: this.props.color,
@@ -135,7 +135,7 @@ class Note extends Component {
         {/* </div> */}
 
         <Button onClick={this.props.onColorChange}>Color</Button>
-      </Container>
+      </NoteContainer>
     );
   }
 }

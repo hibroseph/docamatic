@@ -1,8 +1,7 @@
 import styled from "styled-components";
-import interact from 'interactjs'
 
 
-export const Container = styled.div`
+export const NoteContainer = styled.div`
   padding-left: 20px;
   padding-top: 10px;
   padding-right: 20px;

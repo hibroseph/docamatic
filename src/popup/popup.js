@@ -50,29 +50,17 @@ class Popup extends Component {
                   note.title.includes(this.state.search_query)
                 ) {
                   console.log("We found a note that matches your search query");
+                  console.log("The key of note " + note.id + " is " + key);
+
                   // Split the text to bold the part that is the search query
                   let text = note.body.split(this.state.search_query);
 
                   return (
-                    // <div style={{ padding: 5 }}>
-                    //   <div> Note ID: {note.id} </div>
-                    //   <div> Note Title: {note.title} </div>
-                    //   <div>
-                    //     Note Text:
-                    //     <div>
-                    //       {text[0]}
-                    //       <span style={{ fontWeight: "bold" }}>
-                    //         {this.state.search_query}
-                    //       </span>
-                    //       {text[1]}
-                    //     </div>
-                    //   </div>
-                    // </div>
-
                     <MiniSearchNote
                       {...note}
-                      text={text}
+                      splitAtQueryText={text}
                       searchQuery={this.state.search_query}
+                      website={key}
                     />
                   );
                 }

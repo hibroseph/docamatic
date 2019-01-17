@@ -17,10 +17,11 @@ export const NoteContainer = styled.div`
 
   resize: both;
   overflow: hidden;
-
+/* 
   -webkit-box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75); */
   box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75);
+
 
   .nav {
     position: absolute;
@@ -30,6 +31,7 @@ export const NoteContainer = styled.div`
     margin-left: 2px;
     margin-right: 2px;
     margin-bottom: 5px;
+    width: 100%;
   }
 
   #title {
@@ -72,6 +74,8 @@ export const NoteContainer = styled.div`
     position: relative;
     width: 100%;
     height: 100%;
+    min-width: 385px;
+    min-height: 227px;
   }
 
   #color-picker {
@@ -84,12 +88,12 @@ export const NoteContainer = styled.div`
   #note {
     width: 100%;
     height: 100%;
-    background-color: white;
+    /* background-color: white; */
     position: relative;
 
   }
 
-  .nav #settings {
+  #settings {
     color: black;
     float: right;
     margin-right: 5px;
@@ -101,15 +105,13 @@ export const NoteContainer = styled.div`
 
   #note-body {
     box-sizing: border-box;
-    width: 100%;
-    height: 100%;
 
     resize: none;
 
     border: 0px;
     background: transparent;
     position: absolute;
-    top: 30px;
+    top: 40px;
     left:0; 
     right:0; 
     bottom:0;

@@ -11,7 +11,7 @@ console.log("NOTES STORAGE KEY: " + notesStorageKey)
 console.log(window)
 
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
-localStorage.setItem(notesStorageKey, '{}')
+// localStorage.setItem(notesStorageKey, '{}')
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{}')
 // let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{"notes"}')
@@ -24,8 +24,8 @@ console.log(initialState);
 const store = createStore(notesApp, initialState)
 
 store.subscribe(() => {
-    // const serialized = JSON.stringify(store.getState());
-    // localStorage.setItem(notesStorageKey, serialized)
+    const serialized = JSON.stringify(store.getState());
+    localStorage.setItem(notesStorageKey, serialized)
     console.log("Subscriber New State:")
     console.log(store.getState())
 })

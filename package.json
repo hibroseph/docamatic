@@ -15,6 +15,7 @@
     "react": "^16.6.0",
     "react-chrome-redux": "^2.0.0-alpha.4",
     "react-clickdrag": "^4.0.0",
+    "react-color": "^2.17.0",
     "react-dom": "^16.6.0",
     "react-redux": "^5.1.0",
     "react-resize-detector": "^3.2.1",

@@ -27,11 +27,12 @@ export function updateNoteDepth(id) {
   };
 }
 
-export function changeNoteColor(id, page) {
+export function changeNoteColor(id, page, color) {
   return {
     type: CHANGE_COLOR,
     id,
-    page
+    page,
+    color
   };
 }
 

@@ -3,12 +3,15 @@ import NewNote from "../components/NewNote";
 import Search from "../components/Search";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
+import IconBar from "../components/IconBar";
 
 class Popup extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { search_query: null };
+    this.state = {
+      search_query: null
+    };
   }
 
   render() {
@@ -20,8 +23,8 @@ class Popup extends Component {
     console.log(Object.keys(this.props.state));
 
     return (
-      <div style={{ width: 200, height: 200 }}>
-        <NewNote />
+      <div style={{ width: 200 }}>
+        <IconBar />
 
         <Search
           onSearch={value => {

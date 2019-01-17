@@ -51,15 +51,12 @@ const notesApp = (state = [], action) => {
     case "CHANGE_COLOR":
       console.log("note is having its note color changed");
 
-      // Generates a random int for a random color for the note
-      let colorIndex = Math.floor(Math.random() * (6 + 1));
-
       return Object.assign({}, state, {
         [action._sender.url]: {
           notes: state[action._sender.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                color: colorList[colorIndex]
+                color: action.color
               });
             } else {
               return note;
@@ -187,7 +184,7 @@ const notesApp = (state = [], action) => {
 
       let page = action.page;
       // Generates a random int for a random color for the note
-      colorIndex = Math.floor(Math.random() * (7 + 1));
+      let colorIndex = Math.floor(Math.random() * (7 + 1));
 
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);

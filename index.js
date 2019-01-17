@@ -44,7 +44,18 @@ store.subscribe(() => {
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // This is if the extension is requesting the current scroll position to position the new note
+  
+  console.log("We recieved a message!");
+
   if (request.newNote == "") {
+    console.log("The message was about a new note!");
+    console.log(sender);
+    console.log(request);
+
+    console.log("We are going to be responding with these things:");
+    console.log("scrollPosition: " + document.documentElement.scrollTop);
+    console.log("page:" + window.location.href);
+
     sendResponse({
       scrollPosition: document.documentElement.scrollTop,
       page: window.location.href

@@ -34,7 +34,7 @@ const NoteList = ({
             key={note.id}
             {...note}
             onDeleteClick={() => {
-              console.log("The delete button was pressed");
+              // console.log("The delete button was pressed");
               onDeleteClick(note.id);
             }}
             onBodyChange={event => {
@@ -46,7 +46,7 @@ const NoteList = ({
               onTitleChange(note.id, event.target.value);
             }}
             onPositionChange={(id, x, y) => {
-              console.log("Position changed to: " + x + " ," + y);
+              // console.log("Position changed to: " + x + " ," + y);
               onPositionChange(id, x, y);
             }}
             // onNoteClicked={(id,) => {
@@ -54,9 +54,10 @@ const NoteList = ({
             //   onNoteClicked(id, )
             // }}
 
-            onColorChange={() => {
-              onColorChange(note.id);
+            onColorChange={(color) => {
+              onColorChange(note.id, color);
             }}
+
             onSizeChange={(id, x, y) => {
               onSizeChange(id, x, y);
             }}
@@ -83,12 +84,12 @@ NoteList.propTypes = {
 
 const mapStateToProps = state => {
   if (state[window.location.href] == null) {
-    console.log("NoteList.js. page == null");
+    // console.log("NoteList.js. page == null");
     return {
       notes: []
     };
   } else {
-    console.log("NoteList.js. page != null");
+    // console.log("NoteList.js. page != null");
     return {
       notes: state[window.location.href].notes
     };
@@ -101,7 +102,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onSizeChange: (id, x, y) => {
-    console.log("PAGE: " + PAGE);
+    // console.log("PAGE: " + PAGE);
     dispatch(updateNoteSize(id, x, y, PAGE));
   },
 
@@ -114,7 +115,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onTextChange: (id, text, title) => {
-    console.log("PAGE: " + PAGE);
+    // console.log("PAGE: " + PAGE);
     dispatch(addText(id, text, title, PAGE));
   },
 
@@ -126,9 +127,9 @@ const mapDispatchToProps = dispatch => ({
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
-  onColorChange: id => {
-    console.log("Changing the color of note: " + id);
-    dispatch(changeNoteColor(id, PAGE));
+  onColorChange: (id, color) => {
+    console.log("Change the color to: " + color);
+    dispatch(changeNoteColor(id, PAGE, color));
   },
 
   onNoteClicked: id => {

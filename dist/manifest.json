@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "Sticky Notes",
+  "name": "Sticky Notes (BETA)",
   "description": "Take notes with sticky notes on any webpage",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "browser_action": {
     "default_popup": "index.html",
     "default_title": "Open the popup"
@@ -23,5 +23,5 @@
     "persistent": false
 
   },
-  "permissions": []
+  "permissions": ["activeTab"]
 }

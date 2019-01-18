@@ -5,5 +5,5 @@ export const MiniSearchNoteContainer = styled.div`
     width: inherit;
     height: auto;
     
-    margin : 3px;
+    margin : 10px;
 `

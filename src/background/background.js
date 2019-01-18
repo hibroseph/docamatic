@@ -1,8 +1,15 @@
 import {wrapStore} from 'react-chrome-redux';
 import {createStore} from 'redux';
 import notesApp from "../redux/reducer";
+import * as Sentry from '@sentry/browser';
+
+// Initializing Sentry
+Sentry.init({ dsn: 'https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219' });
 
 console.log("You are inside THE background.js")
+
+Sentry.captureException("help");
+Sentry.showReportDialog();
 
 
 const notesStorageKey = `notes-${window.location.href}`

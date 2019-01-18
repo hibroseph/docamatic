@@ -142,6 +142,7 @@ class Note extends Component {
               >
                 Settings
               </a>
+
             </div>
 
             <textarea
@@ -189,6 +190,7 @@ class Note extends Component {
             </div>
 
             <div id={"settings-footer"}>
+
               <button
                 id={"settings-save"}
                 onClick={() => {
@@ -199,6 +201,7 @@ class Note extends Component {
               >
                 Save
               </button>
+
             </div>
           </div>
         </NoteContainer>

@@ -2,9 +2,9 @@ import styled from "styled-components";
 
 export const PopupContainer = styled.div`
     margin: 0px;
-    width: 200px;
+    width: 300px;
     height: 100%;
-    background-color: #607d8b;
+    background-color: white;
 
 
 `;

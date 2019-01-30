@@ -82,7 +82,7 @@ export const NoteContainer = styled.div`
     background-color: white;
     border-radius: 5px;
     padding: 10px;
-    width: 246px;
+    width: 260px;
   }
 
   #note {
@@ -115,7 +115,12 @@ export const NoteContainer = styled.div`
     left:0; 
     right:0; 
     bottom:0;
+
+    width:100%;
   }
+
+
+  
 
   .inline {
     display: inline-block;

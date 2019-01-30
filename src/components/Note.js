@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import clickdrag from "react-clickdrag";
-import trash_can from "../assets/delete.png";
 import { NoteContainer } from "../elements/NoteContainer";
-import { Button } from "../elements/Button";
 import ReactResizeDetector from "react-resize-detector";
-import { Menu, Dropdown, Icon } from "antd";
-import { CirclePicker } from "react-color";
+import { Icon, Button } from "antd";
+import { BlockPicker } from "react-color";
+import { NewNoteContainer } from "../elements/NewNoteContainer";
 
 // I'm sorry I used a global
 // This is used to see if the note was previously moving
@@ -32,7 +31,7 @@ class Note extends Component {
       currentY: this.props.position.y,
       lastPositionX: 0,
       lastPositionY: 0,
-      settingsVisible: false,
+      colorPickerVisible: false,
       width: this.props.size.width,
       height: this.props.size.height
     };
@@ -92,121 +91,74 @@ class Note extends Component {
     console.log("this.state:");
     console.log(this.state);
 
-    // If the settings button isn't clicked
-    if (!this.state.settingsVisible) {
-      return (
-        <NoteContainer
-          className={"dragable_note"}
-          style={{
-            backgroundColor: this.props.color,
-            transform: `translate(${this.state.currentX}px,${
-              this.state.currentY
-            }px)`,
-            width: this.state.width,
-            height: this.state.height
-          }}
-          // ref={() => { console.log("ref")}}
-          onMouseUp={() => {
-            if (this.props.dataDrag.isMoving) {
-              this.props.onSizeChange(this.props.id, globalWidth, globalHeight);
-            }
-          }}
-        >
-          <div id={"note"}>
-            <div className="nav">
-              {/* Title */}
-
+    return (
+      <div>
+        <NewNoteContainer>
+          <div
+            className="note"
+            style={{
+              transform: `translate(${this.state.currentX}px, ${
+                this.state.currentY
+              }px)`,
+              width: this.state.width,
+              height: this.state.height
+            }}
+            ref={this.sizeOfComponent}
+          >
+            <div
+              className="title-bar"
+              style={{ backgroundColor: this.props.color }}
+            >
               <input
-                type="text"
-                id="title"
-                defaultValue={this.props.title || "New Note"}
-                onChange={this.props.onTitleChange}
+                className="title-input"
+                placeholder="Note"
+                onClick={() => {
+                  this.setState({
+                    colorPickerVisible: false
+                  });
+                }}
               />
 
               <Icon
-                type="delete"
-                id="delete"
-                onClick={this.props.onDeleteClick}
-                alt="trash"
-              />
-
-              <a
-                id="settings"
+                type="bg-colors"
+                className="nav-bar-item-color"
                 onClick={() => {
-                  // console.log("Opening the settings page");
-                  // change the state to view the settings page
+                  console.log("you clicked the color button");
                   this.setState({
-                    settingsVisible: true
+                    colorPickerVisible: true
                   });
                 }}
-              >
-                Settings
-              </a>
+              />
 
+              <Icon
+                className="nav-bar-item-delete"
+                type="delete"
+                onClick={this.props.onDeleteClick}
+              />
             </div>
 
             <textarea
-              id={"note-body"}
-              defaultValue={this.props.body}
+              className="note-input"
+              onClick={() => {
+                this.setState({
+                  colorPickerVisible: false
+                });
+              }}
               onChange={this.props.onBodyChange}
-              ref={this.sizeOfComponent}
+              defaultValue={this.props.body}
             />
-          </div>
-        </NoteContainer>
-      );
-    } else {
-      // The settings page
-      return (
-        <NoteContainer
-          id={"settingsNote"}
-          className={"dragable_note"}
-          style={{
-            backgroundColor: this.props.color,
-            transform: `translate(${this.state.currentX}px,${
-              this.state.currentY
-            }px)`,
-            width: this.state.width,
-            height: this.state.height
-          }}
-          // ref={() => { console.log("ref")}}
-          onMouseUp={() => {
-            if (this.props.dataDrag.isMoving) {
-              this.props.onSizeChange(this.props.id, globalWidth, globalHeight);
-            }
-          }}
-          ref={this.sizeOfComponent}
-        >
-          <div id={"settings-page"}>
-            <p id={"settings-title"}> Settings page </p>
-
-            <p id={"settings-items"}>Note Color</p>
-
-            <div id={"color-picker"}>
-              <CirclePicker
+            {this.state.colorPickerVisible && (
+              <BlockPicker
+                className="color-picker"
                 onChangeComplete={(color, event) => {
                   this.props.onColorChange(color.hex);
                 }}
               />
-            </div>
-
-            <div id={"settings-footer"}>
-
-              <button
-                id={"settings-save"}
-                onClick={() => {
-                  this.setState({
-                    settingsVisible: false
-                  });
-                }}
-              >
-                Save
-              </button>
-
-            </div>
+            )}
           </div>
-        </NoteContainer>
-      );
-    }
+        </NewNoteContainer>
+      </div>
+    );
   }
 }
 

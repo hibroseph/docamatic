@@ -3,6 +3,7 @@ import { IconBarContainer } from "../elements/IconBarContainer";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import { connect } from "react-redux";
+import { Button } from "antd";
 
 class IconBar extends Component {
   AddNote() {
@@ -21,7 +22,9 @@ class IconBar extends Component {
         console.log("Response:");
         console.log(response);
         // Dispatching action to redux
-        this.props.dispatch(addNote("Note", UUID, response.scrollPosition, response.page));
+        this.props.dispatch(
+          addNote("Note", UUID, response.scrollPosition, response.page)
+        );
       });
     });
   }
@@ -29,6 +32,7 @@ class IconBar extends Component {
   render() {
     return (
       <IconBarContainer>
+        
         <div className="icon-bar">
           <div
             className="icon-bar-item"
@@ -40,13 +44,6 @@ class IconBar extends Component {
           >
             New Note
           </div>
-
-          {/* <div
-            className="icon-bar-item"
-            onClick={this.props.onClickSearch}
-          >
-            Search
-          </div> */}
         </div>
       </IconBarContainer>
     );

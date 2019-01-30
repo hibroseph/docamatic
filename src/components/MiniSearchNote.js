@@ -27,21 +27,12 @@ class MiniSearchNote extends Component {
           window.open(this.props.website, "_blank");
         }}
       >
-        <div className="title_bar">
+        <div className="title-bar">
           <div> {this.props.title} </div>
         </div>
 
         <div className="body">{boldedSearchQuery}</div>
 
-        <div className="menu_bar">
-          <span>
-            {/* <button onClick={() => {
-                console.log("ONCLICK OF BUTTON")
-                window.open(this.props.website, '_blank')
-            }}>Open</button>
-            <button>Delete</button> */}
-          </span>
-        </div>
       </MiniSearchNoteContainer>
     );
   }

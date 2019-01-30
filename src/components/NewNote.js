@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { addNote } from "../redux/actions";
 import { generateUUID } from "../utils/GenerateUUID";
-import { changeConfirmLocale } from "antd/lib/modal/locale";
+import { Button } from "antd";
 
 // chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
 //   console.log(response.farewell);
@@ -13,7 +13,7 @@ const NewNote = ({ dispatch }) => {
 
   return (
     <div>
-      <button
+      <Button
         type="submit"
         onClick={() => {
           UUID = generateUUID();
@@ -42,7 +42,7 @@ const NewNote = ({ dispatch }) => {
         }}
       >
         New Note
-      </button>
+      </Button>
     </div>
   );
 };

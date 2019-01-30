@@ -32,7 +32,7 @@ export const IconBarContainer = styled.div`
 
     text-align: center;
     /* width: 100%; */
-    width: 150px;
+    width: 250px;
     padding: 10px 0;
     
     transition: all 0.3s ease;

@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import NewNote from "../components/NewNote";
+import { Button } from "react-bootstrap";
 import Search from "../components/Search";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
 import IconBar from "../components/IconBar";
 import { PopupContainer } from "../elements/PopupContainer";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
+
 class Popup extends Component {
   constructor(props) {
     super(props);
@@ -69,7 +70,9 @@ class Popup extends Component {
                     );
                   }
                 } else {
-                  return <div> </div>;
+                  return (
+                    <div id={"search-preview"}>Search Existing Notes Above</div>
+                  );
                 }
               });
             })}

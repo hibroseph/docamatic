@@ -3,7 +3,7 @@ import styled from "styled-components"
 export const SearchBarContainer = styled.div`
 input {
     position: absolute;
-    width: 180px;
+    width: 250px;
     display: block;
 
     top: 60px;
@@ -17,7 +17,7 @@ input {
 
     margin-top: 5px;
     margin-bottom: 5px;
-    margin-left: 10px;
+    margin-left: 25px;
     margin-right:10px;
 }
 

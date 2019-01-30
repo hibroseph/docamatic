@@ -6,6 +6,8 @@ import { Provider } from "react-redux";
 import NewNote from "../components/NewNote";
 import { Store } from "react-chrome-redux";
 import Popup from "./popup";
+import Button from 'react-bootstrap/lib/Button';
+import PopperUp from "./popperup";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 
@@ -25,7 +27,7 @@ if (!root) {
 store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <Popup></Popup>
+      <PopperUp></PopperUp>
     </Provider>,
     root
   );

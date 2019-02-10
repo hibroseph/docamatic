@@ -18,6 +18,8 @@ export const NewNoteContainer = styled.div`
     resize: both;
     overflow: auto;
 
+    min-width: 100px;
+    min-height: 100px;
     -webkit-box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
     -moz-box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
     box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);

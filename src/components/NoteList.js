@@ -59,6 +59,7 @@ const NoteList = ({
             }}
 
             onSizeChange={(id, x, y) => {
+              console.log("The size has changed to: " + x + ", " +  y)
               onSizeChange(id, x, y);
             }}
           />

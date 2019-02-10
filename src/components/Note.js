@@ -9,8 +9,8 @@ import { NewNoteContainer } from "../elements/NewNoteContainer";
 // I'm sorry I used a global
 // This is used to see if the note was previously moving
 // to see when it stops moving
-let globalWidth;
-let globalHeight;
+// let globalWidth;
+// let globalHeight;
 
 class Note extends Component {
   constructor(props) {
@@ -37,13 +37,6 @@ class Note extends Component {
     };
   }
 
-  refCallback = element => {
-    if (element) {
-      //   console.log(element.clientHeight);
-      //   console.log(element.clientWidth);
-    }
-  };
-
   componentWillReceiveProps(nextProps) {
     // If its moving and the control key is down, update the state
     if (nextProps.dataDrag.isMoving && nextProps.dataDrag.ctrl) {
@@ -60,7 +53,6 @@ class Note extends Component {
 
       // Only update the global store when it has stopped moving
       if (!nextProps.dataDrag.isMoving && this.props.dataDrag.isMoving) {
-        console.log("Updating redux store");
         // Update the global store
         this.props.onPositionChange(
           this.props.id,
@@ -72,23 +64,31 @@ class Note extends Component {
   }
 
   componentDidUpdate() {
-    globalWidth = this.sizeOfComponent.current.clientWidth;
-    globalHeight = this.sizeOfComponent.current.clientHeight;
+    // globalWidth = this.sizeOfComponent.current.clientWidth;
+    // globalHeight = this.sizeOfComponent.current.clientHeight;
 
-    // console.log("width: " + globalWidth);
-    // console.log("height: " + globalHeight);
+    // console.log("Width: " + globalWidth);
+    // console.log("Height: " + globalHeight);
 
     // check to see if the size has changed
-    // if (this.state.width != globalWidth || this.state.height != globalHeight) {
-    //   this.setState({
-    //     width: globalWidth,
-    //     height: globalHeight
-    //   });
-    // }
+    if (
+      this.state.width != this.sizeOfComponent.current.clientWidth ||
+      this.state.height != this.sizeOfComponent.current.clientHeight
+    ) {
+      this.setState({
+        width: this.sizeOfComponent.current.clientWidth,
+        height: this.sizeOfComponent.current.clientHeight
+      });
+
+      this.props.onSizeChange(
+        this.props.id,
+        this.state.width,
+        this.state.height
+      );
+    }
   }
 
   render() {
-
     return (
       <div>
         <NewNoteContainer>
@@ -152,7 +152,6 @@ class Note extends Component {
                 className="color-picker"
                 color={this.props.color}
                 onChangeComplete={(color, event) => {
-                 
                   this.props.onColorChange(color.hex);
                 }}
               />

@@ -150,7 +150,9 @@ class Note extends Component {
             {this.state.colorPickerVisible && (
               <BlockPicker
                 className="color-picker"
+                color={this.props.color}
                 onChangeComplete={(color, event) => {
+                 
                   this.props.onColorChange(color.hex);
                 }}
               />

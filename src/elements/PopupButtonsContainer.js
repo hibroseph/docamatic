@@ -15,7 +15,7 @@ export const PopupButtonsContainer = styled.div`
     margin-right: 30px;
     margin-left: 30px;
 
-    border-radius: 20px;
+    border-radius: 10px;
     color: white;
     font-size: 20px;
     /* font-weight: bold; */
@@ -32,7 +32,7 @@ export const PopupButtonsContainer = styled.div`
     margin-top: 20px;
     margin-right: 30px;
     margin-left: 30px;
-    border-radius: 20px;
+    border-radius: 10px;
     border-style: none;
     width: 230px;
     font-size: 20px;

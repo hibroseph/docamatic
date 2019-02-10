@@ -16,6 +16,8 @@ class PopperUp extends Component {
   }
 
   render() {
+    let foundItem = false;
+
     return (
       <PopupContainer>
         <PopupButtons
@@ -42,34 +44,44 @@ class PopperUp extends Component {
 
         {this.state.search_query != null && (
           <SearchResultsContainer>
-            <div id="note_scroll_list">
-              {Object.keys(this.props.state).map(key => {
-                console.log("searching for a note");
-                return this.props.state[key].notes.map(note => {
-                  if (this.state.search_query != null) {
-                    if (
-                      note.body.includes(this.state.search_query) ||
-                      note.title.includes(this.state.search_query)
-                    ) {
-                      console.log("we found a match!");
+            {Object.keys(this.props.state).map(key => {
+              console.log("searching for a note");
+              return this.props.state[key].notes.map(note => {
+                if (this.state.search_query != null) {
+                  if (
+                    note.body.includes(this.state.search_query) ||
+                    note.title.includes(this.state.search_query)
+                  ) {
+                    console.log("we found a match!");
+                    foundItem = true;
+                    // Split the text to bold the part that is the search query
+                    let title = note.title.split(this.state.search_query);
+                    let text = note.body.split(this.state.search_query);
 
-                      // Split the text to bold the part that is the search query
-                      let text = note.body.split(this.state.search_query);
+                    console.log("splitAtQueryText: " + text);
+                    console.log("state.search_query" + this.state.search_query);
 
-                      return (
-                        <MiniSearchNote
-                          {...note}
-                          splitAtQueryText={text}
-                          searchQuery={this.state.search_query}
-                          website={key}
-                        />
-                      );
-                    }
+                    return (
+                      <MiniSearchNote
+                        {...note}
+                        bodySplitAtQueryText={text}
+                        titleSplitAtQueryText={title}
+                        searchQuery={this.state.search_query}
+                        website={key}
+                      />
+                    );
                   }
-                });
-              })}
-            </div>
+                }
+              });
+            })}
           </SearchResultsContainer>
+        )}
+
+        {this.state.search_query != null && !foundItem && (
+          <img
+            src="no_results.png"
+            style={{ position: "absolute", top: 195 }}
+          />
         )}
       </PopupContainer>
     );

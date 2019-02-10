@@ -6,5 +6,11 @@ export const PopupContainer = styled.div`
     height: 100%;
     background-color: white;
 
-
+    .test {
+        position: absolute;
+        top: 190px;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+    }
 `;

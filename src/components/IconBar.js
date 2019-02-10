@@ -7,8 +7,8 @@ import { Button } from "antd";
 
 class IconBar extends Component {
   AddNote() {
-    let UUID = generateUUID();
-    // console.log("UUID inside of onClick: " + UUID);
+    let UUID = generateUUIDDd();
+    console.log("UUID inside of onClick: " + UUID);
 
     // TODO: Adding loading symbol while were waiting for the response
 

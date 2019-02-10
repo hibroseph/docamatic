@@ -88,8 +88,6 @@ class Note extends Component {
   }
 
   render() {
-    console.log("this.state:");
-    console.log(this.state);
 
     return (
       <div>
@@ -112,11 +110,13 @@ class Note extends Component {
               <input
                 className="title-input"
                 placeholder="Note"
+                defaultValue={this.props.title}
                 onClick={() => {
                   this.setState({
                     colorPickerVisible: false
                   });
                 }}
+                onChange={this.props.onTitleChange}
               />
 
               <Icon

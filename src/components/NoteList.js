@@ -38,11 +38,11 @@ const NoteList = ({
               onDeleteClick(note.id);
             }}
             onBodyChange={event => {
-              // console.log("Body change to: " + event.target.value)
+              console.log("Body change to: " + event.target.value)
               onTextChange(note.id, event.target.value, note.title);
             }}
             onTitleChange={event => {
-              // console.log("Title changed to: " + event.target.value)
+              console.log("Title changed to: " + event.target.value)
               onTitleChange(note.id, event.target.value);
             }}
             onPositionChange={(id, x, y) => {
@@ -120,6 +120,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onTitleChange: (id, text) => {
+    console.log("We are dispatching a change to the store")
     dispatch(addTitle(id, text, PAGE));
   },
 

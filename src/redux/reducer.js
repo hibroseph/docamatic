@@ -128,14 +128,12 @@ const notesApp = (state = [], action) => {
       });
 
     case "ADD_TEXT":
-      console.log("You are adding text to the note");
-    
 
       return Object.assign({}, state, {
         [action._sender.url]: {
           notes: state[action._sender.url].notes.map((note, id) => {
             if (note.id === action.id) {
-              // console.log("index: " + note.id + " is equal to the action id: " + action.id)
+              console.log("index: " + note.id + " is equal to the action id: " + action.id)
               return Object.assign({}, note, {
                 body: action.body
               });

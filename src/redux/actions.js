@@ -47,6 +47,7 @@ export function updateNotePosition(id, x, y, page) {
 }
 
 export function addTitle(id, text, page) {
+  console.log("actions.js: adding title: " + text + " on the page: " + page);
   return {
     type: ADD_TITLE,
     id: id,
@@ -55,8 +56,8 @@ export function addTitle(id, text, page) {
   };
 }
 
-export function addText(id, text, page) {
-  console.log("actions.js page: " + page);
+export function addText(id, text, title, page) {
+  console.log("actions.js: adding text: " + text + " on page " + page);
 
   return {
     type: ADD_TEXT,

@@ -25,8 +25,8 @@ export const NewNoteContainer = styled.div`
 
   .color-picker {
     position: absolute !important;
-    top: 45px !important;
-    right: -40px !important;
+    top: 70px !important;
+    left: 40px !important;
   }
 
   .nav-bar-item-color {

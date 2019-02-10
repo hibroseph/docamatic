@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import { Button } from "react-bootstrap";
 import Search from "../components/Search";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
-import IconBar from "../components/IconBar";
 import { PopupContainer } from "../elements/PopupContainer";
+import PopupButtons from "../components/PopupButtons";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 
 class Popup extends Component {
@@ -17,20 +16,13 @@ class Popup extends Component {
   }
 
   render() {
-    console.log("popup.js state:");
-    console.log(this.props.state);
-
-    // What are the keys?
-    console.log("The keys of the state:");
-    console.log(Object.keys(this.props.state));
+    let foundItem = false;
 
     return (
       <PopupContainer>
-        <IconBar />
-
-        <Search
+        <PopupButtons
           onSearch={value => {
-            // Update the component state of the search query
+            // update local state with search query
             if (value != "") {
               this.setState({
                 search_query: value
@@ -43,41 +35,54 @@ class Popup extends Component {
           }}
         />
 
-        <SearchResultsContainer>
-          <div id="note_scroll_list">
+        {this.state.search_query == null && (
+          <img
+            src="search_results.png"
+            style={{ position: "absolute", top: 195 }}
+          />
+        )}
+
+        {this.state.search_query != null && (
+          <SearchResultsContainer>
             {Object.keys(this.props.state).map(key => {
+              console.log("searching for a note");
               return this.props.state[key].notes.map(note => {
                 if (this.state.search_query != null) {
                   if (
                     note.body.includes(this.state.search_query) ||
                     note.title.includes(this.state.search_query)
                   ) {
-                    console.log(
-                      "We found a note that matches your search query"
-                    );
-                    console.log("The key of note " + note.id + " is " + key);
-
+                    console.log("we found a match!");
+                    foundItem = true;
                     // Split the text to bold the part that is the search query
+                    let title = note.title.split(this.state.search_query);
                     let text = note.body.split(this.state.search_query);
+
+                    console.log("splitAtQueryText: " + text);
+                    console.log("state.search_query" + this.state.search_query);
 
                     return (
                       <MiniSearchNote
                         {...note}
-                        splitAtQueryText={text}
+                        bodySplitAtQueryText={text}
+                        titleSplitAtQueryText={title}
                         searchQuery={this.state.search_query}
                         website={key}
                       />
                     );
                   }
-                } else {
-                  return (
-                    <div id={"search-preview"}>Search Existing Notes Above</div>
-                  );
                 }
               });
             })}
-          </div>
-        </SearchResultsContainer>
+          </SearchResultsContainer>
+        )}
+
+        {this.state.search_query != null && !foundItem && (
+          <img
+            src="no_results.png"
+            style={{ position: "absolute", top: 195 }}
+          />
+        )}
       </PopupContainer>
     );
   }

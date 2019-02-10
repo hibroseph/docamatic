@@ -4,7 +4,6 @@ import { NoteContainer } from "../elements/NoteContainer";
 import ReactResizeDetector from "react-resize-detector";
 import { Icon, Button } from "antd";
 import { BlockPicker } from "react-color";
-import { NewNoteContainer } from "../elements/NewNoteContainer";
 
 // I'm sorry I used a global
 // This is used to see if the note was previously moving
@@ -91,7 +90,7 @@ class Note extends Component {
   render() {
     return (
       <div>
-        <NewNoteContainer>
+        <NoteContainer>
           <div
             className="note"
             style={{
@@ -157,7 +156,7 @@ class Note extends Component {
               />
             )}
           </div>
-        </NewNoteContainer>
+        </NoteContainer>
       </div>
     );
   }

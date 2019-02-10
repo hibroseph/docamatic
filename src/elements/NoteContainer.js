@@ -1,135 +1,94 @@
 import styled from "styled-components";
 
 export const NoteContainer = styled.div`
-  width: 150px;
-  height: 450px;
+  width: 300px;
+  height: 400px;
 
-  padding-left: 20px;
-  padding-top: 10px;
-  padding-right: 20px;
-  padding-bottom: 20px;
+  overflow: visible;
 
-  display: inline-block;
-  position: absolute;
-  font-family: "arial";
-
-  min-width: 100px;
-
-  resize: both;
-  overflow: hidden;
-/* 
-  -webkit-box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75); */
-  box-shadow: 5px 5px 13px -3px rgba(0, 0, 0, 0.75);
-
-
-  .nav {
+  .note {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    margin-top: 5px;
-    margin-left: 2px;
-    margin-right: 2px;
-    margin-bottom: 5px;
-    width: 100%;
-  }
+    top: 300px;
+    left: 300px;
+    width: 300px;
+    height: 400px;
 
-  #title {
-    float: left;
-    background: transparent;
-    border: none;
-    font-size: 28px;
-    font-weight: bold;
-    width: -webkit-calc(100% - 90px);
-    width: -moz-calc(100% - 90x);
-    width: calc(100% - 90px);
-  }
-
-  #settings-title {
-    font-size: 28px;
-    font-weight: bold;
-  }
-
-  #settings-items {
-    font-size: 15px;
-    font-weight: bold;
-  }
-
-  #settings-save {
-    background-color: white;
-    opacity: 0.8;
+    background-color: #f4f4f4;
     border-radius: 5px;
-    padding: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
-    border: none;
-    font-size: 15px;
-    font-weight: bold;
+    resize: both;
+    overflow: auto;
+
+    min-width: 100px;
+    min-height: 100px;
+    -webkit-box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
+    -moz-box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
+    box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
+  }
+
+  .color-picker {
+    position: absolute !important;
+    top: 70px !important;
+    left: 40px !important;
+  }
+
+  .nav-bar-item-color {
     position: absolute;
-    bottom: 20px;
-    left: 15px;
+    top: 18px;
+    right: 36px;
+    color: white;
   }
 
-  #settings-page {
-    position: relative;
+  .nav-bar-item-delete {
+    position: absolute;
+    size: 25px;
+    top: 18px;
+    right: 16px;
+    color: white;
+  }
+
+  .title-bar {
+    position: absolute;
     width: 100%;
-    height: 100%;
-    min-width: 385px;
-    min-height: 227px;
+    height: 60px;
+
+    background-color: #35a1ec;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
   }
 
-  #color-picker {
-    background-color: white;
-    border-radius: 5px;
-    padding: 10px;
-    width: 260px;
+  .title-input::placeholder {
+    color: #f4f4f4;
   }
 
-  #note {
-    width: 100%;
-    height: 100%;
-    /* background-color: white; */
-    position: relative;
-
-  }
-
-  #settings {
-    color: black;
-    float: right;
-    margin-right: 5px;
-  }
-
-  #delete {
-    float: right;
-  }
-
-  #note-body {
+  .title-input {
+    position: absolute;
     box-sizing: border-box;
+    height: 60px;
+    width: calc(100% - 60px);
+    font-size: 17px;
+    background-color: transparent;
+    padding-left: 20px;
+    color: #f4f4f4;
+    border: none;
+    /*   border: solid 1px black;; */
+  }
+
+  .note-input {
+    position: absolute;
+    box-sizing: border-box;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
 
     resize: none;
 
-    border: 0px;
-    background: transparent;
-    position: absolute;
-    top: 40px;
-    left:0; 
-    right:0; 
-    bottom:0;
-
-    width:100%;
-  }
-
-
-  
-
-  .inline {
-    display: inline-block;
-    width: 100%;
-  }
-
-  .menu_icons {
-    float: right;
-    height: 24px;
-    width: auto;
+    font-size: 15px;
+    padding: 10px 20px 10px 18px;
+    margin-bottom: 10px;
+    background-color: transparent;
+    border: none;
   }
 `;

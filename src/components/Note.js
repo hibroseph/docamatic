@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import clickdrag from "react-clickdrag";
 import { NoteContainer } from "../elements/NoteContainer";
-import ReactResizeDetector from "react-resize-detector";
 import { Icon, Button } from "antd";
 import { BlockPicker } from "react-color";
 
@@ -116,6 +115,16 @@ class Note extends Component {
                   });
                 }}
                 onChange={this.props.onTitleChange}
+                onMouseDown={() => {
+                  console.log("The mouse is down");
+                }}
+                onMouseUp={() => {
+                  console.log("the mouse is up");
+                }}
+                onMouseMove={() => {
+                  console.log("the mouse is moving");
+                  // console.log(event);
+                }}
               />
 
               <Icon
@@ -143,6 +152,9 @@ class Note extends Component {
                   colorPickerVisible: false
                 });
               }}
+              onDoubleClick={() => {
+                console.log("you clicked twice nigga!");
+              }}
               onChange={this.props.onBodyChange}
               defaultValue={this.props.body}
             />
@@ -167,6 +179,9 @@ var draggableNote = clickdrag(Note, {
   onDragStop: () => {
     // update the state of the position of this note here
     // and size
+  },
+  onDragStart: () => {
+    console.log("dragging");
   },
   getSpecificEventData: e => ({
     ctrl: e.ctrlKey,

@@ -3,6 +3,7 @@ import { PopupButtonsContainer } from "../elements/PopupButtonsContainer";
 import { connect } from "react-redux";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
+import * as Sentry from '@sentry/browser'
 
 class PopupButtons extends Component {
   AddNote() {
@@ -13,10 +14,13 @@ class PopupButtons extends Component {
 
     // This is used to request the current scroll position from the HTML document
     // When we get the response, then we add the note.
+
+    // eslint-disable-next-line no-undef
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       console.log("Sending message on: ");
       console.log(tabs);
 
+      // eslint-disable-next-line no-undef
       chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
         console.log("Response:");
         console.log(response);
@@ -34,11 +38,14 @@ class PopupButtons extends Component {
         <div
           className="button"
           onClick={() => {
-            console.log("Adding a new note");
+            console.log("Creating a new note that doesn't exist");
+
+            Sentry.captureMessage('A user added a note');
+
             this.AddNote();
           }}
         >
-          Add Note
+          New Note
         </div>
 
         <input

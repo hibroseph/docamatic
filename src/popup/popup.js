@@ -1,14 +1,17 @@
 import React, { Component } from "react";
-import Search from "../components/Search";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
 import { PopupContainer } from "../elements/PopupContainer";
 import PopupButtons from "../components/PopupButtons";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
+import * as Sentry from '@sentry/browser'
 
 class Popup extends Component {
   constructor(props) {
     super(props);
+
+    console.log("Initializing Sentry in the popup");
+    Sentry.init({ dsn: 'https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219' });
 
     this.state = {
       search_query: null
@@ -23,7 +26,7 @@ class Popup extends Component {
         <PopupButtons
           onSearch={value => {
             // update local state with search query
-            if (value != "") {
+            if (value !== "") {
               this.setState({
                 search_query: value
               });
@@ -37,6 +40,7 @@ class Popup extends Component {
 
         {this.state.search_query == null && (
           <img
+            alt="Search Results"
             src="search_results.png"
             style={{ position: "absolute", top: 195 }}
           />
@@ -79,6 +83,7 @@ class Popup extends Component {
 
         {this.state.search_query != null && !foundItem && (
           <img
+            alt="There are no results"
             src="no_results.png"
             style={{ position: "absolute", top: 195 }}
           />

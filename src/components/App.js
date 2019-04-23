@@ -1,5 +1,6 @@
+// This is the App that will be running in the chrome webpage. This handles displaying the notes that exist on the page
 import React, { Component } from "react";
-import styled from "styled-components";
+// import styled from "styled-components";
 import NoteList from "./NoteList";
 import * as Sentry from "@sentry/browser";
 
@@ -24,12 +25,4 @@ class App extends Component {
   }
 }
 
-const Container = styled.div`
-  box-sizing: border-box;
-  *,
-  *:before,
-  *:after {
-    box-sizing: inherit;
-  }
-`;
 export default App;

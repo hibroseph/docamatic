@@ -4,6 +4,9 @@ import notesApp from "../redux/reducer";
 import * as Sentry from "@sentry/browser";
 
 // Initializing Sentry
+
+console.log("Init'ing Sentry");
+
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
   beforeSend(event) {
@@ -24,9 +27,9 @@ console.log(window);
 
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
 // localStorage.setItem(notesStorageKey, '{}')
+
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
-// let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || '{"notes"}')
 
 console.log("INITIALSTATE: ");
 console.log(initialState);

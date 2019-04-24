@@ -4,7 +4,7 @@ import MiniSearchNote from "../components/MiniSearchNote";
 import { PopupContainer } from "../elements/PopupContainer";
 import PopupButtons from "../components/PopupButtons";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
-import "../elements/PopupStyle.css"
+import "../elements/PopupStyle.css";
 import * as Sentry from "@sentry/browser";
 
 class Popup extends Component {
@@ -19,7 +19,7 @@ class Popup extends Component {
     this.state = {
       search_query: null,
       // For testing change to home
-      page: "something"
+      page: "home"
     };
   }
 
@@ -57,7 +57,12 @@ class Popup extends Component {
               <img
                 alt="Search Results"
                 src="../assets/search_results.png"
-                style={{ position: "absolute", top: 195 }}
+                style={{
+                  position: "absolute",
+                  top: 195,
+                  backgroundColor: "white",
+                  height: 205
+                }}
               />
             )}
 
@@ -103,11 +108,18 @@ class Popup extends Component {
                 alt="There are no results"
                 // src="no_results.png"
                 src="../assets/no_results.png"
-                style={{ position: "absolute", top: 195 }}
+                // className="img"
+                style={{
+                  position: "absolute",
+                  top: 195,
+                  backgroundColor: "white",
+                  height: 205
+                }}
               />
             )}
 
-            <button
+            <p
+              className="feedback-link"
               onClick={() => {
                 this.setState({
                   page: "feedback"
@@ -115,7 +127,7 @@ class Popup extends Component {
               }}
             >
               Send Feedback
-            </button>
+            </p>
           </PopupContainer>
         );
         break;
@@ -124,17 +136,29 @@ class Popup extends Component {
           <PopupContainer>
             <h1>Whatcha think?</h1>
             <p>
-              We'd love to get some feedback on how to improve this application
+              We'd love to get some feedback on how to improve this application.
+              This information is shared anonymously.
             </p>
-            <textarea placeholder="Give us your feedback here!" />
+            <textarea
+              id="fb-ta"
+              placeholder="Give us your feedback here!"
+              onChange={data => {
+                console.log(data.value);
+              }}
+            />
             <button
+              className="fb-btn"
               onClick={() => {
+                // Grab data from text area and send it to Sentry
+                let element = document.getElementById("fb-ta");
+                Sentry.captureMessage("Feedback:" + element.value);
                 this.displayHome();
               }}
             >
               Send
             </button>
             <button
+              className="fb-btn"
               onClick={() => {
                 this.displayHome();
               }}
@@ -160,15 +184,6 @@ class Popup extends Component {
             >
               Reload Page
             </button>
-
-            <p
-              className="feedback-link"
-              onClick={() => {
-                this.displayHome();
-              }}
-            >
-              Click here
-            </p>
           </PopupContainer>
         );
         // This is not good, we need to report an error

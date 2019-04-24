@@ -5,6 +5,7 @@ export const SearchResultsContainer = styled.div`
 position: absolute;
 top: 190px;
 width: 100%;
-height: 210px;
+height: 100%;
+background-color:white;
 overflow-y: auto;
 `

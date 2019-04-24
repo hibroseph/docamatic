@@ -24,7 +24,7 @@
     "styled-components": "^4.0.2"
   },
   "scripts": {
-    "build": "parcel build ./src/popup/index.js ./index.js ./src/background/background.js",
+    "build": "parcel build ./src/popup/index.js ./index.js ./src/background/background.js ",
     "start": "parcel ./src/popup/index.js ./index.js ./src/background/background.js"
   },
   "eslintConfig": {

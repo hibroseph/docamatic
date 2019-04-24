@@ -1,4 +1,24 @@
 .feedback-link {
-    color: blue;
-    font-size: 20px;
+    position: absolute;
+    top: 165px;
+    color: white;
+    font-size: 11px;
 }
+
+#fb-ta {
+    width:290px;
+    height: 180px;
+    padding: 10px;
+    margin: 5px;
+    resize: none;
+    
+}
+
+.fb-btn {
+    margin: 5px;
+}
+
+.img {
+    background-color: white;
+    height: 205px;
+  }

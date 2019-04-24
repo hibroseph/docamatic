@@ -26,6 +26,11 @@ export const PopupButtonsContainer = styled.div`
     background-color: #004f79;
   }
 
+  .img {
+    background-color: white;
+    height: 205px;
+  }
+  
   .input {
     position: relative;
     background-color: #0070ac;

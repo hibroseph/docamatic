@@ -18,12 +18,12 @@ Sentry.init({
   }
 });
 
-console.log("You are inside THE background.js");
+// console.log("You are inside THE background.js");
 
 const notesStorageKey = `notes-${window.location.href}`;
 
-console.log("NOTES STORAGE KEY: " + notesStorageKey);
-console.log(window);
+// console.log("NOTES STORAGE KEY: " + notesStorageKey);
+// console.log(window);
 
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
 // localStorage.setItem(notesStorageKey, '{}')
@@ -31,8 +31,8 @@ console.log(window);
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
 
-console.log("INITIALSTATE: ");
-console.log(initialState);
+// console.log("INITIALSTATE: ");
+// console.log(initialState);
 
 // Create the store
 const store = createStore(notesApp, initialState);
@@ -40,8 +40,8 @@ const store = createStore(notesApp, initialState);
 store.subscribe(() => {
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
-  console.log("Subscriber New State:");
-  console.log(store.getState());
+  // console.log("Subscriber New State:");
+  // console.log(store.getState());
 });
 
 // console.log("Inital state: ")

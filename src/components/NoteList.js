@@ -4,8 +4,6 @@ import Note from "./Note";
 import styled from "styled-components";
 import { connect } from "react-redux";
 
-const PAGE = window.location.href;
-
 import {
   addNote,
   removeNote,
@@ -15,6 +13,8 @@ import {
   changeNoteColor,
   updateNoteSize
 } from "../redux/actions";
+
+const PAGE = window.location.href;
 
 const NoteList = ({
   notes,
@@ -38,11 +38,11 @@ const NoteList = ({
               onDeleteClick(note.id);
             }}
             onBodyChange={event => {
-              console.log("Body change to: " + event.target.value)
+              // console.log("Body change to: " + event.target.value)
               onTextChange(note.id, event.target.value, note.title);
             }}
             onTitleChange={event => {
-              console.log("Title changed to: " + event.target.value)
+              // console.log("Title changed to: " + event.target.value)
               onTitleChange(note.id, event.target.value);
             }}
             onPositionChange={(id, x, y) => {
@@ -59,7 +59,7 @@ const NoteList = ({
             }}
 
             onSizeChange={(id, x, y) => {
-              console.log("The size has changed to: " + x + ", " +  y)
+              // console.log("The size has changed to: " + x + ", " +  y)
               onSizeChange(id, x, y);
             }}
           />
@@ -121,7 +121,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onTitleChange: (id, text) => {
-    console.log("We are dispatching a change to the store")
+    // console.log("We are dispatching a change to the store")
     dispatch(addTitle(id, text, PAGE));
   },
 
@@ -130,7 +130,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onColorChange: (id, color) => {
-    console.log("Change the color to: " + color);
+    // console.log("Change the color to: " + color);
     dispatch(changeNoteColor(id, PAGE, color));
   },
 

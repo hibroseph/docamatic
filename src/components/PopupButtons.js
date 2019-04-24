@@ -7,6 +7,9 @@ import * as Sentry from '@sentry/browser'
 
 class PopupButtons extends Component {
   AddNote() {
+
+    Sentry.captureMessage("A user added a note")
+
     let UUID = generateUUID();
     // console.log("UUID inside of onClick: " + UUID);
 
@@ -17,17 +20,29 @@ class PopupButtons extends Component {
 
     // eslint-disable-next-line no-undef
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      console.log("Sending message on: ");
-      console.log(tabs);
+      // console.log("Sending message on: ");
+      // console.log(tabs);
 
       // eslint-disable-next-line no-undef
       chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
-        console.log("Response:");
-        console.log(response);
+        // console.log("Response:");
+        // console.log(response);
+
+        // if (!response) {
+        //   console.log("Your scroll position was equal to undefined");
+
+        //   Sentry.captureMessage("Scroll Position of undefined", "error")
+        // }
         // Dispatching action to redux
+        try {
         this.props.dispatch(
           addNote("Note", UUID, response.scrollPosition, response.page)
         );
+        } catch (err) {
+          console.log("An error was captured and reported to sentry");
+          console.debug("I think this has to do with the URL and it not being a valid webpage")
+          Sentry.captureException(err)
+        }
       });
     });
   }
@@ -38,10 +53,6 @@ class PopupButtons extends Component {
         <div
           className="button"
           onClick={() => {
-            console.log("Creating a new note that doesn't exist");
-
-            Sentry.captureMessage('A user added a note');
-
             this.AddNote();
           }}
         >

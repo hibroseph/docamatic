@@ -116,13 +116,13 @@ class Note extends Component {
                 }}
                 onChange={this.props.onTitleChange}
                 onMouseDown={() => {
-                  console.log("The mouse is down");
+                  // console.log("The mouse is down");
                 }}
                 onMouseUp={() => {
-                  console.log("the mouse is up");
+                  // console.log("the mouse is up");
                 }}
                 onMouseMove={() => {
-                  console.log("the mouse is moving");
+                  // console.log("the mouse is moving");
                   // console.log(event);
                 }}
               />
@@ -131,7 +131,7 @@ class Note extends Component {
                 type="bg-colors"
                 className="nav-bar-item-color"
                 onClick={() => {
-                  console.log("you clicked the color button");
+                  // console.log("you clicked the color button");
                   this.setState({
                     colorPickerVisible: true
                   });
@@ -153,7 +153,7 @@ class Note extends Component {
                 });
               }}
               onDoubleClick={() => {
-                console.log("you clicked twice nigga!");
+                // console.log("you clicked twice nigga!");
               }}
               onChange={this.props.onBodyChange}
               defaultValue={this.props.body}

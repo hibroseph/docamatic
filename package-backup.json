@@ -6,6 +6,12 @@
     "@material-ui/core": "^3.9.0",
     "@sentry/browser": "^4.5.1",
     "antd": "^3.12.3",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-react-app": "^6.1.0",
     "interactjs": "^1.3.4",
     "node-static": "^0.7.11",
     "parcel-bundler": "^1.12.3",
@@ -21,11 +27,18 @@
     "react-resize-detector": "^3.2.1",
     "react-scripts": "2.1.0",
     "redux": "^4.0.1",
-    "styled-components": "^4.0.2"
+    "styled-components": "^4.0.2",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
   },
   "scripts": {
-    "build": "parcel build ./src/popup/index.js ./index.js ./src/background/background.js",
-    "start": "parcel ./src/popup/index.js ./index.js ./src/background/background.js"
+    "start": "react-scripts start",
+    "start1": "webpack --mode development --watch --devtool inline-source-map --open",
+    "build1": "webpack --mode production",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "build parcel": "parcel index.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -35,5 +48,11 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "file-loader": "^2.0.0",
+    "image-webpack-loader": "^4.5.0",
+    "url-loader": "^1.1.2"
+  }
 }

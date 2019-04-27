@@ -5,7 +5,11 @@ import { PopupContainer } from "../elements/PopupContainer";
 import PopupButtons from "../components/PopupButtons";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 import "../elements/PopupStyle.css";
+import "../css/popup.css";
+import { Icon, Button } from "antd";
 import * as Sentry from "@sentry/browser";
+import { generateUUID } from "../utils/GenerateUUID";
+import { addNote } from "../redux/actions";
 
 class Popup extends Component {
   constructor(props) {
@@ -37,103 +41,167 @@ class Popup extends Component {
     switch (this.state.page) {
       case "home":
         page = (
-          <PopupContainer>
-            <PopupButtons
-              onSearch={value => {
-                // update local state with search query
-                if (value !== "") {
+          <div id="popup-container">
+            <div id="menu-area">
+              <Icon
+                type="setting"
+                className="setting-menu-style"
+                onClick={() => {
                   this.setState({
-                    search_query: value
+                    page: "settings"
                   });
-                } else {
-                  this.setState({
-                    search_query: null
-                  });
-                }
-              }}
-            />
-
-            {this.state.search_query == null && (
-              <img
-                alt="Search Results"
-                src="../assets/search_results.png"
-                style={{
-                  position: "absolute",
-                  top: 195,
-                  backgroundColor: "white",
-                  height: 205
                 }}
               />
-            )}
 
-            {this.state.search_query != null && (
-              <SearchResultsContainer>
-                {Object.keys(this.props.state).map(key => {
-                  // console.log("searching for a note");
-                  return this.props.state[key].notes.map(note => {
-                    if (this.state.search_query != null) {
-                      if (
-                        note.body.includes(this.state.search_query) ||
-                        note.title.includes(this.state.search_query)
-                      ) {
-                        // console.log("we found a match!");
-                        foundItem = true;
-                        // Split the text to bold the part that is the search query
-                        let title = note.title.split(this.state.search_query);
-                        let text = note.body.split(this.state.search_query);
+              <button
+                className="primary-button"
+                onClick={() => {
+                  Sentry.captureMessage("A user added a note");
 
-                        // console.log("splitAtQueryText: " + text);
-                        // console.log(
-                        // "state.search_query" + this.state.search_query
-                        // );
+                  let UUID = generateUUID();
+                  // console.log("UUID inside of onClick: " + UUID);
 
-                        return (
-                          <MiniSearchNote
-                            {...note}
-                            bodySplitAtQueryText={text}
-                            titleSplitAtQueryText={title}
-                            searchQuery={this.state.search_query}
-                            website={key}
-                          />
-                        );
-                      }
+                  // TODO: Adding loading symbol while were waiting for the response
+
+                  // This is used to request the current scroll position from the HTML document
+                  // When we get the response, then we add the note.
+
+                  // eslint-disable-next-line no-undef
+                  chrome.tabs.query(
+                    { active: true, currentWindow: true },
+                    tabs => {
+                      // console.log("Sending message on: ");
+                      // console.log(tabs);
+
+                      // eslint-disable-next-line no-undef
+                      chrome.tabs.sendMessage(
+                        tabs[0].id,
+                        { newNote: "" },
+                        response => {
+                          // console.log("Response:");
+                          // console.log(response);
+
+                          // if (!response) {
+                          //   console.log("Your scroll position was equal to undefined");
+
+                          //   Sentry.captureMessage("Scroll Position of undefined", "error")
+                          // }
+                          // Dispatching action to redux
+                          try {
+                            this.props.dispatch(
+                              addNote(
+                                "Note",
+                                UUID,
+                                response.scrollPosition,
+                                response.page
+                              )
+                            );
+                          } catch (err) {
+                            console.log(
+                              "An error was captured and reported to sentry"
+                            );
+                            console.debug(
+                              "I think this has to do with the URL and it not being a valid webpage"
+                            );
+                            Sentry.captureException(err);
+                          }
+                        }
+                      );
                     }
-                  });
-                })}
-              </SearchResultsContainer>
-            )}
-
-            {this.state.search_query != null && !foundItem && (
-              <img
-                alt="There are no results"
-                // src="no_results.png"
-                src="../assets/no_results.png"
-                // className="img"
-                style={{
-                  position: "absolute",
-                  top: 195,
-                  backgroundColor: "white",
-                  height: 205
+                  );
+                }}
+              >
+                Add Note
+              </button>
+              <input
+                className="primary-input"
+                placeholder="Search Your Notes"
+                onChange={event => {
+                  if (event.target.value !== "") {
+                    this.setState({
+                      search_query: event.target.value
+                    });
+                  } else {
+                    this.setState({
+                      search_query: null
+                    });
+                  }
                 }}
               />
-            )}
+            </div>
 
-            <p
-              className="feedback-link"
-              onClick={() => {
-                this.setState({
-                  page: "feedback"
-                });
-              }}
-            >
-              Send Feedback
-            </p>
-          </PopupContainer>
+            <div id="search-area">
+              {this.state.search_query == null && (
+                <img
+                  alt="Search Results"
+                  src="../assets/search_results.png"
+                  style={{
+                    position: "relative",
+                    top: 50,
+                    backgroundColor: "white",
+                    height: 205
+                  }}
+                />
+              )}
+
+              {this.state.search_query != null && (
+                <SearchResultsContainer>
+                  {Object.keys(this.props.state).map(key => {
+                    // console.log("searching for a note");
+                    return this.props.state[key].notes.map(note => {
+                      if (this.state.search_query != null) {
+                        if (
+                          note.body.includes(this.state.search_query) ||
+                          note.title.includes(this.state.search_query)
+                        ) {
+                          // console.log("we found a match!");
+                          foundItem = true;
+                          // Split the text to bold the part that is the search query
+                          let title = note.title.split(this.state.search_query);
+                          let text = note.body.split(this.state.search_query);
+
+                          // console.log("splitAtQueryText: " + text);
+                          // console.log(
+                          // "state.search_query" + this.state.search_query
+                          // );
+
+                          return (
+                            <MiniSearchNote
+                              {...note}
+                              bodySplitAtQueryText={text}
+                              titleSplitAtQueryText={title}
+                              searchQuery={this.state.search_query}
+                              website={key}
+                            />
+                          );
+                        }
+                      }
+                    });
+                  })}
+                </SearchResultsContainer>
+              )}
+              {this.state.search_query != null && !foundItem && (
+                <img
+                  alt="There are no results"
+                  // src="no_results.png"
+                  src="../assets/no_results.png"
+                  // className="img"
+                  style={{
+                    position: "absolute",
+                    top: 250,
+                    backgroundColor: "white",
+                    height: 205
+                  }}
+                />
+              )}
+            </div>
+          </div>
         );
+
         break;
       case "feedback":
         page = (
-          <PopupContainer>
+          <div id="popup-container">
             <h1>Whatcha think?</h1>
             <p>
               We'd love to get some feedback on how to improve this application.
@@ -165,7 +233,23 @@ class Popup extends Component {
             >
               Exit
             </button>
-          </PopupContainer>
+          </div>
+        );
+        break;
+      case "settings":
+        page = (
+          <div id="popup-container">
+            <h1>Settings</h1>
+
+            <button
+              className="fb-btn"
+              onClick={() => {
+                this.displayHome();
+              }}
+            >
+              Exit
+            </button>
+          </div>
         );
         break;
       default:

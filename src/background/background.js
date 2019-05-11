@@ -28,6 +28,16 @@ const notesStorageKey = `notes-${window.location.href}`;
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
 // localStorage.setItem(notesStorageKey, '{}')
 
+chrome.runtime.onMessage.addListener(
+  function(message, callback) {
+    if (message === "runContentScript"){
+      console.log("Running script")
+      chrome.tabs.executeScript({
+        file: 'index.js'
+      });
+    }
+ });
+
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
 

@@ -29,7 +29,8 @@ class Popup extends Component {
 
   displayHome() {
     this.setState({
-      page: "home"
+      page: "home",
+      feedback: "incomplete"
     });
   }
 
@@ -56,6 +57,12 @@ class Popup extends Component {
               <button
                 className="primary-button"
                 onClick={() => {
+                  chrome.runtime.sendMessage(
+                    { code: "runContentScript" },
+                    resp => {
+                      console.log("We recieved a response");
+                    }
+                  );
                   Sentry.captureMessage("A user added a note");
 
                   let UUID = generateUUID();
@@ -183,9 +190,7 @@ class Popup extends Component {
               {this.state.search_query != null && !foundItem && (
                 <img
                   alt="There are no results"
-                  // src="no_results.png"
                   src="../assets/no_results.png"
-                  // className="img"
                   style={{
                     position: "absolute",
                     top: 250,
@@ -239,16 +244,71 @@ class Popup extends Component {
       case "settings":
         page = (
           <div id="popup-container">
-            <h1>Settings</h1>
+            <div id="settings-top">
+              <h1 id="title-settings">Feedback</h1>
 
-            <button
-              className="fb-btn"
-              onClick={() => {
-                this.displayHome();
-              }}
-            >
-              Exit
-            </button>
+              <p id="title-feedback">
+                We'd love to hear what you like, don't like, improvements,
+                wanted features, etc.
+              </p>
+
+              {this.state.feedback !== "complete" && (
+                <textarea
+                  id="input-feedback"
+                  placeholder="What do you think of Sticky Notes?"
+                />
+              )}
+
+              {this.state.feedback === "complete" && (
+                <img alt="Thank You" src="../assets/feedback-thank-you.png" />
+              )}
+              <button
+                className="primary-button"
+                onClick={() => {
+                  let textArea = document.getElementById("input-feedback");
+
+                  if (textArea.value === "") {
+                    console.log("User inputted nothing");
+                  } else {
+                    try {
+                      Sentry.captureMessage("Feedback:" + textArea.value);
+                      // If this is successful, display the image
+                      this.setState({
+                        feedback: "complete"
+                      });
+                    } catch (error) {
+                      console.log("There was an error with reporting feedback");
+                      console.log(error);
+                      Sentry.captureException(error);
+                    }
+                  }
+                }}
+              >
+                Send Feedback
+              </button>
+
+              <div id="settings-buttons">
+                {/* <button
+                className="primary-button"
+                onClick={() => {
+                  this.displayHome();
+                }}
+              >
+                Save
+              </button> */}
+              </div>
+            </div>
+
+            <div id="settings-bottom">
+              <button
+                className="primary-button button-settings-exit"
+                onClick={() => {
+                  this.displayHome();
+                }}
+              >
+                Exit
+              </button>
+            </div>
           </div>
         );
         break;

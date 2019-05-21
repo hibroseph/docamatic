@@ -60,7 +60,7 @@ class Popup extends Component {
                   chrome.runtime.sendMessage(
                     { code: "runContentScript" },
                     resp => {
-                      console.log("We recieved a response");
+                      console.log("We recieved a response: " + resp);
                     }
                   );
                   Sentry.captureMessage("A user added a note");

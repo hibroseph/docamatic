@@ -8,4 +8,4 @@
 6. Top right click on `Developer mode`
 7. Click `Load unpacked` on the top left bar
 8. Find where dist was built in your file directory
-9. Pray to the almighty that it worked and hopefully it should be visible in chrome as a nomral extension
+9. Pray to the almighty that it worked and hopefully it should be visible in chrome as a normal extension

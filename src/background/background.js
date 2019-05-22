@@ -5,7 +5,7 @@ import * as Sentry from "@sentry/browser";
 
 // Initializing Sentry
 
-console.log("Init'ing Sentry");
+// console.log("Init'ing Sentry");
 
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
@@ -18,6 +18,7 @@ Sentry.init({
   }
 });
 
+// console.log("The background script is running!");
 // console.log("You are inside THE background.js");
 
 const notesStorageKey = `notes-${window.location.href}`;

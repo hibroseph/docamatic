@@ -24,8 +24,8 @@
     "styled-components": "^4.0.2"
   },
   "scripts": {
-    "build": "parcel build ./src/popup/index.js ./index.js ./src/background/background.js -d build",
-    "start": "parcel ./src/popup/index.js ./index.js ./src/background/background.js -d dist"
+    "build": "parcel build ./src/popup/index.js ./src/index.js ./src/background/background.js -d build",
+    "start": "parcel ./src/popup/index.js ./src/index.js ./src/background/background.js -d dist"
   },
   "eslintConfig": {
     "extends": "react-app"

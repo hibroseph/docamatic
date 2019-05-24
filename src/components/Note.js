@@ -4,12 +4,6 @@ import { NoteContainer } from "../elements/NoteContainer";
 import { Icon, Button } from "antd";
 import { BlockPicker } from "react-color";
 
-// I'm sorry I used a global
-// This is used to see if the note was previously moving
-// to see when it stops moving
-// let globalWidth;
-// let globalHeight;
-
 class Note extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +25,8 @@ class Note extends Component {
       lastPositionY: 0,
       colorPickerVisible: false,
       width: this.props.size.width,
-      height: this.props.size.height
+      height: this.props.size.height,
+      ContrastingColor: this.props.ContrastingColor
     };
   }
 
@@ -109,6 +104,7 @@ class Note extends Component {
                 className="title-input"
                 placeholder="Note"
                 defaultValue={this.props.title}
+                style={{ color: this.state.ContrastingColor}}
                 onClick={() => {
                   this.setState({
                     colorPickerVisible: false
@@ -130,6 +126,7 @@ class Note extends Component {
               <Icon
                 type="bg-colors"
                 className="nav-bar-item-color"
+                style={{color: this.state.ContrastingColor}}
                 onClick={() => {
                   // console.log("you clicked the color button");
                   this.setState({
@@ -140,6 +137,7 @@ class Note extends Component {
 
               <Icon
                 className="nav-bar-item-delete"
+                style={{color: this.state.ContrastingColor}}
                 type="delete"
                 onClick={this.props.onDeleteClick}
               />
@@ -164,6 +162,14 @@ class Note extends Component {
                 color={this.props.color}
                 onChangeComplete={(color, event) => {
                   this.props.onColorChange(color.hex);
+
+                  // Calculate contrasting color
+                  // Thanks goes to casesandberg on github for this formula from the heavens
+                  const yiq = ((color.rgb.r * 299) + (color.rgb.g * 587) + (color.rgb.b * 114)) / 1000
+                  
+                  this.setState({
+                    ContrastingColor: (yiq >= 128) ? '#000' : '#fff'
+                  })
                 }}
               />
             )}

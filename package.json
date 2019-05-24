@@ -27,7 +27,8 @@
     "start" : "parcel manifest.json -d dist",
     "build" : "parcel build manifest.json -d build",
     "start:update": "cp -r ./src/assets ./dist/.",
-    "build:update": "cp -r ./src/assets ./build/."
+    "build:update": "cp -r ./src/assets ./build/.",
+    "clean": "rm -rf ./build ./dist"
   },
   "eslintConfig": {
     "extends": "react-app"

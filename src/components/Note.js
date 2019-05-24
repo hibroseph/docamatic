@@ -26,7 +26,7 @@ class Note extends Component {
       colorPickerVisible: false,
       width: this.props.size.width,
       height: this.props.size.height,
-      ContrastingColor: this.props.ContrastingColor
+      ContrastingColor: this.props.contrastColor
     };
   }
 
@@ -161,14 +161,14 @@ class Note extends Component {
                 className="color-picker"
                 color={this.props.color}
                 onChangeComplete={(color, event) => {
-                  this.props.onColorChange(color.hex);
-
                   // Calculate contrasting color
                   // Thanks goes to casesandberg on github for this formula from the heavens
                   const yiq = ((color.rgb.r * 299) + (color.rgb.g * 587) + (color.rgb.b * 114)) / 1000
+                  const CC = (yiq >= 128) ? '#000' : '#fff'
+                  this.props.onColorChange(color.hex, CC);
                   
                   this.setState({
-                    ContrastingColor: (yiq >= 128) ? '#000' : '#fff'
+                    ContrastingColor: CC
                   })
                 }}
               />

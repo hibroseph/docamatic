@@ -44,9 +44,9 @@ const notesApp = (state = [], action) => {
         }
       });
 
-    // case 'CLICKED_NOTE':
-    //     console.log("YOU CLICKED NOTE: " + action.id + "!!!!")
-    //     return state;
+    case 'CLICKED_NOTE':
+        console.log("YOU CLICKED NOTE: " + action.id + "!!!!")
+        return state;
 
     case "CHANGE_COLOR":
       console.log("note is having its note color changed");
@@ -56,7 +56,8 @@ const notesApp = (state = [], action) => {
           notes: state[action._sender.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                color: action.color
+                color: action.color,
+                contrastColor: action.contrastColor
               });
             } else {
               return note;
@@ -72,7 +73,7 @@ const notesApp = (state = [], action) => {
       // return [   ...state.filter(note=>note.id !== action.id),
       //    state.find(note=>note.id === action.id) ]
 
-      console.log("Moving note with id: " + action.id);
+      console.log("fuck Moving note with id: " + action.id);
 
       let stateNew = Object.assign({}, state, {
         // ...[action._sender.url],

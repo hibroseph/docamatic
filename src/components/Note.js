@@ -10,13 +10,8 @@ class Note extends Component {
 
     this.sizeOfComponent = React.createRef();
 
-    console.log(
-      "size props width: " +
-        this.props.size.width +
-        " height: " +
-        this.props.size.height
-    );
-
+  
+    console.log("Color of note: " + this.props.color);
     // Using a local state to assist in moving dem
     this.state = {
       currentX: this.props.position.x,

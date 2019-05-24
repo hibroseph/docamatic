@@ -73,8 +73,6 @@ const notesApp = (state = [], action) => {
       // return [   ...state.filter(note=>note.id !== action.id),
       //    state.find(note=>note.id === action.id) ]
 
-      console.log("fuck Moving note with id: " + action.id);
-
       let stateNew = Object.assign({}, state, {
         // ...[action._sender.url],
 
@@ -188,20 +186,18 @@ const notesApp = (state = [], action) => {
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);
 
-      // return {
-      //   ...state,
-      //   [page]: [
-      //     ...state.page.notes,
-      //     {
-      //       id: action.id,
-      //       position: { x: posx, y: action.y_position },
-      //       size: { width: INITIAL_NOTE_WIDTH, height: INITIAL_NOTE_HEIGHT },
-      //       body: NoteMessages[noteTextIndex],
-      //       title: action.title,
-      //       color: colorList[colorIndex]
-      //     }
-      //   ]
-      // };
+      console.log("r: " + colorList[colorIndex].substr(1,2));
+      console.log("g: " + colorList[colorIndex].substr(3,2));
+      console.log("b: " + colorList[colorIndex].substr(5,2));
+
+      // Calculating the color contrast when a note is created
+      let r = parseInt(colorList[colorIndex].substr(1,2),16);
+	    let g = parseInt(colorList[colorIndex].substr(3,2),16);
+      let b = parseInt(colorList[colorIndex].substr(5,2),16);
+      console.log("r: " + r + " g: " + g + " b: " + b);
+	    let yiq = ((r*299)+(g*587)+(b*114))/1000;
+	    
+      console.log("Adding note: contrasting color: " + yiq);
 
       // If there are notes already on the page
       if (state[page] == null) {
@@ -217,7 +213,8 @@ const notesApp = (state = [], action) => {
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
-                color: colorList[colorIndex]
+                color: colorList[colorIndex],
+                contrastColor: (yiq >= 128) ? '#000' : '#fff'
               }
             ]
           }
@@ -236,7 +233,8 @@ const notesApp = (state = [], action) => {
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
-                color: colorList[colorIndex]
+                color: colorList[colorIndex],
+                contrastColor: (yiq >= 128) ? '#000' : '#fff'
               }
             ]
           }

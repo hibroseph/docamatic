@@ -54,8 +54,8 @@ const NoteList = ({
             //   onNoteClicked(id, )
             // }}
 
-            onColorChange={(color) => {
-              onColorChange(note.id, color);
+            onColorChange={(color, contrastColor) => {
+              onColorChange(note.id, color, contrastColor);
             }}
 
             onSizeChange={(id, x, y) => {
@@ -129,9 +129,9 @@ const mapDispatchToProps = dispatch => ({
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
-  onColorChange: (id, color) => {
+  onColorChange: (id, color, contrastColor) => {
     // console.log("Change the color to: " + color);
-    dispatch(changeNoteColor(id, PAGE, color));
+    dispatch(changeNoteColor(id, PAGE, color, contrastColor));
   },
 
   onNoteClicked: id => {

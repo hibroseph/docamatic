@@ -60,6 +60,10 @@ export const NoteContainer = styled.div`
     color: #f4f4f4;
   }
 
+  .title-input:focus {
+    outline: none;
+  }
+
   .title-input {
     position: absolute;
     box-sizing: border-box;
@@ -90,5 +94,9 @@ export const NoteContainer = styled.div`
     margin-bottom: 10px;
     background-color: transparent;
     border: none;
+  }
+
+  .note-input:focus {
+    outline: none;
   }
 `;

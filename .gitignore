@@ -12,7 +12,7 @@ app.zip
 
 # testing
 /coverage
-
+/test
 # production
 /build
 

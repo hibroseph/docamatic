@@ -28,6 +28,7 @@
     "build" : "parcel build manifest.json -d build",
     "start:update": "cp -r ./src/assets ./dist/.",
     "build:update": "cp -r ./src/assets ./build/.",
+    "make": "zip -r app.zip build/",
     "clean": "rm -rf ./build ./dist"
   },
   "eslintConfig": {

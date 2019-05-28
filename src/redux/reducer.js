@@ -45,8 +45,8 @@ const notesApp = (state = [], action) => {
       });
 
     case 'CLICKED_NOTE':
-        console.log("You clicked a note");
-        console.log(state);
+        // console.log("You clicked a note");
+        // console.log(state);
 
         // Loop through the state and find where the note is what you want to move
 
@@ -58,8 +58,8 @@ const notesApp = (state = [], action) => {
         //     return null;
         //   }
         // })
-        console.log("page: " + action.page);
-        console.log("id: " + action.id);
+        // console.log("page: " + action.page);
+        // console.log("id: " + action.id);
 
         let note = state[action.page].notes.filter((note) => {
           console.log("running function on instance: ")
@@ -83,20 +83,12 @@ const notesApp = (state = [], action) => {
 
         new_state.push(note);
 
-        // console.log("here is new_state again: ")
-        // console.log(new_state);
-
-        const new_new_state = Object.assign({}, state, {
+        return Object.assign({}, state, {
           [action.page]: {
             notes: new_state
           }
         })
         
-        console.log("Here is the new_new state")
-        console.log(new_new_state)
-
-        return new_new_state;
-
 
 
     case "CHANGE_COLOR":

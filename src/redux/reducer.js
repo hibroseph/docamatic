@@ -45,21 +45,6 @@ const notesApp = (state = [], action) => {
       });
 
     case 'CLICKED_NOTE':
-        // console.log("You clicked a note");
-        // console.log(state);
-
-        // Loop through the state and find where the note is what you want to move
-
-        // const note = state[action.page].notes.map(note => {
-        //   if (note.id == action.id) {
-        //     console.log("We found the note we are looking for");
-        //     return note;
-        //   } else {
-        //     return null;
-        //   }
-        // })
-        // console.log("page: " + action.page);
-        // console.log("id: " + action.id);
 
         let note = state[action.page].notes.filter((note) => {
           console.log("running function on instance: ")

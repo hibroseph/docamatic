@@ -11,7 +11,8 @@ import {
   addTitle,
   updateNotePosition,
   changeNoteColor,
-  updateNoteSize
+  updateNoteSize,
+  updateNoteDepth
 } from "../redux/actions";
 
 const PAGE = window.location.href;
@@ -49,10 +50,10 @@ const NoteList = ({
               // console.log("Position changed to: " + x + " ," + y);
               onPositionChange(id, x, y);
             }}
-            // onNoteClicked={(id,) => {
-            //   // console.log("You clicked note: " + id)
-            //   onNoteClicked(id, )
-            // }}
+            onNoteClicked={(id) => {
+              // console.log("You clicked note: " + id)
+              onNoteClicked(id)
+            }}
 
             onColorChange={(color, contrastColor) => {
               onColorChange(note.id, color, contrastColor);
@@ -135,7 +136,7 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onNoteClicked: id => {
-    dispatch(updateNotePosition(id, PAGE));
+    dispatch(updateNoteDepth(id, PAGE));
   }
 });
 

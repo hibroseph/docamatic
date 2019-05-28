@@ -31,8 +31,8 @@ const notesApp = (state = [], action) => {
       console.log("note is being resized");
 
       return Object.assign({}, state, {
-        [action._sender.url]: {
-          notes: state[action._sender.url].notes.map(note => {
+        [action.page]: {
+          notes: state[action.page].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 size: { width: action.x, height: action.y }
@@ -45,11 +45,62 @@ const notesApp = (state = [], action) => {
       });
 
     case 'CLICKED_NOTE':
-        console.log("YOU CLICKED NOTE: " + action.id + "!!!!")
-        return state;
+        console.log("You clicked a note");
+        console.log(state);
+
+        // Loop through the state and find where the note is what you want to move
+
+        // const note = state[action.page].notes.map(note => {
+        //   if (note.id == action.id) {
+        //     console.log("We found the note we are looking for");
+        //     return note;
+        //   } else {
+        //     return null;
+        //   }
+        // })
+        console.log("page: " + action.page);
+        console.log("id: " + action.id);
+
+        let note = state[action.page].notes.filter((note) => {
+          console.log("running function on instance: ")
+          console.log(note);
+          if (note.id === action.id) {
+            return note;
+          }
+        }).find(note => {
+          return note.id === action.id
+        })
+
+        if (note === undefined) {
+          return state;
+        }
+        
+        const new_state = state[action.page].notes.filter(notes => {
+          if (notes.id !== action.id) {
+            return notes;
+          }
+        })
+
+        new_state.push(note);
+
+        // console.log("here is new_state again: ")
+        // console.log(new_state);
+
+        const new_new_state = Object.assign({}, state, {
+          [action.page]: {
+            notes: new_state
+          }
+        })
+        
+        console.log("Here is the new_new state")
+        console.log(new_new_state)
+
+        return new_new_state;
+
+
 
     case "CHANGE_COLOR":
-      console.log("note is having its note color changed");
+      // console.log("note is having its note color changed");
 
       return Object.assign({}, state, {
         [action._sender.url]: {
@@ -89,8 +140,8 @@ const notesApp = (state = [], action) => {
           })
         }
       });
-      console.log("STATE IN REDUCER:");
-      console.log(stateNew);
+      // console.log("STATE IN REDUCER:");
+      // console.log(stateNew);
 
       return stateNew;
 
@@ -108,7 +159,7 @@ const notesApp = (state = [], action) => {
     // })
 
     case "ADD_TITLE":
-      console.log("Note is having it's title changed");
+      // console.log("Note is having it's title changed");
 
       return Object.assign({}, state, {
         [action._sender.url]: {
@@ -132,7 +183,7 @@ const notesApp = (state = [], action) => {
         [action._sender.url]: {
           notes: state[action._sender.url].notes.map((note, id) => {
             if (note.id === action.id) {
-              console.log("index: " + note.id + " is equal to the action id: " + action.id)
+              // console.log("index: " + note.id + " is equal to the action id: " + action.id)
               return Object.assign({}, note, {
                 body: action.body
               });
@@ -145,7 +196,7 @@ const notesApp = (state = [], action) => {
       });
 
     case "REMOVE_NOTE":
-      console.log("Removing note with id: " + action.id);
+      // console.log("Removing note with id: " + action.id);
 
       
       // Filter the id of the note that needs to be deleted out
@@ -173,7 +224,7 @@ const notesApp = (state = [], action) => {
 
     case "ADD_NOTE":
 
-      console.log("You are adding a note");
+      // console.log("You are adding a note");
 
       // Generates a random position on the page
       const posx = Math.floor(Math.random() * (600 + 1));
@@ -186,18 +237,18 @@ const notesApp = (state = [], action) => {
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);
 
-      console.log("r: " + colorList[colorIndex].substr(1,2));
-      console.log("g: " + colorList[colorIndex].substr(3,2));
-      console.log("b: " + colorList[colorIndex].substr(5,2));
+      // console.log("r: " + colorList[colorIndex].substr(1,2));
+      // console.log("g: " + colorList[colorIndex].substr(3,2));
+      // console.log("b: " + colorList[colorIndex].substr(5,2));
 
       // Calculating the color contrast when a note is created
       let r = parseInt(colorList[colorIndex].substr(1,2),16);
 	    let g = parseInt(colorList[colorIndex].substr(3,2),16);
       let b = parseInt(colorList[colorIndex].substr(5,2),16);
-      console.log("r: " + r + " g: " + g + " b: " + b);
+      // console.log("r: " + r + " g: " + g + " b: " + b);
 	    let yiq = ((r*299)+(g*587)+(b*114))/1000;
 	    
-      console.log("Adding note: contrasting color: " + yiq);
+      // console.log("Adding note: contrasting color: " + yiq);
 
       // If there are notes already on the page
       if (state[page] == null) {

@@ -90,6 +90,9 @@ class Note extends Component {
               height: this.state.height
             }}
             ref={this.sizeOfComponent}
+            onClick={()=>{
+              this.props.onNoteClicked(this.props.id);
+            }}
           >
             <div
               className="title-bar"

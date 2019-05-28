@@ -10,8 +10,7 @@ class Note extends Component {
 
     this.sizeOfComponent = React.createRef();
 
-  
-    console.log("Color of note: " + this.props.color);
+    // console.log("Color of note: " + this.props.color);
     // Using a local state to assist in moving dem
     this.state = {
       currentX: this.props.position.x,
@@ -42,11 +41,7 @@ class Note extends Component {
       // Only update the global store when it has stopped moving
       if (!nextProps.dataDrag.isMoving && this.props.dataDrag.isMoving) {
         // Update the global store
-        this.props.onPositionChange(
-          this.props.id,
-          this.state.currentX,
-          this.state.currentY
-        );
+        // console.log("positon changing");
       }
     }
   }
@@ -67,12 +62,7 @@ class Note extends Component {
         width: this.sizeOfComponent.current.clientWidth,
         height: this.sizeOfComponent.current.clientHeight
       });
-
-      this.props.onSizeChange(
-        this.props.id,
-        this.state.width,
-        this.state.height
-      );
+      // console.log("size changing");
     }
   }
 
@@ -90,6 +80,22 @@ class Note extends Component {
               height: this.state.height
             }}
             ref={this.sizeOfComponent}
+            onMouseUp={() => {
+              // console.log("YOU RELEASED THE MOUSE$#@$!$@!#%!%");
+
+              // console.log("UPDATING POS AND SIZE IN REDUX")
+              this.props.onSizeChange(
+                this.props.id,
+                this.state.width,
+                this.state.height
+              );
+
+              this.props.onPositionChange(
+                this.props.id,
+                this.state.currentX,
+                this.state.currentY
+              );
+            }}
           >
             <div
               className="title-bar"
@@ -99,7 +105,7 @@ class Note extends Component {
                 className="title-input"
                 placeholder="Note"
                 defaultValue={this.props.title}
-                style={{ color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 onClick={() => {
                   this.setState({
                     colorPickerVisible: false
@@ -110,7 +116,7 @@ class Note extends Component {
                   // console.log("The mouse is down");
                 }}
                 onMouseUp={() => {
-                  // console.log("the mouse is up");
+                  // console.log("the mouse is upppppp!!%$#^$#@%#@!%!");
                 }}
                 onMouseMove={() => {
                   // console.log("the mouse is moving");
@@ -121,7 +127,7 @@ class Note extends Component {
               <Icon
                 type="bg-colors"
                 className="nav-bar-item-color"
-                style={{color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 onClick={() => {
                   // console.log("you clicked the color button");
                   this.setState({
@@ -132,7 +138,7 @@ class Note extends Component {
 
               <Icon
                 className="nav-bar-item-delete"
-                style={{color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 type="delete"
                 onClick={this.props.onDeleteClick}
               />
@@ -158,13 +164,17 @@ class Note extends Component {
                 onChangeComplete={(color, event) => {
                   // Calculate contrasting color
                   // Thanks goes to casesandberg on github for this formula from the heavens
-                  const yiq = ((color.rgb.r * 299) + (color.rgb.g * 587) + (color.rgb.b * 114)) / 1000
-                  const CC = (yiq >= 128) ? '#000' : '#fff'
+                  const yiq =
+                    (color.rgb.r * 299 +
+                      color.rgb.g * 587 +
+                      color.rgb.b * 114) /
+                    1000;
+                  const CC = yiq >= 128 ? "#000" : "#fff";
                   this.props.onColorChange(color.hex, CC);
-                  
+
                   this.setState({
                     ContrastingColor: CC
-                  })
+                  });
                 }}
               />
             )}
@@ -180,9 +190,10 @@ var draggableNote = clickdrag(Note, {
   onDragStop: () => {
     // update the state of the position of this note here
     // and size
+    // console.log("You stopped dragging, lets update the size");
   },
   onDragStart: () => {
-    console.log("dragging");
+    // console.log("dragging");
   },
   getSpecificEventData: e => ({
     ctrl: e.ctrlKey,

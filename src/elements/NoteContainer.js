@@ -1,14 +1,14 @@
 import styled from "styled-components";
 
 export const NoteContainer = styled.div`
-  /* width: 300px; */
-  /* height: 400px; */
-
   overflow: visible;
 
   .note-drag-handle {
     width:100%;
     height: 20px;
+    background-color: blue;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
   }
 
   .note {
@@ -19,7 +19,7 @@ export const NoteContainer = styled.div`
     height: 100%;
 
     background-color: #f4f4f4;
-    border-radius: 5px;
+    border-radius: 5px, 5px,0px, 0px;
     resize: both;
     overflow: auto;
 
@@ -57,8 +57,8 @@ export const NoteContainer = styled.div`
     height: 60px;
 
     background-color: #35a1ec;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    /* border-top-left-radius: 5px; */
+    /* border-top-right-radius: 5px; */
   }
 
   .title-input::placeholder {
@@ -86,7 +86,7 @@ export const NoteContainer = styled.div`
   .note-input {
     position: absolute;
     box-sizing: border-box;
-    top: 60px;
+    top: 80px;
     left: 0;
     right: 0;
     bottom: 0;

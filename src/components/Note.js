@@ -25,7 +25,6 @@ class Note extends Component {
     };
   }
 
-
   render() {
     return (
       <Rnd
@@ -46,7 +45,7 @@ class Note extends Component {
         }}
         onResizeStop={(e, d, ref, delta, position) => {
           let tempWidth = this.state.width + delta.width;
-          let tempHeight = this.state.height + delta.height;
+          let tempHeight = this.state.height + delta.height + 20;
 
           this.setState({
             width: tempWidth,
@@ -55,13 +54,14 @@ class Note extends Component {
 
           this.props.onSizeChange(tempWidth, tempHeight);
         }}
-        dragHandleClassName="title-bar"
+        dragHandleClassName="note-drag-handle"
         minWidth={200}
         minHeight={200}
         bounds="window"
       >
         <NoteContainer>
           <div className="note" ref={this.sizeOfComponent}>
+            <div className="note-drag-handle" />
             <div
               className="title-bar"
               style={{ backgroundColor: this.props.color }}

@@ -1,10 +1,15 @@
 import styled from "styled-components";
 
 export const NoteContainer = styled.div`
-  width: 300px;
-  height: 400px;
+  /* width: 300px; */
+  /* height: 400px; */
 
   overflow: visible;
+
+  .note-drag-handle {
+    width:100%;
+    height: 20px;
+  }
 
   .note {
     position: absolute;

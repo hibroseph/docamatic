@@ -48,10 +48,6 @@ class Note extends Component {
           let tempWidth = this.state.width + delta.width;
           let tempHeight = this.state.height + delta.height;
 
-          console.log(
-            "updating size width: " + tempWidth + " height: " + tempHeight
-          );
-
           this.setState({
             width: tempWidth,
             height: tempHeight
@@ -59,6 +55,7 @@ class Note extends Component {
 
           this.props.onSizeChange(tempWidth, tempHeight);
         }}
+        dragHandleClassName="title-bar"
         minWidth={200}
         minHeight={200}
         bounds="window"

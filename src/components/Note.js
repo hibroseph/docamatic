@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-// import clickdrag from "react-clickdrag";
+import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
 import { Icon } from "antd";
 import { BlockPicker } from "react-color";
@@ -10,9 +10,10 @@ class Note extends Component {
     super(props);
 
     this.sizeOfComponent = React.createRef();
+    let accent = LightenColor(this.props.color, -0.05);
 
-    // console.log("Color of note: " + this.props.color);
-    // Using a local state to assist in moving dem
+    console.log("Your accent color is: " + accent);
+
     this.state = {
       currentX: this.props.position.x,
       currentY: this.props.position.y,
@@ -21,7 +22,8 @@ class Note extends Component {
       colorPickerVisible: false,
       width: this.props.size.width,
       height: this.props.size.height,
-      ContrastingColor: this.props.contrastColor
+      ContrastingColor: this.props.contrastColor,
+      accentColor: accent
     };
   }
 
@@ -61,7 +63,10 @@ class Note extends Component {
       >
         <NoteContainer>
           <div className="note" ref={this.sizeOfComponent}>
-            <div className="note-drag-handle" />
+            <div
+              className="note-drag-handle"
+              style={{ backgroundColor: this.state.accentColor }}
+            />
             <div
               className="title-bar"
               style={{ backgroundColor: this.props.color }}
@@ -135,6 +140,13 @@ class Note extends Component {
                   this.setState({
                     ContrastingColor: CC
                   });
+
+                  // Calculate the accent color
+                  let accent = LightenColor(color.hex, -0.05);
+
+                  this.setState({
+                    accentColor: accent
+                  })
                 }}
               />
             )}

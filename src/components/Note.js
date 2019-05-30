@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import clickdrag from "react-clickdrag";
+// import clickdrag from "react-clickdrag";
 import { NoteContainer } from "../elements/NoteContainer";
-import { Icon, Button } from "antd";
+import { Icon } from "antd";
 import { BlockPicker } from "react-color";
+import { Rnd } from "react-rnd";
 
 class Note extends Component {
   constructor(props) {
@@ -24,79 +25,46 @@ class Note extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    // If its moving and the control key is down, update the state
-    if (nextProps.dataDrag.isMoving && nextProps.dataDrag.ctrl) {
-      this.setState({
-        currentX: this.state.lastPositionX + nextProps.dataDrag.moveDeltaX,
-        currentY: this.state.lastPositionY + nextProps.dataDrag.moveDeltaY
-      });
-    } else {
-      // Update the local state for changes
-      this.setState({
-        lastPositionX: this.state.currentX,
-        lastPositionY: this.state.currentY
-      });
-
-      // Only update the global store when it has stopped moving
-      if (!nextProps.dataDrag.isMoving && this.props.dataDrag.isMoving) {
-        // Update the global store
-        // console.log("positon changing");
-      }
-    }
-  }
-
-  componentDidUpdate() {
-    // globalWidth = this.sizeOfComponent.current.clientWidth;
-    // globalHeight = this.sizeOfComponent.current.clientHeight;
-
-    // console.log("Width: " + globalWidth);
-    // console.log("Height: " + globalHeight);
-
-    // check to see if the size has changed
-    if (
-      this.state.width != this.sizeOfComponent.current.clientWidth ||
-      this.state.height != this.sizeOfComponent.current.clientHeight
-    ) {
-      this.setState({
-        width: this.sizeOfComponent.current.clientWidth,
-        height: this.sizeOfComponent.current.clientHeight
-      });
-      // console.log("size changing");
-    }
-  }
 
   render() {
     return (
-      <div>
+      <Rnd
+        default={{
+          x: this.state.currentX,
+          y: this.state.currentY,
+          width: this.state.width,
+          height: this.state.height
+        }}
+        onDragStop={(e, d) => {
+          console.log("x: " + d.x + " y: " + d.y);
+          this.setState({
+            currentX: d.x,
+            currentY: d.y
+          });
+
+          this.props.onPositionChange(this.props.id, d.x, d.y);
+        }}
+        onResizeStop={(e, d, ref, delta, position) => {
+          let tempWidth = this.state.width + delta.width;
+          let tempHeight = this.state.height + delta.height;
+
+          console.log(
+            "updating size width: " + tempWidth + " height: " + tempHeight
+          );
+
+          this.setState({
+            width: tempWidth,
+            height: tempHeight
+          });
+
+          this.props.onSizeChange(tempWidth, tempHeight);
+        }}
+        minWidth={200}
+        minHeight={200}
+        bounds="window"
+      >
         <NoteContainer>
-          <div
-            className="note"
-            style={{
-              transform: `translate(${this.state.currentX}px, ${
-                this.state.currentY
-              }px)`,
-              width: this.state.width,
-              height: this.state.height
-            }}
-            ref={this.sizeOfComponent}
-            onMouseUp={() => {
-              // console.log("YOU RELEASED THE MOUSE$#@$!$@!#%!%");
-
-              // console.log("UPDATING POS AND SIZE IN REDUX")
-              this.props.onSizeChange(
-                this.props.id,
-                this.state.width,
-                this.state.height
-              );
-
-              this.props.onPositionChange(
-                this.props.id,
-                this.state.currentX,
-                this.state.currentY
-              );
-            }}
-          >
+          <div className="note" ref={this.sizeOfComponent}>
             <div
               className="title-bar"
               style={{ backgroundColor: this.props.color }}
@@ -112,15 +80,8 @@ class Note extends Component {
                   });
                 }}
                 onChange={this.props.onTitleChange}
-                onMouseDown={() => {
-                  // console.log("The mouse is down");
-                }}
-                onMouseUp={() => {
-                  // console.log("the mouse is upppppp!!%$#^$#@%#@!%!");
-                }}
-                onMouseMove={() => {
-                  // console.log("the mouse is moving");
-                  // console.log(event);
+                onMouseDown={e => {
+                  e.stopPropagation();
                 }}
               />
 
@@ -129,7 +90,6 @@ class Note extends Component {
                 className="nav-bar-item-color"
                 style={{ color: this.state.ContrastingColor }}
                 onClick={() => {
-                  // console.log("you clicked the color button");
                   this.setState({
                     colorPickerVisible: true
                   });
@@ -150,6 +110,9 @@ class Note extends Component {
                 this.setState({
                   colorPickerVisible: false
                 });
+              }}
+              onMouseDown={e => {
+                e.stopPropagation();
               }}
               onDoubleClick={() => {
                 // console.log("you clicked twice nigga!");
@@ -180,25 +143,9 @@ class Note extends Component {
             )}
           </div>
         </NoteContainer>
-      </div>
+      </Rnd>
     );
   }
 }
 
-// // Make the note draggable
-var draggableNote = clickdrag(Note, {
-  onDragStop: () => {
-    // update the state of the position of this note here
-    // and size
-    // console.log("You stopped dragging, lets update the size");
-  },
-  onDragStart: () => {
-    // console.log("dragging");
-  },
-  getSpecificEventData: e => ({
-    ctrl: e.ctrlKey,
-    shift: e.shiftKey
-  })
-});
-
-export default draggableNote;
+export default Note;

@@ -8,10 +8,10 @@ export const NoteContainer = styled.div`
 
   .note {
     position: absolute;
-    top: 300px;
-    left: 300px;
-    width: 300px;
-    height: 400px;
+    /* top: 300px; */
+    /* left: 300px; */
+    width: 100%;
+    height: 100%;
 
     background-color: #f4f4f4;
     border-radius: 5px;
@@ -74,6 +74,7 @@ export const NoteContainer = styled.div`
     padding-left: 20px;
     color: #f4f4f4;
     border: none;
+    user-select: none;
     /*   border: solid 1px black;; */
   }
 

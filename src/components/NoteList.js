@@ -58,9 +58,9 @@ const NoteList = ({
               onColorChange(note.id, color, contrastColor);
             }}
 
-            onSizeChange={(id, x, y) => {
+            onSizeChange={(x, y) => {
               // console.log("The size has changed to: " + x + ", " +  y)
-              onSizeChange(id, x, y);
+              onSizeChange(note.id, x, y);
             }}
           />
         );
@@ -126,6 +126,8 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onPositionChange: (id, x, y) => {
+    console.log("The position has changed x: " + x + " y: " + y);
+
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 

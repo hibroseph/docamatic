@@ -1,18 +1,19 @@
 import React, { Component } from "react";
-import clickdrag from "react-clickdrag";
+import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
-import { Icon, Button } from "antd";
+import { Icon } from "antd";
 import { BlockPicker } from "react-color";
+import { Rnd } from "react-rnd";
 
 class Note extends Component {
   constructor(props) {
     super(props);
 
     this.sizeOfComponent = React.createRef();
+    let accent = LightenColor(this.props.color, -0.05);
 
-  
-    console.log("Color of note: " + this.props.color);
-    // Using a local state to assist in moving dem
+    console.log("Your accent color is: " + accent);
+
     this.state = {
       currentX: this.props.position.x,
       currentY: this.props.position.y,
@@ -21,76 +22,51 @@ class Note extends Component {
       colorPickerVisible: false,
       width: this.props.size.width,
       height: this.props.size.height,
-      ContrastingColor: this.props.contrastColor
+      ContrastingColor: this.props.contrastColor,
+      accentColor: accent
     };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // If its moving and the control key is down, update the state
-    if (nextProps.dataDrag.isMoving && nextProps.dataDrag.ctrl) {
-      this.setState({
-        currentX: this.state.lastPositionX + nextProps.dataDrag.moveDeltaX,
-        currentY: this.state.lastPositionY + nextProps.dataDrag.moveDeltaY
-      });
-    } else {
-      // Update the local state for changes
-      this.setState({
-        lastPositionX: this.state.currentX,
-        lastPositionY: this.state.currentY
-      });
-
-      // Only update the global store when it has stopped moving
-      if (!nextProps.dataDrag.isMoving && this.props.dataDrag.isMoving) {
-        // Update the global store
-        this.props.onPositionChange(
-          this.props.id,
-          this.state.currentX,
-          this.state.currentY
-        );
-      }
-    }
-  }
-
-  componentDidUpdate() {
-    // globalWidth = this.sizeOfComponent.current.clientWidth;
-    // globalHeight = this.sizeOfComponent.current.clientHeight;
-
-    // console.log("Width: " + globalWidth);
-    // console.log("Height: " + globalHeight);
-
-    // check to see if the size has changed
-    if (
-      this.state.width != this.sizeOfComponent.current.clientWidth ||
-      this.state.height != this.sizeOfComponent.current.clientHeight
-    ) {
-      this.setState({
-        width: this.sizeOfComponent.current.clientWidth,
-        height: this.sizeOfComponent.current.clientHeight
-      });
-
-      this.props.onSizeChange(
-        this.props.id,
-        this.state.width,
-        this.state.height
-      );
-    }
   }
 
   render() {
     return (
-      <div>
+      <Rnd
+        default={{
+          x: this.state.currentX,
+          y: this.state.currentY,
+          width: this.state.width,
+          height: this.state.height
+        }}
+        onDragStop={(e, d) => {
+          console.log("x: " + d.x + " y: " + d.y);
+          this.setState({
+            currentX: d.x,
+            currentY: d.y
+          });
+
+          this.props.onPositionChange(this.props.id, d.x, d.y);
+        }}
+        onResizeStop={(e, d, ref, delta, position) => {
+          let tempWidth = this.state.width + delta.width;
+          let tempHeight = this.state.height + delta.height + 20;
+
+          this.setState({
+            width: tempWidth,
+            height: tempHeight
+          });
+
+          this.props.onSizeChange(tempWidth, tempHeight);
+        }}
+        dragHandleClassName="note-drag-handle"
+        minWidth={200}
+        minHeight={200}
+        bounds="window"
+      >
         <NoteContainer>
-          <div
-            className="note"
-            style={{
-              transform: `translate(${this.state.currentX}px, ${
-                this.state.currentY
-              }px)`,
-              width: this.state.width,
-              height: this.state.height
-            }}
-            ref={this.sizeOfComponent}
-          >
+          <div className="note" ref={this.sizeOfComponent}>
+            <div
+              className="note-drag-handle"
+              style={{ backgroundColor: this.state.accentColor }}
+            />
             <div
               className="title-bar"
               style={{ backgroundColor: this.props.color }}
@@ -99,31 +75,23 @@ class Note extends Component {
                 className="title-input"
                 placeholder="Note"
                 defaultValue={this.props.title}
-                style={{ color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 onClick={() => {
                   this.setState({
                     colorPickerVisible: false
                   });
                 }}
                 onChange={this.props.onTitleChange}
-                onMouseDown={() => {
-                  // console.log("The mouse is down");
-                }}
-                onMouseUp={() => {
-                  // console.log("the mouse is up");
-                }}
-                onMouseMove={() => {
-                  // console.log("the mouse is moving");
-                  // console.log(event);
+                onMouseDown={e => {
+                  e.stopPropagation();
                 }}
               />
 
               <Icon
                 type="bg-colors"
                 className="nav-bar-item-color"
-                style={{color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 onClick={() => {
-                  // console.log("you clicked the color button");
                   this.setState({
                     colorPickerVisible: true
                   });
@@ -132,7 +100,7 @@ class Note extends Component {
 
               <Icon
                 className="nav-bar-item-delete"
-                style={{color: this.state.ContrastingColor}}
+                style={{ color: this.state.ContrastingColor }}
                 type="delete"
                 onClick={this.props.onDeleteClick}
               />
@@ -144,6 +112,9 @@ class Note extends Component {
                 this.setState({
                   colorPickerVisible: false
                 });
+              }}
+              onMouseDown={e => {
+                e.stopPropagation();
               }}
               onDoubleClick={() => {
                 // console.log("you clicked twice nigga!");
@@ -158,36 +129,32 @@ class Note extends Component {
                 onChangeComplete={(color, event) => {
                   // Calculate contrasting color
                   // Thanks goes to casesandberg on github for this formula from the heavens
-                  const yiq = ((color.rgb.r * 299) + (color.rgb.g * 587) + (color.rgb.b * 114)) / 1000
-                  const CC = (yiq >= 128) ? '#000' : '#fff'
+                  const yiq =
+                    (color.rgb.r * 299 +
+                      color.rgb.g * 587 +
+                      color.rgb.b * 114) /
+                    1000;
+                  const CC = yiq >= 128 ? "#000" : "#fff";
                   this.props.onColorChange(color.hex, CC);
-                  
+
                   this.setState({
                     ContrastingColor: CC
+                  });
+
+                  // Calculate the accent color
+                  let accent = LightenColor(color.hex, -0.05);
+
+                  this.setState({
+                    accentColor: accent
                   })
                 }}
               />
             )}
           </div>
         </NoteContainer>
-      </div>
+      </Rnd>
     );
   }
 }
 
-// // Make the note draggable
-var draggableNote = clickdrag(Note, {
-  onDragStop: () => {
-    // update the state of the position of this note here
-    // and size
-  },
-  onDragStart: () => {
-    console.log("dragging");
-  },
-  getSpecificEventData: e => ({
-    ctrl: e.ctrlKey,
-    shift: e.shiftKey
-  })
-});
-
-export default draggableNote;
+export default Note;

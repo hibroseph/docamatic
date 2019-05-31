@@ -62,7 +62,13 @@ class Note extends Component {
         bounds="window"
       >
         <NoteContainer>
-          <div className="note" ref={this.sizeOfComponent}>
+
+          <div className="note" 
+            ref={this.sizeOfComponent}
+            onClick={()=>{
+              this.props.onNoteClicked(this.props.id);
+            }}
+             >
             <div
               className="note-drag-handle"
               style={{ backgroundColor: this.state.accentColor }}

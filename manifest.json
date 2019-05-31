@@ -19,7 +19,10 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["./src/components/Note/ColorPicker/ColorPicker.css"],
+      "css": [
+        "./src/components/Note/ColorPicker/ColorPicker.css",
+        "./src/components/Note/NoteBody/NoteBody.css"
+      ],
       "js": ["./src/index.js"]
     }
   ],

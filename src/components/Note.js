@@ -3,7 +3,8 @@ import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
 import { Icon } from "antd";
 import { Rnd } from "react-rnd";
-import ColorPicker from "./Note/ColorPicker/ColorPicker/"
+import ColorPicker from "./Note/ColorPicker/ColorPicker"
+import NoteBody from "./Note/NoteBody/NoteBody"
 
 class Note extends Component {
   constructor(props) {
@@ -111,23 +112,15 @@ class Note extends Component {
                 onClick={this.props.onDeleteClick}
               />
             </div>
-
-            <textarea
-              className="note-input"
-              onClick={() => {
+            <NoteBody
+              onTextChange={this.props.onBodyChange}
+              defaultValue={this.props.body}
+              updateFocus={() => {
                 this.setState({
                   colorPickerVisible: false
-                });
+                })
               }}
-              onMouseDown={e => {
-                e.stopPropagation();
-              }}
-              onDoubleClick={() => {
-                // console.log("you clicked twice nigga!");
-              }}
-              onChange={this.props.onBodyChange}
-              defaultValue={this.props.body}
-            />
+            ></NoteBody>
             
             <ColorPicker
               color={this.props.color}

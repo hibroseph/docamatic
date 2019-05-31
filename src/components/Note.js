@@ -5,6 +5,7 @@ import { Icon } from "antd";
 import { Rnd } from "react-rnd";
 import ColorPicker from "./Note/ColorPicker/ColorPicker";
 import NoteBody from "./Note/NoteBody/NoteBody";
+import NoteTitle from "./Note/NoteTitle/NoteTitle";
 
 class Note extends Component {
   constructor(props) {
@@ -26,11 +27,38 @@ class Note extends Component {
       ContrastingColor: this.props.contrastColor,
       AccentColor: accent
     };
+
+    // Bind dem
+    this.focus = this.focus.bind(this);
+  }
+
+  // To find what to display
+  focus(item) {
+    console.log("Deciding on what to focus on");
+
+    switch (item) {
+      case "color":
+        this.setState({
+          colorPickerVisible: true
+        });
+        break;
+      case "note":
+        this.setState({
+          colorPickerVisible: false
+        });
+        break;
+      default:
+        this.setState({
+          colorPickerVisible: false
+        });
+        break;
+    }
   }
 
   render() {
     return (
       <Rnd
+        
         default={{
           x: this.state.currentX,
           y: this.state.currentY,
@@ -70,59 +98,21 @@ class Note extends Component {
               this.props.onNoteClicked(this.props.id);
             }}
           >
-            <div
-              className="note-drag-handle"
-              style={{ backgroundColor: this.state.AccentColor }}
+            <NoteTitle
+              accentColor={this.state.AccentColor}
+              textColor={this.state.ContrastingColor}
+              color={this.props.color}
+              title={this.props.title}
+              updateFocus={this.focus}
+              onChange={this.props.onTitleChange}
+              onDeleteClick={this.props.onDeleteClick}
             />
-            <div
-              className="title-bar"
-              style={{ backgroundColor: this.props.color }}
-            >
-              <input
-                className="title-input"
-                placeholder="Note"
-                defaultValue={this.props.title}
-                style={{ color: this.state.ContrastingColor }}
-                onClick={() => {
-                  this.setState({
-                    colorPickerVisible: false
-                  });
-                }}
-                onChange={this.props.onTitleChange}
-                onMouseDown={e => {
-                  e.stopPropagation();
-                }}
-              />
-
-              <Icon
-                type="bg-colors"
-                className="nav-bar-item-color"
-                style={{ color: this.state.ContrastingColor }}
-                onClick={() => {
-                  this.setState({
-                    colorPickerVisible: true
-                  });
-                }}
-              />
-
-              <Icon
-                className="nav-bar-item-delete"
-                style={{ color: this.state.ContrastingColor }}
-                type="delete"
-                onClick={this.props.onDeleteClick}
-              />
-            </div>
-            
             <NoteBody
               onTextChange={this.props.onBodyChange}
               defaultValue={this.props.body}
-              updateFocus={() => {
-                this.setState({
-                  colorPickerVisible: false
-                });
-              }}
+              updateFocus={this.focus}
             />
-            
+
             <ColorPicker
               color={this.props.color}
               visible={this.state.colorPickerVisible}

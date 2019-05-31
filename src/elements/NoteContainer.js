@@ -31,12 +31,6 @@ export const NoteContainer = styled.div`
     box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
   }
 
-  .color-picker {
-    position: absolute !important;
-    top: 70px !important;
-    left: 40px !important;
-  }
-
   .nav-bar-item-color {
     position: absolute;
     top: 18px;

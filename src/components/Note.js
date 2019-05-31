@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
 import { Icon } from "antd";
-import { BlockPicker } from "react-color";
 import { Rnd } from "react-rnd";
+import ColorPicker from "./Note/ColorPicker/ColorPicker/"
 
 class Note extends Component {
   constructor(props) {
@@ -23,7 +23,7 @@ class Note extends Component {
       width: this.props.size.width,
       height: this.props.size.height,
       ContrastingColor: this.props.contrastColor,
-      accentColor: accent
+      AccentColor: accent
     };
   }
 
@@ -71,7 +71,7 @@ class Note extends Component {
              >
             <div
               className="note-drag-handle"
-              style={{ backgroundColor: this.state.accentColor }}
+              style={{ backgroundColor: this.state.AccentColor }}
             />
             <div
               className="title-bar"
@@ -128,34 +128,18 @@ class Note extends Component {
               onChange={this.props.onBodyChange}
               defaultValue={this.props.body}
             />
-            {this.state.colorPickerVisible && (
-              <BlockPicker
-                className="color-picker"
-                color={this.props.color}
-                onChangeComplete={(color, event) => {
-                  // Calculate contrasting color
-                  // Thanks goes to casesandberg on github for this formula from the heavens
-                  const yiq =
-                    (color.rgb.r * 299 +
-                      color.rgb.g * 587 +
-                      color.rgb.b * 114) /
-                    1000;
-                  const CC = yiq >= 128 ? "#000" : "#fff";
-                  this.props.onColorChange(color.hex, CC);
-
-                  this.setState({
-                    ContrastingColor: CC
-                  });
-
-                  // Calculate the accent color
-                  let accent = LightenColor(color.hex, -0.05);
-
-                  this.setState({
-                    accentColor: accent
-                  })
-                }}
-              />
-            )}
+            
+            <ColorPicker
+              color={this.props.color}
+              visible={this.state.colorPickerVisible}
+              onColorChange={(color, contrast, accent)=> {
+                this.setState({
+                  ContrastingColor: contrast,
+                  AccentColor: accent
+                })
+                this.props.onColorChange(color, contrast);
+              }}
+            ></ColorPicker>
           </div>
         </NoteContainer>
       </Rnd>

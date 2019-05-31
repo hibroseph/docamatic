@@ -22,6 +22,7 @@
       "css": [
         "./src/components/Note/ColorPicker/ColorPicker.css",
         "./src/components/Note/NoteBody/NoteBody.css"
+        
       ],
       "js": ["./src/index.js"]
     }

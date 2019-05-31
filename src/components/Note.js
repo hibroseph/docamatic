@@ -3,8 +3,8 @@ import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
 import { Icon } from "antd";
 import { Rnd } from "react-rnd";
-import ColorPicker from "./Note/ColorPicker/ColorPicker"
-import NoteBody from "./Note/NoteBody/NoteBody"
+import ColorPicker from "./Note/ColorPicker/ColorPicker";
+import NoteBody from "./Note/NoteBody/NoteBody";
 
 class Note extends Component {
   constructor(props) {
@@ -63,13 +63,13 @@ class Note extends Component {
         bounds="window"
       >
         <NoteContainer>
-
-          <div className="note" 
+          <div
+            className="note"
             ref={this.sizeOfComponent}
-            onClick={()=>{
+            onClick={() => {
               this.props.onNoteClicked(this.props.id);
             }}
-             >
+          >
             <div
               className="note-drag-handle"
               style={{ backgroundColor: this.state.AccentColor }}
@@ -118,21 +118,21 @@ class Note extends Component {
               updateFocus={() => {
                 this.setState({
                   colorPickerVisible: false
-                })
+                });
               }}
-            ></NoteBody>
-            
+            />
+
             <ColorPicker
               color={this.props.color}
               visible={this.state.colorPickerVisible}
-              onColorChange={(color, contrast, accent)=> {
+              onColorChange={(color, contrast, accent) => {
                 this.setState({
                   ContrastingColor: contrast,
                   AccentColor: accent
-                })
+                });
                 this.props.onColorChange(color, contrast);
               }}
-            ></ColorPicker>
+            />
           </div>
         </NoteContainer>
       </Rnd>

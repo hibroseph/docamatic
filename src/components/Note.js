@@ -112,6 +112,7 @@ class Note extends Component {
                 onClick={this.props.onDeleteClick}
               />
             </div>
+            
             <NoteBody
               onTextChange={this.props.onBodyChange}
               defaultValue={this.props.body}
@@ -121,7 +122,7 @@ class Note extends Component {
                 });
               }}
             />
-
+            
             <ColorPicker
               color={this.props.color}
               visible={this.state.colorPickerVisible}

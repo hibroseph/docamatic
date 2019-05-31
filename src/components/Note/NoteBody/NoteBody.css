@@ -1,0 +1,22 @@
+.note-input {
+  position: absolute;
+  box-sizing: border-box;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100%;
+
+  resize: none;
+
+  font-size: 15px;
+  padding: 10px 20px 10px 18px;
+  margin-bottom: 10px;
+  background-color: transparent;
+  border: none;
+}
+
+.note-input:focus {
+  outline: none;
+}

@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
 import { PopupContainer } from "../elements/PopupContainer";
-import PopupButtons from "../components/PopupButtons";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 import "../elements/PopupStyle.css";
 import "../css/popup.css";
@@ -10,14 +9,18 @@ import { Icon, Button } from "antd";
 import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
+import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
 
 class Popup extends Component {
   constructor(props) {
     super(props);
 
     console.log("Initializing Sentry in the popup");
+
     Sentry.init({
-      dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219"
+      dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
+      environment: ENVIRONMENT,
+      release: RELEASE + VERSION
     });
 
     this.state = {

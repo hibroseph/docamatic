@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import { LightenColor } from "../utils/LightenColor";
 import { NoteContainer } from "../elements/NoteContainer";
 import { Icon } from "antd";
-import { BlockPicker } from "react-color";
 import { Rnd } from "react-rnd";
+import ColorPicker from "./Note/ColorPicker/ColorPicker";
+import NoteBody from "./Note/NoteBody/NoteBody";
+import NoteTitle from "./Note/NoteTitle/NoteTitle";
 
 class Note extends Component {
   constructor(props) {
@@ -23,13 +25,40 @@ class Note extends Component {
       width: this.props.size.width,
       height: this.props.size.height,
       ContrastingColor: this.props.contrastColor,
-      accentColor: accent
+      AccentColor: accent
     };
+
+    // Bind dem
+    this.focus = this.focus.bind(this);
+  }
+
+  // To find what to display
+  focus(item) {
+    console.log("Deciding on what to focus on");
+
+    switch (item) {
+      case "color":
+        this.setState({
+          colorPickerVisible: true
+        });
+        break;
+      case "note":
+        this.setState({
+          colorPickerVisible: false
+        });
+        break;
+      default:
+        this.setState({
+          colorPickerVisible: false
+        });
+        break;
+    }
   }
 
   render() {
     return (
       <Rnd
+        
         default={{
           x: this.state.currentX,
           y: this.state.currentY,
@@ -62,100 +91,39 @@ class Note extends Component {
         bounds="window"
       >
         <NoteContainer>
-
-          <div className="note" 
+          <div
+            className="note"
             ref={this.sizeOfComponent}
-            onClick={()=>{
+            onClick={() => {
               this.props.onNoteClicked(this.props.id);
             }}
-             >
-            <div
-              className="note-drag-handle"
-              style={{ backgroundColor: this.state.accentColor }}
+          >
+            <NoteTitle
+              accentColor={this.state.AccentColor}
+              textColor={this.state.ContrastingColor}
+              color={this.props.color}
+              title={this.props.title}
+              updateFocus={this.focus}
+              onChange={this.props.onTitleChange}
+              onDeleteClick={this.props.onDeleteClick}
             />
-            <div
-              className="title-bar"
-              style={{ backgroundColor: this.props.color }}
-            >
-              <input
-                className="title-input"
-                placeholder="Note"
-                defaultValue={this.props.title}
-                style={{ color: this.state.ContrastingColor }}
-                onClick={() => {
-                  this.setState({
-                    colorPickerVisible: false
-                  });
-                }}
-                onChange={this.props.onTitleChange}
-                onMouseDown={e => {
-                  e.stopPropagation();
-                }}
-              />
-
-              <Icon
-                type="bg-colors"
-                className="nav-bar-item-color"
-                style={{ color: this.state.ContrastingColor }}
-                onClick={() => {
-                  this.setState({
-                    colorPickerVisible: true
-                  });
-                }}
-              />
-
-              <Icon
-                className="nav-bar-item-delete"
-                style={{ color: this.state.ContrastingColor }}
-                type="delete"
-                onClick={this.props.onDeleteClick}
-              />
-            </div>
-
-            <textarea
-              className="note-input"
-              onClick={() => {
-                this.setState({
-                  colorPickerVisible: false
-                });
-              }}
-              onMouseDown={e => {
-                e.stopPropagation();
-              }}
-              onDoubleClick={() => {
-                // console.log("you clicked twice nigga!");
-              }}
-              onChange={this.props.onBodyChange}
+            <NoteBody
+              onTextChange={this.props.onBodyChange}
               defaultValue={this.props.body}
+              updateFocus={this.focus}
             />
-            {this.state.colorPickerVisible && (
-              <BlockPicker
-                className="color-picker"
-                color={this.props.color}
-                onChangeComplete={(color, event) => {
-                  // Calculate contrasting color
-                  // Thanks goes to casesandberg on github for this formula from the heavens
-                  const yiq =
-                    (color.rgb.r * 299 +
-                      color.rgb.g * 587 +
-                      color.rgb.b * 114) /
-                    1000;
-                  const CC = yiq >= 128 ? "#000" : "#fff";
-                  this.props.onColorChange(color.hex, CC);
 
-                  this.setState({
-                    ContrastingColor: CC
-                  });
-
-                  // Calculate the accent color
-                  let accent = LightenColor(color.hex, -0.05);
-
-                  this.setState({
-                    accentColor: accent
-                  })
-                }}
-              />
-            )}
+            <ColorPicker
+              color={this.props.color}
+              visible={this.state.colorPickerVisible}
+              onColorChange={(color, contrast, accent) => {
+                this.setState({
+                  ContrastingColor: contrast,
+                  AccentColor: accent
+                });
+                this.props.onColorChange(color, contrast);
+              }}
+            />
           </div>
         </NoteContainer>
       </Rnd>

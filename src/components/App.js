@@ -3,6 +3,7 @@ import React, { Component } from "react";
 // import styled from "styled-components";
 import NoteList from "./NoteList";
 import * as Sentry from "@sentry/browser";
+import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants"
 
 class App extends Component {
   constructor(props) {
@@ -12,7 +13,9 @@ class App extends Component {
 
     // Initializing Sentry
     Sentry.init({
-      dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219"
+      dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
+      environment: ENVIRONMENT,
+      release: RELEASE + VERSION
     });
   }
 

@@ -24,6 +24,17 @@ const notesStorageKey = `notes-${window.location.href}`;
 // console.log("Inital state: ")
 // console.log(store.getState())
 
+console.log("WOOOOOOOOOOOOOOHOOOOOOOOO inside of index.js")
+
+// Send a message giving the current browser width and height so that notes will not appear out of that area
+chrome.runtime.sendMessage({
+  message: "windowSize",
+  pageWidth: document.documentElement.clientWidth,
+  pageHeight: document.documentElement.clientHeight
+});
+
+
+
 console.log("Notes storage key: " + notesStorageKey);
 
 const store = new Store({
@@ -31,7 +42,7 @@ const store = new Store({
 });
 
 store.subscribe(() => {
-  console.log("Store Update");
+  // console.log("Store Update");
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
   //   console.log(store.getState());
@@ -41,21 +52,26 @@ store.subscribe(() => {
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // This is if the extension is requesting the current scroll position to position the new note
-  
-  console.log("We recieved a message!");
+
+  // console.log("We recieved a message!");
 
   if (request.newNote == "") {
-    console.log("The message was about a new note!");
-    console.log(sender);
-    console.log(request);
+    // console.log("The message was about a new note!");
+    // console.log(sender);
+    // console.log(request);
+    // console.log(": ")
+    console.log("Width of Page: " + document.documentElement.clientWidth);
+    console.log("Height of Page: " + document.documentElement.clientHeight);
 
-    console.log("We are going to be responding with these things:");
+    //console.log("We are going to be responding with these things:");
     console.log("scrollPosition: " + document.documentElement.scrollTop);
-    console.log("page:" + window.location.href);
+    // console.log("page:" + window.location.href);
 
     sendResponse({
       scrollPosition: document.documentElement.scrollTop,
-      page: window.location.href
+      page: window.location.href,
+      pageWidth: document.documentElement.clientWidth,
+      pageHeight: document.documentElement.clientHeight
     });
   }
 });
@@ -81,8 +97,3 @@ store.ready().then(() => {
     rootNode
   );
 });
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-// serviceWorker.unregister();

@@ -1,0 +1,115 @@
+.main_error_container {
+  position: absolute;
+  top: 100px;
+  width: 300px;
+  height: 400px;
+  border-radius: 15px 15px 0 0;
+  background-color: #ff0033;
+  z-index: 3;
+}
+
+.error_title {
+  position: relative;
+  top: 0px;
+
+  /* Sadly, we are not sure why the positioning is incorrect normally
+  *  thus this margin-top -15px is here to correct for what we cannot 
+  *  understand.
+  */
+  margin-top: -15px;
+  width: 300px;
+  height: 80px;
+  background-color: #ce0028;
+  border-radius: 15px 15px 0px 0px;
+}
+
+/* All elements have the text color of white and that font style */
+
+.main_error_container * {
+  font-family: "Arial Black", Gadget, sans-serif;
+  color: white;
+}
+
+.error_title_text {
+  position: relative;
+  top: 28px;
+  text-align: center;
+  /*   background-color:blue; */
+}
+
+.error_description {
+  position: relative;
+  padding-left: 15px;
+  font-weight: bold;
+  padding-right: 15px;
+  font-size: 15px;
+}
+
+.error_textarea {
+  position: relative;
+
+  width: 100%;
+  height: 160px;
+  padding: 15px;
+
+  background-color: #ce0028;
+
+  border: none;
+  resize: none;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.error_textarea::placeholder {
+  color: white;
+}
+
+/* This is to elimate the blue highlight when focused*/
+.error_textarea:focus {
+  outline: 0;
+}
+
+.error_textarea:hover {
+  background-color: #b70024;
+}
+
+.button_area {
+  /*   height: 50px; */
+  /*   background-color: blue; */
+}
+
+.button {
+  width: 100px;
+  position: relative;
+  background-color: #ce0028;
+  border: none;
+  padding: 15px;
+  border-radius: 20px;
+  margin: 8px;
+}
+
+/* This is to elimate the blue highlight when focused*/
+.button:focus {
+  outline: 0;
+}
+
+.button:hover {
+  background-color: #b70024;
+}
+
+.cancel_button {
+  float: right;
+  margin-right: 20px;
+  /*   left: 50px; */
+}
+
+.submit_button {
+  float: left;
+  margin-left: 20px;
+  /*   left: 15px; */
+}

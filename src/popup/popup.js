@@ -5,11 +5,13 @@ import { PopupContainer } from "../elements/PopupContainer";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 import "../elements/PopupStyle.css";
 import "../css/popup.css";
-import { Icon, Button } from "antd";
+import { Icon, Button, Breadcrumb } from "antd";
 import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
+import ErrorNotification from "../components/ErrorNotification";
+import ErrorPopup from "../components/ErrorPopup";
 
 class Popup extends Component {
   constructor(props) {
@@ -26,7 +28,8 @@ class Popup extends Component {
     this.state = {
       search_query: null,
       // For testing change to home
-      page: "home"
+      page: "home",
+      error: false
     };
   }
 
@@ -46,6 +49,43 @@ class Popup extends Component {
       case "home":
         page = (
           <div id="popup-container">
+            {this.state.error && (
+              // <ErrorNotification
+              //   onClose={() => {
+              //     // The user just wants to close the error message window
+              //     this.setState({
+              //       error: false
+              //     });
+              //   }}
+              //   onErrorReported={(msg) => {
+              //     // The user hopefully wrote what error occurred, lets send that to sentry
+              //     console.log("Sending error message to sentry")
+
+              //     Sentry.captureMessage(msg)
+
+              //     // Close the error message
+              //     this.setState({
+              //       error: false
+              //     })
+              //   }}
+              // />
+              <ErrorPopup
+                onClose={()=> {
+                  this.setState({
+                    error: false
+                  });
+                }}
+                onErrorReported={msg => {
+                  console.log("Sending error to Sentry: " + msg);
+
+                  Sentry.captureMessage(msg)
+
+                  this.setState({
+                    error: false
+                  })
+                }}></ErrorPopup>
+            )}
+            
             <div id="menu-area">
               <Icon
                 type="setting"
@@ -60,13 +100,14 @@ class Popup extends Component {
               <button
                 className="primary-button"
                 onClick={() => {
-                  chrome.runtime.sendMessage(
-                    { code: "runContentScript" },
-                    resp => {
-                      console.log("We recieved a response: " + resp);
-                    }
-                  );
-                  Sentry.captureMessage("A user added a note");
+                  // chrome.runtime.sendMessage(
+                  //   { code: "runContentScript" },
+                  //   resp => {
+                  //     console.log("We recieved a response: " + resp);
+                  //   }
+                  // );
+
+                  // Sentry.captureMessage("A user added a note");
 
                   let UUID = generateUUID();
                   // console.log("UUID inside of onClick: " + UUID);
@@ -80,23 +121,17 @@ class Popup extends Component {
                   chrome.tabs.query(
                     { active: true, currentWindow: true },
                     tabs => {
-                      // console.log("Sending message on: ");
-                      // console.log(tabs);
+                      console.log("Sending message on: ");
+                      console.log(tabs);
 
                       // eslint-disable-next-line no-undef
                       chrome.tabs.sendMessage(
                         tabs[0].id,
                         { newNote: "" },
                         response => {
-                          // console.log("Response:");
-                          // console.log(response);
+                          console.log("Response:");
+                          console.log(response);
 
-                          // if (!response) {
-                          //   console.log("Your scroll position was equal to undefined");
-
-                          //   Sentry.captureMessage("Scroll Position of undefined", "error")
-                          // }
-                          // Dispatching action to redux
                           try {
                             this.props.dispatch(
                               addNote(
@@ -107,13 +142,9 @@ class Popup extends Component {
                               )
                             );
                           } catch (err) {
-                            console.log(
-                              "An error was captured and reported to sentry"
-                            );
-                            console.debug(
-                              "I think this has to do with the URL and it not being a valid webpage"
-                            );
-                            Sentry.captureException(err);
+                            this.setState({
+                              error: true
+                            })
                           }
                         }
                       );
@@ -227,7 +258,16 @@ class Popup extends Component {
               onClick={() => {
                 // Grab data from text area and send it to Sentry
                 let element = document.getElementById("fb-ta");
-                Sentry.captureMessage("Feedback:" + element.value);
+                Sentry.captureMessage(
+                  "Feedback >>" +
+                    element.value +
+                    "<< State >> " +
+                    JSON.stringify(this.props.state) +
+                    " <<"
+                );
+                console.log(
+                  "The current state: " + JSON.stringify(this.props.state)
+                );
                 this.displayHome();
               }}
             >
@@ -248,7 +288,7 @@ class Popup extends Component {
         page = (
           <div id="popup-container">
             <div id="settings-top">
-              <h1 id="title-settings">Feedback</h1>
+              <h1 id="title-settings">Settings</h1>
 
               <p id="title-feedback">
                 We'd love to hear what you like, don't like, improvements,
@@ -274,7 +314,16 @@ class Popup extends Component {
                     console.log("User inputted nothing");
                   } else {
                     try {
+                      console.log(this.props.state);
+
+                      Sentry.addBreadcrumb({
+                        level: "Feedback",
+                        data: this.props.state,
+                        message: textArea.value
+                      });
+
                       Sentry.captureMessage("Feedback:" + textArea.value);
+
                       // If this is successful, display the image
                       this.setState({
                         feedback: "complete"

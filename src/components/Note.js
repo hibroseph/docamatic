@@ -16,6 +16,20 @@ class Note extends Component {
 
     console.log("Your accent color is: " + accent);
 
+
+    console.log("INSIDE OF YOUR NOTE BOY");
+    chrome.runtime.onMessage.addListener(
+      (request, sender, sendResponse) => {
+        console.log("You got a glorious message in your note")
+
+        if (request.message === "windowSize") {
+          console.log("WE GOT THE WINDOW SIZE")
+          console.log("windowWidth:" + request.pageWidth);
+          console.log("windowHeight:" + request.pageHeight);
+        }
+      }
+    )
+
     this.state = {
       currentX: this.props.position.x,
       currentY: this.props.position.y,
@@ -56,6 +70,9 @@ class Note extends Component {
   }
 
   render() {
+    console.log("X::" + this.state.currentX);
+    console.log("Y::" + this.state.currentY);
+
     return (
       <Rnd
         

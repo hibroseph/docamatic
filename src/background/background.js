@@ -21,7 +21,11 @@ const notesStorageKey = `notes-${window.location.href}`;
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
 // localStorage.setItem(notesStorageKey, '{}')
 
+
+// This handles running the script which adds notes to the page and gets the position of the webpage
 chrome.runtime.onMessage.addListener(function(message, callback) {
+  console.log("Message: " );
+  console.log(message);
   if (message === "runContentScript") {
     console.log("Running script");
     chrome.tabs.executeScript({
@@ -29,6 +33,8 @@ chrome.runtime.onMessage.addListener(function(message, callback) {
     });
   }
 });
+
+
 
 // See if we have previously saved a state and if not, insert an empty array
 let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");

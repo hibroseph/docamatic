@@ -10,7 +10,6 @@ import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
-import ErrorNotification from "../components/ErrorNotification";
 import ErrorPopup from "../components/ErrorPopup";
 
 import NoResultsImage from "../assets/no_results.png";
@@ -54,25 +53,6 @@ class Popup extends Component {
         page = (
           <div id="popup-container">
             {this.state.error && (
-              // <ErrorNotification
-              //   onClose={() => {
-              //     // The user just wants to close the error message window
-              //     this.setState({
-              //       error: false
-              //     });
-              //   }}
-              //   onErrorReported={(msg) => {
-              //     // The user hopefully wrote what error occurred, lets send that to sentry
-              //     console.log("Sending error message to sentry")
-
-              //     Sentry.captureMessage(msg)
-
-              //     // Close the error message
-              //     this.setState({
-              //       error: false
-              //     })
-              //   }}
-              // />
               <ErrorPopup
                 onClose={()=> {
                   this.setState({

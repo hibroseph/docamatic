@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "../css/ErrorPopupStyle.css";
+import "./ErrorPopupStyle.css";
 
 class ErrorPopup extends Component {
   constructor(props) {

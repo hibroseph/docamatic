@@ -25,8 +25,7 @@
         "{{./components/Note/ColorPicker/ColorPicker.css}}",
         "{{./components/Note/NoteBody/NoteBody.css}}",
         "{{./components/Note/NoteTitle/NoteTitle.css}}",
-        "{{./css/ErrorPopupStyle.css}}",
-        "{{./css/ErrorNotificationStyle.css}}"
+        "{{./components/ErrorPopup/ErrorPopupStyle.css}}"
       ],
       "js": ["{{./index.js}}"]
     }

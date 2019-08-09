@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "../elements/ErrorNotificationStyle.css";
+import "../css/ErrorNotificationStyle.css";
 
 class ErrorNotification extends Component {
   constructor(props) {

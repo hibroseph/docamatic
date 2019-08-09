@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-store.ready().then(() => {
+
   let rootNode = document.getElementById("__NOTES___MOUNT___POINT___");
 
   if (!rootNode) {
@@ -90,6 +90,7 @@ store.ready().then(() => {
     document.body.appendChild(rootNode);
   }
 
+  store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
       <App />

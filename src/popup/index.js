@@ -22,7 +22,7 @@ if (!root) {
 store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <Popup></Popup>
+      <Popup/>
     </Provider>,
     root
   );

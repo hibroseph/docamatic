@@ -13,6 +13,10 @@ import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
 import ErrorNotification from "../components/ErrorNotification";
 import ErrorPopup from "../components/ErrorPopup";
 
+import NoResultsImage from "../assets/no_results.png";
+import SearchResultsImage from "../assets/search_results.png";
+import FeedbackThankYouImage from "../assets/feedback_thanks.png"
+
 class Popup extends Component {
   constructor(props) {
     super(props);
@@ -175,7 +179,7 @@ class Popup extends Component {
               {this.state.search_query == null && (
                 <img
                   alt="Search Results"
-                  src="../assets/search_results.png"
+                  src={SearchResultsImage}
                   style={{
                     position: "relative",
                     top: 50,
@@ -224,7 +228,7 @@ class Popup extends Component {
               {this.state.search_query != null && !foundItem && (
                 <img
                   alt="There are no results"
-                  src="../assets/no_results.png"
+                  src={NoResultsImage}
                   style={{
                     position: "absolute",
                     top: 250,
@@ -303,7 +307,7 @@ class Popup extends Component {
               )}
 
               {this.state.feedback === "complete" && (
-                <img alt="Thank You" src="../assets/feedback-thank-you.png" />
+                <img alt="Thank You" src={FeedbackThankYouImage} />
               )}
               <button
                 className="primary-button"

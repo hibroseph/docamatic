@@ -4,13 +4,12 @@ import MiniSearchNote from "../components/MiniSearchNote";
 import { PopupContainer } from "../elements/PopupContainer";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 import "../elements/PopupStyle.css";
-import "../css/popup.css";
 import { Icon, Button, Breadcrumb } from "antd";
 import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
-import ErrorPopup from "../components/ErrorPopup";
+import ErrorPopup from "../components/ErrorPopup/ErrorPopup";
 
 import NoResultsImage from "../assets/no_results.png";
 import SearchResultsImage from "../assets/search_results.png";

@@ -35,7 +35,7 @@ export const NoteContainer = styled.div`
     position: relative;
     width: 100%;
     height: 40px;
-    background-color: ${props => props.color};
+    background-color: ${props => props.color.title};
   }
 
   .title p {
@@ -56,7 +56,7 @@ export const NoteContainer = styled.div`
   }
   .icons {
     font-size: 16px;
-    color: ${props => props.contrastingColor};
+    color: ${props => props.color.text};
   }
 
   .title .arrow:hover ~ .settings-container {
@@ -72,7 +72,7 @@ export const NoteContainer = styled.div`
     border: none;
     width: calc(100% - 30px);
     height: 100%;
-    color: ${props => props.contrastingColor};
+    color: ${props => props.color.text};
     padding: 0 10px 0 10px;
     box-sizing: border-box;
     outline: none;

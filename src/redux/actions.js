@@ -28,13 +28,12 @@ export function updateNoteDepth(id, page) {
   };
 }
 
-export function changeNoteColor(id, page, color, contrastColor) {
+export function changeNoteColor(id, page, color) {
   return {
     type: CHANGE_COLOR,
     id,
     page,
-    color,
-    contrastColor
+    color
   };
 }
 
@@ -72,7 +71,8 @@ export function addNote(title, id, y_position, page) {
     id: id,
     title,
     y_position,
-    page
+    page,
+    date_created: new Date().getTime()
   };
 }
 

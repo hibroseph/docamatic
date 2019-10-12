@@ -1,4 +1,5 @@
 function hex_to_RGB(hex) {
+  console.log("hex: " + hex);
   var m = hex.match(/^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
   return {
     r: parseInt(m[1], 16),
@@ -8,6 +9,8 @@ function hex_to_RGB(hex) {
 }
 
 export const getContrastingColor = col => {
+  console.log("contrastingcolor:");
+  console.log(col);
   if (col === "transparent") {
     return "rgba(0,0,0,0.4)";
   }

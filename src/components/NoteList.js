@@ -52,8 +52,9 @@ const NoteList = ({
             onNoteClicked={id => {
               onNoteClicked(id);
             }}
-            onColorChange={(color, contrastColor) => {
-              onColorChange(note.id, color, contrastColor);
+            onColorChange={color => {
+              console.log("changing olor");
+              onColorChange(note.id, color);
             }}
             onSizeChange={(x, y) => {
               onSizeChange(note.id, x, y);
@@ -66,17 +67,17 @@ const NoteList = ({
 };
 
 // Let's stop some bugs from happening
-NoteList.propTypes = {
-  notes: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      body: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      position: PropTypes.object.isRequired
-    }).isRequired
-  ).isRequired,
-  onDeleteClick: PropTypes.func.isRequired
-};
+// NoteList.propTypes = {
+//   notes: PropTypes.arrayOf(
+//     PropTypes.shape({
+//       id: PropTypes.string.isRequired,
+//       body: PropTypes.string.isRequired,
+//       color: PropTypes.string.isRequired,
+//       position: PropTypes.object.isRequired
+//     }).isRequired
+//   ).isRequired,
+//   onDeleteClick: PropTypes.func.isRequired
+// };
 
 const mapStateToProps = state => {
   if (state[window.location.href] == null) {
@@ -115,8 +116,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
-  onColorChange: (id, color, contrastColor) => {
-    dispatch(changeNoteColor(id, PAGE, color, contrastColor));
+  onColorChange: (id, color) => {
+    dispatch(changeNoteColor(id, PAGE, color));
   },
 
   onNoteClicked: id => {

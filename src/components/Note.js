@@ -11,7 +11,7 @@ import ColorSwatch from "./ColorSwatch";
 import { getContrastingColor } from "../utils/ContrastingColor";
 
 const Note = props => {
-  let contrastingColor = getContrastingColor(props.color);
+  // let contrastingColor = getContrastingColor(props.color);
 
   return (
     <Rnd
@@ -44,7 +44,7 @@ const Note = props => {
         bottomLeft: false
       }}
     >
-      <Container contrastingColor={contrastingColor} color={props.color}>
+      <Container color={props.color}>
         <div className="title">
           <input
             style={{ margin: 0 }}
@@ -67,7 +67,7 @@ const Note = props => {
             </div>
             <ColorSwatch
               colors={props.colors}
-              onColorChange={color => props.onColorChange(color, null)}
+              onColorChange={color => props.onColorChange(color)}
             ></ColorSwatch>
           </div>
         </div>

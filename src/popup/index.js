@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { Store } from "react-chrome-redux";
-import Popup from "./popup";
+// import Popup from "./popup";
+import Popup from "./newPopup";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 
@@ -14,7 +15,6 @@ if (!root) {
   root = document.createElement("div");
 
   document.body.appendChild(root);
-} else {
 }
 
 store.ready().then(() => {

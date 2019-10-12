@@ -37,7 +37,7 @@ class MiniSearchNote extends Component {
     return (
       <MiniSearchNoteContainer
         style={{
-          backgroundColor: this.props.color
+          backgroundColor: this.props.color.title
         }}
         onClick={() => {
           window.open(this.props.website, "_blank");

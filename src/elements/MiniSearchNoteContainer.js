@@ -2,10 +2,9 @@ import styled from "styled-components";
 
 export const MiniSearchNoteContainer = styled.div`
   position: relative;
-  width: 280px;
   font-size: 15px;
   border-radius: 5px;
-  margin: 10px 0px 0px 10;
+  margin: 10px 10px 0px 10px;
   box-shadow: 10px 10px 58px 5px rgba(0, 0, 0, 0.1);
 
   .title-bar {

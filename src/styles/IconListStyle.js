@@ -1,11 +1,12 @@
 import styled from "styled-components";
+import { THEME } from "../utils/constants";
 
 export const IconListStyle = styled.div`
   width: 70px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #245f88;
+  background-color: ${THEME.Primary};
 
   .icon {
     width: 100%;
@@ -15,10 +16,10 @@ export const IconListStyle = styled.div`
   }
 
   .icon:hover {
-    background-color: #21aae3;
+    background-color: ${THEME.Accent};
   }
 
   .icon:active {
-    background-color: #178aba;
+    background-color: ${THEME.Active};
   }
 `;

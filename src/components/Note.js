@@ -8,7 +8,6 @@ import {
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import ColorSwatch from "./ColorSwatch";
-import { getContrastingColor } from "../utils/ContrastingColor";
 
 const Note = props => {
   // let contrastingColor = getContrastingColor(props.color);

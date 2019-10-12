@@ -31,6 +31,7 @@ let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
 const store = createStore(notesApp, initialState);
 
 store.subscribe(() => {
+  console.log("Store:");
   console.log(store.getState());
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);

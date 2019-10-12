@@ -6,7 +6,7 @@ export const PopupStyle = styled.div`
   height: 100%;
 `;
 
-export const PopupContent = styled.div`
+export const PopupContentStyle = styled.div`
   position: absolute;
   top: 0px;
   left: 70px;

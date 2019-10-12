@@ -56,7 +56,7 @@ export const NoteContainer = styled.div`
   }
   .icons {
     font-size: 16px;
-    color: white;
+    color: ${props => props.contrastingColor};
   }
 
   .title .arrow:hover ~ .settings-container {
@@ -72,7 +72,7 @@ export const NoteContainer = styled.div`
     border: none;
     width: calc(100% - 30px);
     height: 100%;
-    color: white;
+    color: ${props => props.contrastingColor};
     padding: 0 10px 0 10px;
     box-sizing: border-box;
     outline: none;

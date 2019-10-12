@@ -8,8 +8,11 @@ import {
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import ColorSwatch from "./ColorSwatch";
+import { getContrastingColor } from "../utils/ContrastingColor";
 
 const Note = props => {
+  let contrastingColor = getContrastingColor(props.color);
+
   return (
     <Rnd
       default={{
@@ -41,7 +44,7 @@ const Note = props => {
         bottomLeft: false
       }}
     >
-      <Container color={props.color}>
+      <Container contrastingColor={contrastingColor} color={props.color}>
         <div className="title">
           <input
             style={{ margin: 0 }}

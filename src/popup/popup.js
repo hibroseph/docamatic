@@ -4,7 +4,6 @@ import MiniSearchNote from "../components/MiniSearchNote";
 import { PopupContainer } from "../elements/PopupContainer";
 import { SearchResultsContainer } from "../elements/SearchResultsContainer";
 import "../elements/PopupStyle.css";
-import { Icon, Button, Breadcrumb } from "antd";
 import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
@@ -49,7 +48,7 @@ class Popup extends Component {
         page = (
           <div id="popup-container">
             <div id="menu-area">
-              <Icon
+              {/* <Icon
                 type="setting"
                 className="setting-menu-style"
                 onClick={() => {
@@ -57,7 +56,7 @@ class Popup extends Component {
                     page: "settings"
                   });
                 }}
-              />
+              /> */}
 
               <button
                 className="primary-button"
@@ -71,6 +70,7 @@ class Popup extends Component {
 
                   // Sentry.captureMessage("A user added a note");
 
+                  console.log("adding note");
                   let UUID = generateUUID();
                   // TODO: Adding loading symbol while were waiting for the response
 
@@ -86,6 +86,7 @@ class Popup extends Component {
                         tabs[0].id,
                         { newNote: "" },
                         response => {
+                          console.log("got a response from the backend");
                           try {
                             this.props.dispatch(
                               addNote(
@@ -96,6 +97,7 @@ class Popup extends Component {
                               )
                             );
                           } catch (err) {
+                            console.log("uh oh, got an error");
                             this.setState({
                               error: true
                             });

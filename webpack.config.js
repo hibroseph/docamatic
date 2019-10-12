@@ -110,22 +110,25 @@ module.exports = {
     ]
   },
   plugins: [
-    new WebpackOnBuildPlugin(stats => {
-      const newlyCreatedAssets = stats.compilation.assets;
+    IS_PRODUCTION
+      ? new WebpackOnBuildPlugin(stats => {
+          const newlyCreatedAssets = stats.compilation.assets;
 
-      const unlinked = [];
-      fs.readdir(path.resolve(buildDir), (err, files) => {
-        files.forEach(function(file) {
-          if (!newlyCreatedAssets[file]) {
-            fs.unlink(path.resolve(buildDir + file), () => {});
-            unlinked.push(file);
-          }
-        });
-        if (unlinked.length > 0) {
-          console.log("Removed old assets: ", unlinked);
-        }
-      });
-    }),
+          const unlinked = [];
+
+          fs.readdir(path.resolve(buildDir), (err, files) => {
+            files.forEach(function(file) {
+              if (!newlyCreatedAssets[file]) {
+                fs.unlink(path.resolve(buildDir + file), () => {});
+                unlinked.push(file);
+              }
+            });
+            if (unlinked.length > 0) {
+              console.log("Removed old assets: ", unlinked);
+            }
+          });
+        })
+      : /* no-op */ new Function(),
     new CleanWebpackPlugin(DIST_DIR),
     new webpack.ProvidePlugin({
       browser: "webextension-polyfill"

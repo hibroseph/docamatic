@@ -150,7 +150,7 @@ const notesApp = (state = [], action) => {
 
       let page = action.page;
       // Generates a random int for a random color for the note
-      let colorIndex = Math.floor(Math.random() * (7 + 1));
+      let colorIndex = Math.floor(Math.random() * colorList.length);
 
       // Generates a random int for random text
       const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);

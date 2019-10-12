@@ -88,10 +88,6 @@ const mapStateToProps = state => {
       notes: state[window.location.href].notes
     };
   }
-
-  // return {
-  //   notes: state.window.location.href.notes
-  // };
 };
 
 const mapDispatchToProps = dispatch => ({

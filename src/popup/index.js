@@ -11,18 +11,16 @@ const store = new Store({
 });
 
 if (!root) {
-  // console.log("There is no root mount point for us :(");
   root = document.createElement("div");
 
   document.body.appendChild(root);
 } else {
-  // console.log("Yay, I found a mount point :)");
 }
 
 store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <Popup/>
+      <Popup />
     </Provider>,
     root
   );

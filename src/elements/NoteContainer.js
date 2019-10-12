@@ -22,6 +22,4 @@ export const NoteContainer = styled.div`
     -moz-box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
     box-shadow: 5px 5px 38px 1px rgba(0, 0, 0, 0.51);
   }
-
-
 `;

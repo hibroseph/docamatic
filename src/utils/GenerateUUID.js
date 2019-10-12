@@ -7,4 +7,3 @@ export const generateUUID = () => {
     return v.toString(16);
   });
 };
-

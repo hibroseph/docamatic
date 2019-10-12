@@ -1,8 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Note from "./Note";
-import styled from "styled-components";
 import { connect } from "react-redux";
+
+// Colors that are displayed in the color picker
+import { COLORS } from "../utils/constants";
 
 import {
   addNote,
@@ -34,33 +36,26 @@ const NoteList = ({
           <Note
             key={note.id}
             {...note}
+            colors={COLORS}
             onDeleteClick={() => {
-              // console.log("The delete button was pressed");
               onDeleteClick(note.id);
             }}
             onBodyChange={event => {
-              // console.log("Body change to: " + event.target.value)
               onTextChange(note.id, event.target.value, note.title);
             }}
             onTitleChange={event => {
-              // console.log("Title changed to: " + event.target.value)
               onTitleChange(note.id, event.target.value);
             }}
             onPositionChange={(id, x, y) => {
-              // console.log("Position changed to: " + x + " ," + y);
               onPositionChange(id, x, y);
             }}
-            onNoteClicked={(id) => {
-              // console.log("You clicked note: " + id)
-              onNoteClicked(id)
+            onNoteClicked={id => {
+              onNoteClicked(id);
             }}
-
             onColorChange={(color, contrastColor) => {
               onColorChange(note.id, color, contrastColor);
             }}
-
             onSizeChange={(x, y) => {
-              // console.log("The size has changed to: " + x + ", " +  y)
               onSizeChange(note.id, x, y);
             }}
           />
@@ -83,15 +78,12 @@ NoteList.propTypes = {
   onDeleteClick: PropTypes.func.isRequired
 };
 
-
 const mapStateToProps = state => {
   if (state[window.location.href] == null) {
-    // console.log("NoteList.js. page == null");
     return {
       notes: []
     };
   } else {
-    // console.log("NoteList.js. page != null");
     return {
       notes: state[window.location.href].notes
     };
@@ -104,7 +96,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   onSizeChange: (id, x, y) => {
-    // console.log("PAGE: " + PAGE);
     dispatch(updateNoteSize(id, x, y, PAGE));
   },
 
@@ -117,23 +108,18 @@ const mapDispatchToProps = dispatch => ({
   },
 
   onTextChange: (id, text, title) => {
-    // console.log("PAGE: " + PAGE);
     dispatch(addText(id, text, title, PAGE));
   },
 
   onTitleChange: (id, text) => {
-    // console.log("We are dispatching a change to the store")
     dispatch(addTitle(id, text, PAGE));
   },
 
   onPositionChange: (id, x, y) => {
-    console.log("The position has changed x: " + x + " y: " + y);
-
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
   onColorChange: (id, color, contrastColor) => {
-    // console.log("Change the color to: " + color);
     dispatch(changeNoteColor(id, PAGE, color, contrastColor));
   },
 

@@ -9,17 +9,14 @@ import * as Sentry from "@sentry/browser";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
-import ErrorPopup from "../components/ErrorPopup/ErrorPopup";
 
 import NoResultsImage from "../assets/no_results.png";
 import SearchResultsImage from "../assets/search_results.png";
-import FeedbackThankYouImage from "../assets/feedback_thanks.png"
+import FeedbackThankYouImage from "../assets/feedback_thanks.png";
 
 class Popup extends Component {
   constructor(props) {
     super(props);
-
-    console.log("Initializing Sentry in the popup");
 
     Sentry.init({
       dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
@@ -51,24 +48,6 @@ class Popup extends Component {
       case "home":
         page = (
           <div id="popup-container">
-            {this.state.error && (
-              <ErrorPopup
-                onClose={()=> {
-                  this.setState({
-                    error: false
-                  });
-                }}
-                onErrorReported={msg => {
-                  console.log("Sending error to Sentry: " + msg);
-
-                  Sentry.captureMessage(msg)
-
-                  this.setState({
-                    error: false
-                  })
-                }}></ErrorPopup>
-            )}
-            
             <div id="menu-area">
               <Icon
                 type="setting"
@@ -86,15 +65,13 @@ class Popup extends Component {
                   // chrome.runtime.sendMessage(
                   //   { code: "runContentScript" },
                   //   resp => {
-                  //     console.log("We recieved a response: " + resp);
+                  //
                   //   }
                   // );
 
                   // Sentry.captureMessage("A user added a note");
 
                   let UUID = generateUUID();
-                  // console.log("UUID inside of onClick: " + UUID);
-
                   // TODO: Adding loading symbol while were waiting for the response
 
                   // This is used to request the current scroll position from the HTML document
@@ -104,17 +81,11 @@ class Popup extends Component {
                   chrome.tabs.query(
                     { active: true, currentWindow: true },
                     tabs => {
-                      console.log("Sending message on: ");
-                      console.log(tabs);
-
                       // eslint-disable-next-line no-undef
                       chrome.tabs.sendMessage(
                         tabs[0].id,
                         { newNote: "" },
                         response => {
-                          console.log("Response:");
-                          console.log(response);
-
                           try {
                             this.props.dispatch(
                               addNote(
@@ -127,7 +98,7 @@ class Popup extends Component {
                           } catch (err) {
                             this.setState({
                               error: true
-                            })
+                            });
                           }
                         }
                       );
@@ -171,23 +142,16 @@ class Popup extends Component {
               {this.state.search_query != null && (
                 <SearchResultsContainer>
                   {Object.keys(this.props.state).map(key => {
-                    // console.log("searching for a note");
                     return this.props.state[key].notes.map(note => {
                       if (this.state.search_query != null) {
                         if (
                           note.body.includes(this.state.search_query) ||
                           note.title.includes(this.state.search_query)
                         ) {
-                          // console.log("we found a match!");
                           foundItem = true;
                           // Split the text to bold the part that is the search query
                           let title = note.title.split(this.state.search_query);
                           let text = note.body.split(this.state.search_query);
-
-                          // console.log("splitAtQueryText: " + text);
-                          // console.log(
-                          // "state.search_query" + this.state.search_query
-                          // );
 
                           return (
                             <MiniSearchNote
@@ -232,9 +196,7 @@ class Popup extends Component {
             <textarea
               id="fb-ta"
               placeholder="Give us your feedback here!"
-              onChange={data => {
-                console.log(data.value);
-              }}
+              onChange={data => {}}
             />
             <button
               className="fb-btn"
@@ -247,9 +209,6 @@ class Popup extends Component {
                     "<< State >> " +
                     JSON.stringify(this.props.state) +
                     " <<"
-                );
-                console.log(
-                  "The current state: " + JSON.stringify(this.props.state)
                 );
                 this.displayHome();
               }}
@@ -294,11 +253,8 @@ class Popup extends Component {
                   let textArea = document.getElementById("input-feedback");
 
                   if (textArea.value === "") {
-                    console.log("User inputted nothing");
                   } else {
                     try {
-                      console.log(this.props.state);
-
                       Sentry.addBreadcrumb({
                         level: "Feedback",
                         data: this.props.state,
@@ -312,8 +268,6 @@ class Popup extends Component {
                         feedback: "complete"
                       });
                     } catch (error) {
-                      console.log("There was an error with reporting feedback");
-                      console.log(error);
                       Sentry.captureException(error);
                     }
                   }
@@ -322,16 +276,7 @@ class Popup extends Component {
                 Send Feedback
               </button>
 
-              <div id="settings-buttons">
-                {/* <button
-                className="primary-button"
-                onClick={() => {
-                  this.displayHome();
-                }}
-              >
-                Save
-              </button> */}
-              </div>
+              <div id="settings-buttons"></div>
             </div>
 
             <div id="settings-bottom">

@@ -21,12 +21,6 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": [
-        "{{./components/Note/ColorPicker/ColorPicker.css}}",
-        "{{./components/Note/NoteBody/NoteBody.css}}",
-        "{{./components/Note/NoteTitle/NoteTitle.css}}",
-        "{{./components/ErrorPopup/ErrorPopupStyle.css}}"
-      ],
       "js": ["{{./index.js}}"]
     }
   ]

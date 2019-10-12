@@ -3,13 +3,11 @@ import React, { Component } from "react";
 // import styled from "styled-components";
 import NoteList from "./NoteList";
 import * as Sentry from "@sentry/browser";
-import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants"
+import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
 
 class App extends Component {
   constructor(props) {
     super(props);
-
-    console.log("Initialing Sentry");
 
     // Initializing Sentry
     Sentry.init({

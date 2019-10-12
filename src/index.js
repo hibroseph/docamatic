@@ -21,11 +21,6 @@ const notesStorageKey = `notes-${window.location.href}`;
 // //     console.log(store.getState())
 // })
 
-// console.log("Inital state: ")
-// console.log(store.getState())
-
-console.log("WOOOOOOOOOOOOOOHOOOOOOOOO inside of index.js")
-
 // Send a message giving the current browser width and height so that notes will not appear out of that area
 chrome.runtime.sendMessage({
   message: "windowSize",
@@ -33,40 +28,19 @@ chrome.runtime.sendMessage({
   pageHeight: document.documentElement.clientHeight
 });
 
-
-
-console.log("Notes storage key: " + notesStorageKey);
-
 const store = new Store({
   portName: "NOTES_STORE"
 });
 
 store.subscribe(() => {
-  // console.log("Store Update");
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
-  //   console.log(store.getState());
-  //   console.log(document.documentElement.scrollTop);
 });
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // This is if the extension is requesting the current scroll position to position the new note
-
-  // console.log("We recieved a message!");
-
   if (request.newNote == "") {
-    // console.log("The message was about a new note!");
-    // console.log(sender);
-    // console.log(request);
-    // console.log(": ")
-    console.log("Width of Page: " + document.documentElement.clientWidth);
-    console.log("Height of Page: " + document.documentElement.clientHeight);
-
-    //console.log("We are going to be responding with these things:");
-    console.log("scrollPosition: " + document.documentElement.scrollTop);
-    // console.log("page:" + window.location.href);
-
     sendResponse({
       scrollPosition: document.documentElement.scrollTop,
       page: window.location.href,
@@ -76,21 +50,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+let rootNode = document.getElementById("__NOTES___MOUNT___POINT___");
 
-  let rootNode = document.getElementById("__NOTES___MOUNT___POINT___");
+if (!rootNode) {
+  rootNode = document.createElement("div");
+  Object.assign(rootNode.style, {
+    top: 0,
+    left: 0,
+    position: "absolute",
+    zIndex: 9999999999999999
+  });
+  document.body.appendChild(rootNode);
+}
 
-  if (!rootNode) {
-    rootNode = document.createElement("div");
-    Object.assign(rootNode.style, {
-      top: 0,
-      left: 0,
-      position: "absolute",
-      zIndex: 9999999999999999
-    });
-    document.body.appendChild(rootNode);
-  }
-
-  store.ready().then(() => {
+store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
       <App />

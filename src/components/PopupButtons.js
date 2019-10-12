@@ -4,15 +4,13 @@ import { PopupButtonsContainer } from "../elements/PopupButtonsContainer";
 import { connect } from "react-redux";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
-import * as Sentry from '@sentry/browser'
+import * as Sentry from "@sentry/browser";
 
 class PopupButtons extends Component {
   AddNote() {
-
-    Sentry.captureMessage("A user added a note")
+    Sentry.captureMessage("A user added a note");
 
     let UUID = generateUUID();
-    // console.log("UUID inside of onClick: " + UUID);
 
     // TODO: Adding loading symbol while were waiting for the response
 
@@ -21,28 +19,18 @@ class PopupButtons extends Component {
 
     // eslint-disable-next-line no-undef
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      // console.log("Sending message on: ");
-      // console.log(tabs);
-
       // eslint-disable-next-line no-undef
       chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
-        // console.log("Response:");
-        // console.log(response);
-
-        // if (!response) {
-        //   console.log("Your scroll position was equal to undefined");
-
-        //   Sentry.captureMessage("Scroll Position of undefined", "error")
-        // }
         // Dispatching action to redux
         try {
-        this.props.dispatch(
-          addNote("Note", UUID, response.scrollPosition, response.page)
-        );
+          this.props.dispatch(
+            addNote("Note", UUID, response.scrollPosition, response.page)
+          );
         } catch (err) {
-          console.log("An error was captured and reported to sentry");
-          console.debug("I think this has to do with the URL and it not being a valid webpage")
-          Sentry.captureException(err)
+          console.debug(
+            "I think this has to do with the URL and it not being a valid webpage"
+          );
+          Sentry.captureException(err);
         }
       });
     });

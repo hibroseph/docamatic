@@ -1,5 +1,5 @@
 import React from "react";
-import * as Sentry from "@sentry/browser"
+import * as Sentry from "@sentry/browser";
 
 const Settings = props => {
   return (
@@ -28,7 +28,6 @@ const Settings = props => {
             let textArea = document.getElementById("input-feedback");
 
             if (textArea.value === "") {
-              console.log("User inputted nothing");
             } else {
               try {
                 Sentry.captureMessage("Feedback:" + textArea.value);
@@ -37,8 +36,6 @@ const Settings = props => {
                   feedback: "complete"
                 });
               } catch (error) {
-                console.log("There was an error with reporting feedback");
-                console.log(error);
                 Sentry.captureException(error);
               }
             }
@@ -47,16 +44,7 @@ const Settings = props => {
           Send Feedback
         </button>
 
-        <div id="settings-buttons">
-          {/* <button
-                className="primary-button"
-                onClick={() => {
-                  this.displayHome();
-                }}
-              >
-                Save
-              </button> */}
-        </div>
+        <div id="settings-buttons"></div>
       </div>
 
       <div id="settings-bottom">

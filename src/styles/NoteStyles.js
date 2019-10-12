@@ -7,8 +7,8 @@ export const NoteContainer = styled.div`
   background-color: #f5f5f5;
   border-radius: 10px 10px 0 0;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
   overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
   box-shadow: 11px 6px 73px -25px rgba(0, 0, 0, 0.75);
 
   textarea::-webkit-scrollbar {
@@ -38,31 +38,6 @@ export const NoteContainer = styled.div`
     background-color: ${props => props.color};
   }
 
-  .settings-container {
-    position: absolute;
-    left: 100%;
-    background-color: inherit;
-    width: 100%;
-    height: 40px;
-    transition: 0.3s ease left;
-    top: 0px;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    /*   overflow: hidden; */
-  }
-
-  .settings-container .icons {
-    transition: all 0.1s ease-in-out;
-  }
-  .settings-container .icons:hover {
-    transform: scale(1.2);
-  }
-
-  .settings-container:hover {
-    left: 0px;
-  }
-
   .title p {
     display: inline-block;
     margin: 10px;
@@ -88,6 +63,10 @@ export const NoteContainer = styled.div`
     left: 0px;
   }
 
+  .settings-container:hover {
+    left: 0px;
+  }
+
   input {
     background-color: transparent;
     border: none;
@@ -103,5 +82,38 @@ export const NoteContainer = styled.div`
   .body {
     width: 100%;
     height: calc(100% - 40px);
+  }
+
+  .settings-container {
+    position: absolute;
+    left: 100%;
+    background-color: inherit;
+    width: 100%;
+    height: 40px;
+    transition: 0.3s ease left;
+    top: 0px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  .icon-container .icons {
+    transition: all 0.1s ease-in-out;
+  }
+  .icon-container .icons:hover {
+    transform: scale(1.2);
+  }
+
+  .icon-container:hover {
+    left: 0px;
+  }
+
+  .icon-container {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
   }
 `;

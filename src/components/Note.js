@@ -5,8 +5,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
   faArrowsAlt,
+  faHeart,
+  faThumbtack,
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
 import ColorSwatch from "./ColorSwatch";
 
 const Note = props => {
@@ -54,6 +58,15 @@ const Note = props => {
 
           <div className="settings-container">
             <div className="icon-container">
+              <FontAwesomeIcon
+                className="icons"
+                icon={fasHeart}
+              ></FontAwesomeIcon>
+              <FontAwesomeIcon
+                className="icons"
+                icon={faThumbtack}
+                style={{ color: "grey" }}
+              ></FontAwesomeIcon>
               <FontAwesomeIcon
                 onClick={props.onDeleteClick}
                 className="icons"

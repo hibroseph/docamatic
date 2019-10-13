@@ -9,18 +9,27 @@ export const MiniSearchNoteContainer = styled.div`
 
   .title-bar {
     position: relative;
-    width: 100%;
     height: 20px;
     padding: 8px 0px 8px 8px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    color: white;
+    color: ${props => props.color.text};
+    background-color: ${props => props.color.title};
   }
+
   .body {
     box-sizing: border-box;
     position: relative;
     background-color: white;
     width: 100%;
     padding: 8px;
+  }
+
+  .title-bar:hover ~ .body {
+    filter: brightness(0.85);
+  }
+
+  .body:hover {
+    filter: brightness(0.85);
   }
 `;

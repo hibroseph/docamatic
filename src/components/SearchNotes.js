@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { SearchNotes as Container } from "../styles/SearchNotesStyle";
 import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
+import search_hint from "../assets/search_results.png";
+import no_results from "../assets/no_results.png";
 
 class SearchNotes extends Component {
   constructor(props) {
@@ -20,6 +22,8 @@ class SearchNotes extends Component {
   render() {
     console.log("PROPS");
     console.log(this.props);
+
+    let foundItem = false;
     return (
       <Container>
         <input
@@ -29,32 +33,42 @@ class SearchNotes extends Component {
           onChange={this.handleChange}
         ></input>
         <div className="searchresults">
-          {Object.keys(this.props.notes).map(key => {
-            // console.log(key);
-            return this.props.state[key].notes.map(note => {
-              if (this.state.search_query != null) {
-                if (
-                  note.body.includes(this.state.search_query) ||
-                  note.title.includes(this.state.search_query)
-                ) {
-                  // foundItem = true;
-                  // Split the text to bold the part that is the search query
-                  let title = note.title.split(this.state.search_query);
-                  let text = note.body.split(this.state.search_query);
+          {!this.state.search_query && (
+            <img src={search_hint} style={{ marginLeft: 10 }}></img>
+          )}
+          {this.state.search_query &&
+            Object.keys(this.props.notes).map(key => {
+              return this.props.state[key].notes.map(note => {
+                if (this.state.search_query != null) {
+                  if (
+                    note.body
+                      .toLowerCase()
+                      .includes(this.state.search_query.toLowerCase()) ||
+                    note.title
+                      .toLowerCase()
+                      .includes(this.state.search_query.toLowerCase())
+                  ) {
+                    foundItem = true;
+                    // Split the text to bold the part that is the search query
+                    // let title = note.title.split(this.state.search_query);
+                    // let text = note.body.split(this.state.search_query);
 
-                  return (
-                    <MiniSearchNote
-                      {...note}
-                      bodySplitAtQueryText={text}
-                      titleSplitAtQueryText={title}
-                      searchQuery={this.state.search_query}
-                      website={key}
-                    />
-                  );
+                    return (
+                      <MiniSearchNote
+                        {...note}
+                        // bodySplitAtQueryText={text}
+                        // titleSplitAtQueryText={title}
+                        searchQuery={this.state.search_query}
+                        website={key}
+                      />
+                    );
+                  }
                 }
-              }
-            });
-          })}
+              });
+            })}
+          {this.state.search_query && !foundItem && (
+            <img style={{ marginLeft: 10 }} src={no_results}></img>
+          )}
         </div>
       </Container>
     );

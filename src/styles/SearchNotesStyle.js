@@ -19,6 +19,13 @@ export const SearchNotes = styled.div`
     outline: none;
   }
 
+  .searchbox:hover {
+    background-color: ${THEME.Accent};
+  }
+
+  .searchbox:active {
+    background-color: ${THEME.Active};
+  }
   .searchbox::placeholder {
     color: white;
   }

@@ -14,7 +14,9 @@ import {
   updateNotePosition,
   changeNoteColor,
   updateNoteSize,
-  updateNoteDepth
+  updateNoteDepth,
+  stickify,
+  heartify
 } from "../redux/actions";
 
 const PAGE = window.location.href;
@@ -27,7 +29,10 @@ const NoteList = ({
   onPositionChange,
   onColorChange,
   onNoteClicked,
-  onSizeChange
+  onSizeChange,
+  onStickify,
+  onHeartify,
+  scrollYOffset
 }) => {
   return (
     <div>
@@ -36,7 +41,14 @@ const NoteList = ({
           <Note
             key={note.id}
             {...note}
+            scrollYOffset={scrollYOffset}
             colors={COLORS}
+            onHeartifyClick={() => {
+              onHeartify(note.id);
+            }}
+            onStickifyClick={() => {
+              onStickify(note.id);
+            }}
             onDeleteClick={() => {
               onDeleteClick(note.id);
             }}
@@ -79,19 +91,26 @@ const NoteList = ({
 //   onDeleteClick: PropTypes.func.isRequired
 // };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, props) => {
   if (state[window.location.href] == null) {
     return {
       notes: []
     };
   } else {
     return {
-      notes: state[window.location.href].notes
+      notes: state[window.location.href].notes,
+      scrollYOffset: props.scrollYOffset
     };
   }
 };
 
 const mapDispatchToProps = dispatch => ({
+  onHeartify: id => {
+    dispatch(heartify(id, PAGE));
+  },
+  onStickify: id => {
+    dispatch(stickify(id, PAGE));
+  },
   onSizeChange: (id, x, y) => {
     dispatch(updateNoteSize(id, x, y, PAGE));
   },

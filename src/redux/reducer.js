@@ -21,6 +21,36 @@ const NoteMessages = [
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
+    case "HEARTIFY":
+      return Object.assign({}, state, {
+        [action.page]: {
+          notes: state[action.page].notes.map(note => {
+            if (note.id === action.id) {
+              return Object.assign({}, note, {
+                heart: !note.heart
+              });
+            } else {
+              return note;
+            }
+          })
+        }
+      });
+
+    case "STICKIFY":
+      return Object.assign({}, state, {
+        [action.page]: {
+          notes: state[action.page].notes.map(note => {
+            if (note.id === action.id) {
+              return Object.assign({}, note, {
+                stickify: !note.stickify
+              });
+            } else {
+              return note;
+            }
+          })
+        }
+      });
+
     case "RESIZE_NOTE":
       return Object.assign({}, state, {
         [action.page]: {
@@ -186,7 +216,9 @@ const notesApp = (state = [], action) => {
                 color: {
                   title: colorList[colorIndex],
                   text: yiq >= 128 ? "#000" : "#fff"
-                }
+                },
+                stickify: false,
+                heart: false
               }
             ]
           }

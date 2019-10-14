@@ -1,6 +1,8 @@
 import React from "react";
 import { PopupContentStyle } from "../styles/PopupStyle";
 import SearchNotes from "./SearchNotes";
+import HeartNotes from "./HeartNotes";
+
 export const PopupContent = props => {
   return (
     <PopupContentStyle>
@@ -9,7 +11,7 @@ export const PopupContent = props => {
           case "sort":
             return "Sort Notes";
           case "hearted":
-            return "Like Notes";
+            return <HeartNotes state={props.state}></HeartNotes>;
           case "search":
             return <SearchNotes state={props.state}></SearchNotes>;
           case "settings":

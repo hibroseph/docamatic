@@ -3,7 +3,7 @@ import { THEME } from "../utils/constants";
 
 export const SearchNotes = styled.div`
   .searchbox {
-    position: absolute;
+    position: relative;
     width: calc(100% - 20px);
     left: 10px;
     top: 10px;
@@ -17,6 +17,7 @@ export const SearchNotes = styled.div`
     padding: 0 10px;
     height: 40px;
     outline: none;
+    margin-bottom 20px;
   }
 
   .searchbox:hover {
@@ -31,8 +32,6 @@ export const SearchNotes = styled.div`
   }
 
   .searchresults {
-    position: absolute;
-    top: 60px;
     width: 100%;
     height: calc(100% - 60px);
     overflow: auto;

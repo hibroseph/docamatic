@@ -3,9 +3,9 @@ import styled from "styled-components";
 export const MiniSearchNoteContainer = styled.div`
   position: relative;
   font-size: 15px;
-  border-radius: 5px;
+  border-radius: 10px;
   margin: 10px 10px 0px 10px;
-  box-shadow: 10px 10px 58px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 17px -5px rgba(0, 0, 0, 0.75);
 
   .title-bar {
     position: relative;
@@ -15,6 +15,7 @@ export const MiniSearchNoteContainer = styled.div`
     border-top-right-radius: 10px;
     color: ${props => props.color.text};
     background-color: ${props => props.color.title};
+    font-weight: bold;
   }
 
   .body {

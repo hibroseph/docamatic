@@ -27,14 +27,15 @@ const icons = [
 export class Popup extends Component {
   constructor(props) {
     super(props);
-    this.state = { page: "sort" };
+    this.state = { page: "welcome" };
 
-    this.AddNote = this.AddNote.bind(this);
+    this.DetermineClick = this.DetermineClick.bind(this);
   }
 
-  AddNote(data) {
+  DetermineClick(data) {
     console.log("you clicked! " + data);
     if (data === "new") {
+      data = "Note";
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         // eslint-disable-next-line no-undef
         chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
@@ -58,7 +59,7 @@ export class Popup extends Component {
       <Container>
         <IconList
           icons={icons}
-          onClicky={data => this.AddNote(data)}
+          onClicky={data => this.DetermineClick(data)}
         ></IconList>
         <PopupContent
           state={this.props.state}

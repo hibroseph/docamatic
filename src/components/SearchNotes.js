@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import MiniSearchNote from "../components/MiniSearchNote";
 import search_hint from "../assets/search_results.png";
 import no_results from "../assets/no_results.png";
+import FilterNotes from "./FilterNotes";
 
 class SearchNotes extends Component {
   constructor(props) {
@@ -19,10 +20,8 @@ class SearchNotes extends Component {
     this.setState({ search_query: event.target.value });
   }
 
+  // TODO: Figure out how to render no search results image if the filter notes component returns null
   render() {
-    console.log("PROPS");
-    console.log(this.props);
-
     let foundItem = false;
     return (
       <Container>
@@ -32,44 +31,27 @@ class SearchNotes extends Component {
           placeholder="Search Notes Here"
           onChange={this.handleChange}
         ></input>
-        <div className="searchresults">
-          {!this.state.search_query && (
-            <img src={search_hint} style={{ marginLeft: 10 }}></img>
-          )}
-          {this.state.search_query &&
-            Object.keys(this.props.notes).map(key => {
-              return this.props.state[key].notes.map(note => {
-                if (this.state.search_query != null) {
-                  if (
-                    note.body
-                      .toLowerCase()
-                      .includes(this.state.search_query.toLowerCase()) ||
-                    note.title
-                      .toLowerCase()
-                      .includes(this.state.search_query.toLowerCase())
-                  ) {
-                    foundItem = true;
-                    // Split the text to bold the part that is the search query
-                    // let title = note.title.split(this.state.search_query);
-                    // let text = note.body.split(this.state.search_query);
-
-                    return (
-                      <MiniSearchNote
-                        {...note}
-                        // bodySplitAtQueryText={text}
-                        // titleSplitAtQueryText={title}
-                        searchQuery={this.state.search_query}
-                        website={key}
-                      />
-                    );
-                  }
-                }
-              });
-            })}
-          {this.state.search_query && !foundItem && (
-            <img style={{ marginLeft: 10 }} src={no_results}></img>
-          )}
-        </div>
+        {!this.state.search_query && (
+          <img
+            src={search_hint}
+            style={{ marginLeft: 10, marginTop: 100 }}
+          ></img>
+        )}
+        <FilterNotes
+          filter={note => {
+            // The searching lambda
+            if (this.state.search_query) {
+              return (
+                note.title
+                  .toLowerCase()
+                  .includes(this.state.search_query.toLowerCase()) ||
+                note.body
+                  .toLowerCase()
+                  .includes(this.state.search_query.toLowerCase())
+              );
+            }
+          }}
+        />
       </Container>
     );
   }

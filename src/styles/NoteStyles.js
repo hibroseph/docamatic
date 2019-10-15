@@ -9,7 +9,7 @@ export const NoteContainer = styled.div`
   box-sizing: border-box;
   overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
-  box-shadow: 11px 6px 73px -25px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 4px 17px -5px rgba(0, 0, 0, 0.75);
 
   textarea::-webkit-scrollbar {
     width: 8px;

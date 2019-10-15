@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { SearchNotes as Container } from "../styles/SearchNotesStyle";
+import MiniSearchNote from "../components/MiniSearchNote";
 import NoHeartNotes from "../assets/NoHeartNotes.png";
 import { connect } from "react-redux";
-import MiniSearchNote from "../components/MiniSearchNote";
 
+// TODO: figure out state with the input
 class HeartNotes extends Component {
   constructor(props) {
     super(props);
@@ -23,19 +24,11 @@ class HeartNotes extends Component {
     return (
       <Container>
         <div className="searchresults">
-          {Object.keys(this.props.notes).map(key => {
+          {Object.keys(this.props.state).map(key => {
             return this.props.state[key].notes.map(note => {
               if (note.heart) {
                 foundNotes = true;
-                return (
-                  <MiniSearchNote
-                    {...note}
-                    // bodySplitAtQueryText={text}
-                    // titleSplitAtQueryText={title}
-                    searchQuery={this.state.search_query}
-                    website={key}
-                  />
-                );
+                return <MiniSearchNote {...note} website={key} />;
               }
             });
           })}
@@ -50,7 +43,7 @@ class HeartNotes extends Component {
 
 export default connect(
   state => {
-    return { notes: state };
+    return { state: state };
   },
   null
 )(HeartNotes);

@@ -17,6 +17,7 @@ class SearchNotes extends Component {
   }
 
   handleChange(event) {
+    console.log("setting state: " + event.target.value)
     this.setState({ search_query: event.target.value });
   }
 
@@ -26,7 +27,7 @@ class SearchNotes extends Component {
     return (
       <Container>
         <input
-          value={this.state.search_query}
+          // value={this.state.search_query}
           className="searchbox"
           placeholder="Search Notes Here"
           onChange={this.handleChange}
@@ -38,6 +39,7 @@ class SearchNotes extends Component {
           ></img>
         )}
         <FilterNotes
+          style="searchresults"
           filter={note => {
             // The searching lambda
             if (this.state.search_query) {
@@ -51,6 +53,7 @@ class SearchNotes extends Component {
               );
             }
           }}
+          noResultsImg={this.state.search_query ? no_results : null}
         />
       </Container>
     );

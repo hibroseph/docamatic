@@ -5,6 +5,7 @@ import HeartNotes from "./HeartNotes";
 import SortNotes from "./SortNotes";
 import Settings from "./Settings";
 import Alerts from "./Settings";
+import NoAddedNotes from "../assets/NoAddedNotes.png"
 import Welcome from "../assets/Welcome.png";
 import FilterNotes from "./FilterNotes";
 export const PopupContent = props => {
@@ -17,7 +18,7 @@ export const PopupContent = props => {
           case "hearted":
             return <HeartNotes></HeartNotes>;
           case "search":
-            return <SearchNotes state={props.state}></SearchNotes>;
+            return <SearchNotes></SearchNotes>;
           case "settings":
             return <Settings></Settings>;
           case "alerts":
@@ -26,8 +27,9 @@ export const PopupContent = props => {
             return (
               <FilterNotes
                 filter={note => {
-                  return note.title.includes("new");
+                  return true
                 }}
+                noResultsImg={NoAddedNotes}
               ></FilterNotes>
             );
         }

@@ -21,12 +21,12 @@ class HeartNotes extends Component {
   }
 
   render() {
-    var foundNotes = false;
     return (
       <FilterNotes
         filter={note => {
           return note.heart === true;
         }}
+        noResultsImg={NoHeartNotes}
       ></FilterNotes>
     );
   }

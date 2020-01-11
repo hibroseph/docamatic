@@ -34,7 +34,7 @@ module.exports = {
       },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
-        use: [{ loader: "url-loader" }]
+        use: [{ loader: "url-loader", options: { limit: 8192 } }]
       }
     ]
   },
@@ -48,7 +48,10 @@ module.exports = {
       template: "./src/popup/index.html"
     }),
     // copy extension manifest and icons
-    new CopyWebpackPlugin([{ from: "./manifest.json" }]),
+    new CopyWebpackPlugin([
+      { from: "./manifest.json" },
+      { context: "./icons/", from: "icon*" }
+    ]),
     new CleanWebpackPlugin(["dist"])
   ]
 };

@@ -14,7 +14,9 @@ import {
   updateNotePosition,
   changeNoteColor,
   updateNoteSize,
-  updateNoteDepth
+  updateNoteDepth,
+  stickify,
+  heartify
 } from "../redux/actions";
 
 const PAGE = window.location.href;
@@ -27,7 +29,10 @@ const NoteList = ({
   onPositionChange,
   onColorChange,
   onNoteClicked,
-  onSizeChange
+  onSizeChange,
+  onStickify,
+  onHeartify,
+  scrollYOffset
 }) => {
   return (
     <div>
@@ -36,7 +41,14 @@ const NoteList = ({
           <Note
             key={note.id}
             {...note}
+            scrollYOffset={scrollYOffset}
             colors={COLORS}
+            onHeartifyClick={() => {
+              onHeartify(note.id);
+            }}
+            onStickifyClick={() => {
+              onStickify(note.id);
+            }}
             onDeleteClick={() => {
               onDeleteClick(note.id);
             }}
@@ -52,8 +64,9 @@ const NoteList = ({
             onNoteClicked={id => {
               onNoteClicked(id);
             }}
-            onColorChange={(color, contrastColor) => {
-              onColorChange(note.id, color, contrastColor);
+            onColorChange={color => {
+              console.log("changing olor");
+              onColorChange(note.id, color);
             }}
             onSizeChange={(x, y) => {
               onSizeChange(note.id, x, y);
@@ -66,31 +79,38 @@ const NoteList = ({
 };
 
 // Let's stop some bugs from happening
-NoteList.propTypes = {
-  notes: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      body: PropTypes.string.isRequired,
-      color: PropTypes.string.isRequired,
-      position: PropTypes.object.isRequired
-    }).isRequired
-  ).isRequired,
-  onDeleteClick: PropTypes.func.isRequired
-};
+// NoteList.propTypes = {
+//   notes: PropTypes.arrayOf(
+//     PropTypes.shape({
+//       id: PropTypes.string.isRequired,
+//       body: PropTypes.string.isRequired,
+//       color: PropTypes.string.isRequired,
+//       position: PropTypes.object.isRequired
+//     }).isRequired
+//   ).isRequired,
+//   onDeleteClick: PropTypes.func.isRequired
+// };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, props) => {
   if (state[window.location.href] == null) {
     return {
       notes: []
     };
   } else {
     return {
-      notes: state[window.location.href].notes
+      notes: state[window.location.href].notes,
+      scrollYOffset: props.scrollYOffset
     };
   }
 };
 
 const mapDispatchToProps = dispatch => ({
+  onHeartify: id => {
+    dispatch(heartify(id, PAGE));
+  },
+  onStickify: id => {
+    dispatch(stickify(id, PAGE));
+  },
   onSizeChange: (id, x, y) => {
     dispatch(updateNoteSize(id, x, y, PAGE));
   },
@@ -115,8 +135,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(updateNotePosition(id, x, y, PAGE));
   },
 
-  onColorChange: (id, color, contrastColor) => {
-    dispatch(changeNoteColor(id, PAGE, color, contrastColor));
+  onColorChange: (id, color) => {
+    dispatch(changeNoteColor(id, PAGE, color));
   },
 
   onNoteClicked: id => {

@@ -1,140 +1,71 @@
 const path = require("path");
 const webpack = require("webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-const MinifyPlugin = require("babel-minify-webpack-plugin");
-const PrintTimeWebpackPlugin = require("print-time-webpack");
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
-const fs = require("fs");
-const WebpackOnBuildPlugin = require("on-build-webpack");
-const buildDir = "./dist/";
-const DIST_DIR = path.resolve(__dirname, "dist/");
-const SRC_DIR = path.resolve(__dirname, "src");
-const ASSET_EXTENSIONS = [
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "eot",
-  "otf",
-  "svg",
-  "ttf",
-  "woff",
-  "woff2"
-];
-const MANIFEST_FILE = "manifest.json";
-
-const manifestPath = path.join(SRC_DIR, MANIFEST_FILE);
+const ManifestPlugin = require("webpack-manifest-plugin");
+const WebpackShellPlugin = require("webpack-shell-plugin");
 
 module.exports = {
-  output: {
-    filename: MANIFEST_FILE,
-    path: DIST_DIR
-  },
+  // Entry files for our popup and background pages
   entry: {
-    manifestPath
+    popup: "./src/popup/index.js",
+    background: "./src/background/index.js",
+    script: "./src/index.js"
   },
+  // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].[hash].js"
+  },
+  // Here we define loaders for different file types
   module: {
     rules: [
-      {
-        test: /\.html$/,
-        use: [
-          "file-loader",
-          "extract-loader",
-          {
-            loader: "html-loader",
-            options: {
-              minimize: IS_PRODUCTION,
-              attrs: ["link:href", "script:src", "img:src"]
-            }
-          }
-        ]
-      },
-      {
-        test: /\.css$/,
-        use: [
-          "file-loader",
-          "extract-loader",
-          {
-            loader: "css-loader"
-          }
-        ]
-      },
-      {
-        test: /\/index\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        use: [
-          {
-            loader: "spawn-loader",
-            options: {
-              name: "[hash].js"
-            }
-          }
-        ]
-      },
+      // We use Babel to transpile JSX
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        use: [
-          {
-            loader: "babel-loader",
-            query: {
-              presets: ["@babel/preset-env", "@babel/preset-react"]
-            }
-          },
-          // Ensure babel-polyfill is imported
-          // Normally, this would just be an entry point, but relying on
-          // spawn-loader is preventing us from doing that.
-          {
-            loader: "imports-loader",
-            query: "__babelPolyfill=babel-polyfill"
-          }
-        ]
-      },
-      {
-        test: new RegExp(".(" + ASSET_EXTENSIONS.join("|") + ")$"),
+        include: [path.resolve(__dirname, "./src")],
+        exclude: /node_modules/,
         use: {
-          loader: "file-loader",
-          options: {
-            outputPath: "assets/"
-          }
+          loader: "babel-loader"
         }
       },
       {
-        test: manifestPath,
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
         use: [
-          { loader: "file-loader", options: { name: "manifest.[ext]" } },
-          { loader: "extricate-loader" },
-          { loader: "interpolate-loader" }
+          {
+            loader: "url-loader",
+            options: {
+              limit: 8192,
+              name: "assets/[hash].[ext]"
+            }
+          }
         ]
       }
     ]
   },
   plugins: [
-    IS_PRODUCTION
-      ? new WebpackOnBuildPlugin(stats => {
-          const newlyCreatedAssets = stats.compilation.assets;
-
-          const unlinked = [];
-
-          fs.readdir(path.resolve(buildDir), (err, files) => {
-            files.forEach(function(file) {
-              if (!newlyCreatedAssets[file]) {
-                fs.unlink(path.resolve(buildDir + file), () => {});
-                unlinked.push(file);
-              }
-            });
-            if (unlinked.length > 0) {
-              console.log("Removed old assets: ", unlinked);
-            }
-          });
-        })
-      : /* no-op */ new Function(),
-    new CleanWebpackPlugin(DIST_DIR),
-    new webpack.ProvidePlugin({
-      browser: "webextension-polyfill"
+    // create CSS file with all used styles
+    new MiniCssExtractPlugin(),
+    // create popup.html from template and inject styles and script bundles
+    new HtmlWebpackPlugin({
+      chunks: ["popup"],
+      hash: true,
+      filename: "index.html",
+      template: "./src/popup/index.html"
     }),
-    IS_PRODUCTION ? new MinifyPlugin() : /* no-op */ new Function(),
-    new PrintTimeWebpackPlugin()
-  ],
-  devtool: "eval-source-map"
+    // copy extension manifest and icons
+    new CopyWebpackPlugin([
+      { from: "./src/manifest.json" },
+      { context: "./icons/", from: "icon*", to: "./icons/" }
+    ]),
+    new CleanWebpackPlugin(["dist"]),
+    new ManifestPlugin({ fileName: "assetManifest.json" }),
+    new WebpackShellPlugin({ onBuildEnd: ["node refreshPaths.js"] })
+  ]
 };

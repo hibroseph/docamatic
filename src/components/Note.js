@@ -5,14 +5,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowLeft,
   faArrowsAlt,
+  faHeart,
+  faThumbtack,
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
 import ColorSwatch from "./ColorSwatch";
-import { getContrastingColor } from "../utils/ContrastingColor";
 
+/*
+  there currently is a glitch in the space time when you move a card. I think it has to do with the props
+  not getting set fast enough so the note glitches back since we are setting the current position to be the y position
+*/
 const Note = props => {
-  let contrastingColor = getContrastingColor(props.color);
-
+  // let contrastingColor = getContrastingColor(props.color);
+  console.log(`SCROLL BBY ${props.scrollYOffset}`);
   return (
     <Rnd
       default={{
@@ -22,7 +29,10 @@ const Note = props => {
         width: props.size.width,
         height: props.size.height
       }}
-      onDragStop={(e, d) => props.onPositionChange(props.id, d.x, d.y)}
+      onDragStop={(e, d) => {
+        console.log(`dragging stopped ${d.x},${d.y}`);
+        props.onPositionChange(props.id, d.x, d.y);
+      }}
       onResizeStop={(e, d, ref, delta, position) => {
         props.onSizeChange(
           props.size.width + delta.width,
@@ -43,8 +53,10 @@ const Note = props => {
         bottomRight: true,
         bottomLeft: false
       }}
+      disableDragging={props.stickify ? true : false}
+      style={{ position: props.stickify ? "fixed" : "absolute" }}
     >
-      <Container contrastingColor={contrastingColor} color={props.color}>
+      <Container stickify={props.stickify} color={props.color}>
         <div className="title">
           <input
             style={{ margin: 0 }}
@@ -56,18 +68,30 @@ const Note = props => {
           <div className="settings-container">
             <div className="icon-container">
               <FontAwesomeIcon
+                className="icons"
+                onClick={props.onHeartifyClick}
+                icon={props.heart ? faHeart : fasHeart}
+              ></FontAwesomeIcon>
+              {/* <FontAwesomeIcon
+                className="icons"
+                icon={faThumbtack}
+                onClick={props.onStickifyClick}
+                style={{ color: props.stickify ? props.color.text : "grey" }}
+              ></FontAwesomeIcon> */}
+              <FontAwesomeIcon
                 onClick={props.onDeleteClick}
                 className="icons"
                 icon={faTrashAlt}
               />
               <FontAwesomeIcon
                 className="drag-handle icons"
+                style={{ color: props.stickify ? "grey" : props.color.text }}
                 icon={faArrowsAlt}
               />
             </div>
             <ColorSwatch
               colors={props.colors}
-              onColorChange={color => props.onColorChange(color, null)}
+              onColorChange={color => props.onColorChange(color)}
             ></ColorSwatch>
           </div>
         </div>

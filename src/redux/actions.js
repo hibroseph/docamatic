@@ -7,9 +7,27 @@ export const CHANGE_COLOR = "CHANGE_COLOR";
 export const CLICKED_NOTE = "CLICKED_NOTE";
 export const RESIZE_NOTE = "RESIZE_NOTE";
 export const NOTE_DEPTH = "MOVE_NOTE";
+export const STICKIFY = "STICKIFY";
+export const HEARTIFY = "HEARTIFY";
 /*
  * action creators
  */
+export function heartify(id, page) {
+  return {
+    type: HEARTIFY,
+    id,
+    page
+  };
+}
+
+export function stickify(id, page) {
+  return {
+    type: STICKIFY,
+    id,
+    page
+  };
+}
+
 export function updateNoteSize(id, x, y, page) {
   return {
     type: RESIZE_NOTE,
@@ -28,13 +46,12 @@ export function updateNoteDepth(id, page) {
   };
 }
 
-export function changeNoteColor(id, page, color, contrastColor) {
+export function changeNoteColor(id, page, color) {
   return {
     type: CHANGE_COLOR,
     id,
     page,
-    color,
-    contrastColor
+    color
   };
 }
 
@@ -72,7 +89,8 @@ export function addNote(title, id, y_position, page) {
     id: id,
     title,
     y_position,
-    page
+    page,
+    date_created: new Date().getTime()
   };
 }
 

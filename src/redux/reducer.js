@@ -6,6 +6,7 @@ import {
   INITIAL_NOTE_HEIGHT,
   INITIAL_NOTE_WIDTH
 } from "../utils/constants";
+import { getContrastingColor } from "../utils/ContrastingColor";
 
 // Messages to appear when a note is created
 const NoteMessages = [
@@ -20,6 +21,36 @@ const NoteMessages = [
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
+    case "HEARTIFY":
+      return Object.assign({}, state, {
+        [action.page]: {
+          notes: state[action.page].notes.map(note => {
+            if (note.id === action.id) {
+              return Object.assign({}, note, {
+                heart: !note.heart
+              });
+            } else {
+              return note;
+            }
+          })
+        }
+      });
+
+    case "STICKIFY":
+      return Object.assign({}, state, {
+        [action.page]: {
+          notes: state[action.page].notes.map(note => {
+            if (note.id === action.id) {
+              return Object.assign({}, note, {
+                stickify: !note.stickify
+              });
+            } else {
+              return note;
+            }
+          })
+        }
+      });
+
     case "RESIZE_NOTE":
       return Object.assign({}, state, {
         [action.page]: {
@@ -65,13 +96,16 @@ const notesApp = (state = [], action) => {
       });
 
     case "CHANGE_COLOR":
+      console.log("changing color in reducer");
       return Object.assign({}, state, {
         [action._sender.url]: {
           notes: state[action._sender.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                color: action.color,
-                contrastColor: action.contrastColor
+                color: {
+                  title: action.color,
+                  text: getContrastingColor(action.color)
+                }
               });
             } else {
               return note;
@@ -176,8 +210,15 @@ const notesApp = (state = [], action) => {
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
-                color: colorList[colorIndex],
-                contrastColor: yiq >= 128 ? "#000" : "#fff"
+                // color: colorList[colorIndex],
+                // contrastColor: yiq >= 128 ? "#000" : "#fff",
+                date_created: action.date_created,
+                color: {
+                  title: colorList[colorIndex],
+                  text: yiq >= 128 ? "#000" : "#fff"
+                },
+                stickify: false,
+                heart: false
               }
             ]
           }
@@ -196,8 +237,13 @@ const notesApp = (state = [], action) => {
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
-                color: colorList[colorIndex],
-                contrastColor: yiq >= 128 ? "#000" : "#fff"
+                // color: colorList[colorIndex],
+                // contrastColor: yiq >= 128 ? "#000" : "#fff",
+                date_created: action.date_created,
+                color: {
+                  title: colorList[colorIndex],
+                  text: yiq >= 128 ? "#000" : "#fff"
+                }
               }
             ]
           }

@@ -15,12 +15,40 @@ class App extends Component {
       environment: ENVIRONMENT,
       release: RELEASE + VERSION
     });
+
+    this.state = {
+      scrollYOffset: window.pageYOffset,
+      timer: null
+    };
+
+    this.listenToScroll = this.listenToScroll.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener("scroll", this.listenToScroll);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.listenToScroll);
+  }
+
+  listenToScroll() {
+    if (this.state.timer !== null) {
+      clearTimeout(this.state.timer);
+    }
+
+    let timer = setTimeout(() => {
+      console.log("THE USER STOPPED SCROLLINGGG!!!");
+      // update the position of the note we are currently on
+    }, 500);
+
+    this.setState({ scrollYOffset: window.pageYOffset, timer: timer });
   }
 
   render() {
     return (
       <div>
-        <NoteList />
+        <NoteList scrollYOffset={this.state.scrollYOffset} />
       </div>
     );
   }

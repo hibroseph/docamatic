@@ -23,8 +23,8 @@
   },
   "scripts": {
     "start": "webpack --mode=development --watch",
-    "build": "SET NODE_ENV=development && webpack",
-    "prod": "rm -rf app.zip && webpack --mode=development && zip -r app.zip dist/"
+    "build": "webpack --mode=development",
+    "prod": "rm -rf app.zip && webpack --mode=production && zip -r app.zip dist/"
   },
   "eslintConfig": {
     "extends": "react-app"

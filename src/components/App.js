@@ -1,7 +1,7 @@
 // This is the App that will be running in the chrome webpage. This handles displaying the notes that exist on the page
 import React, { Component } from "react";
 // import styled from "styled-components";
-import NoteList from "./NoteList";
+import NoteList from "./NoteList.tsx";
 import * as Sentry from "@sentry/browser";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
 

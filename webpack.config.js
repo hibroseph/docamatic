@@ -22,13 +22,12 @@ module.exports = {
   // Here we define loaders for different file types
   module: {
     rules: [
-      // We use Babel to transpile JSX
       {
-        test: /\.js$/,
+        test: /\.(t|j)sx?$/,
         include: [path.resolve(__dirname, "./src")],
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: "ts-loader"
         }
       },
       {
@@ -46,6 +45,12 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        enforce: "pre",
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "source-map-loader"
       }
     ]
   },
@@ -67,5 +72,6 @@ module.exports = {
     new CleanWebpackPlugin(["dist"]),
     new ManifestPlugin({ fileName: "assetManifest.json" }),
     new WebpackShellPlugin({ onBuildEnd: ["node refreshPaths.js"] })
-  ]
+  ],
+  devtool: "source-map"
 };

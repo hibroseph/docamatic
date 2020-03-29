@@ -1,3 +1,4 @@
+[![Build Status](https://dev.azure.com/iwillridgley/iwillridgley/_apis/build/status/hibroseph.Docamatic?branchName=master)](https://dev.azure.com/iwillridgley/iwillridgley/_build/latest?definitionId=1&branchName=master)
 # Steps to develop:
 1. Clone using `git clone https://github.com/hibroseph/sticky-notes`
 2. Install packages `npm i`

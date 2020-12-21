@@ -25,12 +25,14 @@ export const PopupContent = props => {
             return <Alerts></Alerts>;
           default:
             return (
-              <FilterNotes
-                filter={note => {
-                  return true
-                }}
-                noResultsImg={NoAddedNotes}
-              ></FilterNotes>
+              <div>
+                <FilterNotes
+                  filter={note => {
+                    return true
+                  }}
+                  noResultsImg={NoAddedNotes}
+                ></FilterNotes>
+              </div>
             );
         }
       })()}

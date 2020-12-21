@@ -2,11 +2,19 @@ import styled from "styled-components";
 
 export const MiniSearchNoteContainer = styled.div`
   position: relative;
-  font-size: 15px;
-  border-radius: 10px;
-  margin: 10px 10px 0px 10px;
-  box-shadow: 0px 4px 17px -5px rgba(0, 0, 0, 0.75);
+  
+  .url-preview {
+    font-weight: bold;
+    margin-bottom: 0px;
+    margin-left: 10px;
+  }
 
+  .note {
+  font-size: 15px;
+    border-radius: 10px;
+    margin: 5px 10px 0px 10px;
+    box-shadow: 0px 4px 17px -5px rgba(0, 0, 0, 0.75);
+  }
   .title-bar {
     position: relative;
     padding: 8px 0px 8px 8px;
@@ -26,11 +34,7 @@ export const MiniSearchNoteContainer = styled.div`
     padding: 8px;
   }
 
-  .title-bar:hover ~ .body {
-    filter: brightness(0.85);
-  }
-
-  .body:hover {
-    filter: brightness(0.85);
+  .note:hover {
+    filter: brightness(0.95);
   }
 `;

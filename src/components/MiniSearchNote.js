@@ -41,12 +41,15 @@ class MiniSearchNote extends Component {
           window.open(this.props.website, "_blank");
         }}
       >
-        <div className="title-bar">
-          <div> {this.props.title} </div>
-        </div>
+        <p className="url-preview">{this.props.website}</p>
+        <div className="note">
+          <div className="title-bar">
+            <div> {this.props.title} </div>
+          </div>
 
-        <div className="body">
-          <div>{this.props.body}</div>
+          <div className="body">
+            <div>{this.props.body}</div>
+          </div>
         </div>
       </MiniSearchNoteContainer>
     );

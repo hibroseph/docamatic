@@ -30,6 +30,9 @@ export const NoteContainer = styled.div`
   }
 
   .title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     border-radius: 10px 10px 0 0;
     box-sizing: border-box;
     position: relative;
@@ -89,10 +92,10 @@ export const NoteContainer = styled.div`
     left: 100%;
     background-color: inherit;
     width: 100%;
-    height: 40px;
     transition: 0.3s ease left;
     top: 0px;
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
@@ -113,6 +116,7 @@ export const NoteContainer = styled.div`
     width: 100%;
     height: 40px;
     display: flex;
+    flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
   }

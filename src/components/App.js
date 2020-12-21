@@ -18,14 +18,33 @@ class App extends Component {
 
     this.state = {
       scrollYOffset: window.pageYOffset,
+      current_url: location.href,
       timer: null
     };
 
     this.listenToScroll = this.listenToScroll.bind(this);
+    this.listenForUrlChange = this.listenForUrlChange.bind(this);
+
+
+  }
+
+  listenForUrlChange() {
+    let url = location.href;
+    document.body.addEventListener('click', () => {
+      requestAnimationFrame(() => {
+        if (url !== location.href) {
+          url = location.href;
+          this.setState({
+            current_url: url
+          })
+        }
+      });
+    }, true);
   }
 
   componentDidMount() {
     window.addEventListener("scroll", this.listenToScroll);
+    this.listenForUrlChange();
   }
 
   componentWillUnmount() {
@@ -38,7 +57,6 @@ class App extends Component {
     }
 
     let timer = setTimeout(() => {
-      console.log("THE USER STOPPED SCROLLINGGG!!!");
       // update the position of the note we are currently on
     }, 500);
 
@@ -48,7 +66,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NoteList scrollYOffset={this.state.scrollYOffset} />
+        <NoteList url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
       </div>
     );
   }

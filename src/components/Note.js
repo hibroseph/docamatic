@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Rnd } from "react-rnd";
 import { NoteContainer as Container } from "../styles/NoteStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,8 +18,13 @@ import ColorSwatch from "./ColorSwatch";
   not getting set fast enough so the note glitches back since we are setting the current position to be the y position
 */
 const Note = props => {
-  // let contrastingColor = getContrastingColor(props.color);
-  console.log(`SCROLL BBY ${props.scrollYOffset}`);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const textAreaRef = useRef(null);
+
+  useEffect(() => {
+    textAreaRef.current.selectionStart = cursorPosition;
+    textAreaRef.current.selectionEnd = cursorPosition;
+  })
   return (
     <Rnd
       default={{
@@ -30,7 +35,6 @@ const Note = props => {
         height: props.size.height
       }}
       onDragStop={(e, d) => {
-        console.log(`dragging stopped ${d.x},${d.y}`);
         props.onPositionChange(props.id, d.x, d.y);
       }}
       onResizeStop={(e, d, ref, delta, position) => {
@@ -97,7 +101,16 @@ const Note = props => {
         </div>
 
         <div className="body">
-          <textarea onChange={props.onBodyChange} value={props.body} />
+          <textarea
+            ref={textAreaRef}
+            onFocus={e => {
+              e.target.selectionStart = cursorPosition
+            }}
+            onChange={e => {
+              props.onBodyChange(e);
+              setCursorPosition(e.target.selectionStart)
+              textAreaRef.current.selectionStart = cursorPosition;
+            }} value={props.body} />
         </div>
       </Container>
     </Rnd>

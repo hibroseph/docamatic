@@ -33,17 +33,14 @@ export class Popup extends Component {
   }
 
   DetermineClick(data) {
-    console.log("you clicked! " + data);
     if (data === "new") {
       data = "Note";
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         // eslint-disable-next-line no-undef
         chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
-          console.log("got a response from the backend");
           try {
             this.props.addNoteClick(data, response);
           } catch (err) {
-            console.log("uh oh, got an error: " + err);
           }
         });
       });

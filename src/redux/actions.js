@@ -12,91 +12,92 @@ export const HEARTIFY = "HEARTIFY";
 /*
  * action creators
  */
-export function heartify(id, page) {
+export function heartify(id, url) {
   return {
     type: HEARTIFY,
     id,
-    page
+    url
   };
 }
 
-export function stickify(id, page) {
+export function stickify(id, url) {
   return {
     type: STICKIFY,
     id,
-    page
+    url
   };
 }
 
-export function updateNoteSize(id, x, y, page) {
+export function updateNoteSize(id, x, y, url) {
   return {
     type: RESIZE_NOTE,
     id,
     x,
     y,
-    page
+    url
   };
 }
 
-export function updateNoteDepth(id, page) {
+export function updateNoteDepth(id, url) {
   return {
     type: CLICKED_NOTE,
     id,
-    page
+    url
   };
 }
 
-export function changeNoteColor(id, page, color) {
+export function changeNoteColor(id, url, color) {
   return {
     type: CHANGE_COLOR,
     id,
-    page,
+    url,
     color
   };
 }
 
-export function updateNotePosition(id, x, y, page) {
+export function updateNotePosition(id, x, y, url) {
   return {
     type: MOVE_NOTE,
     id,
     x,
     y,
-    page
+    url
   };
 }
 
-export function addTitle(id, text, page) {
+export function addTitle(id, text, url) {
   return {
     type: ADD_TITLE,
     id: id,
     title: text,
-    page
+    url
   };
 }
 
-export function addText(id, text, title, page) {
+export function addText(id, text, title, url) {
   return {
     type: ADD_TEXT,
     id: id,
     body: text,
-    currentPage: page
+    url
   };
 }
 
-export function addNote(title, id, y_position, page) {
+export function addNote(title, id, y_position, url) {
   return {
     type: ADD_NOTE,
     id: id,
     title,
     y_position,
-    page,
+    url,
     date_created: new Date().getTime()
   };
 }
 
-export function removeNote(id, page) {
+export function removeNote(id, url) {
   return {
     type: REMOVE_NOTE,
-    id
+    id,
+    url
   };
 }

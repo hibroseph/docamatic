@@ -15,16 +15,16 @@
     "react-chrome-redux": "^2.0.0-alpha.4",
     "react-color": "^2.18.0",
     "react-dom": "^16.12.0",
-    "react-redux": "^5.1.2",
+    "react-redux": "6.0.0",
     "react-rnd": "^9.2.0",
     "react-router-dom": "^5.1.2",
     "redux": "^4.0.5",
     "styled-components": "^4.4.1"
   },
   "scripts": {
-    "start": "webpack --mode=development --watch",
-    "build": "webpack --mode=development",
-    "prod": "rm -rf app.zip && webpack --mode=production && zip -r app.zip dist/"
+    "start": "npx webpack --mode=development --watch",
+    "build": "npx webpack --mode=development",
+    "prod": "rm -rf app.zip && npx webpack --mode=production && zip -r app.zip dist/"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -1,15 +1,18 @@
 {
   "manifest_version": 2,
-
   "name": "Docamatic - Add Sticky Notes to the Web",
   "description": "Want to add your own sticky notes to any webpage? Docamatic is your solution",
-  "version": "3.0.2",
+  "version": "3.0.4",
   "browser_action": {
     "default_popup": "index.html"
   },
-  "permissions": ["activeTab"],
+  "permissions": [
+    "activeTab"
+  ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -20,8 +23,12 @@
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["script.js"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "script.js"
+      ]
     }
   ]
 }

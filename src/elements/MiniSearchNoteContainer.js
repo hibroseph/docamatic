@@ -9,7 +9,6 @@ export const MiniSearchNoteContainer = styled.div`
 
   .title-bar {
     position: relative;
-    height: 20px;
     padding: 8px 0px 8px 8px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;

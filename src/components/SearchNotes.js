@@ -17,7 +17,6 @@ class SearchNotes extends Component {
   }
 
   handleChange(event) {
-    console.log("setting state: " + event.target.value)
     this.setState({ search_query: event.target.value });
   }
 
@@ -29,7 +28,7 @@ class SearchNotes extends Component {
         <input
           // value={this.state.search_query}
           className="searchbox"
-          placeholder="Search Notes Here"
+          placeholder="Search"
           onChange={this.handleChange}
         ></input>
         {!this.state.search_query && (

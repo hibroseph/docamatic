@@ -13,13 +13,14 @@ export interface Note {
 export interface NoteListProps {
   notes: [Note];
   scrollYOffset: number;
-  onHeartify: (id: number) => void;
-  onStickify: (id: number) => void;
-  onDeleteClick: (id: number) => void;
-  onTextChange: (id: number, body: string, title: string) => void;
-  onTitleChange: (id: number, title: string) => void;
-  onPositionChange: (id: number, x: number, y: number) => void;
-  onNoteClicked: (id: number) => void;
-  onColorChange: (id: number, color: string) => void;
-  onSizeChange: (id: number, width: number, height: number) => void;
+  url: string;
+  onHeartify: (id: number, url: string) => void;
+  onStickify: (id: number, url: string) => void;
+  onDeleteClick: (id: number, url: string) => void;
+  onTextChange: (id: number, body: string, title: string, url: string) => void;
+  onTitleChange: (id: number, title: string, url: string) => void;
+  onPositionChange: (id: number, x: number, y: number, url: string) => void;
+  onNoteClicked: (id: number, url: string) => void;
+  onColorChange: (id: number, color: string, url: string) => void;
+  onSizeChange: (id: number, width: number, height: number, url: string) => void;
 }

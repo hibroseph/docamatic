@@ -20,11 +20,14 @@ const NoteMessages = [
 ];
 
 const notesApp = (state = [], action) => {
+  console.log("in reducer");
+  console.log(action);
+
   switch (action.type) {
     case "HEARTIFY":
       return Object.assign({}, state, {
-        [action.page]: {
-          notes: state[action.page].notes.map(note => {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 heart: !note.heart
@@ -38,8 +41,8 @@ const notesApp = (state = [], action) => {
 
     case "STICKIFY":
       return Object.assign({}, state, {
-        [action.page]: {
-          notes: state[action.page].notes.map(note => {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 stickify: !note.stickify
@@ -53,8 +56,8 @@ const notesApp = (state = [], action) => {
 
     case "RESIZE_NOTE":
       return Object.assign({}, state, {
-        [action.page]: {
-          notes: state[action.page].notes.map(note => {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 size: { width: action.x, height: action.y }
@@ -67,7 +70,7 @@ const notesApp = (state = [], action) => {
       });
 
     case "CLICKED_NOTE":
-      let note = state[action.page].notes
+      let note = state[action.url].notes
         .filter(note => {
           if (note.id === action.id) {
             return note;
@@ -81,7 +84,7 @@ const notesApp = (state = [], action) => {
         return state;
       }
 
-      const new_state = state[action.page].notes.filter(notes => {
+      const new_state = state[action.url].notes.filter(notes => {
         if (notes.id !== action.id) {
           return notes;
         }
@@ -90,16 +93,17 @@ const notesApp = (state = [], action) => {
       new_state.push(note);
 
       return Object.assign({}, state, {
-        [action.page]: {
+        [action.url]: {
           notes: new_state
         }
       });
 
     case "CHANGE_COLOR":
       console.log("changing color in reducer");
-      return Object.assign({}, state, {
-        [action._sender.url]: {
-          notes: state[action._sender.url].notes.map(note => {
+      console.log(action)
+      let newState = Object.assign({}, state, {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 color: {
@@ -113,11 +117,14 @@ const notesApp = (state = [], action) => {
           })
         }
       });
+      console.log("new state");
+      console.log(newState);
+      return newState;
 
     case "MOVE_NOTE":
       let stateNew = Object.assign({}, state, {
-        [action._sender.url]: {
-          notes: state[action._sender.url].notes.map(note => {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               // let's change the position
               return Object.assign({}, note, {
@@ -134,8 +141,8 @@ const notesApp = (state = [], action) => {
 
     case "ADD_TITLE":
       return Object.assign({}, state, {
-        [action._sender.url]: {
-          notes: state[action._sender.url].notes.map(note => {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 title: action.title
@@ -149,8 +156,8 @@ const notesApp = (state = [], action) => {
 
     case "ADD_TEXT":
       return Object.assign({}, state, {
-        [action._sender.url]: {
-          notes: state[action._sender.url].notes.map((note, id) => {
+        [action.url]: {
+          notes: state[action.url].notes.map((note, id) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 body: action.body
@@ -164,14 +171,14 @@ const notesApp = (state = [], action) => {
 
     case "REMOVE_NOTE":
       // Filter the id of the note that needs to be deleted out
-      let notes = state[action._sender.url].notes.filter(note => {
+      let notes = state[action.url].notes.filter(note => {
         if (note.id != action.id) {
           return note;
         }
       });
 
       let newState = Object.assign({}, state, {
-        [action._sender.url]: {
+        [action.url]: {
           notes
         }
       });
@@ -182,7 +189,6 @@ const notesApp = (state = [], action) => {
       // Generates a random position on the page
       const posx = Math.floor(Math.random() * (600 + 1));
 
-      let page = action.page;
       // Generates a random int for a random color for the note
       let colorIndex = Math.floor(Math.random() * colorList.length);
 
@@ -197,9 +203,9 @@ const notesApp = (state = [], action) => {
       let yiq = (r * 299 + g * 587 + b * 114) / 1000;
 
       // If there are notes already on the page
-      if (state[page] == null) {
+      if (state[action.url] == null) {
         return Object.assign({}, state, {
-          [action.page]: {
+          [action.url]: {
             notes: [
               {
                 id: action.id,
@@ -225,9 +231,9 @@ const notesApp = (state = [], action) => {
         });
       } else {
         return Object.assign({}, state, {
-          [action.page]: {
+          [action.url]: {
             notes: [
-              ...state[action.page].notes,
+              ...state[action.url].notes,
               {
                 id: action.id,
                 position: { x: posx, y: action.y_position },

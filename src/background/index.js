@@ -16,7 +16,7 @@ const notesStorageKey = `notes-${window.location.href}`;
 // localStorage.setItem(notesStorageKey, '{}')
 
 // This handles running the script which adds notes to the page and gets the position of the webpage
-chrome.runtime.onMessage.addListener(function(message, callback) {
+chrome.runtime.onMessage.addListener(function (message, callback) {
   if (message === "runContentScript") {
     chrome.tabs.executeScript({
       file: "index.js"
@@ -31,8 +31,6 @@ let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
 const store = createStore(notesApp, initialState);
 
 store.subscribe(() => {
-  console.log("Store:");
-  console.log(store.getState());
   const serialized = JSON.stringify(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
 });

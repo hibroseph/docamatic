@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { MiniSearchNoteContainer } from "../elements/MiniSearchNoteContainer";
-
+import { CreateFriendlyPreviewUrl } from "../utils/CreateFriendlyPreviewUrl"
 class MiniSearchNote extends Component {
   render() {
     // Two arrays to construct the bolded queries
@@ -41,7 +41,7 @@ class MiniSearchNote extends Component {
           window.open(this.props.website, "_blank");
         }}
       >
-        <p className="url-preview">{this.props.website}</p>
+        <p className="url-preview">{CreateFriendlyPreviewUrl(this.props.website)}</p>
         <div className="note">
           <div className="title-bar">
             <div> {this.props.title} </div>

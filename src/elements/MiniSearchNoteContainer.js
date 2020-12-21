@@ -15,6 +15,7 @@ export const MiniSearchNoteContainer = styled.div`
     color: ${props => props.color.text};
     background-color: ${props => props.color.title};
     font-weight: bold;
+    overflow-wrap: break-word;
   }
 
   .body {

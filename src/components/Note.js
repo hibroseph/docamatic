@@ -18,13 +18,33 @@ import ColorSwatch from "./ColorSwatch";
   not getting set fast enough so the note glitches back since we are setting the current position to be the y position
 */
 const Note = props => {
-  const [cursorPosition, setCursorPosition] = useState(0);
+  const [noteBodyCursorPosition, setNoteBodyCursorPosition] = useState(0);
+  const [noteTitleCursorPosition, setNoteTitleCursorPosition] = useState(0);
+
+  /* Using controlled inputs (the title input and body textarea requires us to 
+    manually manipulate where the cursor is pointing at
+    */
   const textAreaRef = useRef(null);
+  const titleRef = useRef(null);
 
   useEffect(() => {
-    textAreaRef.current.selectionStart = cursorPosition;
-    textAreaRef.current.selectionEnd = cursorPosition;
+    textAreaRef.current.selectionStart = noteBodyCursorPosition;
+    textAreaRef.current.selectionEnd = noteBodyCursorPosition;
+
+    titleRef.current.selectionStart = noteTitleCursorPosition;
+    titleRef.current.selectionEnd = noteTitleCursorPosition;
   })
+
+  const titleChange = event => {
+    props.onTitleChange(event);
+    setNoteTitleCursorPosition(event.target.selectionStart);
+  }
+
+  const bodyChange = event => {
+    props.onBodyChange(event);
+    setNoteBodyCursorPosition(event.target.selectionStart)
+  }
+
   return (
     <Rnd
       default={{
@@ -63,9 +83,11 @@ const Note = props => {
       <Container stickify={props.stickify} color={props.color}>
         <div className="title">
           <input
+            ref={titleRef}
             style={{ margin: 0 }}
             value={props.title}
-            onChange={props.onTitleChange}
+            onChange={titleChange}
+
           />
           <FontAwesomeIcon className="arrow icons" icon={faArrowLeft} />
 
@@ -103,14 +125,8 @@ const Note = props => {
         <div className="body">
           <textarea
             ref={textAreaRef}
-            onFocus={e => {
-              e.target.selectionStart = cursorPosition
-            }}
-            onChange={e => {
-              props.onBodyChange(e);
-              setCursorPosition(e.target.selectionStart)
-              textAreaRef.current.selectionStart = cursorPosition;
-            }} value={props.body} />
+            onChange={bodyChange}
+            value={props.body} />
         </div>
       </Container>
     </Rnd>

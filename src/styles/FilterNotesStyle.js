@@ -32,4 +32,17 @@ export const FilterNotes = styled.div`
   .filter-results::-webkit-scrollbar-thumb:hover {
     background-color: grey;
   }
+
+  .url-selector {
+    word-break: break-all
+  }
+  .url-selector:hover {
+    background-color: #f1f1f1
+    border-radius: 5px;
+  }
+
+  .caret-icon {
+    display: inline;
+    margin-right: 10px;
+  }
 `;

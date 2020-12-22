@@ -41,7 +41,9 @@ class MiniSearchNote extends Component {
           window.open(this.props.website, "_blank");
         }}
       >
-        <p className="url-preview">{CreateFriendlyPreviewUrl(this.props.website)}</p>
+        {this.props.showUrlPreview != null &&
+          <p className="url-preview">{CreateFriendlyPreviewUrl(this.props.website)}</p>
+        }
         <div className="note">
           <div className="title-bar">
             <div> {this.props.title} </div>

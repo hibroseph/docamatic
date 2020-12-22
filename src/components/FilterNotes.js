@@ -33,7 +33,7 @@ class FilterNotes extends Component {
             // Comparing happens right here
             if (this.props.filter(note)) {
               foundItem = true;
-              return <MiniSearchNote key={note.id} {...note} website={key} />;
+              return <MiniSearchNote key={note.id} {...note} website={key} showUrlPreview />;
             }
           })}
         </div>

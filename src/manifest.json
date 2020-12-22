@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Docamatic - Add Sticky Notes to the Web",
   "description": "Want to add your own sticky notes to any webpage? Docamatic is your solution",
-  "version": "3.0.4",
+  "version": "3.1.0",
   "browser_action": {
     "default_popup": "index.html"
   },

@@ -18,8 +18,8 @@ import { connect } from "react-redux";
 const icons = [
   { type: faStickyNote, name: "new" },
   { type: faSearch, name: "search" },
+  { type: faSortAmountDown, name: "sort" },
   { type: faHeart, name: "hearted" }
-  // { type: faSortAmountDown, name: "sort" },
   // { type: faBell, name: "alerts" },
   // { type: faCog, name: "settings" }
 ];

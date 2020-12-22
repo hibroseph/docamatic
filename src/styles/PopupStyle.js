@@ -12,6 +12,6 @@ export const PopupContentStyle = styled.div`
   left: 70px;
   width: calc(100% - 70px);
   height: 100%;
-
+  overflow-y: auto;
   background-color: white;
 `;

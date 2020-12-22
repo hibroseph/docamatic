@@ -5,5 +5,4 @@ export const PopupContainer = styled.div`
     width: 300px;
     height: 100%;
     background-color: #0082c8;
-
 `;

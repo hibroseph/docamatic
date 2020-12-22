@@ -34,6 +34,8 @@ export const FilterNotes = styled.div`
   }
 
   .url-selector {
+    padding: 2px;
+    margin: 5px 0px 5px 0px
     word-break: break-all
   }
   .url-selector:hover {

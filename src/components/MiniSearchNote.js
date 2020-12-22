@@ -42,7 +42,7 @@ class MiniSearchNote extends Component {
         }}
       >
         {this.props.showUrlPreview != null &&
-          <p className="url-preview">{CreateFriendlyPreviewUrl(this.props.website)}</p>
+          <p className="url-preview">{this.props.previewText}</p>
         }
         <div className="note">
           <div className="title-bar">

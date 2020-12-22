@@ -5,7 +5,9 @@ export const GroupByContainer = styled.div`
 display:inline
 
 .title{
-
+ font-weight: bold;
+ font-size: 20px;
+ margin: 0px 0px 10px 0px;
 }
 .button-container {
     display: flex;

@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { FilterNotes as Container } from "../styles/FilterNotesStyle";
 import MiniSearchNote from "../components/MiniSearchNote";
 import { connect } from "react-redux";
+import { CreateFriendlyPreviewUrl } from "../utils/CreateFriendlyPreviewUrl";
 /* This component will take in some sort of parameter that will
 
 detail to it on how to sort all the notes.
@@ -33,7 +34,7 @@ class FilterNotes extends Component {
             // Comparing happens right here
             if (this.props.filter(note)) {
               foundItem = true;
-              return <MiniSearchNote key={note.id} {...note} website={key} showUrlPreview />;
+              return <MiniSearchNote key={note.id} {...note} website={key} showUrlPreview previewText={CreateFriendlyPreviewUrl(key)} />;
             }
           })}
         </div>

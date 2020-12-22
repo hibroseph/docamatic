@@ -23,3 +23,12 @@ test("Creates friendly url from http://github.com/issues/new?title=hello", () =>
 test("Creates friendly url from https://stackoverflow/issues/new?title=hello", () => {
     expect(CreateFriendlyPreviewUrl("https://stackoverflow/issues/new?title=hello")).toBe("stackoverflow/issues/new");
 })
+
+test("Creates friendly url from https://www.stackoverflow/issues/new?title=hello", () => {
+    expect(CreateFriendlyPreviewUrl("https://www.stackoverflow/issues/new?title=hello")).toBe("stackoverflow/issues/new");
+})
+
+
+test("Creates friendly url from https://www.google.com", () => {
+    expect(CreateFriendlyPreviewUrl("https://www.google.com")).toBe("google.com");
+})

@@ -87,6 +87,10 @@ class SortNotes extends Component {
     return Object.keys(newArray).sort(this.getSortingFunction(this.state.sortType)).map(key => newArray[key]);
   }
 
+  getSortedArrayWithUrl = (state) => {
+    return Object.keys(this.props.pages).sort((a, b) => this.getSortingFunction(this.state.sortType)(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));
+  }
+
   ascendingSort = (a, b) => {
     if (a < b) { return -1; }
     if (a > b) { return 1; }
@@ -105,52 +109,52 @@ class SortNotes extends Component {
     console.log(this.state)
     console.log(this.props.pages)
     return (
-      <div style={{ padding: "10px" }}>
+      <div style={{ padding: "10 0px 10px 10px" }}>
         <GroupByContainer>
           <p className="title">Sort By</p>
           <div className="button-container">
             <button onClick={() => this.handleClick('url')} className={this.state.groupBy == 'url' ? "selected" : ""}>Url</button>
             <button onClick={() => this.handleClick('date')} className={this.state.groupBy == 'date' ? "selected" : ""}>Date</button>
           </div>
-          {this.state.sortType == 'ascending' && <FontAwesomeIcon icon={faSortAlphaDown} onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
-          {this.state.sortType == 'descending' && <FontAwesomeIcon icon={faSortAlphaUp} onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
+          {this.state.sortType == 'ascending' && <FontAwesomeIcon icon={faSortAlphaDown} className="sortOrder" onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
+          {this.state.sortType == 'descending' && <FontAwesomeIcon icon={faSortAlphaUp} className="sortOrder" onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
         </GroupByContainer>
         <Container>
           {(() => {
             switch (this.state.groupBy) {
               case 'url':
                 return (
-                  <div>
-                    { Object.keys(this.props.pages)
-                      .sort(this.getSortingFunction(this.state.sortType))
+                  <div className="filter-results">
+                    { this.getSortedArrayWithUrl(this.state)
                       .map(key => {
-                        console.log("mapping key")
-                        console.log(key);
-                        return (
-                          <div>
-                            <div className="url-selector" onClick={() => this.handleTogglingNotes(key)}>
-                              {this.state.expandTabs.includes(key) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
-                                : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
-                              <h3 style={{ display: "inline" }}>{CreateFriendlyPreviewUrl(key)}</h3>
-                            </div>
-                            { this.state.expandTabs.includes(key) && <div>
-                              {
-                                this.props.pages[key].notes.map(note => {
-                                  return <MiniSearchNote {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></MiniSearchNote>
-                                })
+                        if (this.props.pages[key].notes.length > 0) {
+                          return (
+                            <div>
+                              <div className="url-selector" onClick={() => this.handleTogglingNotes(key)}>
+                                {this.state.expandTabs.includes(key) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
+                                  : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
+                                <h3 style={{ display: "inline" }}>{CreateFriendlyPreviewUrl(key)}</h3>
+                              </div>
+                              {this.state.expandTabs.includes(key) && <div>
+                                {
+                                  this.props.pages[key].notes.map(note => {
+                                    return <MiniSearchNote {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></MiniSearchNote>
+                                  })
+                                }
+                              </div>
                               }
                             </div>
-                            }
-                          </div>)
+                          )
+                        }
                       })}
                   </div>
                 )
               case 'date':
                 return (
-                  <div>
+                  <div className="filter-results">
                     { this.getArraySortedWithDates(this.props.pages).map(note => {
-                      console.log("lol hello");
-                      console.log(note);
+                      console.log("rendinger")
+                      console.log(note)
                       return (
                         <div>
                           <div className="url-selector" onClick={() => this.handleTogglingNotes(note.id)}>

@@ -9,7 +9,7 @@ export const SearchNotes = styled.div`
     top: 10px;
     box-sizing: border-box;
     border: none;
-    background-color: ${THEME.Primary};
+    background-color: #f1f1f1;
     color: white;
     font-size: 20px;
     font-weight: bold;
@@ -21,14 +21,14 @@ export const SearchNotes = styled.div`
   }
 
   .searchbox:hover {
-    background-color: ${THEME.Accent};
+    background-color: #d1d1d1;
   }
 
   .searchbox:active {
-    background-color: ${THEME.Active};
+    background-color: #919191;
   }
   .searchbox::placeholder {
-    color: white;
+    color: black;
   }
 
   .searchresults {

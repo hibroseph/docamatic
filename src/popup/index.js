@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { Store } from "react-chrome-redux";
-// import Popup from "./popup";
+import "fontsource-roboto"
 import Popup from "./newPopup";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");

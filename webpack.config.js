@@ -45,6 +45,14 @@ module.exports = {
             }
           }
         ]
+      }, {
+        test: /\.(ttf|woff|woff2?)$/,
+        use: {
+          loader: 'file-loader'
+          , options: {
+            name: 'css/fonts/[name]-[hash:8].[ext]'
+          }
+        }
       },
       {
         enforce: "pre",

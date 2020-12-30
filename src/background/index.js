@@ -10,8 +10,10 @@ Sentry.init({
   release: RELEASE + VERSION
 });
 
+let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9"
 const notesStorageKey = `notes-${window.location.href}`;
 
+chrome.runtime.setUninstallURL(feedbackUrl);
 // localStorage.setItem(notesStorageKey, '{"notes" : []}')
 // localStorage.setItem(notesStorageKey, '{}')
 

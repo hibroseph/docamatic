@@ -10,27 +10,7 @@ export const FilterNotes = styled.div`
 
   .filter-results {
     width: 100%;
-    height: 100%;
-    overflow: auto;
     background-color: transparent;
-  }
-
-  .filter-results::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .filter-results::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  .filter-results::-webkit-scrollbar-thumb {
-    background-color: lightgrey;
-    border-radius: 100px;
-    transition: all 0.1s ease-in-out;
-  }
-
-  .filter-results::-webkit-scrollbar-thumb:hover {
-    background-color: grey;
   }
 
   .url-selector {

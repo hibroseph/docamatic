@@ -1,27 +1,14 @@
 import React, { Component } from "react";
-import CurrentlyBuilding from "../assets/CurrentlyBuilding.png";
+import { SortNotesByDate } from '../components/SortNotesByDate';
+import { SortNotesByUrl } from "../components/SortNotesByUrl";
+import { SortingHeader } from "../components/SortingHeader";
 import { connect } from "react-redux";
-import { SortNotesFactory } from "../utils/SortNotes";
-// import { SearchNotes as Container } from "../styles/SearchNotesStyle";
 import { FilterNotes as Container } from "../styles/FilterNotesStyle";
-import MiniSearchNote from "../components/MiniSearchNote";
-import FilterNotes from "../components/FilterNotes";
-import { GroupByContainer } from "../elements/GroupByContainer";
-import {
-  faSortAlphaDown,
-  faSortAlphaUp,
-  faAngleRight,
-  faAngleDown
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "../../node_modules/@fortawesome/react-fontawesome/index";
-import { CreateFriendlyPreviewUrl } from "../utils/CreateFriendlyPreviewUrl";
-import { CreateFriendlyDate } from "../utils/CreateFriendlyDate";
+
 
 class SortNotes extends Component {
   constructor(props) {
     super(props);
-    console.log(this.state)
-    console.log(this.props)
     this.state = {
       groupBy: "url",
       expandTabs: [],
@@ -30,7 +17,6 @@ class SortNotes extends Component {
   }
 
   handleClick = (name) => {
-    console.log("setting state");
     this.setState({
       groupBy: name
     })
@@ -40,7 +26,6 @@ class SortNotes extends Component {
     if (this.state.expandTabs.includes(url)) {
       this.setState({
         expandTabs: this.state.expandTabs.filter(tab => {
-          console.log(tab + " : " + url + " = " + tab != url);
           return tab != url
         })
       })
@@ -49,7 +34,6 @@ class SortNotes extends Component {
         expandTabs: [...this.state.expandTabs, url]
       })
     }
-
   }
 
   handleToggleSortOrder = () => {
@@ -64,31 +48,13 @@ class SortNotes extends Component {
     }
   }
 
-  getSortingFunction = (sortType) => {
-    switch (sortType) {
+  getSortingFunction = () => {
+    switch (this.state.sortType) {
       case 'ascending':
         return this.ascendingSort;
       case 'descending':
         return this.descendingSort;
     }
-  }
-
-  getArraySortedWithDates = (state) => {
-    console.log("getting new array")
-    let newArray = {};
-
-    Object.keys(state).map(key => {
-      state[key].notes.map(note => {
-        newArray[note.date_created] = { ...note, url: key };
-      })
-    })
-    console.log("sorted array")
-    console.log(Object.keys(newArray).sort(this.getSortingFunction(this.state.sortType)).map(key => newArray[key]));
-    return Object.keys(newArray).sort(this.getSortingFunction(this.state.sortType)).map(key => newArray[key]);
-  }
-
-  getSortedArrayWithUrl = (state) => {
-    return Object.keys(this.props.pages).sort((a, b) => this.getSortingFunction(this.state.sortType)(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));
   }
 
   ascendingSort = (a, b) => {
@@ -105,70 +71,34 @@ class SortNotes extends Component {
 
 
   render() {
-    console.log("render state")
-    console.log(this.state)
-    console.log(this.props.pages)
     return (
       <div style={{ padding: "10 0px 10px 10px" }}>
-        <GroupByContainer>
-          <p className="title">Sort By</p>
-          <div className="button-container">
-            <button onClick={() => this.handleClick('url')} className={this.state.groupBy == 'url' ? "selected" : ""}>Url</button>
-            <button onClick={() => this.handleClick('date')} className={this.state.groupBy == 'date' ? "selected" : ""}>Date</button>
-          </div>
-          {this.state.sortType == 'ascending' && <FontAwesomeIcon icon={faSortAlphaDown} className="sortOrder" onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
-          {this.state.sortType == 'descending' && <FontAwesomeIcon icon={faSortAlphaUp} className="sortOrder" onClick={this.handleToggleSortOrder}></FontAwesomeIcon>}
-        </GroupByContainer>
+        <SortingHeader
+          handleClick={selectedItem => this.handleClick(selectedItem)}
+          groupBy={this.state.groupBy}
+          sortType={this.state.sortType}
+          handleToggleSortOrder={() => this.handleToggleSortOrder()}>
+        </SortingHeader>
         <Container>
           {(() => {
             switch (this.state.groupBy) {
               case 'url':
                 return (
-                  <div className="filter-results">
-                    { this.getSortedArrayWithUrl(this.state)
-                      .map(key => {
-                        if (this.props.pages[key].notes.length > 0) {
-                          return (
-                            <div>
-                              <div className="url-selector" onClick={() => this.handleTogglingNotes(key)}>
-                                {this.state.expandTabs.includes(key) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
-                                  : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
-                                <h3 style={{ display: "inline" }}>{CreateFriendlyPreviewUrl(key)}</h3>
-                              </div>
-                              {this.state.expandTabs.includes(key) && <div>
-                                {
-                                  this.props.pages[key].notes.map(note => {
-                                    return <MiniSearchNote {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></MiniSearchNote>
-                                  })
-                                }
-                              </div>
-                              }
-                            </div>
-                          )
-                        }
-                      })}
-                  </div>
+                  <SortNotesByUrl
+                    pages={this.props.pages}
+                    getSortedArrayWithUrl={() => this.getSortedArrayWithUrl()}
+                    handleTogglingNotes={key => this.handleTogglingNotes(key)}
+                    expandTabs={this.state.expandTabs}
+                    getSortingFunction={() => this.getSortingFunction()}
+                  ></SortNotesByUrl>
                 )
               case 'date':
                 return (
-                  <div className="filter-results">
-                    { this.getArraySortedWithDates(this.props.pages).map(note => {
-                      console.log("rendinger")
-                      console.log(note)
-                      return (
-                        <div>
-                          <div className="url-selector" onClick={() => this.handleTogglingNotes(note.id)}>
-                            {this.state.expandTabs.includes(note.id) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
-                              : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
-                            <h3 style={{ display: "inline" }}>{CreateFriendlyDate(note.date_created)}</h3>
-                          </div>
-                          {
-                            this.state.expandTabs.includes(note.id) && <MiniSearchNote {...note} website={note.url}></MiniSearchNote>
-                          }
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <SortNotesByDate
+                    pages={this.props.pages}
+                    getSortingFunction={() => this.getSortingFunction()}
+                    handleTogglingNotes={(key) => this.handleTogglingNotes(key)}
+                    expandTabs={this.state.expandTabs}></SortNotesByDate>
                 )
               default:
                 return (
@@ -186,8 +116,6 @@ class SortNotes extends Component {
 
 export default connect(
   state => {
-    console.log("connect")
-    console.log(state)
     return { pages: state };
   }, null
 )(SortNotes);

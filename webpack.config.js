@@ -75,7 +75,7 @@ module.exports = {
     // copy extension manifest and icons
     new CopyWebpackPlugin([
       { from: "./src/manifest.json" },
-      { context: "./icons/", from: "icon*", to: "./icons/" }
+      { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }
     ]),
     new CleanWebpackPlugin(["dist"]),
     new ManifestPlugin({ fileName: "assetManifest.json" }),

@@ -81,7 +81,7 @@ module.exports = {
     }),
     new CleanWebpackPlugin(["dist"]),
     new ManifestPlugin({ fileName: "assetManifest.json" }),
-    new WebpackShellPlugin({ onBuildStart: ["rm -rf dist/"], onBuildEnd: ["node refreshPaths.js"] })
+    new WebpackShellPlugin({ onBuildStart: ["rm -rf dist/"], onBuildExit: ["node refreshPaths.js"] })
   ],
   devtool: "source-map"
 };

@@ -42,5 +42,12 @@ button:hover {
 }
 
 .sortOrder {
+    width: 1em;
+    padding: 6px;
+}
+
+.sortOrder:hover {
+    background-color: #c1c1c1;
+    border-radius: 10px;
 }
 `

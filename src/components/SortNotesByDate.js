@@ -56,7 +56,7 @@ export const SortNotesByDate = props =>
                     <div className="url-selector" onClick={() => props.handleTogglingNotes(noteGroup.date)}>
                         {props.expandTabs.includes(noteGroup.date) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
                             : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
-                        <h3 style={{ display: "inline" }}>{CreateFriendlyDate(noteGroup.date)}</h3>
+                        <h3 style={{ display: "inline" }}>{CreateFriendlyDate(noteGroup.date, props.groupingKey)}</h3>
                     </div>
                     {noteGroup.notes.map(note => {
                         return (<div>

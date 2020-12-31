@@ -7,31 +7,65 @@ import {
 import { CreateFriendlyDate } from "../utils/CreateFriendlyDate";
 import MiniSearchNote from "../components/MiniSearchNote";
 
-const getArraySortedWithDates = (pages, sortType) => {
+const getGroupingDateKey = (groupByDate, date) => {
+    let date = new Date(date);
+    switch (groupByDate) {
+        case "day":
+            date.setSeconds(0, 0);
+            date.setMinutes(0, 0);
+            date.setHours(0, 0);
+        case "hour":
+            date.setMinutes(0, 0);
+            date.setSeconds(0, 0);
+            return date.valueOf();
+        case "minute":
+            date.setSeconds(0, 0);
+            return date.valueOf();
+        case "second":
+            return date.valueOf();
+
+    }
+}
+
+const getArraySortedWithDates = (pages, sortType, groupingKey) => {
     let newArray = {};
 
     Object.keys(pages).map(key => {
         pages[key].notes.map(note => {
-            newArray[note.date_created] = { ...note, url: key };
+            if (newArray[getGroupingDateKey(groupingKey, note.date_created)] == undefined) {
+                newArray[getGroupingDateKey(groupingKey, note.date_created)] = [{ ...note, url: key }]
+            } else {
+                newArray[getGroupingDateKey(groupingKey, note.date_created)].push({ ...note, url: key });
+            }
         })
     })
-    return Object.keys(newArray).sort(sortType).map(key => newArray[key]);
+
+    console.log(newArray);
+    console.log(Object.keys(newArray))
+    console.log(Object.keys(newArray).sort(sortType).map(key => Object.assign({}, { date: key }, { notes: newArray[key] })));
+    return Object.keys(newArray).sort(sortType).map(key => Object.assign({}, { date: key }, { notes: newArray[key] }));
+
 }
 
 export const SortNotesByDate = props =>
     <div className="filter-results">
-        {getArraySortedWithDates(props.pages, props.getSortingFunction()).map(note => {
+        {getArraySortedWithDates(props.pages, props.getSortingFunction(), props.groupingKey).map(noteGroup => {
+
             return (
                 <div>
-                    <div className="url-selector" onClick={() => props.handleTogglingNotes(note.id)}>
-                        {props.expandTabs.includes(note.id) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
+                    <div className="url-selector" onClick={() => props.handleTogglingNotes(noteGroup.date)}>
+                        {props.expandTabs.includes(noteGroup.date) ? <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
                             : <FontAwesomeIcon className="caret-icon" icon={faAngleRight}></FontAwesomeIcon>}
-                        <h3 style={{ display: "inline" }}>{CreateFriendlyDate(note.date_created)}</h3>
+                        <h3 style={{ display: "inline" }}>{CreateFriendlyDate(noteGroup.date)}</h3>
                     </div>
-                    {
-                        props.expandTabs.includes(note.id) && <MiniSearchNote {...note} website={note.url}></MiniSearchNote>
-                    }
-                </div>
-            )
+                    {noteGroup.notes.map(note => {
+                        return (<div>
+                            {
+                                props.expandTabs.includes(noteGroup.date) && <MiniSearchNote {...note} website={note.url}></MiniSearchNote>
+                            }
+                        </div>)
+                    })}
+                </div>)
+
         })}
     </div>

@@ -4,12 +4,15 @@ export const GroupByContainer = styled.div`
 
 background-color: #f1f1f1;
 border-radius: 15px;
-display: flex;
-justify-content: space-evenly;
-align-items: center
-height: 40px;
-margin-right: 10px;
 
+.first-row {
+    margin-right: 10px;
+}
+.row {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center
+}
 .title{
  font-weight: bold;
  font-size: 20px;

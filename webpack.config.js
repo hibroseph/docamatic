@@ -73,10 +73,12 @@ module.exports = {
       template: "./src/popup/index.html"
     }),
     // copy extension manifest and icons
-    new CopyWebpackPlugin([
-      { from: "./src/manifest.json" },
-      { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "./src/manifest.json" },
+        { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }
+      ]
+    }),
     new CleanWebpackPlugin(["dist"]),
     new ManifestPlugin({ fileName: "assetManifest.json" }),
     new WebpackShellPlugin({ onBuildStart: ["rm -rf dist/"], onBuildEnd: ["node refreshPaths.js"] })

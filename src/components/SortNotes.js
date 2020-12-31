@@ -13,6 +13,7 @@ class SortNotes extends Component {
       groupBy: "url",
       expandTabs: [],
       sortType: "ascending",
+      dateGroupingKey: "minute"
     }
   }
 
@@ -69,6 +70,11 @@ class SortNotes extends Component {
     return 0;
   }
 
+  handleDateGroupingKey = (event) => {
+    console.log("YOU CHANGED IT")
+    console.log(event)
+    this.setState({ dateGroupingKey: event.target.value })
+  }
 
   render() {
     return (
@@ -77,7 +83,9 @@ class SortNotes extends Component {
           handleClick={selectedItem => this.handleClick(selectedItem)}
           groupBy={this.state.groupBy}
           sortType={this.state.sortType}
-          handleToggleSortOrder={() => this.handleToggleSortOrder()}>
+          handleToggleSortOrder={() => this.handleToggleSortOrder()}
+          handleDateGroupingKey={(event) => { console.log("lol"); this.handleDateGroupingKey(event) }}
+          dateGroupingKey={this.state.dateGroupingKey}>
         </SortingHeader>
         <Container>
           {(() => {
@@ -98,7 +106,9 @@ class SortNotes extends Component {
                     pages={this.props.pages}
                     getSortingFunction={() => this.getSortingFunction()}
                     handleTogglingNotes={(key) => this.handleTogglingNotes(key)}
-                    expandTabs={this.state.expandTabs}></SortNotesByDate>
+                    expandTabs={this.state.expandTabs}
+                    groupingKey={this.state.dateGroupingKey}
+                  ></SortNotesByDate>
                 )
               default:
                 return (

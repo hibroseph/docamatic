@@ -70,10 +70,10 @@ class SortNotes extends Component {
     return 0;
   }
 
-  handleDateGroupingKey = (event) => {
+  handleDateGroupingKey = (key) => {
     console.log("YOU CHANGED IT")
-    console.log(event)
-    this.setState({ dateGroupingKey: event.target.value })
+    console.log(key)
+    this.setState({ dateGroupingKey: key })
   }
 
   render() {
@@ -84,7 +84,7 @@ class SortNotes extends Component {
           groupBy={this.state.groupBy}
           sortType={this.state.sortType}
           handleToggleSortOrder={() => this.handleToggleSortOrder()}
-          handleDateGroupingKey={(event) => { console.log("lol"); this.handleDateGroupingKey(event) }}
+          handleDateGroupingKey={(key) => this.handleDateGroupingKey(key)}
           dateGroupingKey={this.state.dateGroupingKey}>
         </SortingHeader>
         <Container>

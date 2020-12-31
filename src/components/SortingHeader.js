@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { GroupByContainer } from "../elements/GroupByContainer";
 import {
     faSortAlphaDown,
@@ -6,33 +6,41 @@ import {
     faSort
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "../../node_modules/@fortawesome/react-fontawesome/index";
+import { DocamaticButton } from "../elements/DocamaticButton";
+import { DateGroupByMenu } from "../elements/DateGroupByMenu";
+import useComponentVisible from "../utils/useComponentVisible";
 
-const toggleDateSortOptions = () => {
-
+const DetermineSelectedGroupByButton = (groupedByKey, key) => {
+    if (key == groupedByKey) {
+        return 'selected';
+    } else {
+        return '';
+    }
 }
-
-export const SortingHeader = props =>
-    <GroupByContainer>
-        <div className="row first-row">
-            <p className="title">Sort By</p>
-            <div className="button-container">
-                <button onClick={() => props.handleClick('url')} className={props.groupBy == 'url' ? "selected" : ""}>Url</button>
-                <button onClick={() => props.handleClick('date')} className={props.groupBy == 'date' ? "selected" : ""}>Date</button>
+export const SortingHeader = props => {
+    const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
+    console.log(setIsComponentVisible)
+    return (<div>
+        <GroupByContainer>
+            <div className="row first-row">
+                <p className="title">Sort By</p>
+                <div className="button-container">
+                    <DocamaticButton onClick={() => props.handleClick('url')} className={props.groupBy == 'url' ? "selected" : ""}>Url</DocamaticButton>
+                    <DocamaticButton onClick={() => props.handleClick('date')} className={props.groupBy == 'date' ? "selected" : ""}>Date</DocamaticButton>
+                </div>
+                {props.sortType == 'ascending' && <FontAwesomeIcon icon={faSortAlphaDown} className="sortOrder" onClick={props.handleToggleSortOrder}></FontAwesomeIcon>}
+                {props.sortType == 'descending' && <FontAwesomeIcon icon={faSortAlphaUp} className="sortOrder" onClick={props.handleToggleSortOrder}></FontAwesomeIcon>}
+                {props.groupBy == 'date' && <FontAwesomeIcon icon={faSort} className={`sortOrder ${isComponentVisible ? "selected" : ""}`} onClick={() => setIsComponentVisible(!isComponentVisible)}></FontAwesomeIcon>}
             </div>
-            {props.sortType == 'ascending' && <FontAwesomeIcon icon={faSortAlphaDown} className="sortOrder" onClick={props.handleToggleSortOrder}></FontAwesomeIcon>}
-            {props.sortType == 'descending' && <FontAwesomeIcon icon={faSortAlphaUp} className="sortOrder" onClick={props.handleToggleSortOrder}></FontAwesomeIcon>}
-            {props.groupBy == 'date' && <FontAwesomeIcon icon={faSort} className="sortOrder" onClick={() => toggleDateSortOptions()}></FontAwesomeIcon>}
-        </div>
-        {/*
-            <div>
-                <p>Group By</p>
-                {props.groupBy == 'date' &&
-                    <select name="group dates" value={props.dateGroupingKey} onChange={props.handleDateGroupingKey}>
-                        <option value="second">Seconds</option>
-                        <option value="minute">Minutes</option>
-                        <option value="hour">Hours</option>
-                        <option value="day">Days</option>
-                    </select>}
-            </div>
-        */}
-    </GroupByContainer>
+        </GroupByContainer>
+        {
+            isComponentVisible && <DateGroupByMenu ref={ref}>
+                <div className="title">Group By</div>
+                <DocamaticButton onClick={() => props.handleDateGroupingKey('second')} className={DetermineSelectedGroupByButton(props.dateGroupingKey, 'second')}>Seconds</DocamaticButton>
+                <DocamaticButton onClick={() => props.handleDateGroupingKey('minute')} className={DetermineSelectedGroupByButton(props.dateGroupingKey, 'minute')}>Minutes</DocamaticButton>
+                <DocamaticButton onClick={() => props.handleDateGroupingKey('hour')} className={DetermineSelectedGroupByButton(props.dateGroupingKey, 'hour')}>Hours</DocamaticButton>
+                <DocamaticButton onClick={() => props.handleDateGroupingKey('day')} className={DetermineSelectedGroupByButton(props.dateGroupingKey, 'day')}>Days</DocamaticButton>
+            </DateGroupByMenu>
+        }
+    </div>)
+}

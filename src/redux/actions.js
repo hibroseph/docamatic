@@ -74,7 +74,12 @@ export function addTitle(id, text, url) {
   };
 }
 
-export function addText(id, text, title, url) {
+export function addText(id, text, url) {
+  console.log("addText in action")
+  console.log(id)
+  console.log(text)
+  console.log(url)
+  console.log("end of action logging")
   return {
     type: ADD_TEXT,
     id: id,
@@ -95,6 +100,8 @@ export function addNote(title, id, y_position, url) {
 }
 
 export function removeNote(id, url) {
+
+  console.log("remove note in action")
   return {
     type: REMOVE_NOTE,
     id,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 import { Rnd } from "react-rnd";
 import { NoteContainer as Container } from "../styles/NoteStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,40 +9,22 @@ import {
   faThumbtack,
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
-
+import { useInputControls } from "../utils/useInputControls";
 import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
 import ColorSwatch from "./ColorSwatch";
 
-/*
-  there currently is a glitch in the space time when you move a card. I think it has to do with the props
-  not getting set fast enough so the note glitches back since we are setting the current position to be the y position
-*/
 const Note = props => {
-  const [noteBodyCursorPosition, setNoteBodyCursorPosition] = useState(0);
-  const [noteTitleCursorPosition, setNoteTitleCursorPosition] = useState(0);
 
-  /* Using controlled inputs (the title input and body textarea requires us to 
-    manually manipulate where the cursor is pointing at
-    */
-  const textAreaRef = useRef(null);
-  const titleRef = useRef(null);
-
-  useEffect(() => {
-    textAreaRef.current.selectionStart = noteBodyCursorPosition;
-    textAreaRef.current.selectionEnd = noteBodyCursorPosition;
-
-    titleRef.current.selectionStart = noteTitleCursorPosition;
-    titleRef.current.selectionEnd = noteTitleCursorPosition;
-  })
+  const controls = useInputControls();
 
   const titleChange = event => {
     props.onTitleChange(event);
-    setNoteTitleCursorPosition(event.target.selectionStart);
+    controls.title.setCursorPosition(event.target.selectionStart);
   }
 
   const bodyChange = event => {
     props.onBodyChange(event);
-    setNoteBodyCursorPosition(event.target.selectionStart)
+    controls.body.setCursorPosition(event.target.selectionStart)
   }
 
   return (
@@ -83,7 +65,7 @@ const Note = props => {
       <Container stickify={props.stickify} color={props.color}>
         <div className="title">
           <input
-            ref={titleRef}
+            ref={controls.title.ref}
             style={{ margin: 0 }}
             value={props.title}
             onChange={titleChange}
@@ -124,7 +106,7 @@ const Note = props => {
 
         <div className="body">
           <textarea
-            ref={textAreaRef}
+            ref={controls.body.ref}
             onChange={bodyChange}
             value={props.body} />
         </div>

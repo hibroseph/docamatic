@@ -19,6 +19,7 @@ for (let i = 0, length = assetKeys.length; i < length; i++) {
   manifestString = manifestString.replace(assetKeys[i], assets[assetKeys[i]]);
 }
 
+
 fs.writeFileSync("./dist/manifest.json", manifestString);
 
 console.log("Refreshed all paths and saved new manifest.json 👍");

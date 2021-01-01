@@ -36,7 +36,7 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
               onStickifyClick={() => this.props.onStickify(note.id, this.props.url)}
               onDeleteClick={() => this.props.onDeleteClick(note.id, this.props.url)}
               onBodyChange={event =>
-                this.props.onTextChange(note.id, event.target.value, note.title, this.props.url)
+                this.props.onTextChange(note.id, event.target.value, this.props.url)
               }
               onTitleChange={event =>
                 this.props.onTitleChange(note.id, event.target.value, this.props.url)
@@ -76,7 +76,7 @@ const mapDispatchToProps = dispatch => ({
   onSizeChange: (id, x, y, url) => dispatch(updateNoteSize(id, x, y, url)),
   onAddClick: (text, url) => dispatch(addNote(text, url)),
   onDeleteClick: (id, url) => dispatch(removeNote(id, url)),
-  onTextChange: (id, text, title, url) => dispatch(addText(id, text, title, url)),
+  onTextChange: (id, text, url) => dispatch(addText(id, text, url)),
   onTitleChange: (id, text, url) => dispatch(addTitle(id, text, url)),
   onPositionChange: (id, x, y, url) => dispatch(updateNotePosition(id, x, y, url)),
   onColorChange: (id, color, url) => dispatch(changeNoteColor(id, url, color)),

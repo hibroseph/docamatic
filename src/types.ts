@@ -17,7 +17,7 @@ export interface NoteListProps {
   onHeartify: (id: number, url: string) => void;
   onStickify: (id: number, url: string) => void;
   onDeleteClick: (id: number, url: string) => void;
-  onTextChange: (id: number, body: string, title: string, url: string) => void;
+  onTextChange: (id: number, body: string, url: string) => void;
   onTitleChange: (id: number, title: string, url: string) => void;
   onPositionChange: (id: number, x: number, y: number, url: string) => void;
   onNoteClicked: (id: number, url: string) => void;

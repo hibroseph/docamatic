@@ -1,61 +1,84 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { MiniSearchNoteContainer } from "../elements/MiniSearchNoteContainer";
-import { CreateFriendlyPreviewUrl } from "../utils/CreateFriendlyPreviewUrl"
-class MiniSearchNote extends Component {
-  render() {
-    // Two arrays to construct the bolded queries
-    // let bodyBoldedSearchQuery = [];
-    // let titleBoldedSearchQuery = [];
+import {
+  faTrashAlt,
+  faExternalLinkAlt
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { connect } from "react-redux";
+import { removeNote, addTitle, addText } from "../redux/actions";
+import { useInputControls } from "../utils/useInputControls";
+import { Editor, EditorState, ContentState } from 'draft-js';
+import 'draft-js/dist/Draft.css';
 
-    // let i = 0;
+const MiniSearchNote = props => {
 
-    // // To bold the search query in the title
-    // for (i; i < this.props.titleSplitAtQueryText.length; i++) {
-    //   titleBoldedSearchQuery.push(
-    //     <span>{this.props.titleSplitAtQueryText[i]}</span>
-    //   );
+  //const controls = useInputControls();
 
-    //   // Check to add only 1 search query NOT at the end
-    //   if (i < this.props.titleSplitAtQueryText.length - 1) {
-    //     titleBoldedSearchQuery.push(<b>{this.props.searchQuery}</b>);
-    //   }
-    // }
+  const titleChange = event => {
+    props.onNoteTitleChange(props.id, event.target.value, props.website);
+    //controls.title.setCursorPosition(event.target.selectionStart);
+  }
 
-    // i = 0;
+  const bodyChange = event => {
+    console.log("there was a body change")
+    console.log(event)
+    //controls.body.ref.current.style.height = calculateHeight(event.target.value);
+    props.onNoteBodyChange(props.id, event.target.value, props.website)
+    //controls.body.setCursorPosition(event.target.selectionStart);
+  }
+  console.log(props.body)
+  const [editorState, setEditorState] = useState(() => EditorState.createWithContent(props.body));
 
-    // // To bold the search query in the body
-    // for (i; i < this.props.bodySplitAtQueryText.length; i++) {
-    //   bodyBoldedSearchQuery.push(
-    //     <span>{this.props.bodySplitAtQueryText[i]}</span>
-    //   );
-    //   //   Ledt's make sure the last search Query doesn't appear
-    //   if (i < this.props.bodySplitAtQueryText.length - 1) {
-    //     bodyBoldedSearchQuery.push(<b>{this.props.searchQuery}</b>);
-    //   }
-    // }
+  useEffect(() => {
+    console.log("effect")
+    console.log(editorState.getCurrentContent())
 
-    return (
-      <MiniSearchNoteContainer
-        color={this.props.color}
-        onClick={() => {
-          window.open(this.props.website, "_blank");
-        }}
-      >
-        {this.props.showUrlPreview != null &&
-          <p className="url-preview">{this.props.previewText}</p>
-        }
-        <div className="note">
-          <div className="title-bar">
-            <div> {this.props.title} </div>
-          </div>
-
-          <div className="body">
-            <div>{this.props.body}</div>
+    props.onNoteBodyChange(props.id, editorState.getCurrentContent(), props.website)
+  })
+  return (
+    <MiniSearchNoteContainer
+      color={props.color}
+    >
+      {props.showUrlPreview != null &&
+        <p className="url-preview">{props.previewText}</p>
+      }
+      <div className="note">
+        <div className="title-bar">
+          <input
+            id={"title"}
+            //ref={controls.title.ref}
+            value={props.title}
+            onChange={titleChange}></input>
+          <div className="manageIcons">
+            <FontAwesomeIcon
+              className="icon"
+              icon={faExternalLinkAlt}
+              onClick={() => {
+                window.open(props.website, "_blank")
+              }}
+            ></FontAwesomeIcon>
+            <FontAwesomeIcon
+              className="icon"
+              icon={faTrashAlt}
+              onClick={(event) => {
+                props.onDeleteClick(props.id, props.website)
+                event.stopPropagation();
+              }}
+            />
           </div>
         </div>
-      </MiniSearchNoteContainer>
-    );
-  }
+        <Editor editorState={editorState} onChange={setEditorState} />
+      </div>
+    </MiniSearchNoteContainer>
+  );
 }
 
-export default MiniSearchNote;
+
+const mapDispatchToProps = dispatch => ({
+  onDeleteClick: (id, url) => dispatch(removeNote(id, url)),
+  onNoteBodyChange: (id, text, url) => dispatch(addText(id, text, url)),
+  onNoteTitleChange: (id, text, url) => dispatch(addTitle(id, text, url))
+});
+
+export default connect(null, mapDispatchToProps)(MiniSearchNote);

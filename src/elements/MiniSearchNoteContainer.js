@@ -22,7 +22,8 @@ export const MiniSearchNoteContainer = styled.div`
     font-weight: bold;
   }
 
-  div#body {
+  #body {
+    overflow-y: hidden;
     width: 100%;
     box-sizing: border-box;
     font-family: Roboto, Arial, Helvetica, sans-serif;
@@ -31,6 +32,7 @@ export const MiniSearchNoteContainer = styled.div`
     background-color: transparent;
     border: none;
     resize: none;
+    transition: height .3s ease-out;
   }
 
   .manageIcons {

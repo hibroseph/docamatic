@@ -16,6 +16,7 @@
     "react": "^16.12.0",
     "react-chrome-redux": "^2.0.0-alpha.4",
     "react-color": "^2.18.0",
+    "react-contenteditable": "^3.3.5",
     "react-dom": "^16.12.0",
     "react-redux": "6.0.0",
     "react-rnd": "^9.2.0",

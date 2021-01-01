@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef } from "react";
 import { MiniSearchNoteContainer } from "../elements/MiniSearchNoteContainer";
 import {
   faTrashAlt,
@@ -8,34 +8,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { connect } from "react-redux";
 import { removeNote, addTitle, addText } from "../redux/actions";
 import { useInputControls } from "../utils/useInputControls";
-import { Editor, EditorState, ContentState } from 'draft-js';
-import 'draft-js/dist/Draft.css';
+import ContentEditable from 'react-contenteditable'
 
 const MiniSearchNote = props => {
 
-  //const controls = useInputControls();
-
+  const controls = useInputControls();
+  const bodyRef = useRef(null);
   const titleChange = event => {
     props.onNoteTitleChange(props.id, event.target.value, props.website);
-    //controls.title.setCursorPosition(event.target.selectionStart);
+    controls.title.setCursorPosition(event.target.selectionStart);
   }
 
   const bodyChange = event => {
-    console.log("there was a body change")
-    console.log(event)
     //controls.body.ref.current.style.height = calculateHeight(event.target.value);
     props.onNoteBodyChange(props.id, event.target.value, props.website)
     //controls.body.setCursorPosition(event.target.selectionStart);
   }
-  console.log(props.body)
-  const [editorState, setEditorState] = useState(() => EditorState.createWithContent(props.body));
-
-  useEffect(() => {
-    console.log("effect")
-    console.log(editorState.getCurrentContent())
-
-    props.onNoteBodyChange(props.id, editorState.getCurrentContent(), props.website)
-  })
   return (
     <MiniSearchNoteContainer
       color={props.color}
@@ -47,7 +35,7 @@ const MiniSearchNote = props => {
         <div className="title-bar">
           <input
             id={"title"}
-            //ref={controls.title.ref}
+            ref={controls.title.ref}
             value={props.title}
             onChange={titleChange}></input>
           <div className="manageIcons">
@@ -68,7 +56,12 @@ const MiniSearchNote = props => {
             />
           </div>
         </div>
-        <Editor editorState={editorState} onChange={setEditorState} />
+        <ContentEditable
+          id="body"
+          innerRef={bodyRef}
+          html={props.body}
+          onChange={bodyChange}
+        ></ContentEditable>
       </div>
     </MiniSearchNoteContainer>
   );
@@ -77,7 +70,7 @@ const MiniSearchNote = props => {
 
 const mapDispatchToProps = dispatch => ({
   onDeleteClick: (id, url) => dispatch(removeNote(id, url)),
-  onNoteBodyChange: (id, text, url) => dispatch(addText(id, text, url)),
+  onNoteBodyChange: (id, text, url) => { console.log("lol"); dispatch(addText(id, text, url)) },
   onNoteTitleChange: (id, text, url) => dispatch(addTitle(id, text, url))
 });
 

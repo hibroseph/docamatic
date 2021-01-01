@@ -1,7 +1,6 @@
 // const INITIAL_NOTE_WIDTH = 250;
 // const INITIAL_NOTE_HEIGHT = 400;
 
-import { ContentState } from 'draft-js';
 import {
   COLORS as colorList,
   INITIAL_NOTE_HEIGHT,
@@ -203,11 +202,8 @@ const notesApp = (state = [], action) => {
       let r = parseInt(colorList[colorIndex].substr(1, 2), 16);
       let g = parseInt(colorList[colorIndex].substr(3, 2), 16);
       let b = parseInt(colorList[colorIndex].substr(5, 2), 16);
-      console.log("In reducer before ADDing_NOTE")
       let yiq = (r * 299 + g * 587 + b * 114) / 1000;
-      const lol = ContentState.createFromText(NoteMessages[noteTextIndex])
-      console.log("In reducer ADD_NOTE")
-      console.log(lol)
+
       // If there are notes already on the page
       if (state[action.url] == null) {
         return Object.assign({}, state, {
@@ -220,7 +216,7 @@ const notesApp = (state = [], action) => {
                   width: INITIAL_NOTE_WIDTH,
                   height: INITIAL_NOTE_HEIGHT
                 },
-                body: lol,
+                body: NoteMessages[noteTextIndex],
                 title: action.title,
                 // color: colorList[colorIndex],
                 // contrastColor: yiq >= 128 ? "#000" : "#fff",

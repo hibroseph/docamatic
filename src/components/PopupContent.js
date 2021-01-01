@@ -5,6 +5,7 @@ import HeartNotes from "./HeartNotes";
 import SortNotes from "./SortNotes";
 import Settings from "./Settings";
 import Alerts from "./Settings";
+import CurrentPageNotes from './CurrentPageNotes'
 import NoAddedNotes from "../assets/NoAddedNotes.png"
 import Welcome from "../assets/Welcome.png";
 import FilterNotes from "./FilterNotes";
@@ -25,14 +26,7 @@ export const PopupContent = props => {
             return <Alerts></Alerts>;
           default:
             return (
-              <div>
-                <FilterNotes
-                  filter={note => {
-                    return true
-                  }}
-                  noResultsImg={NoAddedNotes}
-                ></FilterNotes>
-              </div>
+              <CurrentPageNotes></CurrentPageNotes>
             );
         }
       })()}

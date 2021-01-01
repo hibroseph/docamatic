@@ -15,8 +15,8 @@ export const useInputControls = () => {
     const titleRef = useRef(null);
 
     useEffect(() => {
-        textAreaRef.current.selectionStart = noteBodyCursorPosition;
-        textAreaRef.current.selectionEnd = noteBodyCursorPosition;
+        //textAreaRef.current.selectionStart = noteBodyCursorPosition;
+        //textAreaRef.current.selectionEnd = noteBodyCursorPosition;
 
         titleRef.current.selectionStart = noteTitleCursorPosition;
         titleRef.current.selectionEnd = noteTitleCursorPosition;

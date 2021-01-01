@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Rnd } from "react-rnd";
 import { NoteContainer as Container } from "../styles/NoteStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,11 +12,12 @@ import {
 import { useInputControls } from "../utils/useInputControls";
 import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
 import ColorSwatch from "./ColorSwatch";
+import ContentEditable from 'react-contenteditable'
 
 const Note = props => {
 
   const controls = useInputControls();
-
+  const bodyRef = useRef(null);
   const titleChange = event => {
     props.onTitleChange(event);
     controls.title.setCursorPosition(event.target.selectionStart);
@@ -24,7 +25,7 @@ const Note = props => {
 
   const bodyChange = event => {
     props.onBodyChange(event);
-    controls.body.setCursorPosition(event.target.selectionStart)
+    //controls.body.setCursorPosition(event.target.selectionStart)
   }
 
   return (
@@ -103,13 +104,12 @@ const Note = props => {
             ></ColorSwatch>
           </div>
         </div>
-
-        <div className="body">
-          <textarea
-            ref={controls.body.ref}
-            onChange={bodyChange}
-            value={props.body} />
-        </div>
+        <ContentEditable
+          id="body"
+          innerRef={bodyRef}
+          html={props.body}
+          onChange={bodyChange}>
+        </ContentEditable>
       </Container>
     </Rnd>
   );

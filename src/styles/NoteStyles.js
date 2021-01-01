@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const NoteContainer = styled.div`
   position: absolute !important;
   width: 100% !important;
-  height: 100% !important;
   background-color: #f5f5f5 !important;
   border-radius: 10px 10px 0 0 !important;
   box-sizing: border-box !important;
@@ -14,6 +13,18 @@ export const NoteContainer = styled.div`
     width: 8px !important;
   }
 
+  #body {
+    overflow-y: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: Roboto, Arial, Helvetica, sans-serif;
+    outline: none;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    resize: none;
+    transition: height .3s ease-out;
+  }
   textarea::-webkit-scrollbar-track {
     background-color: transparent !important;
   }

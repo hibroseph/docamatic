@@ -15,6 +15,10 @@ export const IconListStyle = styled.div`
     color: white;
   }
 
+  .selected {
+    background-color: #0b7bad;
+  }
+  
   .icon:hover {
     background-color: ${THEME.Accent};
   }

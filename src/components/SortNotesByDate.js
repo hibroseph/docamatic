@@ -39,10 +39,6 @@ const getArraySortedWithDates = (pages, sortType, groupingKey) => {
             }
         })
     })
-
-    console.log(newArray);
-    console.log(Object.keys(newArray))
-    console.log(Object.keys(newArray).sort(sortType).map(key => Object.assign({}, { date: key }, { notes: newArray[key] })));
     return Object.keys(newArray).sort(sortType).map(key => Object.assign({}, { date: key }, { notes: newArray[key] }));
 
 }

@@ -6,6 +6,7 @@ import {
   faArrowLeft,
   faArrowsAlt,
   faHeart,
+  faEye,
   faThumbtack,
   faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
@@ -81,17 +82,15 @@ const Note = props => {
                 onClick={props.onHeartifyClick}
                 icon={props.heart ? faHeart : fasHeart}
               ></FontAwesomeIcon>
-              {/* <FontAwesomeIcon
-                className="icons"
-                icon={faThumbtack}
-                onClick={props.onStickifyClick}
-                style={{ color: props.stickify ? props.color.text : "grey" }}
-              ></FontAwesomeIcon> */}
               <FontAwesomeIcon
                 onClick={props.onDeleteClick}
                 className="icons"
                 icon={faTrashAlt}
               />
+              <FontAwesomeIcon
+                onClick={props.onHideNote}
+                className="icons"
+                icon={faEye} />
               <FontAwesomeIcon
                 className="drag-handle icons"
                 style={{ color: props.stickify ? "grey" : props.color.text }}

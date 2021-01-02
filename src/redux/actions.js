@@ -9,9 +9,20 @@ export const RESIZE_NOTE = "RESIZE_NOTE";
 export const NOTE_DEPTH = "MOVE_NOTE";
 export const STICKIFY = "STICKIFY";
 export const HEARTIFY = "HEARTIFY";
+export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY"
 /*
  * action creators
  */
+
+export function toggleVisibility(id, url, visible) {
+  return {
+    type: TOGGLE_VISIBILITY,
+    id,
+    visible,
+    url
+  }
+}
+
 export function heartify(id, url) {
   return {
     type: HEARTIFY,

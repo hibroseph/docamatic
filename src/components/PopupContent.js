@@ -14,6 +14,8 @@ export const PopupContent = props => {
     <PopupContentStyle>
       {(() => {
         switch (props.page) {
+          case "current":
+            return <CurrentPageNotes></CurrentPageNotes>
           case "sort":
             return <SortNotes></SortNotes>;
           case "hearted":
@@ -26,7 +28,7 @@ export const PopupContent = props => {
             return <Alerts></Alerts>;
           default:
             return (
-              <CurrentPageNotes></CurrentPageNotes>
+              <p>There has been an error</p>
             );
         }
       })()}

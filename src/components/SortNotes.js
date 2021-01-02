@@ -71,8 +71,6 @@ class SortNotes extends Component {
   }
 
   handleDateGroupingKey = (key) => {
-    console.log("YOU CHANGED IT")
-    console.log(key)
     this.setState({ dateGroupingKey: key })
   }
 

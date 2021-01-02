@@ -8,6 +8,7 @@ export interface Note {
   color: { title: string; text: string };
   stickify: boolean;
   heart: boolean;
+  visible: boolean;
 }
 
 export interface NoteListProps {
@@ -23,4 +24,5 @@ export interface NoteListProps {
   onNoteClicked: (id: number, url: string) => void;
   onColorChange: (id: number, color: string, url: string) => void;
   onSizeChange: (id: number, width: number, height: number, url: string) => void;
+  onHideNote: (id: number, url: string) => void;
 }

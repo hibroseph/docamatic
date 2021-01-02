@@ -8,7 +8,7 @@ export const THEME = {
   Primary: "#08597d",
   Secondary: "#f8ac59",
   Accent: "#1799c6",
-  Active: "#c1e5ef"
+  Active: "#0d8cc5"
 };
 export const INITIAL_NOTE_HEIGHT = 380;
 export const INITIAL_NOTE_WIDTH = 225;

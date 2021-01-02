@@ -37,10 +37,11 @@ export const MiniSearchNoteContainer = styled.div`
 
   .manageIcons {
     display: flex;
-    justify-content: space-between;
-    width:15%;
+    width: 45%;
     margin-right: 15px;
+    justify-content: space-between;
   }
+
 
   .icon {
     transition: all 0.1s ease-in-out;

@@ -1,6 +1,5 @@
 export const CreateFriendlyDate = (dateInMs, sortBy = 'minute') => {
     let newDate = new Date(parseInt(dateInMs));
-    console.log("formatting date for " + sortBy)
     switch (sortBy) {
         case 'second':
             return `${newDate.toLocaleDateString()} ${newDate.toLocaleTimeString()}`;

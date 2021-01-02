@@ -21,13 +21,19 @@ class HeartNotes extends Component {
   }
 
   render() {
-    return (
+    return (<div>
+      <p style={{
+        fontWeight: "bold",
+        fontSize: "20px",
+        margin: "10px 5px 0px 10px"
+      }}>Favorite Notes</p>
       <FilterNotes
         filter={note => {
           return note.heart === true;
         }}
         noResultsImg={NoHeartNotes}
       ></FilterNotes>
+    </div>
     );
   }
 }

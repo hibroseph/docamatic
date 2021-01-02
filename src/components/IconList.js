@@ -4,6 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconListStyle as Container } from "../styles/IconListStyle";
 
 export const IconList = props => {
+  const DetermineIfSelected = (name) => {
+    if (props.page == name) {
+      return 'selected'
+    }
+  }
+
   return (
     <Container>
       {props.icons.map(icon => {
@@ -11,7 +17,7 @@ export const IconList = props => {
           <FontAwesomeIcon
             key={icon.name}
             icon={icon.type}
-            className="icon"
+            className={`icon ${DetermineIfSelected(icon.name)}`}
             onClick={() => props.onClicky(icon.name)}
           />
         );

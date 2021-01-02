@@ -20,8 +20,6 @@ const NoteMessages = [
 ];
 
 const notesApp = (state = [], action) => {
-  console.log("in reducer");
-  console.log(action);
 
   switch (action.type) {
     case "HEARTIFY":
@@ -99,8 +97,6 @@ const notesApp = (state = [], action) => {
       });
 
     case "CHANGE_COLOR":
-      console.log("changing color in reducer");
-      console.log(action)
       let newState = Object.assign({}, state, {
         [action.url]: {
           notes: state[action.url].notes.map(note => {
@@ -117,8 +113,6 @@ const notesApp = (state = [], action) => {
           })
         }
       });
-      console.log("new state");
-      console.log(newState);
       return newState;
 
     case "MOVE_NOTE":
@@ -139,6 +133,21 @@ const notesApp = (state = [], action) => {
 
       return stateNew;
 
+    case "TOGGLE_VISIBILITY":
+      return Object.assign({}, state, {
+        [action.url]: {
+          notes: state[action.url].notes.map(note => {
+            if (note.id === action.id) {
+              return Object.assign({}, note, {
+                visible: action.visible
+              });
+            } else {
+              return note;
+            }
+          })
+        }
+      });
+
     case "ADD_TITLE":
       return Object.assign({}, state, {
         [action.url]: {
@@ -155,8 +164,6 @@ const notesApp = (state = [], action) => {
       });
 
     case "ADD_TEXT":
-      console.log("Add text in reducer")
-      console.log(action)
       return Object.assign({}, state, {
         [action.url]: {
           notes: state[action.url].notes.map((note, id) => {
@@ -172,7 +179,6 @@ const notesApp = (state = [], action) => {
       });
 
     case "REMOVE_NOTE":
-      console.log("remove note in reducer")
       // Filter the id of the note that needs to be deleted out
       let notes = state[action.url].notes.filter(note => {
         if (note.id != action.id) {
@@ -226,7 +232,8 @@ const notesApp = (state = [], action) => {
                   text: yiq >= 128 ? "#000" : "#fff"
                 },
                 stickify: false,
-                heart: false
+                heart: false,
+                visible: false
               }
             ]
           }
@@ -251,7 +258,8 @@ const notesApp = (state = [], action) => {
                 color: {
                   title: colorList[colorIndex],
                   text: yiq >= 128 ? "#000" : "#fff"
-                }
+                },
+                visible: false
               }
             ]
           }

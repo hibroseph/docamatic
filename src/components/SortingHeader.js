@@ -19,7 +19,6 @@ const DetermineSelectedGroupByButton = (groupedByKey, key) => {
 }
 export const SortingHeader = props => {
     const { ref, isComponentVisible, setIsComponentVisible } = useComponentVisible(false);
-    console.log(setIsComponentVisible)
     return (<div>
         <GroupByContainer>
             <div className="row first-row">

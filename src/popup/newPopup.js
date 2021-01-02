@@ -10,6 +10,7 @@ import {
   faHeart,
   faCog,
   faBell,
+  faCompass,
   faSortAmountDown
 } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
@@ -17,9 +18,10 @@ import { connect } from "react-redux";
 // The list of icons to generate in the side bar
 const icons = [
   { type: faStickyNote, name: "new" },
+  { type: faCompass, name: "current" },
   { type: faSearch, name: "search" },
   { type: faSortAmountDown, name: "sort" },
-  { type: faHeart, name: "hearted" }
+  { type: faHeart, name: "hearted" },
   // { type: faBell, name: "alerts" },
   // { type: faCog, name: "settings" }
 ];
@@ -27,7 +29,7 @@ const icons = [
 export class Popup extends Component {
   constructor(props) {
     super(props);
-    this.state = { page: "welcome" };
+    this.state = { current_page: "current" };
 
     this.DetermineClick = this.DetermineClick.bind(this);
   }
@@ -46,7 +48,7 @@ export class Popup extends Component {
       });
     } else {
       this.setState({
-        page: data
+        current_page: data
       });
     }
   }
@@ -56,11 +58,12 @@ export class Popup extends Component {
       <Container>
         <IconList
           icons={icons}
+          page={this.state.current_page}
           onClicky={data => this.DetermineClick(data)}
         ></IconList>
         <PopupContent
           state={this.props.state}
-          page={this.state.page}
+          page={this.state.current_page}
         ></PopupContent>
       </Container>
     );

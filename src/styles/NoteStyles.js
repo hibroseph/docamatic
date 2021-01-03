@@ -39,19 +39,6 @@ export const NoteContainer = styled.div`
     background-color: grey !important;
   }
 
-  .title {
-    font-family: Roboto, Arial, Helvetica, sans-serif !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    border-radius: 10px 10px 0 0 !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    width: 100% !important;
-    height: 40px !important;
-    background-color: ${props => props.color.title} !important;
-  }
-
   .title p {
     display: inline-block !important;
     margin: 10px !important;
@@ -118,7 +105,7 @@ export const NoteContainer = styled.div`
     transition: all 0.1s ease-in-out !important;
   }
   .icon-container .icons:hover {
-    transform: scale(1.2) !important;
+    
   }
 
   .icon-container:hover {

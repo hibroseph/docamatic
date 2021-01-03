@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { PopupStyle as Container } from "../styles/PopupStyle";
 import { PopupContent } from "../components/PopupContent";
 import { IconList } from "../components/IconList";
@@ -26,55 +26,45 @@ const icons = [
   // { type: faCog, name: "settings" }
 ];
 
-export class Popup extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { current_page: "current" };
+export const Popup = props => {
 
-    this.DetermineClick = this.DetermineClick.bind(this);
+  const [currentPage, setCurrentPage] = useState("current");
+
+  const CreateNewNote = (data) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      // eslint-disable-next-line no-undef
+      chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
+        try {
+          props.addNoteClick(data, response);
+        } catch (err) {
+        }
+      });
+    })
   }
 
-  DetermineClick(data) {
+  const DetermineClick = (data) => {
     if (data === "new") {
-      data = "Note";
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        // eslint-disable-next-line no-undef
-        chrome.tabs.sendMessage(tabs[0].id, { newNote: "" }, response => {
-          try {
-            this.props.addNoteClick(data, response);
-          } catch (err) {
-          }
-        });
-      });
+      CreateNewNote("Note");
     } else {
-      this.setState({
-        current_page: data
-      });
+      setCurrentPage(data);
     }
   }
 
-  render() {
-    return (
-      <Container>
-        <IconList
-          icons={icons}
-          page={this.state.current_page}
-          onClicky={data => this.DetermineClick(data)}
-        ></IconList>
-        <PopupContent
-          state={this.props.state}
-          page={this.state.current_page}
-        ></PopupContent>
-      </Container>
-    );
-  }
+  return (
+    <Container>
+      <IconList
+        icons={icons}
+        page={currentPage}
+        onClicky={data => DetermineClick(data)}
+      ></IconList>
+      <PopupContent
+        page={currentPage}
+        createNewNote={() => CreateNewNote("new")}
+      ></PopupContent>
+    </Container>
+  );
 }
 
-const mapStateToProps = state => {
-  return {
-    state: state
-  };
-};
 
 const mapDispatchToProps = dispatch => {
   return {
@@ -86,6 +76,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(Popup);

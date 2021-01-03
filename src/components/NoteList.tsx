@@ -1,5 +1,5 @@
 import * as React from "react";
-import Note from "./Note";
+import Note from "./Note/Note";
 import { connect } from "react-redux";
 import * as Types from "../types";
 import { COLORS } from "../utils/constants";

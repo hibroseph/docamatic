@@ -5,7 +5,7 @@ import HeartNotes from "./HeartNotes";
 import SortNotes from "./SortNotes";
 import Settings from "./Settings";
 import Alerts from "./Settings";
-import CurrentPageNotes from './CurrentPageNotes'
+import CurrentPageNotes from './CurrentPageNotes/CurrentPageNotes'
 import NoAddedNotes from "../assets/NoAddedNotes.png"
 import Welcome from "../assets/Welcome.png";
 import FilterNotes from "./FilterNotes";
@@ -15,7 +15,7 @@ export const PopupContent = props => {
       {(() => {
         switch (props.page) {
           case "current":
-            return <CurrentPageNotes></CurrentPageNotes>
+            return <CurrentPageNotes createNewNote={props.createNewNote}></CurrentPageNotes>
           case "sort":
             return <SortNotes></SortNotes>;
           case "hearted":

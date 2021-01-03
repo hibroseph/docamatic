@@ -1,6 +1,6 @@
 // REMEMBER TO UPDATE THESE AS YOU PROGRESS WITH YOUR BUILDS
 export const ENVIRONMENT = "development";
-export const VERSION = "3.1.3";
+export const VERSION = "3.1.4";
 export const RELEASE = "sticky-notes@";
 
 export const COLORS = ["#ed5565", "#f8ac59", "#c1e5ef", "#1799c6", "#08597d"];

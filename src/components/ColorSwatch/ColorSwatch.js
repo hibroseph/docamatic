@@ -1,5 +1,5 @@
 import React from "react";
-import { ColorSwatchContainer as Container } from "../styles/ColorSwatchStyles";
+import { ColorSwatchContainer as Container } from "./ColorSwatchStyles";
 
 const ColorSwatch = props => {
   return (

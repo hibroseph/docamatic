@@ -1,7 +1,5 @@
 import React, { Component } from "react";
-import { SearchNotes as Container } from "../styles/SearchNotesStyle";
-import MiniSearchNote from "../components/MiniSearchNote";
-import NoHeartNotes from "../assets/NoHeartNotes.png";
+import NoHeartNotes from "../../../assets/NoHeartNotes.png";
 import FilterNotes from "./FilterNotes";
 import { connect } from "react-redux";
 

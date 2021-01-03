@@ -20,6 +20,10 @@ export const NoteList = styled.div`
 }
 `
 
+export const NotePadding = styled.div`
+    padding: 5px 7px 5px 7px;
+`
+
 export const CreateNewNote = styled.div`
     display: flex;
     flex-direction: column;

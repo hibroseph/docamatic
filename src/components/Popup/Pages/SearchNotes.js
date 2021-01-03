@@ -1,9 +1,8 @@
 import React, { Component } from "react";
-import { SearchNotes as Container } from "../styles/SearchNotesStyle";
+import { SearchNotes as Container } from "../../../styles/SearchNotesStyle";
 import { connect } from "react-redux";
-import MiniSearchNote from "../components/MiniSearchNote";
-import search_hint from "../assets/search_results.png";
-import no_results from "../assets/no_results.png";
+import search_hint from "../../../assets/search_results.png";
+import no_results from "../../../assets/no_results.png";
 import FilterNotes from "./FilterNotes";
 
 class SearchNotes extends Component {

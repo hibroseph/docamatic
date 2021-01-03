@@ -1,18 +1,20 @@
 import React from 'react'
 import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
-import ColorSwatch from "../ColorSwatch";
+import ColorSwatch from "../ColorSwatch/ColorSwatch";
 import {
     faArrowsAlt,
     faHeart,
     faEye,
+    faEyeSlash,
     faTrashAlt
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SettingsContainer, SettingsIconContainer } from "./style";
 
 export const SettingsBar = props => {
+    console.log(props)
     return (
-        <SettingsContainer>
+        <SettingsContainer color={{ ...props.color }}>
             <SettingsIconContainer color={{ ...props.color }}>
                 <FontAwesomeIcon
                     className="icons"
@@ -25,9 +27,9 @@ export const SettingsBar = props => {
                     icon={faTrashAlt}
                 />
                 <FontAwesomeIcon
-                    onClick={props.onHideNote}
+                    onClick={() => props.onToggleVisibility(!props.visible)}
                     className="icons"
-                    icon={faEye} />
+                    icon={props.visible ? faEye : faEyeSlash} />
                 <FontAwesomeIcon
                     className="drag-handle icons"
                     style={{ color: props.stickify ? "grey" : props.color.text }}

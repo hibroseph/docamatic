@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { IconListStyle as Container } from "../styles/IconListStyle";
+import { IconListStyle as Container } from "../../styles/IconListStyle";
 
 export const IconList = props => {
   const DetermineIfSelected = (name) => {

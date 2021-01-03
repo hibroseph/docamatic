@@ -2,8 +2,11 @@ import React from 'react';
 import { SettingsToggle, TitleBar as Container } from "./style"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faArrowLeft,
+    faEllipsisV
 } from "@fortawesome/free-solid-svg-icons";
+
+import {
+} from "@fortawesome/free-regular-svg-icons";
 import { useInputControls } from "../../utils/useInputControls";
 import { SettingsBar } from "./SettingsBar";
 
@@ -24,7 +27,7 @@ export const TitleBar = props => {
                 onChange={titleChange}
             />
             <SettingsToggle>
-                <FontAwesomeIcon id={"settings-container-toggle"} className="icons" icon={faArrowLeft} /></SettingsToggle>
+                <FontAwesomeIcon id={"settings-container-toggle"} className="icons" icon={faEllipsisV} /></SettingsToggle>
             <SettingsBar {...props}></SettingsBar>
         </Container>
     )

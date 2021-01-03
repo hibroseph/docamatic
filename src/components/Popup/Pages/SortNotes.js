@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import { SortNotesByDate } from '../components/SortNotesByDate';
-import { SortNotesByUrl } from "../components/SortNotesByUrl";
-import { SortingHeader } from "../components/SortingHeader";
+import { SortNotesByDate } from './SortNotesByDate';
+import { SortNotesByUrl } from "./SortNotesByUrl";
+import { SortingHeader } from "../SortingHeader";
 import { connect } from "react-redux";
-import { FilterNotes as Container } from "../styles/FilterNotesStyle";
+import { FilterNotes as Container } from "../../../styles/FilterNotesStyle";
 
 
 class SortNotes extends Component {

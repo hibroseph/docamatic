@@ -1,11 +1,11 @@
 import React from 'react';
-import { FontAwesomeIcon } from "../../node_modules/@fortawesome/react-fontawesome/index";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faAngleRight,
     faAngleDown
 } from "@fortawesome/free-solid-svg-icons";
-import { CreateFriendlyDate } from "../utils/CreateFriendlyDate";
-import MiniSearchNote from "../components/MiniSearchNote";
+import { CreateFriendlyDate } from "../../../utils/CreateFriendlyDate";
+import MiniSearchNote from "../MiniSearchNote";
 
 const getGroupingDateKey = (groupByDate, date) => {
     let date = new Date(date);

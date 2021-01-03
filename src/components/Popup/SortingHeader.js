@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { GroupByContainer } from "../elements/GroupByContainer";
+import { GroupByContainer } from "../../elements/GroupByContainer";
 import {
     faSortAlphaDown,
     faSortAlphaUp,
     faSort
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "../../node_modules/@fortawesome/react-fontawesome/index";
-import { DocamaticButton } from "../elements/DocamaticButton";
-import { DateGroupByMenu } from "../elements/DateGroupByMenu";
-import useComponentVisible from "../utils/useComponentVisible";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { DocamaticButton } from "../../elements/DocamaticButton";
+import { DateGroupByMenu } from "../../elements/DateGroupByMenu";
+import useComponentVisible from "../../utils/useComponentVisible";
 
 const DetermineSelectedGroupByButton = (groupedByKey, key) => {
     if (key == groupedByKey) {

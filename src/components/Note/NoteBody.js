@@ -1,5 +1,5 @@
 import React from 'react'
-import ContentEditable from 'react-contenteditable'
+import { StyledContentEditable } from './style'
 
 export const NoteBody = props => {
     const bodyChange = event => {
@@ -7,9 +7,9 @@ export const NoteBody = props => {
         //controls.body.setCursorPosition(event.target.selectionStart)
     }
 
-    return <ContentEditable
+    return <StyledContentEditable
         id="body"
         html={props.body}
         onChange={bodyChange}>
-    </ContentEditable>
+    </StyledContentEditable>
 }

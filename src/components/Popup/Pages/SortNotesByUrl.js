@@ -1,11 +1,11 @@
 import React from 'react'
-import { FontAwesomeIcon } from "../../node_modules/@fortawesome/react-fontawesome/index";
+import { FontAwesomeIcon } from "../../../../node_modules/@fortawesome/react-fontawesome/index";
 import {
     faAngleRight,
     faAngleDown
 } from "@fortawesome/free-solid-svg-icons";
-import { CreateFriendlyPreviewUrl } from '../utils/CreateFriendlyPreviewUrl'
-import MiniSearchNote from "../components/MiniSearchNote";
+import { CreateFriendlyPreviewUrl } from '../../../utils/CreateFriendlyPreviewUrl'
+import MiniSearchNote from "..//MiniSearchNote";
 
 const getSortedArrayWithUrl = (pages, sortingType) => {
     return Object.keys(pages).sort((a, b) => sortingType(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));

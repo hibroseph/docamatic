@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { MiniSearchNoteContainer } from "../elements/MiniSearchNoteContainer";
+import { MiniSearchNoteContainer } from "../../elements/MiniSearchNoteContainer";
 import {
   faTrashAlt,
   faExternalLinkAlt,
@@ -11,8 +11,8 @@ import {
 import { faHeart as fasHeart } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { connect } from "react-redux";
-import { removeNote, addTitle, addText, toggleVisibility, heartify } from "../redux/actions";
-import { useInputControls } from "../utils/useInputControls";
+import { removeNote, addTitle, addText, toggleVisibility, heartify } from "../../redux/actions";
+import { useInputControls } from "../../utils/useInputControls";
 import ContentEditable from 'react-contenteditable'
 
 const MiniSearchNote = props => {

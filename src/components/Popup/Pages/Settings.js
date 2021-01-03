@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import CurrentlyBuilding from "../assets/CurrentlyBuilding.png";
+import CurrentlyBuilding from "../../../assets/CurrentlyBuilding.png";
 
-class Alerts extends Component {
+class Settings extends Component {
   render() {
     return (
       <img
@@ -12,4 +12,4 @@ class Alerts extends Component {
   }
 }
 
-export default Alerts;
+export default Settings;

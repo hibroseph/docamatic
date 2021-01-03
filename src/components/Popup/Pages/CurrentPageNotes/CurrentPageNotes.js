@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { NotValidWebpage, Message, NoteList, CreateNewNote } from './style'
-import WomanLookingAtWebPageImage from "../../assets/woman-looking-at-webpage.png"
-import ManPostingNote from "../../assets/man-posting-note.png"
-import MiniSearchNote from '../MiniSearchNote'
+import { NotValidWebpage, Message, NoteList, CreateNewNote, NotePadding } from './style'
+import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webpage.png"
+import ManPostingNote from "../../../../assets/man-posting-note.png"
+import MiniSearchNote from '../../MiniSearchNote'
+import Note from '../../../Note/Note'
+import { COLORS } from '../../../../utils/constants'
 const CurrentPageNotes = (props) => {
     const [url, setCurrentUrl] = useState('')
 
@@ -43,7 +45,9 @@ const CurrentPageNotes = (props) => {
                 IsValidUrl(url) && Object.keys(props.notes).map(key => {
                     if (key == url) {
                         return props.notes[key].notes.map(note => {
-                            return <MiniSearchNote {...note} website={key}></MiniSearchNote>
+                            return <NotePadding>
+                                <Note {...note} colors={props.colors} url={key} />
+                            </NotePadding>
                         })
                     }
                 })
@@ -53,7 +57,7 @@ const CurrentPageNotes = (props) => {
 }
 
 const mapStateToProps = (state) => {
-    return { notes: state }
+    return { notes: state, colors: COLORS }
 }
 
 export default connect(mapStateToProps, null)(CurrentPageNotes)

@@ -1,14 +1,10 @@
 import React from "react";
-import { PopupContentStyle } from "../styles/PopupStyle";
-import SearchNotes from "./SearchNotes";
-import HeartNotes from "./HeartNotes";
-import SortNotes from "./SortNotes";
-import Settings from "./Settings";
-import Alerts from "./Settings";
-import CurrentPageNotes from './CurrentPageNotes/CurrentPageNotes'
-import NoAddedNotes from "../assets/NoAddedNotes.png"
-import Welcome from "../assets/Welcome.png";
-import FilterNotes from "./FilterNotes";
+import { PopupContentStyle } from "../../styles/PopupStyle";
+import SearchNotes from "./Pages/SearchNotes";
+import HeartNotes from "./Pages/HeartNotes";
+import SortNotes from "./Pages/SortNotes";
+import Settings from "./Pages/Settings";
+import CurrentPageNotes from './Pages/CurrentPageNotes/CurrentPageNotes'
 export const PopupContent = props => {
   return (
     <PopupContentStyle>
@@ -24,8 +20,6 @@ export const PopupContent = props => {
             return <SearchNotes></SearchNotes>;
           case "settings":
             return <Settings></Settings>;
-          case "alerts":
-            return <Alerts></Alerts>;
           default:
             return (
               <p>There has been an error</p>

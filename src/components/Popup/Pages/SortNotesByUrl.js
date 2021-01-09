@@ -25,7 +25,7 @@ export const SortNotesByUrl = props =>
                             {props.expandTabs.includes(key) && <div>
                                 {
                                     props.pages[key].notes.map(note => {
-                                        return <Note {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
+                                        return <Note {...note} url={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
                                     })
                                 }
                             </div>

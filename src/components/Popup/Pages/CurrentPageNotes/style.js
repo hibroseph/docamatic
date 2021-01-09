@@ -7,15 +7,7 @@ export const NotValidWebpage = styled.div`
 `
 
 export const NoteList = styled.div`
-.title {
-    font-weight: bold;
-    font-size: 20px;
-    margin: 10px 5px 0px 10px;
-}
-`
 
-export const NotePadding = styled.div`
-    padding: 5px 0;
 `
 
 export const CreateNewNote = styled.div`

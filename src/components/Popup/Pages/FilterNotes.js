@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import Note from "../../Note/Note";
-import { NotePadding } from "../Pages/CurrentPageNotes/style"
+import { NotePadding } from "../style"
 import { connect } from "react-redux";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
+import { PreviewUrl } from "../style";
 
 class FilterNotes extends Component {
   constructor(props) {
@@ -21,7 +22,8 @@ class FilterNotes extends Component {
             if (this.props.filter(note)) {
               foundItem = true;
               return <NotePadding>
-                <Note key={note.id} {...note} url={key} showUrlPreview previewText={CreateFriendlyPreviewUrl(key)} />
+                <PreviewUrl href={key} target="_new">{CreateFriendlyPreviewUrl(key)}</PreviewUrl>
+                <Note key={note.id} {...note} url={key} />
               </NotePadding>;
             }
           })}

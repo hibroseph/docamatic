@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import NoHeartNotes from "../../../assets/NoHeartNotes.png";
 import FilterNotes from "./FilterNotes";
 import { connect } from "react-redux";
+import { PageTitle } from "../style"
 
 // TODO: figure out state with the input
 class HeartNotes extends Component {
@@ -20,11 +21,7 @@ class HeartNotes extends Component {
 
   render() {
     return (<div>
-      <p style={{
-        fontWeight: "bold",
-        fontSize: "20px",
-        margin: "10px 5px 0px 10px"
-      }}>Favorite Notes</p>
+      <PageTitle>Favorite Notes</PageTitle>
       <FilterNotes
         filter={note => {
           return note.heart === true;

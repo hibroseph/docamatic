@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyPreviewUrl } from '../../../utils/CreateFriendlyPreviewUrl'
 import Note from '../../Note/Note';
+import { NotePadding } from "../style"
 
 const getSortedArrayWithUrl = (pages, sortingType) => {
     return Object.keys(pages).sort((a, b) => sortingType(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));
@@ -25,7 +26,9 @@ export const SortNotesByUrl = props =>
                             {props.expandTabs.includes(key) && <div>
                                 {
                                     props.pages[key].notes.map(note => {
-                                        return <Note {...note} url={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
+                                        return <NotePadding>
+                                            <Note {...note} url={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
+                                        </NotePadding>
                                     })
                                 }
                             </div>

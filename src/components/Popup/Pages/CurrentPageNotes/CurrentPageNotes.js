@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { NotValidWebpage, MessageHeader, SubMessage, NoteList, CreateNewNote, NotePadding, Image, Link } from './style'
+import { NotValidWebpage, MessageHeader, SubMessage, NoteList, CreateNewNote, Image, Link } from './style'
+import { NotePadding, PageTitle } from "../../style"
 import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webpage.png"
 import ManPostingNote from "../../../../assets/man-posting-note.png"
 import Note from '../../../Note/Note'
@@ -40,7 +41,7 @@ const CurrentPageNotes = (props) => {
 
     return (
         <NoteList>
-            <p className="title">Current Notes on Page</p>
+            <PageTitle>Current Notes on Page</PageTitle>
             { !IsValidUrl(url) && NotValidPage()}
             {
                 IsValidUrl(url) && Object.keys(props.notes).map(key => {

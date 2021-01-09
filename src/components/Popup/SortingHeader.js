@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DocamaticButton } from "../../elements/DocamaticButton";
 import { DateGroupByMenu } from "../../elements/DateGroupByMenu";
 import useComponentVisible from "../../utils/useComponentVisible";
+import { PageTitle } from "./style"
 
 const DetermineSelectedGroupByButton = (groupedByKey, key) => {
     if (key == groupedByKey) {
@@ -22,7 +23,7 @@ export const SortingHeader = props => {
     return (<div>
         <GroupByContainer>
             <div className="row first-row">
-                <p className="title">Sort By</p>
+                <PageTitle>Sort By</PageTitle>
                 <div className="button-container">
                     <DocamaticButton onClick={() => props.handleClick('url')} className={props.groupBy == 'url' ? "selected" : ""}>Url</DocamaticButton>
                     <DocamaticButton onClick={() => props.handleClick('date')} className={props.groupBy == 'date' ? "selected" : ""}>Date</DocamaticButton>

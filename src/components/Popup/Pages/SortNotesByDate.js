@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyDate } from "../../../utils/CreateFriendlyDate";
 import Note from "../../Note/Note";
+import { NotePadding } from "../style";
 
 const getGroupingDateKey = (groupByDate, date) => {
     let date = new Date(date);
@@ -57,7 +58,9 @@ export const SortNotesByDate = props =>
                     {noteGroup.notes.map(note => {
                         return (<div>
                             {
-                                props.expandTabs.includes(noteGroup.date) && <Note {...note} website={note.url}></Note>
+                                props.expandTabs.includes(noteGroup.date) && <NotePadding>
+                                    <Note {...note} website={note.url}></Note>
+                                </NotePadding>
                             }
                         </div>)
                     })}

@@ -76,7 +76,7 @@ class SortNotes extends Component {
 
   render() {
     return (
-      <div style={{ padding: "10 0px 10px 10px" }}>
+      <div>
         <SortingHeader
           handleClick={selectedItem => this.handleClick(selectedItem)}
           groupBy={this.state.groupBy}

@@ -33,3 +33,29 @@ export const PopupContentStyle = styled.div`
     background-color: grey;
   }
 `;
+
+export const NotePadding = styled.div`
+    padding: 5px 0;
+`
+
+export const PreviewUrl = styled.a`
+  margin: 2px 0;
+  text-decoration: none;
+  color: black;
+  padding: 2px;
+  display: block;
+
+  &:visited {
+    color: black;
+  }
+
+  &:hover {
+    background-color: lightgrey;
+    border-radius: 5px;
+  }
+`
+export const PageTitle = styled.p`
+  font-weight: bold;
+  font-size: 20px;
+  margin: 10px 0;
+`

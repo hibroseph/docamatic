@@ -9,6 +9,7 @@ export const PopupStyle = styled.div`
 
 export const PopupContentStyle = styled.div`
   height: 100%;
+  width: 330px;
   background-color: white;
   overflow-y: auto;
   padding: 5px 10px 5px 10px;

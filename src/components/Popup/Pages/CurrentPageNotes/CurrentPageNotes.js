@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
-import { NotValidWebpage, Message, NoteList, CreateNewNote, NotePadding } from './style'
+import { NotValidWebpage, MessageHeader, SubMessage, NoteList, CreateNewNote, NotePadding, Image, Link } from './style'
 import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webpage.png"
 import ManPostingNote from "../../../../assets/man-posting-note.png"
 import Note from '../../../Note/Note'
@@ -19,15 +19,16 @@ const CurrentPageNotes = (props) => {
     const NotValidPage = () => {
         return <NotValidWebpage>
             <img style={{ width: "300px", height: "auto", objectFit: "cover" }} src={WomanLookingAtWebPageImage} ></img>
-            <Message bold>We can't place a note on this page. Go to any webpage to add a note such as <a href="https://google.com" target="_blank">google.com</a></Message>
+            <MessageHeader bold>We can't place a note on this page. </MessageHeader>
+            <SubMessage>Go to any webpage to add a note such as <Link href="https://google.com" target="_blank">google.com</Link></SubMessage>
         </NotValidWebpage>
     }
 
     const RenderNoValidNote = () => {
         if ((!Object.keys(props.notes).includes(url) || props.notes[url].notes.length == 0) && IsValidUrl()) {
             return <CreateNewNote>
-                <Message bold>There are no notes on this page. </Message>
-                <img src={ManPostingNote}></img>
+                <MessageHeader bold>There are no notes on this page. </MessageHeader>
+                <Image src={ManPostingNote}></Image>
                 <button onClick={props.createNewNote}>Create New Note</button>
             </CreateNewNote>
         }

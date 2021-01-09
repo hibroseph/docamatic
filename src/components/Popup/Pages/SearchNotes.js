@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { SearchNotes as Container } from "../../../styles/SearchNotesStyle";
+import { SearchBox } from "../SearchNotesStyle";
 import { connect } from "react-redux";
 import search_hint from "../../../assets/search_results.png";
 import no_results from "../../../assets/no_results.png";
@@ -23,13 +23,14 @@ class SearchNotes extends Component {
   render() {
     let foundItem = false;
     return (
-      <Container>
-        <input
-          // value={this.state.search_query}
-          className="searchbox"
-          placeholder="Search"
-          onChange={this.handleChange}
-        ></input>
+      <div>
+        <SearchBox>
+          <input
+            // value={this.state.search_query}
+            placeholder="Search"
+            onChange={this.handleChange}
+          ></input>
+        </SearchBox>
         {!this.state.search_query && (
           <img
             src={search_hint}
@@ -37,7 +38,6 @@ class SearchNotes extends Component {
           ></img>
         )}
         <FilterNotes
-          style="searchresults"
           filter={note => {
             // The searching lambda
             if (this.state.search_query) {
@@ -53,7 +53,7 @@ class SearchNotes extends Component {
           }}
           noResultsImg={this.state.search_query ? no_results : null}
         />
-      </Container>
+      </div>
     );
   }
 }

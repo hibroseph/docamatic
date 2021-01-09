@@ -2,7 +2,6 @@ import * as React from "react";
 import { DraggableNote } from "./Note/DraggableNote";
 import { connect } from "react-redux";
 import * as Types from "../types";
-import { COLORS } from "../utils/constants";
 import {
   updateNotePosition,
   updateNoteSize
@@ -30,7 +29,6 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
                 key={note.id}
                 {...note}
                 scrollYOffset={this.props.scrollYOffset}
-                colors={COLORS}
                 url={this.props.url}
               />
             )

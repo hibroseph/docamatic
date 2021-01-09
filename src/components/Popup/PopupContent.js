@@ -1,5 +1,5 @@
 import React from "react";
-import { PopupContentStyle } from "../../styles/PopupStyle";
+import { PopupContentStyle } from "./style";
 import SearchNotes from "./Pages/SearchNotes";
 import HeartNotes from "./Pages/HeartNotes";
 import SortNotes from "./Pages/SortNotes";

@@ -21,7 +21,7 @@ export const NoteList = styled.div`
 `
 
 export const NotePadding = styled.div`
-    padding: 5px 7px 5px 7px;
+    padding: 5px 0;
 `
 
 export const CreateNewNote = styled.div`

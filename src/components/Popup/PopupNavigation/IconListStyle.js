@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { THEME } from "../utils/constants";
+import { THEME } from "../../../utils/constants";
 
 export const IconListStyle = styled.div`
   width: 70px;

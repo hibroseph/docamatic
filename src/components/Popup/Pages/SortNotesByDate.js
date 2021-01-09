@@ -5,7 +5,7 @@ import {
     faAngleDown
 } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyDate } from "../../../utils/CreateFriendlyDate";
-import MiniSearchNote from "../MiniSearchNote";
+import Note from "../../Note/Note";
 
 const getGroupingDateKey = (groupByDate, date) => {
     let date = new Date(date);
@@ -57,7 +57,7 @@ export const SortNotesByDate = props =>
                     {noteGroup.notes.map(note => {
                         return (<div>
                             {
-                                props.expandTabs.includes(noteGroup.date) && <MiniSearchNote {...note} website={note.url}></MiniSearchNote>
+                                props.expandTabs.includes(noteGroup.date) && <Note {...note} website={note.url}></Note>
                             }
                         </div>)
                     })}

@@ -3,9 +3,9 @@ import { connect } from 'react-redux'
 import { NotValidWebpage, Message, NoteList, CreateNewNote, NotePadding } from './style'
 import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webpage.png"
 import ManPostingNote from "../../../../assets/man-posting-note.png"
-import MiniSearchNote from '../../MiniSearchNote'
 import Note from '../../../Note/Note'
 import { COLORS } from '../../../../utils/constants'
+
 const CurrentPageNotes = (props) => {
     const [url, setCurrentUrl] = useState('')
 

@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SettingsContainer, SettingsIconContainer } from "./style";
+import { COLORS } from "../../utils/constants";
 
 export const SettingsBar = props => {
     console.log(props)
@@ -37,7 +38,7 @@ export const SettingsBar = props => {
                 />
             </SettingsIconContainer>
             <ColorSwatch
-                colors={props.colors}
+                colors={COLORS}
                 onColorChange={color => props.onColorChange(color)}
             ></ColorSwatch>
         </SettingsContainer>

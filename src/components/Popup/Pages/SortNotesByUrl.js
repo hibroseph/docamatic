@@ -5,7 +5,7 @@ import {
     faAngleDown
 } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyPreviewUrl } from '../../../utils/CreateFriendlyPreviewUrl'
-import MiniSearchNote from "..//MiniSearchNote";
+import Note from '../../Note/Note';
 
 const getSortedArrayWithUrl = (pages, sortingType) => {
     return Object.keys(pages).sort((a, b) => sortingType(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));
@@ -25,7 +25,7 @@ export const SortNotesByUrl = props =>
                             {props.expandTabs.includes(key) && <div>
                                 {
                                     props.pages[key].notes.map(note => {
-                                        return <MiniSearchNote {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></MiniSearchNote>
+                                        return <Note {...note} website={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
                                     })
                                 }
                             </div>

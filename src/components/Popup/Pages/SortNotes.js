@@ -3,7 +3,7 @@ import { SortNotesByDate } from './SortNotesByDate';
 import { SortNotesByUrl } from "./SortNotesByUrl";
 import { SortingHeader } from "../SortingHeader";
 import { connect } from "react-redux";
-import { FilterNotes as Container } from "../../../styles/FilterNotesStyle";
+import { FilterNotes as Container } from "../FilterNotesStyle";
 
 
 class SortNotes extends Component {

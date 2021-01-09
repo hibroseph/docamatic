@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { PopupStyle as Container } from "../styles/PopupStyle";
+import { PopupStyle as Container } from "../components/Popup/style";
 import { PopupContent } from "../components/Popup/PopupContent";
-import { IconList } from "../components/Popup/IconList";
+import { IconList } from "../components/Popup/PopupNavigation/IconList";
 import { generateUUID } from "../utils/GenerateUUID";
 import { addNote } from "../redux/actions";
 import {

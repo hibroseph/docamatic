@@ -1,11 +1,7 @@
 // const INITIAL_NOTE_WIDTH = 250;
 // const INITIAL_NOTE_HEIGHT = 400;
 
-import {
-  COLORS as colorList,
-  INITIAL_NOTE_HEIGHT,
-  INITIAL_NOTE_WIDTH
-} from "../utils/constants";
+import { COLORS as colorList, INITIAL_NOTE_HEIGHT, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
 
 // Messages to appear when a note is created
@@ -16,65 +12,69 @@ const NoteMessages = [
   "CONGRATS! You made a note!",
   "What do you want to remember today?",
   "Ooo what a nice color",
-  "Wanna change the color? Press the color button"
+  "Wanna change the color? Press the color button",
 ];
 
 const notesApp = (state = [], action) => {
-
   switch (action.type) {
+    case "IMPORT_NOTES":
+      console.log("in reducer, importing notes");
+      console.log(action);
+      return state;
+
     case "HEARTIFY":
       return Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                heart: !note.heart
+                heart: !note.heart,
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "STICKIFY":
       return Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                stickify: !note.stickify
+                stickify: !note.stickify,
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "RESIZE_NOTE":
       return Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                size: { width: action.x, height: action.y }
+                size: { width: action.x, height: action.y },
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "CLICKED_NOTE":
       let note = state[action.url].notes
-        .filter(note => {
+        .filter((note) => {
           if (note.id === action.id) {
             return note;
           }
         })
-        .find(note => {
+        .find((note) => {
           return note.id === action.id;
         });
 
@@ -82,7 +82,7 @@ const notesApp = (state = [], action) => {
         return state;
       }
 
-      const new_state = state[action.url].notes.filter(notes => {
+      const new_state = state[action.url].notes.filter((notes) => {
         if (notes.id !== action.id) {
           return notes;
         }
@@ -92,43 +92,43 @@ const notesApp = (state = [], action) => {
 
       return Object.assign({}, state, {
         [action.url]: {
-          notes: new_state
-        }
+          notes: new_state,
+        },
       });
 
     case "CHANGE_COLOR":
       let newState = Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 color: {
                   title: action.color,
-                  text: getContrastingColor(action.color)
-                }
+                  text: getContrastingColor(action.color),
+                },
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
       return newState;
 
     case "MOVE_NOTE":
       let stateNew = Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               // let's change the position
               return Object.assign({}, note, {
-                position: { x: action.x, y: action.y }
+                position: { x: action.x, y: action.y },
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
       return stateNew;
@@ -136,31 +136,31 @@ const notesApp = (state = [], action) => {
     case "TOGGLE_VISIBILITY":
       return Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                visible: action.visible
+                visible: action.visible,
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "ADD_TITLE":
       return Object.assign({}, state, {
         [action.url]: {
-          notes: state[action.url].notes.map(note => {
+          notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                title: action.title
+                title: action.title,
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "ADD_TEXT":
@@ -169,18 +169,18 @@ const notesApp = (state = [], action) => {
           notes: state[action.url].notes.map((note, id) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                body: action.body
+                body: action.body,
               });
             } else {
               return note;
             }
-          })
-        }
+          }),
+        },
       });
 
     case "REMOVE_NOTE":
       // Filter the id of the note that needs to be deleted out
-      let notes = state[action.url].notes.filter(note => {
+      let notes = state[action.url].notes.filter((note) => {
         if (note.id != action.id) {
           return note;
         }
@@ -188,8 +188,8 @@ const notesApp = (state = [], action) => {
 
       let newState = Object.assign({}, state, {
         [action.url]: {
-          notes
-        }
+          notes,
+        },
       });
 
       return newState;
@@ -220,7 +220,7 @@ const notesApp = (state = [], action) => {
                 position: { x: posx, y: action.y_position },
                 size: {
                   width: INITIAL_NOTE_WIDTH,
-                  height: INITIAL_NOTE_HEIGHT
+                  height: INITIAL_NOTE_HEIGHT,
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
@@ -229,14 +229,14 @@ const notesApp = (state = [], action) => {
                 date_created: action.date_created,
                 color: {
                   title: colorList[colorIndex],
-                  text: yiq >= 128 ? "#000" : "#fff"
+                  text: yiq >= 128 ? "#000" : "#fff",
                 },
                 stickify: false,
                 heart: false,
-                visible: false
-              }
-            ]
-          }
+                visible: false,
+              },
+            ],
+          },
         });
       } else {
         return Object.assign({}, state, {
@@ -248,7 +248,7 @@ const notesApp = (state = [], action) => {
                 position: { x: posx, y: action.y_position },
                 size: {
                   width: INITIAL_NOTE_WIDTH,
-                  height: INITIAL_NOTE_HEIGHT
+                  height: INITIAL_NOTE_HEIGHT,
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
@@ -257,12 +257,12 @@ const notesApp = (state = [], action) => {
                 date_created: action.date_created,
                 color: {
                   title: colorList[colorIndex],
-                  text: yiq >= 128 ? "#000" : "#fff"
+                  text: yiq >= 128 ? "#000" : "#fff",
                 },
-                visible: false
-              }
-            ]
-          }
+                visible: false,
+              },
+            ],
+          },
         });
       }
 

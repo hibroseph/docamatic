@@ -9,25 +9,33 @@ export const RESIZE_NOTE = "RESIZE_NOTE";
 export const NOTE_DEPTH = "MOVE_NOTE";
 export const STICKIFY = "STICKIFY";
 export const HEARTIFY = "HEARTIFY";
-export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY"
+export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY";
+export const IMPORT_NOTES = "IMPORT_NOTES";
 /*
  * action creators
  */
+
+export function importNotes(notes) {
+  return {
+    type: IMPORT_NOTES,
+    notes,
+  };
+}
 
 export function toggleVisibility(id, url, visible) {
   return {
     type: TOGGLE_VISIBILITY,
     id,
     visible,
-    url
-  }
+    url,
+  };
 }
 
 export function heartify(id, url) {
   return {
     type: HEARTIFY,
     id,
-    url
+    url,
   };
 }
 
@@ -35,7 +43,7 @@ export function stickify(id, url) {
   return {
     type: STICKIFY,
     id,
-    url
+    url,
   };
 }
 
@@ -45,7 +53,7 @@ export function updateNoteSize(id, x, y, url) {
     id,
     x,
     y,
-    url
+    url,
   };
 }
 
@@ -53,7 +61,7 @@ export function updateNoteDepth(id, url) {
   return {
     type: CLICKED_NOTE,
     id,
-    url
+    url,
   };
 }
 
@@ -62,7 +70,7 @@ export function changeNoteColor(id, url, color) {
     type: CHANGE_COLOR,
     id,
     url,
-    color
+    color,
   };
 }
 
@@ -72,7 +80,7 @@ export function updateNotePosition(id, x, y, url) {
     id,
     x,
     y,
-    url
+    url,
   };
 }
 
@@ -81,7 +89,7 @@ export function addTitle(id, text, url) {
     type: ADD_TITLE,
     id: id,
     title: text,
-    url
+    url,
   };
 }
 
@@ -90,7 +98,7 @@ export function addText(id, text, url) {
     type: ADD_TEXT,
     id: id,
     body: text,
-    url
+    url,
   };
 }
 
@@ -101,7 +109,7 @@ export function addNote(title, id, y_position, url) {
     title,
     y_position,
     url,
-    date_created: new Date().getTime()
+    date_created: new Date().getTime(),
   };
 }
 
@@ -109,6 +117,6 @@ export function removeNote(id, url) {
   return {
     type: REMOVE_NOTE,
     id,
-    url
+    url,
   };
 }

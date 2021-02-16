@@ -22,8 +22,7 @@ const icons = [
   { type: faSearch, name: "search" },
   { type: faSortAmountDown, name: "sort" },
   { type: faHeart, name: "hearted" },
-  // { type: faBell, name: "alerts" },
-  // { type: faCog, name: "settings" }
+  { type: faCog, name: "settings" }
 ];
 
 export const Popup = props => {

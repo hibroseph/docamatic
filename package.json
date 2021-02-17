@@ -12,6 +12,7 @@
     "@types/react": "^16.9.27",
     "@types/react-dom": "^16.9.5",
     "draft-js": "^0.11.7",
+    "file-saver": "^2.0.5",
     "fontsource-roboto": "^3.1.5",
     "react": "^16.12.0",
     "react-chrome-redux": "^2.0.0-alpha.4",

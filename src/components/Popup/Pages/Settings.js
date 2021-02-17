@@ -4,34 +4,32 @@ import { PageTitle } from "../style";
 import { VERSION } from "../../../utils/constants";
 import { MessageHeader, SubMessage } from "../Pages/CurrentPageNotes/style";
 import { connect } from "react-redux";
-import { importNotes } from "../../../redux/actions";
+import { importNotes, nukeNotes } from "../../../redux/actions";
+import { saveAs } from "file-saver";
+import PopupWindow from "../PopupWindow";
+import { useState } from "react";
 
-const SettingButton = styled.button``;
-const VerticalButtons = styled.div`
-  height: 50px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+const SettingButton = styled.button`
+  border: none;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+  padding: 5px 10px;
+  &:hover {
+    background-color: #f1f1f1;
+  }
 `;
+
 const HorizontalItems = styled.div`
 display flex; 
-justify-content: space-between;
+justify-content: space-around;
 align-items: center;`;
 
 const SaveNotesToFile = (notes) => {
-  console.log("Saving notes to file");
   var blob = new Blob([JSON.stringify(notes)], { type: "application/json;charset=utf-8" });
-  var url = URL.createObjectURL(blob);
-  var element = document.createElement("a");
-  element.href = url;
-  element.download = "notes.json";
-  document.body.append(element);
-  element.click();
-  console.log("Finished saving notes to a file");
+  saveAs(blob, "docamatic-notes.json");
 };
 
 const OpenFile = (event, importNotes) => {
-  console.log("opening file");
   console.log(event);
   var input = event.target;
 
@@ -46,24 +44,60 @@ const OpenFile = (event, importNotes) => {
   reader.readAsText(input.files[0]);
 };
 
+const OpenNotesToFile = () => {
+  let fileElement = document.getElementById("inputFile");
+  fileElement.click();
+};
+
 const Settings = (props) => {
-  console.log(props);
+  const [showPopup, setPopupVisibility] = useState(false);
+  const [popupContent, setPopupContent] = useState(null);
+
+  const NukeNotes = () => {
+    setPopupContent(GetNukeConfirmationPopup());
+    setPopupVisibility(true);
+  };
+
+  const AreYouSureYouWantToNukeConfirmation = () => {
+    props.nukeNotes();
+    ClosePopup();
+  };
+
+  const ClosePopup = () => {
+    setPopupVisibility(false);
+  };
+
+  const GetNukeConfirmationPopup = () => {
+    return {
+      jsx: (
+        <div style={{ padding: "10px" }}>
+          <SubMessage>This will delete all your notes. This is a non-reversible action!</SubMessage>
+          <HorizontalItems>
+            <SettingButton onClick={() => AreYouSureYouWantToNukeConfirmation()}>Yes! Nuke it all!</SettingButton>
+            <SettingButton onClick={() => ClosePopup()}>No! Abort!</SettingButton>
+          </HorizontalItems>
+        </div>
+      ),
+      title: "Are You Sure?",
+    };
+  };
+
   return (
     <div>
       <PageTitle>Settings</PageTitle>
       <MessageHeader bold>Export/Import</MessageHeader>
-      <SubMessage>
-        The following is used to export your notes to a file and import them. This might be necessary if you install another version of chrome. It is
-        also recommend to make file backup of your notes if they are important incase of data corruption or accidental deletion of the app
-      </SubMessage>
-      <VerticalButtons>
+      <HorizontalItems>
         <SettingButton onClick={() => SaveNotesToFile(props.notes)}>Export Notes</SettingButton>
-        <HorizontalItems>
-          <p>Import</p>
-          <input type="file" name="Import" onChange={(event) => OpenFile(event, props.importNotes)} />
-        </HorizontalItems>
-      </VerticalButtons>
-      <p>Version: {VERSION}</p>
+        <SettingButton onClick={() => OpenNotesToFile()}>Import Notes</SettingButton>
+        <input id="inputFile" hidden type="file" name="Import" onChange={(event) => OpenFile(event, props.importNotes)} />
+      </HorizontalItems>
+      <MessageHeader bold>Nuke</MessageHeader>
+      <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>
+      <HorizontalItems>
+        <SettingButton onClick={() => NukeNotes(props.nukeNotes)}>Nuke</SettingButton>
+      </HorizontalItems>
+      {showPopup && <PopupWindow title={popupContent.title}>{popupContent.jsx}</PopupWindow>}
+      <p>Docamatic Version: {VERSION}</p>
     </div>
   );
 };
@@ -76,6 +110,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     importNotes: (notes) => {
       dispatch(importNotes(notes));
+    },
+    nukeNotes: () => {
+      dispatch(nukeNotes());
     },
   };
 };

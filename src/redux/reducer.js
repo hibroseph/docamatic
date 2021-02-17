@@ -3,6 +3,7 @@
 
 import { COLORS as colorList, INITIAL_NOTE_HEIGHT, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
+import { NUKENOTES, NUKE_NOTES } from "./actions";
 
 // Messages to appear when a note is created
 const NoteMessages = [
@@ -17,10 +18,46 @@ const NoteMessages = [
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
+    case NUKE_NOTES:
+      console.log("nuking all notes");
+      console.log(state);
+      return {};
+
     case "IMPORT_NOTES":
-      console.log("in reducer, importing notes");
-      console.log(action);
-      return state;
+      // The following logic loops over the notes being imported and only adds ones that don't exist in the current state.
+      let finalState = Object.keys(action.notes).reduce((finalReducedState, key) => {
+        if (state[key] != null) {
+          let noteIds = state[key].notes.reduce((map, obj) => {
+            map[obj.id] = obj;
+            return map;
+          }, {});
+
+          let newStateCombinedWithNewNotes = action.notes[key].notes.reduce((reducedState, note) => {
+            if (noteIds[note.id] == null) {
+              return Object.assign({}, reducedState, {
+                [key]: {
+                  notes: [...reducedState[key].notes, note],
+                },
+              });
+            } else {
+              return newState;
+            }
+          }, finalReducedState);
+
+          finalReducedState = Object.assign({}, finalReducedState, newStateCombinedWithNewNotes);
+
+          return finalReducedState;
+        } else {
+          // add notes to state since the key doesn't exist
+          return Object.assign({}, finalReducedState, {
+            [key]: {
+              notes: action.notes[key].notes,
+            },
+          });
+        }
+      }, state);
+
+      return finalState;
 
     case "HEARTIFY":
       return Object.assign({}, state, {

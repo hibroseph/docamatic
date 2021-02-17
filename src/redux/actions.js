@@ -11,9 +11,16 @@ export const STICKIFY = "STICKIFY";
 export const HEARTIFY = "HEARTIFY";
 export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY";
 export const IMPORT_NOTES = "IMPORT_NOTES";
+export const NUKE_NOTES = "NUKE_NOTES";
 /*
  * action creators
  */
+
+export function nukeNotes() {
+  return {
+    type: NUKE_NOTES,
+  };
+}
 
 export function importNotes(notes) {
   return {

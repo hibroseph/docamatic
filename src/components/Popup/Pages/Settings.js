@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { importNotes, nukeNotes } from "../../../redux/actions";
 import { saveAs } from "file-saver";
 import PopupWindow from "../PopupWindow";
+import Toast from "../Toast";
 import { useState } from "react";
 
 const SettingButton = styled.button`
@@ -24,35 +25,18 @@ display flex;
 justify-content: space-around;
 align-items: center;`;
 
-const SaveNotesToFile = (notes) => {
-  var blob = new Blob([JSON.stringify(notes)], { type: "application/json;charset=utf-8" });
-  saveAs(blob, "docamatic-notes.json");
-};
-
-const OpenFile = (event, importNotes) => {
-  console.log(event);
-  var input = event.target;
-
-  var reader = new FileReader();
-
-  reader.onload = function () {
-    var notes = JSON.parse(reader.result);
-    console.log(notes);
-    importNotes(notes);
-  };
-
-  reader.readAsText(input.files[0]);
-};
-
-const OpenNotesToFile = () => {
-  let fileElement = document.getElementById("inputFile");
-  fileElement.click();
-};
+const PopupContent = styled.div`
+  padding: 10px;
+`;
 
 const Settings = (props) => {
   const [showPopup, setPopupVisibility] = useState(false);
   const [popupContent, setPopupContent] = useState(null);
 
+  /*
+  const [showToast, setToastVisibility] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+*/
   const NukeNotes = () => {
     setPopupContent(GetNukeConfirmationPopup());
     setPopupVisibility(true);
@@ -67,10 +51,37 @@ const Settings = (props) => {
     setPopupVisibility(false);
   };
 
+  const SaveNotesToFile = (notes) => {
+    var blob = new Blob([JSON.stringify(notes)], { type: "application/json;charset=utf-8" });
+    saveAs(blob, "docamatic-notes.json");
+  };
+
+  const OpenFile = (event, importNotes) => {
+    /*
+    setToastMessage("Importing Your Notes");
+    setToastVisibility(true);
+*/
+    var input = event.target;
+
+    var reader = new FileReader();
+
+    reader.onload = function () {
+      var notes = JSON.parse(reader.result);
+      importNotes(notes, ClosePopup);
+    };
+
+    reader.readAsText(input.files[0]);
+  };
+
+  const OpenNotesToFile = () => {
+    let fileElement = document.getElementById("inputFile");
+    fileElement.click();
+  };
+
   const GetNukeConfirmationPopup = () => {
     return {
       jsx: (
-        <div style={{ padding: "10px" }}>
+        <div>
           <SubMessage>This will delete all your notes. This is a non-reversible action!</SubMessage>
           <HorizontalItems>
             <SettingButton onClick={() => AreYouSureYouWantToNukeConfirmation()}>Yes! Nuke it all!</SettingButton>
@@ -96,7 +107,13 @@ const Settings = (props) => {
       <HorizontalItems>
         <SettingButton onClick={() => NukeNotes(props.nukeNotes)}>Nuke</SettingButton>
       </HorizontalItems>
-      {showPopup && <PopupWindow title={popupContent.title}>{popupContent.jsx}</PopupWindow>}
+      {showPopup && (
+        <PopupWindow title={popupContent.title}>
+          <PopupContent>{popupContent.jsx}</PopupContent>
+        </PopupWindow>
+      )}
+
+      {/*showToast && <Toast message={toastMessage}></Toast>*/}
       <p>Docamatic Version: {VERSION}</p>
     </div>
   );
@@ -108,8 +125,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    importNotes: (notes) => {
-      dispatch(importNotes(notes));
+    importNotes: (notes, closePopup) => {
+      dispatch(importNotes(notes, closePopup));
     },
     nukeNotes: () => {
       dispatch(nukeNotes());

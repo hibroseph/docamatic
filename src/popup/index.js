@@ -2,13 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { Store } from "react-chrome-redux";
-import "fontsource-roboto"
+import "fontsource-roboto";
 import Popup from "./Popup";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 
 const store = new Store({
-  portName: "NOTES_STORE"
+  portName: "NOTES_STORE",
 });
 
 if (!root) {
@@ -20,7 +21,9 @@ if (!root) {
 store.ready().then(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <Popup />
+      <ErrorBoundary>
+        <Popup />
+      </ErrorBoundary>
     </Provider>,
     root
   );

@@ -8,7 +8,11 @@ export const THEME = {
   Primary: "#08597d",
   Secondary: "#f8ac59",
   Accent: "#1799c6",
-  Active: "#0d8cc5"
+  Active: "#0d8cc5",
 };
-export const INITIAL_NOTE_HEIGHT = 380;
 export const INITIAL_NOTE_WIDTH = 225;
+
+export const CHROME_MESSAGES = {
+  GET_PAGE_INFORMATION: "get_page_information",
+  ERROR_OCCURRED: "an_error_occurred",
+};

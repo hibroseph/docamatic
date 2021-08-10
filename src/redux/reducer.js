@@ -1,9 +1,14 @@
-// const INITIAL_NOTE_WIDTH = 250;
-// const INITIAL_NOTE_HEIGHT = 400;
-
-import { COLORS as colorList, INITIAL_NOTE_HEIGHT, INITIAL_NOTE_WIDTH } from "../utils/constants";
+import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
-import { NUKENOTES, NUKE_NOTES } from "./actions";
+import { NUKE_NOTES } from "./actions";
+import * as Sentry from "@sentry/react";
+import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
+
+Sentry.init({
+  dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
+  environment: ENVIRONMENT,
+  release: RELEASE + VERSION,
+});
 
 // Messages to appear when a note is created
 const NoteMessages = [
@@ -16,11 +21,11 @@ const NoteMessages = [
   "Wanna change the color? Press the color button",
 ];
 
+const REDUCER_ERROR_TITLE = "Reducer";
+
 const notesApp = (state = [], action) => {
   switch (action.type) {
     case NUKE_NOTES:
-      console.log("nuking all notes");
-      console.log(state);
       return {};
 
     case "IMPORT_NOTES":
@@ -216,20 +221,25 @@ const notesApp = (state = [], action) => {
       });
 
     case "REMOVE_NOTE":
-      // Filter the id of the note that needs to be deleted out
-      let notes = state[action.url].notes.filter((note) => {
-        if (note.id != action.id) {
-          return note;
-        }
-      });
+      try {
+        // Filter the id of the note that needs to be deleted out
+        let notes = state[action.url].notes.filter((note) => {
+          if (note.id != action.id) {
+            return note;
+          }
+        });
 
-      let newState = Object.assign({}, state, {
-        [action.url]: {
-          notes,
-        },
-      });
-
-      return newState;
+        return Object.assign({}, state, {
+          [action.url]: {
+            notes,
+          },
+        });
+      } catch (error) {
+        Sentry.captureException(error, {
+          location: "Reducer:REMOTE_NOTE",
+        });
+        return state;
+      }
 
     case "ADD_NOTE":
       // Generates a random position on the page
@@ -257,7 +267,6 @@ const notesApp = (state = [], action) => {
                 position: { x: posx, y: action.y_position },
                 size: {
                   width: INITIAL_NOTE_WIDTH,
-                  height: INITIAL_NOTE_HEIGHT,
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
@@ -270,7 +279,7 @@ const notesApp = (state = [], action) => {
                 },
                 stickify: false,
                 heart: false,
-                visible: false,
+                visible: true,
               },
             ],
           },
@@ -285,7 +294,6 @@ const notesApp = (state = [], action) => {
                 position: { x: posx, y: action.y_position },
                 size: {
                   width: INITIAL_NOTE_WIDTH,
-                  height: INITIAL_NOTE_HEIGHT,
                 },
                 body: NoteMessages[noteTextIndex],
                 title: action.title,
@@ -296,7 +304,7 @@ const notesApp = (state = [], action) => {
                   title: colorList[colorIndex],
                   text: yiq >= 128 ? "#000" : "#fff",
                 },
-                visible: false,
+                visible: true,
               },
             ],
           },

@@ -6,6 +6,7 @@ import {
   updateNotePosition,
   updateNoteSize
 } from "../redux/actions";
+import { GetSafeNoteUrl} from "../utils/GetSafeNoteUrl"
 
 
 class NoteList extends React.Component<Types.NoteListProps, {}> {
@@ -14,10 +15,15 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
   }
 
   render() {
+    console.log("inside of note list rendering")
+
+    
     return (
       <div>
         {this.props.url && this.props.notes.map(note => {
           if (note.visible || note.visible == undefined) {
+            console.log("rendering");
+            console.log(note);
             return (
               <DraggableNote
                 onPositionChange={(id, x, y) =>
@@ -32,7 +38,7 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
                 url={this.props.url}
               />
             )
-          };
+          }
         })}
       </div>
     );
@@ -40,13 +46,16 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
 }
 
 const mapStateToProps = (state, props) => {
-  if (state[window.location.href] == null) {
+
+  let safeUrl:string = GetSafeNoteUrl(window.location.href);
+
+  if (state[safeUrl] == null) {
     return {
       notes: []
     };
   } else {
     return {
-      notes: state[window.location.href].notes,
+      notes: state[safeUrl].notes,
       scrollYOffset: props.scrollYOffset
     };
   }

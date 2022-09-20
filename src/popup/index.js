@@ -8,6 +8,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 
+console.log("we are in index.js");
 const store = new Store({
   portName: "NOTES_STORE",
 });

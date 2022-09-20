@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import NoteList from "./NoteList.tsx";
 import * as Sentry from "@sentry/react";
 import { CHROME_MESSAGES, ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
+import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 
 class App extends Component {
   constructor(props) {
@@ -19,29 +20,28 @@ class App extends Component {
 
     this.state = {
       scrollYOffset: window.pageYOffset,
-      current_url: location.href,
+      current_url: GetSafeNoteUrl(location.href),
       timer: null,
     };
 
     this.listenToScroll = this.listenToScroll.bind(this);
     this.listenForUrlChange = this.listenForUrlChange.bind(this);
     this.listenForHistoryChanges = this.listenForHistoryChanges.bind(this);
-
-    chrome.runtime.sendMessage({ action: CHROME_MESSAGES.ERROR_OCCURRED }, () => {});
+    //chrome.runtime.sendMessage({ action: CHROME_MESSAGES.ERROR_OCCURRED }, () => {});
   }
 
   /*
   This listener is used to update the notes when the page doesn't do a full refresh
   */
   listenForUrlChange() {
-    let url = location.href;
+    let url = GetSafeNoteUrl(location.href);
 
     document.body.addEventListener(
       "click",
       () => {
         requestAnimationFrame(() => {
-          if (url !== location.href) {
-            url = location.href;
+          if (url !== GetSafeNoteUrl(location.href)) {
+            url = GetSafeNoteUrl(location.href);
             this.setState({
               current_url: url,
             });

@@ -5,19 +5,19 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
-const WebpackShellPlugin = require("webpack-shell-plugin");
+const WebpackShellPluginNext = require("webpack-shell-plugin-next");
 
 module.exports = {
   // Entry files for our popup and background pages
   entry: {
     popup: "./src/popup/index.js",
     background: "./src/background/index.js",
-    script: "./src/index.js"
+    script: "./src/index.js",
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].[hash].js"
+    filename: "[name].[hash].js",
   },
   // Here we define loaders for different file types
   module: {
@@ -27,12 +27,12 @@ module.exports = {
         include: [path.resolve(__dirname, "./src")],
         exclude: /node_modules/,
         use: {
-          loader: "ts-loader"
-        }
+          loader: "ts-loader",
+        },
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"]
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
@@ -41,26 +41,27 @@ module.exports = {
             loader: "url-loader",
             options: {
               limit: 8192,
-              name: "assets/[hash].[ext]"
-            }
-          }
-        ]
-      }, {
+              name: "assets/[hash].[ext]",
+            },
+          },
+        ],
+      },
+      {
         test: /\.(ttf|woff|woff2?)$/,
         use: {
-          loader: 'file-loader'
-          , options: {
-            name: 'css/fonts/[name]-[hash:8].[ext]'
-          }
-        }
+          loader: "file-loader",
+          options: {
+            name: "css/fonts/[name]-[hash:8].[ext]",
+          },
+        },
       },
       {
         enforce: "pre",
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "source-map-loader"
-      }
-    ]
+        loader: "source-map-loader",
+      },
+    ],
   },
   plugins: [
     // create CSS file with all used styles
@@ -70,18 +71,22 @@ module.exports = {
       chunks: ["popup"],
       hash: true,
       filename: "index.html",
-      template: "./src/popup/index.html"
+      template: "./src/popup/index.html",
     }),
     // copy extension manifest and icons
     new CopyWebpackPlugin({
-      patterns: [
-        { from: "./src/manifest.json" },
-        { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }
-      ]
+      patterns: [{ from: "./src/manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
     }),
     new CleanWebpackPlugin(["dist"]),
     new ManifestPlugin({ fileName: "assetManifest.json" }),
-    new WebpackShellPlugin({ onBuildStart: ["rm -rf dist/"], onBuildExit: ["node refreshPaths.js"] })
+    new WebpackShellPluginNext({
+      onBuildStart: {
+        scripts: ["rm -rf dist/"],
+      },
+      onBuildExit: {
+        scripts: ["node refreshPaths.js"],
+      },
+    }),
   ],
-  devtool: "source-map"
+  devtool: "source-map",
 };

@@ -7,6 +7,7 @@ import { addNote } from "../redux/actions";
 import { faStickyNote, faSearch, faHeart, faCog, faBell, faCompass, faSortAmountDown } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
 import { CHROME_MESSAGES } from "../utils/constants";
+import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 
 // The list of icons to generate in the side bar
 const icons = [
@@ -31,12 +32,9 @@ export const Popup = (props) => {
   });
   const CreateNewNote = (data) => {
     console.log(props);
-    console.log("attempting to add note to page");
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      console.log("querying bby");
-      // eslint-disable-next-line no-undef
       chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
-        console.log("sending msg");
         try {
           props.addNoteClick(data, response);
         } catch (err) {
@@ -65,8 +63,7 @@ export const Popup = (props) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     addNoteClick: (data, response) => {
-      console.log("maping dispatch to props");
-      dispatch(addNote(data, generateUUID(), response.scrollPosition, response.page));
+      dispatch(addNote(data, generateUUID(), response.scrollPosition, GetSafeNoteUrl(response.page)));
     },
   };
 };

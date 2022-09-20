@@ -56,7 +56,7 @@ const CurrentPageNotes = (props) => {
           if (key == url) {
             return props.notes[key].notes.map((note) => {
               return (
-                <NotePadding key={key}>
+                <NotePadding key={note.id}>
                   <Note popup={true} {...note} colors={props.colors} url={key} />
                 </NotePadding>
               );

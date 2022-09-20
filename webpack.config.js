@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const WebpackShellPluginNext = require("webpack-shell-plugin-next");
 
 module.exports = {
@@ -17,7 +17,8 @@ module.exports = {
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].[hash].js",
+    filename: "[name].[fullhash].js",
+    publicPath: "",
   },
   // Here we define loaders for different file types
   module: {
@@ -41,7 +42,7 @@ module.exports = {
             loader: "url-loader",
             options: {
               limit: 8192,
-              name: "assets/[hash].[ext]",
+              name: "assets/[name].[ext]",
             },
           },
         ],
@@ -51,7 +52,7 @@ module.exports = {
         use: {
           loader: "file-loader",
           options: {
-            name: "css/fonts/[name]-[hash:8].[ext]",
+            name: "css/fonts/[name]-[fullhash:8].[ext]",
           },
         },
       },
@@ -78,7 +79,7 @@ module.exports = {
       patterns: [{ from: "./src/manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
     }),
     new CleanWebpackPlugin(["dist"]),
-    new ManifestPlugin({ fileName: "assetManifest.json" }),
+    new WebpackManifestPlugin({ fileName: "assetManifest.json", basePath: "" }),
     new WebpackShellPluginNext({
       onBuildStart: {
         scripts: ["rm -rf dist/"],

@@ -1,7 +1,6 @@
 // Removes query strings and other variances in urls so your note shows up where you want it/expect it
 
 export const GetSafeNoteUrl = (url) => {
-  console.log("non safe url");
   let safeUrl = url.split(/[?#]/)[0];
 
   let protocol = safeUrl.split("//")[0];
@@ -9,6 +8,5 @@ export const GetSafeNoteUrl = (url) => {
 
   let safestUrl = protocol + "//" + afterProtocol;
   // consolidate multiple slashes in a row
-  console.log("safest url: " + safestUrl);
   return safestUrl;
 };

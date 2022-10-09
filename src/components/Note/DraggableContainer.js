@@ -8,13 +8,12 @@ export const DraggableContainer = (props) => {
         y: props.position.y,
 
         width: props.size.width,
-        height: props.size.height,
       },
       onDragStop: (e, d) => {
         props.onPositionChange(props.id, d.x, d.y);
       },
       onResizeStop: (e, d, ref, delta, position) => {
-        props.onSizeChange(props.size.width + delta.width, props.size.height + delta.height);
+        props.onSizeChange(props.size.width + delta.width);
       },
       dragHandleClassName: "drag-handle",
       bounds: "window",

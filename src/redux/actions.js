@@ -55,12 +55,11 @@ export function stickify(id, url) {
   };
 }
 
-export function updateNoteSize(id, x, y, url) {
+export function updateNoteSize(id, x, url) {
   return {
     type: RESIZE_NOTE,
     id,
     x,
-    y,
     url,
   };
 }

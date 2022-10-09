@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import App from "./components/App";
-import { Store } from "react-chrome-redux";
+import { Store } from "webext-redux";
 import { CHROME_MESSAGES, VERSION } from "./utils/constants";
 
 const notesStorageKey = `notes-${window.location.href}`;
@@ -22,18 +22,14 @@ const store = new Store({
 const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + VERSION + "_";
 
 store.subscribe(() => {
-  console.log("new store state");
   const serialized = JSON.stringify(store.getState());
-  console.log(store.getState());
   localStorage.setItem(notesStorageKey, serialized);
 });
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("sending data about window location");
   // This is if the extension is requesting the current scroll position to position the new note
   if (request.action == CHROME_MESSAGES.GET_PAGE_INFORMATION) {
-    console.log("getting page position for requested note");
     sendResponse({
       scrollPosition: document.documentElement.scrollTop,
       page: window.location.href,

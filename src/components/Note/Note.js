@@ -6,6 +6,8 @@ import { connect } from "react-redux";
 import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility } from "../../redux/actions";
 
 export const Note = (props) => {
+  console.log("props of note");
+  console.log(props);
   return (
     <NoteContainer color={{ ...props.color }}>
       <TitleBar

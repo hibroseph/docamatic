@@ -1,5 +1,5 @@
 import notesApp from "../redux/reducer";
-import { wrapStore } from "react-chrome-redux";
+import { wrapStore } from "webext-redux";
 import { createStore } from "redux";
 import * as Sentry from "@sentry/browser";
 import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
@@ -9,21 +9,34 @@ Sentry.init({
   environment: ENVIRONMENT,
   release: RELEASE + VERSION,
 });
-
+console.debug(`Starting up Docamatic Background ${ENVIRONMENT}:${RELEASE}:${VERSION}`);
 let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
-const notesStorageKey = `notes-${window.location.href}`;
+const notesStorageKey = `notes`;
 
 chrome.runtime.setUninstallURL(feedbackUrl);
 
+let initialState = {};
+
+chrome.storage.local.get(notesStorageKey, (storage) => {
+  initialState = JSON.parse(storage.state || "{}");
+});
+
 // See if we have previously saved a state and if not, insert an empty array
-let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
+//let initialState = JSON.parse(localStorage.getItem(notesStorageKey) || "{}");
 
 // Create the store
 const store = createStore(notesApp, initialState);
 
 store.subscribe(() => {
-  const serialized = JSON.stringify(store.getState());
-  localStorage.setItem(notesStorageKey, serialized);
+  let currentState = store.getState();
+  console.debug("Current store state:");
+  console.debug(currentState);
+  const serialized = JSON.stringify(currentState);
+  chrome.storage.local.set({ notesStorageKey: serialized }, () => {
+    console.debug("Successfully set ");
+    console.debug(serialized);
+    console.debug(`to key ${notesStorageKey}`);
+  });
 });
 
 wrapStore(store, { portName: "NOTES_STORE" });

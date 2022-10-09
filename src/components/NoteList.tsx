@@ -15,22 +15,19 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
   }
 
   render() {
-    console.log("inside of note list rendering")
 
     
     return (
       <div>
         {this.props.url && this.props.notes.map(note => {
           if (note.visible || note.visible == undefined) {
-            console.log("rendering");
-            console.log(note);
             return (
               <DraggableNote
                 onPositionChange={(id, x, y) =>
                   this.props.onPositionChange(id, x, y, this.props.url)
                 }
-                onSizeChange={(width, height) =>
-                  this.props.onSizeChange(note.id, width, height, this.props.url)
+                onSizeChange={(width) =>
+                  this.props.onSizeChange(note.id, width, this.props.url)
                 }
                 key={note.id}
                 {...note}
@@ -62,7 +59,7 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  onSizeChange: (id, x, y, url) => dispatch(updateNoteSize(id, x, y, url)),
+  onSizeChange: (id, x, url) => dispatch(updateNoteSize(id, x, url)),
   onPositionChange: (id, x, y, url) => dispatch(updateNotePosition(id, x, y, url)),
 });
 

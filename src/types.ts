@@ -1,7 +1,7 @@
 export interface Note {
   id: number;
   position: { x: number; y: number };
-  size: { width: number; height: number };
+  size: { width: number };
   body: string;
   title: string;
   date_created: string;
@@ -23,6 +23,6 @@ export interface NoteListProps {
   onPositionChange: (id: number, x: number, y: number, url: string) => void;
   onNoteClicked: (id: number, url: string) => void;
   onColorChange: (id: number, color: string, url: string) => void;
-  onSizeChange: (id: number, width: number, height: number, url: string) => void;
+  onSizeChange: (id: number, width: number, url: string) => void;
   onHideNote: (id: number, url: string) => void;
 }

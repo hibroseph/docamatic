@@ -100,7 +100,7 @@ const notesApp = (state = [], action) => {
           notes: state[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
-                size: { width: action.x, height: action.y },
+                size: { width: action.x },
               });
             } else {
               return note;

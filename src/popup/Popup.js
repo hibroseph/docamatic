@@ -23,7 +23,6 @@ export const Popup = (props) => {
   const [currentPage, setCurrentPage] = useState("current");
 
   useEffect(() => {
-    console.log("loading popup");
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.action == CHROME_MESSAGES.ERROR_OCCURRED) {
         console.error("AN ERROR OCCURRED DAMMIT");
@@ -31,14 +30,12 @@ export const Popup = (props) => {
     });
   });
   const CreateNewNote = (data) => {
-    console.log(props);
-
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
         try {
           props.addNoteClick(data, response);
         } catch (err) {
-          console.log("failed to send msg", err);
+          console.error("failed to send msg", err);
         }
       });
     });

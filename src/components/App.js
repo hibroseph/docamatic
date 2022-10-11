@@ -2,21 +2,11 @@
 import React, { Component } from "react";
 // import styled from "styled-components";
 import NoteList from "./NoteList.tsx";
-import * as Sentry from "@sentry/react";
-import { CHROME_MESSAGES, ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 
 class App extends Component {
   constructor(props) {
     super(props);
-
-    // Initializing Sentry
-    Sentry.init({
-      dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
-      environment: ENVIRONMENT,
-      release: RELEASE + VERSION,
-      ignoreErrors: ["ResizeObserver loop limit exceeded"],
-    });
 
     this.state = {
       scrollYOffset: window.pageYOffset,

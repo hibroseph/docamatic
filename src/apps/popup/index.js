@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { Store } from "webext-redux";
 import Popup from "./Popup";
-import ErrorBoundary from "../components/ErrorBoundary";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 let root = document.getElementById("__POPUP__MOUNT__POINT__");
 

@@ -1,15 +1,17 @@
-import notesApp from "../redux/reducer";
+import notesApp from "../../redux/reducer";
 import { wrapStore } from "webext-redux";
 import { createStore } from "redux";
 import * as Sentry from "@sentry/browser";
-import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
+import config from "../../../config.json";
 
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
-  environment: ENVIRONMENT,
-  release: RELEASE + VERSION,
+  environment: config.environment,
+  release: config.release + config.version,
+  debug: true,
 });
-console.debug(`Starting up Docamatic Background ${ENVIRONMENT}:${RELEASE}:${VERSION}`);
+
+console.debug(`Starting up Docamatic Background ${config.environment}:${config.release}:${config.version}`);
 let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 const notesStorageKey = `notes`;
 
@@ -28,14 +30,17 @@ chrome.storage.local.get(notesStorageKey, (storage) => {
 const store = createStore(notesApp, initialState);
 
 store.subscribe(() => {
-  let currentState = store.getState();
-  console.debug("Current store state:");
-  console.debug(currentState);
-  const serialized = JSON.stringify(currentState);
-  chrome.storage.local.set({ notesStorageKey: serialized }, () => {
-    console.debug("Successfully set ");
-    console.debug(serialized);
-    console.debug(`to key ${notesStorageKey}`);
+  Sentry.wrap(() => {
+    let currentState = store.getState();
+    console.debug("Current store state:");
+    console.debug(currentState);
+    const serialized = JSON.stringify(currentState);
+    chrome.storage.local.set({ notesStorageKey: serialized }, () => {
+      console.debug("Successfully set ");
+      console.debug(serialized);
+      console.debug(`to key ${notesStorageKey}`);
+    });
+    hello.goodbye();
   });
 });
 

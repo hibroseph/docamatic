@@ -2,13 +2,14 @@ import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
 import { NUKE_NOTES } from "./actions";
 import * as Sentry from "@sentry/react";
-import { ENVIRONMENT, RELEASE, VERSION } from "../utils/constants";
+/*
+import config from
 
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
   environment: ENVIRONMENT,
   release: RELEASE + VERSION,
-});
+});*/
 
 // Messages to appear when a note is created
 const NoteMessages = [

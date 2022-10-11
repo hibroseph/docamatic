@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { PopupStyle as Container } from "../components/Popup/style";
-import { PopupContent } from "../components/Popup/PopupContent";
-import { IconList } from "../components/Popup/PopupNavigation/IconList";
-import { generateUUID } from "../utils/GenerateUUID";
-import { addNote } from "../redux/actions";
+import { PopupStyle as Container } from "../../components/Popup/style";
+import { PopupContent } from "../../components/Popup/PopupContent";
+import { IconList } from "../../components/Popup/PopupNavigation/IconList";
+import { generateUUID } from "../../utils/GenerateUUID";
+import { addNote } from "../../redux/actions";
 import { faStickyNote, faSearch, faHeart, faCog, faBell, faCompass, faSortAmountDown } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
-import { CHROME_MESSAGES } from "../utils/constants";
-import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
+import { CHROME_MESSAGES } from "../../utils/constants";
+import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
 
 // The list of icons to generate in the side bar
 const icons = [
@@ -30,7 +30,9 @@ export const Popup = (props) => {
     });
   });
   const CreateNewNote = (data) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true }, (tabs) => {
+      console.log("tabs we have available from query are");
+      console.log(tabs);
       chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
         try {
           props.addNoteClick(data, response);

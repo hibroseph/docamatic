@@ -1,13 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 import { PageTitle } from "../style";
-import { VERSION } from "../../../utils/constants";
+import config from "../../../../config.json";
 import { MessageHeader, SubMessage } from "../Pages/CurrentPageNotes/style";
 import { connect } from "react-redux";
 import { importNotes, nukeNotes } from "../../../redux/actions";
 import { saveAs } from "file-saver";
 import PopupWindow from "../PopupWindow";
-import Toast from "../Toast";
 import { useState } from "react";
 
 const SettingButton = styled.button`
@@ -114,7 +113,7 @@ const Settings = (props) => {
       )}
 
       {/*showToast && <Toast message={toastMessage}></Toast>*/}
-      <p>Docamatic Version: {VERSION}</p>
+      <p>Docamatic Version: {config.version}</p>
     </div>
   );
 };

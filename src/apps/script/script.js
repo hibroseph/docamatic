@@ -1,14 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
-import App from "./components/App";
+import App from "../../components/App";
 import { Store } from "webext-redux";
-import { CHROME_MESSAGES, VERSION } from "./utils/constants";
+import { CHROME_MESSAGES } from "../../utils/constants";
+import config from "../../../config.json";
+import * as Sentry from "@sentry/react";
+import config from "../../config.json";
+
+// Initializing Sentry
+Sentry.init({
+  dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
+  environment: config.environment,
+  release: config.release + config.version,
+  ignoreErrors: ["ResizeObserver loop limit exceeded"],
+});
 
 const notesStorageKey = `notes-${window.location.href}`;
 
 // Send a message giving the current browser width and height so that notes will not appear out of that area
-
 chrome.runtime.sendMessage({
   message: "windowSize",
   pageWidth: document.documentElement.clientWidth,
@@ -19,7 +29,7 @@ const store = new Store({
   portName: "NOTES_STORE",
 });
 
-const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + VERSION + "_";
+const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
 
 store.subscribe(() => {
   const serialized = JSON.stringify(store.getState());

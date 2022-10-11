@@ -6,13 +6,14 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const WebpackShellPluginNext = require("webpack-shell-plugin-next");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
   // Entry files for our popup and background pages
   entry: {
-    popup: "./src/popup/index.js",
-    background: "./src/background/index.js",
-    script: "./src/index.js",
+    popup: "./src/apps/popup/index.js",
+    background: "./src/apps/background/background.js",
+    script: "./src/apps/script/script.js",
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
@@ -72,11 +73,11 @@ module.exports = {
       chunks: ["popup"],
       hash: true,
       filename: "index.html",
-      template: "./src/popup/index.html",
+      template: "./src/apps/popup/index.html",
     }),
     // copy extension manifest and icons
     new CopyWebpackPlugin({
-      patterns: [{ from: "./src/manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
+      patterns: [{ from: "./manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
     }),
     new CleanWebpackPlugin(["dist"]),
     new WebpackManifestPlugin({ fileName: "assetManifest.json", basePath: "" }),
@@ -85,9 +86,10 @@ module.exports = {
         scripts: ["rm -rf dist/"],
       },
       onBuildExit: {
-        scripts: ["node refreshPaths.js"],
+        scripts: ["node refresh-paths.js"],
       },
     }),
+    //new BundleAnalyzerPlugin(),
   ],
   devtool: "source-map",
 };

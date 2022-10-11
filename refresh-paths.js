@@ -5,7 +5,7 @@
 const fs = require("fs");
 
 let assetData = fs.readFileSync("./dist/assetManifest.json");
-let manifestData = fs.readFileSync("./src/manifest.json");
+let manifestData = fs.readFileSync("./manifest.json");
 
 let manifest = JSON.parse(manifestData);
 let assets = JSON.parse(assetData);
@@ -18,7 +18,6 @@ let manifestString = JSON.stringify(manifest);
 for (let i = 0, length = assetKeys.length; i < length; i++) {
   manifestString = manifestString.replace(assetKeys[i], assets[assetKeys[i]]);
 }
-
 
 fs.writeFileSync("./dist/manifest.json", manifestString);
 

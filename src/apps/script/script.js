@@ -12,7 +12,7 @@ import config from "../../config.json";
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
   environment: config.environment,
-  release: config.release + config.version,
+  release: config.release_prefix + config.version,
   ignoreErrors: ["ResizeObserver loop limit exceeded"],
 });
 

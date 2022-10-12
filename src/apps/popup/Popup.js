@@ -34,11 +34,10 @@ export const Popup = (props) => {
       console.log("tabs we have available from query are");
       console.log(tabs);
       chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
-        try {
+        Sentry.wrap(() => {
           props.addNoteClick(data, response);
-        } catch (err) {
-          console.error("failed to send msg", err);
-        }
+          ello();
+        });
       });
     });
   };

@@ -79,15 +79,32 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [{ from: "./manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
     }),
-    new CleanWebpackPlugin(["dist"]),
+    //new CleanWebpackPlugin(["dist"]),
     new WebpackManifestPlugin({ fileName: "assetManifest.json", basePath: "" }),
     new WebpackShellPluginNext({
+      onBeforeBuild: {
+        scripts: ["echo onBeforeBuild",
+          "./watch.sh"]
+      },
+      onBuildEnd: {
+        scripts: ["echo onBuildEnd",
+        "node refresh-paths.js"]
+      },
+      onDoneWatch: {
+        scripts: [
+          "echo onWatchRun",
+          "./watch.sh"
+        ]
+      },
+      onAfterDone : {
+        scripts: [
+          "node refresh-paths.js"
+        ]
+      },
       onBuildStart: {
-        scripts: ["rm -rf dist/"],
-      },
-      onBuildExit: {
-        scripts: ["node refresh-paths.js"],
-      },
+        scripts: [
+          "rm -rf dist/"],
+      }
     }),
     //new BundleAnalyzerPlugin(),
   ],

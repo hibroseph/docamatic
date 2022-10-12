@@ -1,5 +1,5 @@
 {
-    "environment":"development",
-    "version": "3.1.8",
-    "release_prefix":"docamatic@"
+  "environment": "development",
+  "version": "6.6.6",
+  "release_prefix": "docamatic@"
 }

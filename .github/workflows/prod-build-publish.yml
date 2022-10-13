@@ -58,5 +58,7 @@ jobs:
           -X PUT \
           -T ./dist/app.zip \
           -v \
+          --fail-with-body \
           https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.CHROME_WEBSTORE_ITEM_ID}}
+          if [ $? -ne 0 ]; then echo "::error failed to publish::Unable to publish, curl request returned 400>"; fi
  

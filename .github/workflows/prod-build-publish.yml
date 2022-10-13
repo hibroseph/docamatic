@@ -47,13 +47,14 @@ jobs:
          
     - name: Chrome Webstore Access Token
       run: |
-        ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq '.access_token') >> $GITHUB_ENV
+        ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq '.access_token')
         if [ $? -ne 0 ]; then echo "::error access token::Unable to get access token"; fi
+        echo "SECRET_TOKEN=::add-mask::$ACCESS_TOKEN" >> $GITHUB_ENV
     
     - name: Chrome Webstore Publish
       run: |
           curl \
-          -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
+          -H "Authorization: Bearer ${{ env.SECRET_TOKEN }}"  \
           -H "x-goog-api-version: 2" \
           -X PUT \
           -T ./dist/app.zip \

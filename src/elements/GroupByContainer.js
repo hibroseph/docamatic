@@ -13,11 +13,6 @@ border-radius: 15px;
     justify-content: space-evenly;
     align-items: center
 }
-.title{
- font-weight: bold;
- font-size: 20px;
- margin: 10px 5px 10px 0px;
-}
 
 .button-container {
     display: flex;

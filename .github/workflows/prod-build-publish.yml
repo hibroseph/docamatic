@@ -31,6 +31,8 @@ jobs:
     # You may pin to the exact commit or the version.
     # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d38
       uses: getsentry/action-release@v1.2.0
+      env: 
+        SENTRY_ORG: "joe-patrol"
       with:
         environment: "production"
         sourcemaps: ./dist/sentry

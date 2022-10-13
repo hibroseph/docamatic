@@ -47,8 +47,8 @@ jobs:
          
     - name: Chrome Webstore Access Token
       run: |
-        echo "::add-mask::ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')" >> $GITHUB_ENV
-        echo $ACCESS_TOKEN
+        echo "ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')" >> $GITHUB_ENV
+        echo "::add-mask::$ACCESS_TOKEN"
         
     - name: Chrome Webstore Publish
       run: |

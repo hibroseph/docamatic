@@ -32,6 +32,10 @@ cp -r assets app
 cp manifest.json app
 cp -r icons app
 
+mkdir sentry
+cp *.js sentry
+cp *.map sentry
+cp manifest sentry
 
 zip -r app.zip app/
 

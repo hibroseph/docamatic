@@ -45,3 +45,5 @@ jobs:
         version_prefix: "docamatic@"
         # Space-separated list of projects. Defaults to the env variable "SENTRY_PROJECT" if not provided.
         projects: "docamatic"
+    - name: Chrome Webstore Publish
+    - run: ACCESS_TOKEN=$(::add-mask::(curl "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_tokenb" | jq '.access_token')

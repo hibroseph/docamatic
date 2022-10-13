@@ -4,7 +4,11 @@
 name: prod-build
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      prod_build_version:
+        required: true
+        description: 'Version of docmatic to build and publish'
 
 jobs:
   build:
@@ -18,4 +22,4 @@ jobs:
         node-version: 18
         cache: 'npm'
     - run: ./setup-env.sh
-    - run: ./prod-build.sh
+    - run: ./prod-build.sh ${{ github.event.inputs.prod_build_version }}

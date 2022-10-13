@@ -48,9 +48,7 @@ jobs:
     - name: Chrome Webstore Access Token
       run: |
         ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq '.access_token') >> $GITHUB_ENV
-        if [ $? -ne 0 ]; then \
-          echo "::error access token::Unable to get access token" \
-        fi
+        if [ $? -ne 0 ]; then echo "::error access token::Unable to get access token"; fi
     
     - name: Chrome Webstore Publish
       run: |

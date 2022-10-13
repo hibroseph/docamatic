@@ -46,6 +46,13 @@ jobs:
         projects: "docamatic"
          
     - name: Chrome Webstore Publish
-      run: ACCESS_TOKEN=::add-mask::$(::add-mask::curl "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq '.access_token')
-
+    - run: ACCESS_TOKEN=::add-mask::$(curl "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq '.access_token')
+    - run: |
+          curl \
+          -H "Authorization: Bearer $ACCESS_TOKEN"  \
+          -H "x-goog-api-version: 2" \
+          -X PUT \
+          -T ./dist/app.zip \
+          -v \
+          https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.CHROME_WEBSTORE_ITEM_ID}}
  

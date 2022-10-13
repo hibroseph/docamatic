@@ -1,12 +1,23 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]
-    then
-        echo "You must pass a version number of the production build"
+if [ $# -ne 2 ]; then
+        echo "You must pass a semver number of the build and the environment [production or uat]"
         exit 1;
 fi
 
-echo "Creating a production build with version number" $1
+# verify second parm is either production or uat
+if [ "$2" != production ] && [ "$2" != uat ]; then
+        echo "production or uat are only valid arguments for 2nd parameter"
+        exit 1;
+fi
+#verify first parm is semver number
+rx='^([0-9]+\.){0,2}(\*|[0-9]+)$'
+if [[ $1 =~ $rx ]]; then
+    echo "Creating a $2 build with semver $1"
+else
+    echo "$1 is not a valid semver number"
+    exit 1;
+fi
 
 
 # replace version numbers in manifest and config.json
@@ -15,7 +26,7 @@ jq '.name="Docamatic - Add Sticky Notes to the Web"' tmp_manifest.json > manifes
 rm tmp_manifest.json
 
 jq '.version=$number' --arg number $1 config.json > tmp_config.json
-jq '.environment="production"' tmp_config.json > config.json
+jq '.environment="$2"' tmp_config.json > config.json
 rm tmp_config.json
 
 #start production build
@@ -39,4 +50,4 @@ cp manifest sentry
 
 zip -r app.zip app/
 
-echo "Done creating the production build with version number" $1
+echo "Done creating the $2 build with semver version" $1

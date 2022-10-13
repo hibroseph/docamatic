@@ -51,7 +51,7 @@ jobs:
     - name: Chrome Webstore Publish
       run: |
           curl \
-          -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}  \
+          -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
           -H "x-goog-api-version: 2" \
           -X PUT \
           -T ./dist/app.zip \

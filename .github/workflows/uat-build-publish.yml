@@ -1,0 +1,63 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: uat build and publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      prod_build_version:
+        required: true
+        description: 'Version of docamatic to build and publish'
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-22.04
+    environment: production
+
+    steps:
+    
+    - uses: actions/checkout@v3
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+    - run: ./setup-env.sh
+    - run: npm ci
+    - run: ./build.sh ${{ github.event.inputs.prod_build_version }} uat
+  
+    - name: Sentry Release
+    # You may pin to the exact commit or the version.
+    # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d38
+      uses: getsentry/action-release@v1.2.0
+      env: 
+        SENTRY_ORG: "joe-patrol"      
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      with:
+        environment: "production"
+        sourcemaps: ./dist/sentry
+        finalize: false #false because build needs to go through google review process and wont be published for a few days
+        # Identifier that uniquely identifies the releases. Omit to auto-generate one.
+        version: ${{ github.event.inputs.prod_build_version }}
+        # Value prepended to auto-generated version.
+        version_prefix: "docamatic@"
+        # Space-separated list of projects. Defaults to the env variable "SENTRY_PROJECT" if not provided.
+        projects: "docamatic"
+         
+    - name: Chrome Webstore Access Token
+      run: |
+        ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')
+        echo "::add-mask::$ACCESS_TOKEN"
+        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+        
+    - name: Chrome Webstore Publish
+      run: |
+          curl \
+          -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
+          -H "x-goog-api-version: 2" \
+          -X PUT \
+          -T ./dist/app.zip \
+          -i \
+          --fail-with-body \
+          https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.UAT_CHROME_WEBSTORE_ITEM_ID}}

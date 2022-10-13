@@ -58,7 +58,7 @@ jobs:
           -H "x-goog-api-version: 2" \
           -X PUT \
           -T ./dist/app.zip \
-          -v \
+          -i \
           --fail-with-body \
           https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.CHROME_WEBSTORE_ITEM_ID}}
  

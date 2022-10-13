@@ -60,5 +60,5 @@ jobs:
           -T ./dist/app.zip \
           -i \
           --fail-with-body \
-          https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.CHROME_WEBSTORE_ITEM_ID}}
+          https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.PROD_CHROME_WEBSTORE_ITEM_ID}}
  

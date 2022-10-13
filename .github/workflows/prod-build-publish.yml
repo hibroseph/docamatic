@@ -32,7 +32,8 @@ jobs:
     # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d38
       uses: getsentry/action-release@v1.2.0
       env: 
-        SENTRY_ORG: "joe-patrol"
+        SENTRY_ORG: "joe-patrol"      
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       with:
         environment: "production"
         sourcemaps: ./dist/sentry

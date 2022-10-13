@@ -34,7 +34,6 @@ jobs:
       env: 
         SENTRY_ORG: "joe-patrol"      
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        SENTRY_LOG_LEVEL: debug
       with:
         environment: "production"
         sourcemaps: ./dist/sentry

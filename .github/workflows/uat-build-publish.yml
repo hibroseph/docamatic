@@ -35,7 +35,7 @@ jobs:
         SENTRY_ORG: "joe-patrol"      
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       with:
-        environment: "production"
+        environment: "uat"
         sourcemaps: ./dist/sentry
         finalize: false #false because build needs to go through google review process and wont be published for a few days
         # Identifier that uniquely identifies the releases. Omit to auto-generate one.

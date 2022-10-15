@@ -28,10 +28,6 @@ jobs:
         workflow_conclusion: success
         branch: master
         event: push
-        # Optional, will use specified workflow run
-        run_id: 1122334455
-        # Optional, run number from the workflow
-        run_number: 34
         # Optional, uploaded artifact name,
         # will download all artifacts if not specified
         # and extract them into respective subdirectories

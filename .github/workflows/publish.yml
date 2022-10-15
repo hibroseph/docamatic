@@ -22,8 +22,6 @@ jobs:
       id: download-artifact
       uses: dawidd6/action-download-artifact@v2
       with:
-        # Optional, workflow file name or ID
-        # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
         workflow: build-extension.yml
         workflow_conclusion: success
         branch: master
@@ -32,7 +30,7 @@ jobs:
         # will download all artifacts if not specified
         # and extract them into respective subdirectories
         # https://github.com/actions/download-artifact#download-all-artifacts
-        name: extension
+        name: extension.zip
         if_no_artifact_found: fail
     
     - name: Sentry Release

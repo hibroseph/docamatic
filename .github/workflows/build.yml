@@ -9,11 +9,14 @@ on:
       build_version:
         required: true
         description: 'Version of docamatic to build'
+      environment:
+        required: true
+        description: Environment of build to create
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    environment: production
+    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - uses: actions/checkout@v3
@@ -24,7 +27,7 @@ jobs:
         cache: 'npm'
     - run: ./setup-env.sh
     - run: npm ci
-    - run: ./build.sh ${{ github.event.inputs.prod_build_version }} uat
+    - run: ./build.sh ${{ github.event.inputs.build_version }} ${{ github.event.inputs.build_version }}
   
     - name: Upload extension artifact
       uses: actions/upload-artifact@v3.1.0

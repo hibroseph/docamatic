@@ -32,6 +32,6 @@ jobs:
     - name: Upload extension artifact
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: extension # optional, default is artifact
+        name: extension
         path: ./dist/app.zip
         if-no-files-found: error

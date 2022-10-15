@@ -6,6 +6,9 @@ name: publish extension
 on:
   workflow_dispatch:
     inputs:
+      build_version:
+        required: true
+        description: the version the app was built with in github
       chrome_extension_id:
         required: true
         description: the chrome extension id to publish to

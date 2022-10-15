@@ -1,64 +1,72 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: production build and publish
+name: publish extension
 
 on:
   workflow_dispatch:
     inputs:
-      prod_build_version:
+      chrome_extension_id:
         required: true
-        description: 'Version of docmatic to build and publish'
+        description: the chrome extension id to publish to
 
 jobs:
-  build_and_publish:
+  publish:
     runs-on: ubuntu-22.04
-    environment: production
-
-    steps:
     
-    - uses: actions/checkout@v3
-    - name: Use Node.js 18
-      uses: actions/setup-node@v3
+    steps:
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
       with:
-        node-version: 18
-        cache: 'npm'
-    - run: ./setup-env.sh
-    - run: npm ci
-    - run: ./build.sh ${{ github.event.inputs.prod_build_version }} production
-  
+        # Optional, workflow file name or ID
+        # If not specified, will be inferred from run_id (if run_id is specified), or will be the current workflow
+        workflow: build-extension.yml
+        workflow_conclusion: success
+        branch: master
+        event: push
+        # Optional, will use specified workflow run
+        run_id: 1122334455
+        # Optional, run number from the workflow
+        run_number: 34
+        # Optional, uploaded artifact name,
+        # will download all artifacts if not specified
+        # and extract them into respective subdirectories
+        # https://github.com/actions/download-artifact#download-all-artifacts
+        name: extension.zip
+        if_no_artifact_found: fail
+    
     - name: Sentry Release
-    # You may pin to the exact commit or the version.
-    # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d38
+      # You may pin to the exact commit or the version.
+      # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d3
       uses: getsentry/action-release@v1.2.0
       env: 
         SENTRY_ORG: "joe-patrol"      
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       with:
-        environment: "production"
+        environment: "uat"
         sourcemaps: ./dist/sentry
         finalize: false #false because build needs to go through google review process and wont be published for a few days
         # Identifier that uniquely identifies the releases. Omit to auto-generate one.
-        version: ${{ github.event.inputs.prod_build_version }}
+        version: ${{ github.event.inputs.build_version }}
         # Value prepended to auto-generated version.
         version_prefix: "docamatic@"
         # Space-separated list of projects. Defaults to the env variable "SENTRY_PROJECT" if not provided.
         projects: "docamatic"
-         
+
     - name: Chrome Webstore Access Token
       run: |
         ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')
         echo "::add-mask::$ACCESS_TOKEN"
         echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
-        
+
     - name: Chrome Webstore Publish
       run: |
-          curl \
-          -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
-          -H "x-goog-api-version: 2" \
-          -X PUT \
-          -T ./dist/app.zip \
-          -i \
-          --fail-with-body \
-          https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{secrets.PROD_CHROME_WEBSTORE_ITEM_ID}}
- 
+        curl \
+        -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
+        -H "x-goog-api-version: 2" \
+        -X PUT \
+        -T ./ ${{ github.event.inputs.artifact_name }} \
+        -i \
+        --fail-with-body \
+        https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ github.event.inputs.chrome_extension_id }}

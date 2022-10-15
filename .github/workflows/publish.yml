@@ -32,7 +32,7 @@ jobs:
         # will download all artifacts if not specified
         # and extract them into respective subdirectories
         # https://github.com/actions/download-artifact#download-all-artifacts
-        name: extension.zip
+        name: extension
         if_no_artifact_found: fail
     
     - name: Sentry Release

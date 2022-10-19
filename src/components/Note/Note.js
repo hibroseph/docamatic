@@ -3,12 +3,13 @@ import { NoteContainer } from "./style";
 import { TitleBar } from "./TitleBar";
 import { NoteBody } from "./NoteBody";
 import { connect } from "react-redux";
-import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility } from "../../redux/actions";
-
+import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
+import { TagBubble } from "../TagBubble";
 export const Note = (props) => {
-  console.log("props of note");
-  console.log(props);
+  console.log("props in note")
+  console.log(props)
   return (
+  
     <NoteContainer color={{ ...props.color }}>
       <TitleBar
         {...props}
@@ -18,6 +19,20 @@ export const Note = (props) => {
         onColorChange={(color) => props.onColorChange(props.id, color, props.url)}
         onToggleVisibility={(visible) => props.onToggleVisibility(props.id, props.url, visible)}
       />
+      <div>
+        {props?.tags?.map(tag => 
+        <TagBubble key={tag.id} removeTag={() => props.removeTag(props.id, props.url, tag.id)} text={tag.text} color={tag.color}></TagBubble>
+      )}
+      <TagBubble
+      color="#e0e0e0" 
+      text="add tag" 
+      contentEditable={true}
+      createTag={tag => {
+        console.log("creating tag in note"); 
+        console.log(tag);
+        props.addTag(props.id, props.url, tag)}}
+      ></TagBubble></div>
+      
       <NoteBody onBodyChange={(event) => props.onTextChange(props.id, event.target.value, props.url)} {...props} />
     </NoteContainer>
   );
@@ -33,6 +48,8 @@ const mapDispatchToProps = (dispatch) => ({
   onColorChange: (id, color, url) => dispatch(changeNoteColor(id, url, color)),
   onNoteClicked: (id, url) => dispatch(updateNoteDepth(id, url)),
   onToggleVisibility: (id, url, visible) => dispatch(toggleVisibility(id, url, visible)),
+  removeTag: (noteId, tagId) => dispatch(removeTag(noteId, url, tagId)),
+  addTag: (noteId, url, tagText) => dispatch(addTag(noteId, url, tagText))
 });
 
 export default connect(null, mapDispatchToProps)(Note);

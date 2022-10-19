@@ -6,7 +6,7 @@ import {
   updateNotePosition,
   updateNoteSize
 } from "../redux/actions";
-import { GetSafeNoteUrl} from "../utils/GetSafeNoteUrl"
+import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl"
 
 
 class NoteList extends React.Component<Types.NoteListProps, {}> {
@@ -15,8 +15,6 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
   }
 
   render() {
-
-    
     return (
       <div>
         {this.props.url && this.props.notes.map(note => {
@@ -31,6 +29,7 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
                 }
                 key={note.id}
                 {...note}
+                tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
                 scrollYOffset={this.props.scrollYOffset}
                 url={this.props.url}
               />
@@ -44,15 +43,17 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
 
 const mapStateToProps = (state, props) => {
 
-  let safeUrl:string = GetSafeNoteUrl(window.location.href);
+  let safeUrl: string = GetSafeNoteUrl(window.location.href);
 
   if (state[safeUrl] == null) {
     return {
-      notes: []
+      notes: [],
+      tags: []
     };
   } else {
     return {
       notes: state[safeUrl].notes,
+      tags: state["tags"] || [],
       scrollYOffset: props.scrollYOffset
     };
   }

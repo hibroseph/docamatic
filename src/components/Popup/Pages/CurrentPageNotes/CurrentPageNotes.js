@@ -57,7 +57,9 @@ const CurrentPageNotes = (props) => {
             return props.notes[key].notes.map((note) => {
               return (
                 <NotePadding key={note.id}>
-                  <Note popup={true} {...note} colors={props.colors} url={key} />
+                  <Note popup={true} {...note} 
+                  tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                  colors={props.colors} url={key} />
                 </NotePadding>
               );
             });
@@ -69,7 +71,10 @@ const CurrentPageNotes = (props) => {
 };
 
 const mapStateToProps = (state) => {
-  return { notes: state, colors: COLORS };
+  return { 
+    notes: state,
+    tags: state.tags || [],
+    colors: COLORS };
 };
 
 export default connect(mapStateToProps, null)(CurrentPageNotes);

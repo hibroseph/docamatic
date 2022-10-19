@@ -1,7 +1,9 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
-import { NUKE_NOTES } from "./actions";
+import { ADD_TAG, REMOVE_TAG, NUKE_NOTES } from "./actions";
 import * as Sentry from "@sentry/react";
+import { generateUUID } from "../utils/GenerateUUID";
+import { getRandomTagColor} from "../utils/RandomTagColor";
 /*
 import config from
 
@@ -26,6 +28,98 @@ const REDUCER_ERROR_TITLE = "Reducer";
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
+    case ADD_TAG:
+      console.log("we are going to add the tag baby")
+      console.log(action)
+
+      console.log("state before adding new tag");
+      console.log(state);
+
+      // 3 cases, 
+      //1. tag exists but doesn't exist on the note
+      //2. tag doesn't exist
+      //3. tag exists and exists on the note
+      var tagExists = state?.tags?.find(tag => tag.text == action.text);
+      var noteHasTag = tagExists?.notes?.find(id => id == action.noteId);
+
+      if (tagExists && noteHasTag == undefined) {
+        console.debug(`${action.text} tag exists with id ${tagExists.id} but does not exist on note with id ${action.noteId}. Adding ${tagExists.id} to ${action.noteId}`)
+        newState = Object.assign({}, {
+          [action.url]: Object.assign({}, {
+            notes: Object.assign([], 
+              state[action.url].notes.map(note => {
+                if (note.id != action.noteId)
+                  return note;
+                else 
+                  return { ...note, tags: [...state[action.url]?.tags || [],
+                  {
+                    id: tagExists.id
+                  }] 
+                }
+              })
+            )
+          })},
+          {
+            tags: [...state.tags.map(tag => {
+              if (tag.id != tagExists.id) {
+                return tag;
+              } else {
+                // we found the tag we need to add the note to
+                const {notes, ...strippedTag} = tag;
+                return {
+                  ...strippedTag,
+                  notes: [...notes, action.noteId]
+                }
+              }
+            })]
+          }
+          )
+      } else if (tagExists && noteHasTag) {
+        console.debug(`${action.text} tag exists with id ${tagExists.id} and exist on note with id ${action.noteId}. Doing nothing`)
+        newState = state;
+      } else if (tagExists == undefined) {
+        console.debug(`${action.text} tag does not exist. Creating new tag and assigning it to note with id ${action.noteId}`)
+        var tagId = generateUUID();
+        newState = Object.assign({}, 
+          state, 
+          {
+            [action.url]: Object.assign({}, {
+              notes: Object.assign([], 
+                state[action.url].notes.map(note => {
+                  if (note.id != action.noteId)
+                    return note;
+                  else 
+                    return { ...note, tags: [...state[action.url]?.tags || [],
+                    {
+                      id: tagId
+                    }] }
+                })
+              )
+          })
+        },
+        { 
+          tags: 
+            [...state?.tags || {}, 
+              { 
+              id: tagId, 
+              color: getRandomTagColor(), 
+              text: action.text,
+              notes:[ action.noteId]
+              }
+            ]
+        })
+      };
+
+      
+      console.log("state after adding new tag");
+      console.log(newState)
+      return newState;
+
+    case REMOVE_TAG:
+      console.log("we are removing a tag")
+      console.log(action);
+      return state;
+
     case NUKE_NOTES:
       return {};
 
@@ -280,7 +374,7 @@ const notesApp = (state = [], action) => {
                 },
                 stickify: false,
                 heart: false,
-                visible: true,
+                visible: true
               },
             ],
           },

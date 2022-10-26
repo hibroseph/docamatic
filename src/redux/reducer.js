@@ -24,17 +24,12 @@ const NoteMessages = [
   "Wanna change the color? Press the color button",
 ];
 
+
 const REDUCER_ERROR_TITLE = "Reducer";
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
     case ADD_TAG:
-      console.log("we are going to add the tag baby")
-      console.log(action)
-
-      console.log("state before adding new tag");
-      console.log(state);
-
       // 3 cases, 
       //1. tag exists but doesn't exist on the note
       //2. tag doesn't exist
@@ -109,16 +104,52 @@ const notesApp = (state = [], action) => {
             ]
         })
       };
-
-      
-      console.log("state after adding new tag");
-      console.log(newState)
+      console.debug(newState)
       return newState;
 
     case REMOVE_TAG:
-      console.log("we are removing a tag")
-      console.log(action);
-      return state;
+      console.debug("Removing tag with payload:")
+      console.debug(action);
+
+      // We need to do 2 things
+      // 1. Removing the referenced tag from the notes node
+      // 2. Remove the referenced note from the tags node
+
+      let newTagState = Object.assign({}, 
+        state,
+        {
+          [action.url]: Object.assign({}, {
+            notes: Object.assign([],
+              state[action.url].notes.map(note => {
+                if (note.id != action.noteId)
+                  return note;
+                else
+                  return {
+                    ...note,
+                    tags: note.tags.filter(p => p.id != action.tagId)
+                  };
+                }
+              )
+            )
+          })
+        },
+        {
+          tags: state.tags.map(tag => {
+            if (tag.id != action.tagId) 
+              return tag;
+            else
+              return {
+                ...tag,
+                notes: tag.notes.filter(p => p != action.noteId)
+              }
+          })
+          .filter(tag => tag.notes.length > 0)
+        }
+      )
+
+      console.debug("New State:")
+      console.debug(newTagState);
+      return newTagState;
 
     case NUKE_NOTES:
       return {};

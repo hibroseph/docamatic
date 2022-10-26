@@ -42,7 +42,8 @@ const initPopup = () => {
   }
   console.debug("waiting for store")
   store.ready().then(() => {
-    console.debug("store ready")
+    console.debug("store ready. here is the store")
+    console.debug(store)
     ReactDOM.render(
       <Provider store={store}>
         <ErrorBoundary>

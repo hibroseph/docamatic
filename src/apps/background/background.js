@@ -39,11 +39,16 @@ chrome.runtime.onConnect.addListener((port) => {
     // Gets the current state from the storage.
     chrome.storage.local.get(notesStorageKey, (storage) => {
       if (!isInitialized) {
+        console.debug("store is not initalized")
         // 1. Initializes the redux store and the message passing.
         init(storage.state || initialState);
-        isInitialized = false;
+        isInitialized = true;
+      } else {
+        console.debug("store is already initalized")
       }
       // 2. Sends a message to notify that the store is ready.
+      
+      console.debug("notifying the world that the store is initalized")
       chrome.runtime.sendMessage({ type: "STORE_INITIALIZED" });
     });
   }

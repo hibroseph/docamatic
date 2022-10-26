@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch) => ({
   onColorChange: (id, color, url) => dispatch(changeNoteColor(id, url, color)),
   onNoteClicked: (id, url) => dispatch(updateNoteDepth(id, url)),
   onToggleVisibility: (id, url, visible) => dispatch(toggleVisibility(id, url, visible)),
-  removeTag: (noteId, tagId) => dispatch(removeTag(noteId, url, tagId)),
+  removeTag: (noteId, url, tagId) => dispatch(removeTag(noteId, url, tagId)),
   addTag: (noteId, url, tagText) => dispatch(addTag(noteId, url, tagText))
 });
 

@@ -1,8 +1,6 @@
 import React, {useState} from "react";
 import styled from "styled-components";
 import { getContrastingColor } from "../utils/ContrastingColor"
-import { LightenColor } from "../utils/LightenColor"
-
 
 const TagSpan = styled.span`
     border-radius: 10px;
@@ -37,6 +35,8 @@ export const TagBubble = (props) => {
     contentEditable={props.contentEditable ? true : false}
     suppressContentEditableWarning={props.contentEditable ? true : false}
     onKeyDown={(key) => {
+        console.debug("key!!!")
+        console.debug(key)
         if (key.keyCode == 13 && 
             key.currentTarget.textContent != 'add tag' && 
             key.currentTarget.textContent != '') {
@@ -44,16 +44,21 @@ export const TagBubble = (props) => {
         console.log("creating tag in tag")
         props.createTag(key.currentTarget.textContent)
         setTagText("add tag")
+        key.currentTarget.blur();
         }
     
         if (key.keyCode == 13) {
             console.log("detected enter, resetting tag text")
             key.preventDefault();
             setTagText("add tag");
+            key.currentTarget.blur();
         }}}
     onBlur={blur => { 
+        console.debug("blur!!!")
+        console.debug(blur)
         if (blur.currentTarget.textContent != 'add tag' && blur.currentTarget.textContent != '') {
             props.createTag(blur.currentTarget.textContent);
+            blur.currentTarget.blur();
         }
 
         setTagText("add tag")}

@@ -19,13 +19,6 @@ console.debug("connecting from popup")
 // initalize connection from popup
 chrome.runtime.connect({ name: "POPUP" });
 
-chrome.runtime.onMessage.addListener((req) => {
-  if (req.type === "STORE_INITIALIZED") {
-    // Initializes the popup logic
-    initPopup();
-  }
-});
-
 const initPopup = () => {
   console.log("initing popup")
   let root = document.getElementById("__POPUP__MOUNT__POINT__");
@@ -55,6 +48,7 @@ const initPopup = () => {
   });
 }
 
+
 // Listens for when the store gets initialized
 chrome.runtime.onMessage.addListener((req) => {
   if (req.type === "STORE_INITIALIZED") {
@@ -62,5 +56,3 @@ chrome.runtime.onMessage.addListener((req) => {
     initPopup();
   }
 });
-
-

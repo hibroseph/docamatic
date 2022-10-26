@@ -39,7 +39,9 @@ const notesApp = (state = [], action) => {
 
       if (tagExists && noteHasTag == undefined) {
         console.debug(`${action.text} tag exists with id ${tagExists.id} but does not exist on note with id ${action.noteId}. Adding ${tagExists.id} to ${action.noteId}`)
-        newState = Object.assign({}, {
+        newState = Object.assign({},
+          state,
+          {
           [action.url]: Object.assign({}, {
             notes: Object.assign([], 
               state[action.url].notes.map(note => {
@@ -359,6 +361,14 @@ const notesApp = (state = [], action) => {
           [action.url]: {
             notes,
           },
+        },
+        {
+          tags: state.tags?.map(tag => { 
+            return {
+              ...tag,
+              notes: tag.notes.filter(p => p != action.id)
+              }
+          }).filter(tag => tag.notes.length > 0)
         });
       } catch (error) {
         Sentry.captureException(error, {

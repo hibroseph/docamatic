@@ -6,6 +6,7 @@ import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webp
 import ManPostingNote from "../../../../assets/man-posting-note.png";
 import Note from "../../../Note/Note";
 import { COLORS } from "../../../../utils/constants";
+import { GetSafeNoteUrl } from "../../../../utils/GetSafeNoteUrl";
 
 const CurrentPageNotes = (props) => {
   const [url, setCurrentUrl] = useState("");
@@ -13,7 +14,7 @@ const CurrentPageNotes = (props) => {
   useEffect(() => {
     chrome.tabs.query({ active: true }, (tabs) => {
       let url = tabs[0].url;
-      setCurrentUrl(url);
+      setCurrentUrl(GetSafeNoteUrl(url));
     });
   }, []);
 

@@ -13,6 +13,8 @@ class FilterNotes extends Component {
   render() {
     let foundItem = false;
 
+    console.debug("props")
+    console.debug(props)
     const element = Object.keys(this.props.state).map((key) => {
       return (
         <div key={key}>

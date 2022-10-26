@@ -16,28 +16,14 @@ Sentry.init({
   ignoreErrors: ["ResizeObserver loop limit exceeded"],
 });
 
-const notesStorageKey = `notes-${window.location.href}`;
 
-// Send a message giving the current browser width and height so that notes will not appear out of that area
-chrome.runtime.sendMessage({
-  message: "windowSize",
-  pageWidth: document.documentElement.clientWidth,
-  pageHeight: document.documentElement.clientHeight,
-});
+chrome.runtime.connect({ name: "SCRIPT" });
 
-const store = new Store({
-  portName: "NOTES_STORE",
-});
-
-const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
-
-store.subscribe(() => {
-  const serialized = JSON.stringify(store.getState());
-  localStorage.setItem(notesStorageKey, serialized);
-});
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.debug("Recieved a message in script.js")
+  console.debug(request);
   // This is if the extension is requesting the current scroll position to position the new note
   if (request.action == CHROME_MESSAGES.GET_PAGE_INFORMATION) {
     sendResponse({
@@ -47,31 +33,61 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       pageHeight: document.documentElement.clientHeight,
     });
   }
+
+  if (request.type === "STORE_INITIALIZED") {
+    // Initializes the popup logic
+    console.debug("initing page script")
+    initPageScript();
+  } 
 });
 
-AttachRootNodeAndRender();
 
-function AttachRootNodeAndRender() {
-  let rootNode = document.getElementById(PAGE_MOUNT_POINT);
-  if (!rootNode) {
-    rootNode = document.createElement("div");
-    Object.assign(rootNode.style, {
-      top: 0,
-      left: 0,
-      position: "absolute",
-      zIndex: 9999999999999999,
-    });
+const initPageScript = () => {
+  console.log("initing page script")
+  const notesStorageKey = `notes-${window.location.href}`;
 
-    rootNode.id = PAGE_MOUNT_POINT;
-    document.body.appendChild(rootNode);
-  }
-
-  store.ready().then(() => {
-    ReactDOM.render(
-      <Provider store={store}>
-        <App />
-      </Provider>,
-      rootNode
-    );
+  // Send a message giving the current browser width and height so that notes will not appear out of that area
+  chrome.runtime.sendMessage({
+    message: "windowSize",
+    pageWidth: document.documentElement.clientWidth,
+    pageHeight: document.documentElement.clientHeight,
   });
+
+  const store = new Store({
+    portName: "NOTES_STORE",
+  });
+
+  const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
+
+  store.subscribe(() => {
+    const serialized = JSON.stringify(store.getState());
+    localStorage.setItem(notesStorageKey, serialized);
+  });
+
+  AttachRootNodeAndRender();
+
+  function AttachRootNodeAndRender() {
+    let rootNode = document.getElementById(PAGE_MOUNT_POINT);
+    if (!rootNode) {
+      rootNode = document.createElement("div");
+      Object.assign(rootNode.style, {
+        top: 0,
+        left: 0,
+        position: "absolute",
+        zIndex: 9999999999999999,
+      });
+
+      rootNode.id = PAGE_MOUNT_POINT;
+      document.body.appendChild(rootNode);
+    }
+
+    store.ready().then(() => {
+      ReactDOM.render(
+        <Provider store={store}>
+          <App />
+        </Provider>,
+        rootNode
+      );
+    });
+  }
 }

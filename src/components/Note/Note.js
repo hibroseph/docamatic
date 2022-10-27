@@ -9,19 +9,18 @@ export const Note = (props) => {
   console.log("props in note")
   console.log(props)
   return (
-  
     <NoteContainer color={{ ...props.color }}>
       <TitleBar
         {...props}
-        onHeartifyClick={() => props.onHeartify(props.id, props.url)}
-        onDeleteClick={() => props.onDeleteClick(props.id, props.url)}
-        onTitleChange={(event) => props.onTitleChange(props.id, event.target.value, props.url)}
-        onColorChange={(color) => props.onColorChange(props.id, color, props.url)}
-        onToggleVisibility={(visible) => props.onToggleVisibility(props.id, props.url, visible)}
+        onHeartifyClick={() => props.mutateNote({id: props.id, url: props.url, type: 'heartify'})}
+        onDeleteClick={() => props.mutateNote({id: props.id, url: props.url, type: 'delete_note'})}
+        onTitleChange={(event) => props.mutateNote({ id: props.id, title: event.target.value, url:props.url, type: 'title_change'})}
+        onColorChange={(color) => props.mutateNote({id: props.id, color, url:props.url, type: 'color_change'})}
+        onToggleVisibility={(visible) => props.mutateNote({id: props.id, url: props.url, visible, type:'toggle_visibility'})}
       />
       <div>
         {props?.tags?.map(tag => 
-        <TagBubble key={tag.id} removeTag={() => props.removeTag(props.id, props.url, tag.id)} text={tag.text} color={tag.color}></TagBubble>
+        <TagBubble key={tag.id} removeTag={() => props.mutateNote({id: props.id, url:props.url, tagId:tag.id, type: 'remove_tag'})} text={tag.text} color={tag.color}></TagBubble>
       )}
       <TagBubble
       color="#e0e0e0" 
@@ -30,16 +29,76 @@ export const Note = (props) => {
       createTag={tag => {
         console.log("creating tag in note"); 
         console.log(tag);
-        props.addTag(props.id, props.url, tag)}}
+        props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
       ></TagBubble></div>
-      
-      <NoteBody onBodyChange={(event) => props.onTextChange(props.id, event.target.value, props.url)} {...props} />
+      <NoteBody onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />
     </NoteContainer>
   );
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  onHeartify: (id, url) => dispatch(heartify(id, url)),
+  mutateNote: (props) => {
+    console.debug("Mutating note with props:")
+    console.debug(props)
+
+    let action;
+
+    switch (props.type) {
+      case 'heartify':
+         action = heartify(props.id, props.url);
+         break;
+      case 'delete_note':
+        action = removeNote(props.id, props.url);
+        break;
+      case 'title_change':
+        console.debug("setting title action")
+        action = addTitle(props.id, props.title, props.url);
+        break;
+      case 'color_change':
+        action = changeNoteColor(props.id, props.url, props.color);
+        break;
+      case 'toggle_visibility':
+        action = toggleVisibility(props.id, props.url, props.visible);
+        break;
+      case 'remove_tag':
+        action = removeTag(props.id, props.url, props.tagId);
+        break;
+      case 'add_tag':
+        action = addTag(props.id, props.url, props.tag);
+        break;
+      case 'body_change':
+        action = addText(props.id, props.body, props.url);
+        break;
+      default:
+        console.error("Not handled with props");
+        console.error(props);
+      }
+      console.debug("dispatching action")
+      // call dispatch and handle promise once
+      return dispatch(action)
+      .then(() => console.debug("Successfully dispatched action: " + action.type))
+      .catch(e => {
+        // catch all errors and hopefully handle with retry
+        // TODO: Create retry loop to only retry a few times and then error out
+
+        console.debug("Attempting to wake service worker");
+        chrome.runtime.connect({ name: "SCRIPT" }); 
+
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+          console.debug("Recieved a message in note, maybe service worker?")
+          console.debug(request);
+          
+          if (request.type === "STORE_INITIALIZED") {
+            // Initializes the popup logic
+            console.debug("Service worker responded and is awake")
+            mapDispatchToProps(dispatch).mutateNote(props);
+          } 
+        });
+      })
+    
+  
+ } /*
+  onHeartify: (id, url) => ,
   onStickify: (id, url) => dispatch(stickify(id, url)),
   onAddClick: (text, url) => dispatch(addNote(text, url)),
   onDeleteClick: (id, url) => dispatch(removeNote(id, url)),
@@ -49,7 +108,7 @@ const mapDispatchToProps = (dispatch) => ({
   onNoteClicked: (id, url) => dispatch(updateNoteDepth(id, url)),
   onToggleVisibility: (id, url, visible) => dispatch(toggleVisibility(id, url, visible)),
   removeTag: (noteId, url, tagId) => dispatch(removeTag(noteId, url, tagId)),
-  addTag: (noteId, url, tagText) => dispatch(addTag(noteId, url, tagText))
+  addTag: (noteId, url, tagText) => dispatch(addTag(noteId, url, tagText))*/
 });
 
 export default connect(null, mapDispatchToProps)(Note);

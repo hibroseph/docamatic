@@ -59,7 +59,11 @@ export const SortNotesByDate = (props) => (
               <div>
                 {props.expandTabs.includes(noteGroup.date) && (
                   <NotePadding>
-                    <Note popup={true} {...note} website={note.url}></Note>
+                    <Note popup={true} 
+                    {...note} 
+                    website={note.url}
+                    tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                    ></Note>
                   </NotePadding>
                 )}
               </div>

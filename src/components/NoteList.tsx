@@ -22,10 +22,12 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
             return (
               <DraggableNote
                 onPositionChange={(id, x, y) =>
-                  this.props.onPositionChange(id, x, y, this.props.url)
+                  // @ts-ignore
+                  this.props.mutateNote({ id, x, y, url: this.props.url, type: 'position_change' })
                 }
                 onSizeChange={(width) =>
-                  this.props.onSizeChange(note.id, width, this.props.url)
+                  // @ts-ignore
+                  this.props.mutateNote({ id: note.id, width, url: this.props.url, type: 'size_change' })
                 }
                 key={note.id}
                 {...note}
@@ -60,8 +62,48 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  onSizeChange: (id, x, url) => dispatch(updateNoteSize(id, x, url)),
-  onPositionChange: (id, x, y, url) => dispatch(updateNotePosition(id, x, y, url)),
+  mutateNote: (props) => {
+    let action;
+
+    switch (props.type) {
+      case 'size_change':
+        action = updateNoteSize(props.id, props.width, props.url);
+        break;
+      case 'position_change':
+        action = updateNotePosition(props.id, props.x, props.y, props.url);
+        break;
+      default:
+        console.error("mutateNote state " + props.type + "not handled")
+        console.error(props);
+    }
+
+    return dispatch(action)
+      .then(() => console.debug("Successfully dispatched action: " + action.type))
+      .catch(e => {
+        // catch all errors and hopefully handle with retry
+        // TODO: Create retry loop to only retry a few times and then error out
+
+        console.debug("Attempting to wake service worker");
+        // TODO: Get types for chrome
+        // @ts-ignore
+        chrome.runtime.connect({ name: "SCRIPT" });
+        // @ts-ignore
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+          console.debug("Recieved a message in note, maybe service worker?")
+          console.debug(request);
+
+          if (request.type === "STORE_INITIALIZED") {
+            // Initializes the popup logic
+            console.debug("Service worker responded and is awake")
+            mapDispatchToProps(dispatch).mutateNote(props);
+          }
+        });
+      })
+
+    /*
+      onSizeChange: (id, x, url) => dispatch(updateNoteSize(id, x, url)),
+    onPositionChange: (id, x, y, url) => dispatch(updateNotePosition(id, x, y, url))*/
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(NoteList);

@@ -13,28 +13,36 @@ class FilterNotes extends Component {
   render() {
     let foundItem = false;
 
-    console.debug("props")
-    console.debug(props)
+    console.debug("props in filter notes")
+    console.debug(this.props)
     const element = Object.keys(this.props.state).map((key) => {
-      return (
-        <div key={key}>
-          {this.props.labels && <div className="label">{key} </div>}
-          {this.props.state[key].notes.map((note) => {
-            // Comparing happens right here
-            if (this.props.filter(note)) {
-              foundItem = true;
-              return (
-                <NotePadding>
-                  <PreviewUrl href={key} target="_new">
-                    {CreateFriendlyPreviewUrl(key)}
-                  </PreviewUrl>
-                  <Note popup={true} key={note.id} {...note} url={key} />
-                </NotePadding>
-              );
-            }
-          })}
-        </div>
-      );
+      if (key != 'tags') {
+        console.debug("rendering " + key)
+        return (
+          <div key={key}>
+            {this.props.labels && <div className="label">{key} </div>}
+            {this.props.state[key].notes.map((note) => {
+              // Comparing happens right here
+              if (this.props.filter(note)) {
+                foundItem = true;
+                return (
+                  <NotePadding>
+                    <PreviewUrl href={key} target="_new">
+                      {CreateFriendlyPreviewUrl(key)}
+                    </PreviewUrl>
+                    <Note
+                    {...note} 
+                     tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
+                     popup={true}
+                     key={note.id}
+                     url={key} />
+                  </NotePadding>
+                );
+              }
+            })}
+          </div>
+        );  
+          }
     });
 
     if (foundItem) {
@@ -46,5 +54,7 @@ class FilterNotes extends Component {
 }
 
 export default connect((state) => {
-  return { state: state };
+  return { 
+    state: state,
+    tags: state.tags || [] };
 }, null)(FilterNotes);

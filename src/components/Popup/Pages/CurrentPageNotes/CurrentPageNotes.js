@@ -58,7 +58,8 @@ const CurrentPageNotes = (props) => {
             return props.notes[key].notes.map((note) => {
               return (
                 <NotePadding key={note.id}>
-                  <Note popup={true} {...note} 
+                  <Note popup={true} 
+                  {...note} 
                   tags={props.tags.filter(tag => tag.notes.includes(note.id))}
                   colors={props.colors} url={key} />
                 </NotePadding>

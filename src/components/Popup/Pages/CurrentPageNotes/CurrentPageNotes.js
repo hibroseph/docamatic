@@ -12,7 +12,7 @@ const CurrentPageNotes = (props) => {
   const [url, setCurrentUrl] = useState("");
 
   useEffect(() => {
-    chrome.tabs.query({ active: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url = tabs[0].url;
       setCurrentUrl(GetSafeNoteUrl(url));
     });

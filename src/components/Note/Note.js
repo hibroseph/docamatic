@@ -6,8 +6,6 @@ import { connect } from "react-redux";
 import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
 import { TagBubble } from "../TagBubble";
 export const Note = (props) => {
-  console.log("props in note")
-  console.log(props)
   return (
     <NoteContainer color={{ ...props.color }}>
       <TitleBar
@@ -27,8 +25,6 @@ export const Note = (props) => {
       text="add tag" 
       contentEditable={true}
       createTag={tag => {
-        console.log("creating tag in note"); 
-        console.log(tag);
         props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
       ></TagBubble></div>
       <NoteBody onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />

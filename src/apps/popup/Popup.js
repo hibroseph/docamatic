@@ -30,14 +30,30 @@ export const Popup = (props) => {
     });
   });
   const CreateNewNote = (data) => {
-    chrome.tabs.query({ active: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true  }, (tabs) => {
       console.log("tabs we have available from query are");
       console.log(tabs);
-      chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
-          props.addNoteClick(data, response);
-      });
+      console.debug("sending message to tab")
+      chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
+      .then((response) => props.addNoteClick(data, response))
+      .catch(e => {
+        console.debug("uh oh"); 
+        console.debug(e);
+        console.debug("reloading")
+        chrome.tabs.reload(null, null, () => {
+          console.debug("reloading done sending message")
+          chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
+          .then((response) => {
+            console.log("got tab response");
+            console.debug(response);
+            console.debug("adding note")
+            props.addNoteClick(data, response);
+          })
+        })
+      })
     });
   };
+
 
   const DetermineClick = (data) => {
     if (data === "new") {

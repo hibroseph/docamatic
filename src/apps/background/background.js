@@ -12,6 +12,7 @@ let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 chrome.runtime.setUninstallURL(feedbackUrl);
 let initialState = {};
 
+
 const init = (preloadedState) => {
   console.debug("preloaded state:")
   console.debug(preloadedState)
@@ -23,12 +24,7 @@ const init = (preloadedState) => {
       console.debug("Current store state:");
       console.debug(currentState);
       const serialized = JSON.stringify(currentState);
-      chrome.storage.local.set({ notes: serialized }, () => {
-        console.debug("successfull set " + serialized + " to store")
-
-        chrome.storage.local.get(['notes'], (storage) =>
-        console.log(JSON.parse(storage.notes)))
-      })
+      chrome.storage.local.set({ notes: serialized })
     });
   });
 
@@ -40,7 +36,6 @@ const init = (preloadedState) => {
 // whenever the extension "wakes up" from idle.
 chrome.runtime.onConnect.addListener(port => {
   if (port.name === "POPUP" || port.name === "SCRIPT") {
-    console.log("got popup message from " + port.name)
     // The popup was opened.
     // Gets the current state from the storage.
     chrome.storage.local.get('notes', (storage) => {
@@ -64,7 +59,7 @@ chrome.runtime.onConnect.addListener(port => {
       else if (port.name === "SCRIPT")
       console.debug("TABS")
         console.debug(chrome.tabs)
-        chrome.tabs.query({active: true}, tabs => {
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
           chrome.tabs.sendMessage(tabs[0].id,{ type: "STORE_INITIALIZED" })
         })
         

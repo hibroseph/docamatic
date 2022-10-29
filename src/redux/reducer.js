@@ -38,7 +38,6 @@ const notesApp = (state = [], action) => {
       var noteHasTag = tagExists?.notes?.find(id => id == action.noteId);
 
       if (tagExists && noteHasTag == undefined) {
-        console.debug(`${action.text} tag exists with id ${tagExists.id} but does not exist on note with id ${action.noteId}. Adding ${tagExists.id} to ${action.noteId}`)
         newState = Object.assign({},
           state,
           {
@@ -72,10 +71,8 @@ const notesApp = (state = [], action) => {
           }
           )
       } else if (tagExists && noteHasTag) {
-        console.debug(`${action.text} tag exists with id ${tagExists.id} and exist on note with id ${action.noteId}. Doing nothing`)
         newState = state;
       } else if (tagExists == undefined) {
-        console.debug(`${action.text} tag does not exist. Creating new tag and assigning it to note with id ${action.noteId}`)
         var tagId = generateUUID();
         newState = Object.assign({}, 
           state, 
@@ -106,12 +103,9 @@ const notesApp = (state = [], action) => {
             ]
         })
       };
-      console.debug(newState)
       return newState;
 
     case REMOVE_TAG:
-      console.debug("Removing tag with payload:")
-      console.debug(action);
 
       // We need to do 2 things
       // 1. Removing the referenced tag from the notes node
@@ -149,8 +143,6 @@ const notesApp = (state = [], action) => {
         }
       )
 
-      console.debug("New State:")
-      console.debug(newTagState);
       return newTagState;
 
     case NUKE_NOTES:

@@ -7,7 +7,9 @@ import { CHROME_MESSAGES } from "../../utils/constants";
 import config from "../../../config.json";
 import * as Sentry from "@sentry/react";
 import config from "../../config.json";
+import { StyleSheetManager } from 'styled-components';
 
+//import ReactShadowRoot from 'react-shadow-root';
 // Initializing Sentry
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
@@ -22,8 +24,6 @@ chrome.runtime.connect({ name: "SCRIPT" });
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.debug("Recieved a message in script.js")
-  console.debug(request);
   // This is if the extension is requesting the current scroll position to position the new note
   if (request.action == CHROME_MESSAGES.GET_PAGE_INFORMATION) {
     sendResponse({
@@ -36,7 +36,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.type === "STORE_INITIALIZED") {
     // Initializes the popup logic
-    console.debug("initing page script")
     initPageScript();
   } 
 });
@@ -81,12 +80,20 @@ const initPageScript = () => {
       document.body.appendChild(rootNode);
     }
 
+    const shadow = rootNode.attachShadow({mode: 'open'})
+    const styleSlot = document.createElement('section');
+    shadow.appendChild(styleSlot)
+    const renderIn = document.createElement('div');
+    renderIn.id = PAGE_MOUNT_POINT
+    styleSlot.appendChild(renderIn)
     store.ready().then(() => {
       ReactDOM.render(
         <Provider store={store}>
-          <App />
+          <StyleSheetManager target={styleSlot}>
+            <App/>
+          </StyleSheetManager>
         </Provider>,
-        rootNode
+        renderIn
       );
     });
   }

@@ -25,9 +25,12 @@ export const TitleBar = props => {
                 style={{ margin: 0 }}
                 value={props.title}
                 onChange={titleChange}
+                onKeyDown={event => event.stopPropagation()}
+                onKeyUp={event => event.stopPropagation()}
+                onBeforeInput={event => event.stopPropagation()}
             />
             <SettingsToggle>
-                <FontAwesomeIcon id={"settings-container-toggle"} className="icons" icon={faEllipsisV} /></SettingsToggle>
+                <FontAwesomeIcon id={"settings-container-toggle"} icon={faEllipsisV} /></SettingsToggle>
             <SettingsBar {...props}></SettingsBar>
         </Container>
     )

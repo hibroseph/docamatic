@@ -75,8 +75,6 @@ class SortNotes extends Component {
   }
 
   render() {
-    console.debug("props in SortNotes");
-    console.debug(this.props);
     return (
       <div>
         <SortingHeader

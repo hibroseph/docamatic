@@ -78,23 +78,16 @@ const mapDispatchToProps = dispatch => ({
     }
 
     return dispatch(action)
-      .then(() => console.debug("Successfully dispatched action: " + action.type))
       .catch(e => {
         // catch all errors and hopefully handle with retry
         // TODO: Create retry loop to only retry a few times and then error out
-
-        console.debug("Attempting to wake service worker");
         // TODO: Get types for chrome
         // @ts-ignore
         chrome.runtime.connect({ name: "SCRIPT" });
         // @ts-ignore
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-          console.debug("Recieved a message in note, maybe service worker?")
-          console.debug(request);
-
           if (request.type === "STORE_INITIALIZED") {
             // Initializes the popup logic
-            console.debug("Service worker responded and is awake")
             mapDispatchToProps(dispatch).mutateNote(props);
           }
         });

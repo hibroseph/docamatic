@@ -12,12 +12,8 @@ class FilterNotes extends Component {
 
   render() {
     let foundItem = false;
-
-    console.debug("props in filter notes")
-    console.debug(this.props)
     const element = Object.keys(this.props.state).map((key) => {
       if (key != 'tags') {
-        console.debug("rendering " + key)
         return (
           <div key={key}>
             {this.props.labels && <div className="label">{key} </div>}

@@ -36,7 +36,7 @@ export const TitleBar = styled.div`
     background-color: ${(props) => props.color.title} !important;
 
     .icons {
-        font-size: 20px;
+        width: 20px;
         color: ${(props) => props.color.text};
     }
 

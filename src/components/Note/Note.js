@@ -5,6 +5,8 @@ import { NoteBody } from "./NoteBody";
 import { connect } from "react-redux";
 import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
 import { TagBubble } from "../TagBubble";
+import { TagBubbleContainer }  from "../TagBubbleContainer";
+
 export const Note = (props) => {
   return (
     <NoteContainer color={{ ...props.color }}>
@@ -16,17 +18,18 @@ export const Note = (props) => {
         onColorChange={(color) => props.mutateNote({id: props.id, color, url:props.url, type: 'color_change'})}
         onToggleVisibility={(visible) => props.mutateNote({id: props.id, url: props.url, visible, type:'toggle_visibility'})}
       />
-      <div>
-        {props?.tags?.map(tag => 
-        <TagBubble key={tag.id} removeTag={() => props.mutateNote({id: props.id, url:props.url, tagId:tag.id, type: 'remove_tag'})} text={tag.text} color={tag.color}></TagBubble>
-      )}
-      <TagBubble
-      color="#e0e0e0" 
-      text="add tag" 
-      contentEditable={true}
-      createTag={tag => {
-        props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
-      ></TagBubble></div>
+      <TagBubbleContainer>
+          {props?.tags?.map(tag => 
+          <TagBubble key={tag.id} removeTag={() => props.mutateNote({id: props.id, url:props.url, tagId:tag.id, type: 'remove_tag'})} text={tag.text} color={tag.color}></TagBubble>
+        )}
+        <TagBubble
+        color="#e0e0e0" 
+        text="add tag" 
+        contentEditable={true}
+        createTag={tag => {
+          props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
+        ></TagBubble>
+      </TagBubbleContainer>
       <NoteBody onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />
     </NoteContainer>
   );
@@ -34,9 +37,6 @@ export const Note = (props) => {
 
 const mapDispatchToProps = (dispatch) => ({
   mutateNote: (props) => {
-    console.debug("Mutating note with props:")
-    console.debug(props)
-
     let action;
 
     switch (props.type) {
@@ -47,7 +47,6 @@ const mapDispatchToProps = (dispatch) => ({
         action = removeNote(props.id, props.url);
         break;
       case 'title_change':
-        console.debug("setting title action")
         action = addTitle(props.id, props.title, props.url);
         break;
       case 'color_change':
@@ -69,24 +68,18 @@ const mapDispatchToProps = (dispatch) => ({
         console.error("Not handled with props");
         console.error(props);
       }
-      console.debug("dispatching action")
       // call dispatch and handle promise once
       return dispatch(action)
-      .then(() => console.debug("Successfully dispatched action: " + action.type))
       .catch(e => {
         // catch all errors and hopefully handle with retry
         // TODO: Create retry loop to only retry a few times and then error out
 
-        console.debug("Attempting to wake service worker");
         chrome.runtime.connect({ name: "SCRIPT" }); 
 
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-          console.debug("Recieved a message in note, maybe service worker?")
-          console.debug(request);
           
           if (request.type === "STORE_INITIALIZED") {
             // Initializes the popup logic
-            console.debug("Service worker responded and is awake")
             mapDispatchToProps(dispatch).mutateNote(props);
           } 
         });

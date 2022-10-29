@@ -60,6 +60,10 @@ export const TitleBar = styled.div`
 export const SettingsToggle = styled.span`
   margin-right: 13px;
   width: 6px;
+
+  #settings-container-toggle {
+    color: ${(props) => props.color} 
+  }
 `;
 
 export const SettingsContainer = styled.div`

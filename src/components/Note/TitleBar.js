@@ -30,7 +30,7 @@ export const TitleBar = props => {
                 onBeforeInput={event => event.stopPropagation()}
             />
             <SettingsToggle>
-                <FontAwesomeIcon id={"settings-container-toggle"} icon={faEllipsisV} /></SettingsToggle>
+                <FontAwesomeIcon id={"settings-container-toggle"} icon={faEllipsisV} color={props.color.text} /></SettingsToggle>
             <SettingsBar {...props}></SettingsBar>
         </Container>
     )

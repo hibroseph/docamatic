@@ -42,7 +42,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 const initPageScript = () => {
-  console.log("initing page script")
   const notesStorageKey = `notes-${window.location.href}`;
 
   // Send a message giving the current browser width and height so that notes will not appear out of that area

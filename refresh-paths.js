@@ -21,4 +21,8 @@ for (let i = 0, length = assetKeys.length; i < length; i++) {
 
 fs.writeFileSync("./dist/manifest.json", manifestString);
 
+let popupFile = fs.readFileSync(`./dist/${assets["popup.js"]}`).toString()
+
+fs.writeFileSync(`./dist/${assets["popup.js"]}`, popupFile.replace("[[script.js]]", assets["script.js"]))
+
 console.log("Refreshed all paths and saved new manifest.json 👍");

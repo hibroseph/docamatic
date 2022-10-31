@@ -10,4 +10,5 @@ export const INITIAL_NOTE_WIDTH = 225;
 export const CHROME_MESSAGES = {
   GET_PAGE_INFORMATION: "get_page_information",
   ERROR_OCCURRED: "an_error_occurred",
+  REATTACH_STORE: "reattach_store"
 };

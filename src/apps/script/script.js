@@ -11,6 +11,7 @@ import { StyleSheetManager } from 'styled-components';
 
 //import ReactShadowRoot from 'react-shadow-root';
 // Initializing Sentry
+// TODO: Do we need to reinitalize sentry?s
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
   environment: config.environment,
@@ -18,9 +19,7 @@ Sentry.init({
   ignoreErrors: ["ResizeObserver loop limit exceeded"],
 });
 
-
 chrome.runtime.connect({ name: "SCRIPT" });
-
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -42,7 +41,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 const initPageScript = () => {
-  const notesStorageKey = `notes-${window.location.href}`;
+  //const notesStorageKey = `notes-${window.location.href}`;
 
   // Send a message giving the current browser width and height so that notes will not appear out of that area
   chrome.runtime.sendMessage({
@@ -56,11 +55,11 @@ const initPageScript = () => {
   });
 
   const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
-
+/*
   store.subscribe(() => {
     const serialized = JSON.stringify(store.getState());
     localStorage.setItem(notesStorageKey, serialized);
-  });
+  });*/
 
   AttachRootNodeAndRender();
 
@@ -78,13 +77,33 @@ const initPageScript = () => {
       rootNode.id = PAGE_MOUNT_POINT;
       document.body.appendChild(rootNode);
     }
+    let shadow;
 
-    const shadow = rootNode.attachShadow({mode: 'open'})
-    const styleSlot = document.createElement('section');
-    shadow.appendChild(styleSlot)
-    const renderIn = document.createElement('div');
-    renderIn.id = PAGE_MOUNT_POINT
-    styleSlot.appendChild(renderIn)
+    let styleSlot;
+    let renderIn;
+
+    if (!rootNode.shadowRoot) {
+      shadow = rootNode.attachShadow({mode: 'open'})      
+    } else {
+      shadow = rootNode.shadowRoot;
+    }
+    
+
+    styleSlot = shadow.getElementById("__DOCAMATIC_STYLE_SLOT__");
+    if (!styleSlot) {
+      styleSlot = document.createElement('section');
+      styleSlot.id = "__DOCAMATIC_STYLE_SLOT__";
+      shadow.appendChild(styleSlot)
+    }
+
+    renderIn = shadow.getElementById("__DOCAMATIC_RENDER_IN__");
+
+    if (!renderIn) {
+      renderIn = document.createElement('div');
+      renderIn.id = "__DOCAMATIC_RENDER_IN__"
+      styleSlot.appendChild(renderIn)
+    }
+
     store.ready().then(() => {
       ReactDOM.render(
         <Provider store={store}>
@@ -93,7 +112,8 @@ const initPageScript = () => {
           </StyleSheetManager>
         </Provider>,
         renderIn
+
       );
-    });
+  });
   }
 }

@@ -4,8 +4,8 @@ import { TitleBar } from "./TitleBar";
 import { NoteBody } from "./NoteBody";
 import { connect } from "react-redux";
 import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
-import { TagBubble } from "../TagBubble";
-import { TagBubbleContainer }  from "../TagBubbleContainer";
+import { TagBubble } from "../TagBubble/TagBubble";
+import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
 
 export const Note = (props) => {
   return (
@@ -73,11 +73,9 @@ const mapDispatchToProps = (dispatch) => ({
       .catch(e => {
         // catch all errors and hopefully handle with retry
         // TODO: Create retry loop to only retry a few times and then error out
-
         chrome.runtime.connect({ name: "SCRIPT" }); 
-
+        
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-          
           if (request.type === "STORE_INITIALIZED") {
             // Initializes the popup logic
             mapDispatchToProps(dispatch).mutateNote(props);

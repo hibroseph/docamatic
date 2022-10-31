@@ -44,7 +44,6 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
 }
 
 const mapStateToProps = (state, props) => {
-
   let safeUrl: string = GetSafeNoteUrl(window.location.href);
 
   if (state[safeUrl] == null) {

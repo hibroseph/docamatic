@@ -45,6 +45,8 @@ chrome.runtime.onConnect.addListener(port => {
         chrome.runtime.sendMessage({ type: "STORE_INITIALIZED" });
       else if (port.name === "SCRIPT")
         chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+          console.log("tabz")
+          console.log(tabs)
           chrome.tabs.sendMessage(tabs[0].id,{ type: "STORE_INITIALIZED" })
         })
         

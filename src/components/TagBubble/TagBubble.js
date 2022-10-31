@@ -1,13 +1,13 @@
 import React, {useState} from "react";
 import styled from "styled-components";
-import { getContrastingColor } from "../utils/ContrastingColor"
+import { getContrastingColor } from "../../utils/ContrastingColor"
 
 const TagSpan = styled.span`
     border-radius: 10px;
     background-color: ${props => props.color};
     color: ${props => getContrastingColor(props.color)};
     padding: 2px 5px;
-    margin-left: 2px;
+    margin: 2px;
     font-size: 12px;
     &:hover {
         filter: brightness(85%);

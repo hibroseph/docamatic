@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
 export const TagBubbleContainer = styled.div`
-    margin: 5px;
+    display:flex;
+    flex-wrap:wrap;
 `

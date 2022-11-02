@@ -12,9 +12,9 @@ on:
       chrome_extension_id:
         required: true
         description: the chrome extension id to publish to
-      build_run_id:
+      commit:
         required: true
-        description: the run id of the build run from github
+        description: commit of build
 
 jobs:
   publish:

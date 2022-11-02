@@ -61,6 +61,10 @@ jobs:
         ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')
         echo "::add-mask::$ACCESS_TOKEN"
         echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+        
+    - name: lol
+      run: ls
+        
     - name: Unzip extension.txt
       run: unzip ./extension.zip
 

@@ -64,6 +64,9 @@ jobs:
         
     - name: lol
       run: ls
+      
+    - name: lol2
+      run: pwd
         
     - name: Unzip extension.txt
       run: unzip ./extension.zip

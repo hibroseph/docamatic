@@ -12,9 +12,9 @@ on:
       chrome_extension_id:
         required: true
         description: the chrome extension id to publish to
-      commit:
+      run_id:
         required: true
-        description: commit of build
+        description: the run of the build of the artifact
 
 jobs:
   publish:
@@ -28,7 +28,7 @@ jobs:
         workflow: build-extension.yml
         workflow_conclusion: success
         event: push
-        commit: ${{ github.event.inputs.commit }}
+        run_id: ${{ github.event.inputs.run_id }}
         name: extension
         if_no_artifact_found: fail
     

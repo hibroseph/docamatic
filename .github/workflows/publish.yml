@@ -68,7 +68,7 @@ jobs:
         -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
         -H "x-goog-api-version: 2" \
         -X PUT \
-        -T ./ ${{ github.event.inputs.artifact_name }} \
+        -T ./app.zip \
         -i \
         --fail-with-body \
         https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ github.event.inputs.chrome_extension_id }}

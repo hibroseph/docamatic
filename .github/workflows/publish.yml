@@ -27,9 +27,8 @@ jobs:
       with:
         workflow: build-extension.yml
         workflow_conclusion: success
-        branch: master
         event: push
-        run_id: ${{ github.event.inputs.build_run_id }}
+        commit: ${{ github.event.inputs.commit }}
         name: extension
         if_no_artifact_found: fail
     

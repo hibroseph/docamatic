@@ -70,5 +70,5 @@ jobs:
         -X PUT \
         -T ./ ${{ github.event.inputs.artifact_name }} \
         -i \
-        --fail-with-body \ba
+        --fail-with-body
         https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ github.event.inputs.chrome_extension_id }}

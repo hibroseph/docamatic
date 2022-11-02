@@ -12,10 +12,31 @@ export const HEARTIFY = "HEARTIFY";
 export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY";
 export const IMPORT_NOTES = "IMPORT_NOTES";
 export const NUKE_NOTES = "NUKE_NOTES";
+export const ADD_TAG = "ADD_TAG";
+export const REMOVE_TAG = "REMOVE_TAG"
 
 /*
  * action creators
  */
+export const addTag = (noteId, url, text) => {
+  return {
+    type: ADD_TAG,
+    noteId,
+    text,
+    url
+  }
+}
+
+
+export const removeTag = (noteId, url, tagId) => {
+  return {
+    type: REMOVE_TAG,
+    noteId,
+    url,
+    tagId
+  }
+}
+
 export function nukeNotes() {
   return {
     type: NUKE_NOTES,

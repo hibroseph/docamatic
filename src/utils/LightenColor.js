@@ -1,4 +1,5 @@
 export const LightenColor = (color, luminosity) => {
+  console.log("LIGHTENING COLOR")
   // validate hex string
   color = new String(color).replace(/[^0-9a-f]/gi, "");
   if (color.length < 6) {
@@ -19,5 +20,7 @@ export const LightenColor = (color, luminosity) => {
     ).toString(16);
     newColor += ("00" + c).substr(c.length);
   }
+
+  console.log("new color is: " + newColor)
   return newColor;
 };

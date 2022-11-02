@@ -91,7 +91,8 @@ class SortNotes extends Component {
               case 'url':
                 return (
                   <SortNotesByUrl
-                    pages={this.props.pages}
+                    pages={this.props.notes}
+                    tags={this.props.tags}
                     getSortedArrayWithUrl={() => this.getSortedArrayWithUrl()}
                     handleTogglingNotes={key => this.handleTogglingNotes(key)}
                     expandTabs={this.state.expandTabs}
@@ -101,7 +102,8 @@ class SortNotes extends Component {
               case 'date':
                 return (
                   <SortNotesByDate
-                    pages={this.props.pages}
+                    pages={this.props.notes}
+                    tags={this.props.tags}
                     getSortingFunction={() => this.getSortingFunction()}
                     handleTogglingNotes={(key) => this.handleTogglingNotes(key)}
                     expandTabs={this.state.expandTabs}
@@ -123,7 +125,11 @@ class SortNotes extends Component {
 }
 
 export default connect(
-  state => {
-    return { pages: state };
-  }, null
+  state => { 
+    return {
+      notes: state /* get rid of tags in state object */,
+      tags: state.tags
+    }
+  }
+  , null
 )(SortNotes);

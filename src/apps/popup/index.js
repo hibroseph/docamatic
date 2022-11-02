@@ -14,24 +14,36 @@ Sentry.init({
   release: config.release_prefix + config.version,
 });
 
-let root = document.getElementById("__POPUP__MOUNT__POINT__");
+// initalize connection from popup
+chrome.runtime.connect({ name: "POPUP" });
 
-const store = new Store({
-  portName: "NOTES_STORE",
-});
+const initPopup = () => {
+  let root = document.getElementById("__POPUP__MOUNT__POINT__");
+  const store = new Store({
+    portName: "NOTES_STORE",
+  });
 
-if (!root) {
-  root = document.createElement("div");
-  document.body.appendChild(root);
+  if (!root) {
+    root = document.createElement("div");
+    document.body.appendChild(root);
+  }
+  store.ready().then(() => {
+    ReactDOM.render(
+      <Provider store={store}>
+        <ErrorBoundary>
+          <Popup />
+        </ErrorBoundary>
+      </Provider>,
+      root
+    );
+  });
 }
 
-store.ready().then(() => {
-  ReactDOM.render(
-    <Provider store={store}>
-      <ErrorBoundary>
-        <Popup />
-      </ErrorBoundary>
-    </Provider>,
-    root
-  );
+
+// Listens for when the store gets initialized
+chrome.runtime.onMessage.addListener((req) => {
+  if (req.type === "STORE_INITIALIZED") {
+    // Initializes the popup logic
+    initPopup();
+  }
 });

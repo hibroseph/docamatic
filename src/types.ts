@@ -9,12 +9,20 @@ export interface Note {
   stickify: boolean;
   heart: boolean;
   visible: boolean;
+  tags: [id: string, text: string, color: string]
+}
+
+export interface Tag {
+  id: string,
+  color: string,
+  notes: [number]
 }
 
 export interface NoteListProps {
   notes: [Note];
   scrollYOffset: number;
   url: string;
+  tags: [Tag];
   onHeartify: (id: number, url: string) => void;
   onStickify: (id: number, url: string) => void;
   onDeleteClick: (id: number, url: string) => void;

@@ -11,9 +11,9 @@ const getSortedArrayWithUrl = (pages, sortingType) => {
 export const SortNotesByUrl = (props) => (
   <div className="filter-results">
     {getSortedArrayWithUrl(props.pages, props.getSortingFunction()).map((key) => {
-      if (props.pages[key].notes.length > 0) {
+      if (key != 'tags' && props.pages[key].notes.length > 0) {
         return (
-          <div>
+          <div key={key}>
             <div className="url-selector" onClick={() => props.handleTogglingNotes(key)}>
               {props.expandTabs.includes(key) ? (
                 <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
@@ -22,12 +22,19 @@ export const SortNotesByUrl = (props) => (
               )}
               <h3 style={{ display: "inline" }}>{CreateFriendlyPreviewUrl(key)}</h3>
             </div>
+            
             {props.expandTabs.includes(key) && (
               <div>
                 {props.pages[key].notes.map((note) => {
                   return (
                     <NotePadding>
-                      <Note popup={true} {...note} url={key} previewText={CreateFriendlyPreviewUrl(key)}></Note>
+                      <Note key={note.id} 
+                      popup={true} 
+                      {...note} 
+                      url={key} 
+                      previewText={CreateFriendlyPreviewUrl(key)}
+                      tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                      ></Note>
                     </NotePadding>
                   );
                 })}

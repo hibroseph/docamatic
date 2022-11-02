@@ -6,14 +6,15 @@ import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webp
 import ManPostingNote from "../../../../assets/man-posting-note.png";
 import Note from "../../../Note/Note";
 import { COLORS } from "../../../../utils/constants";
+import { GetSafeNoteUrl } from "../../../../utils/GetSafeNoteUrl";
 
 const CurrentPageNotes = (props) => {
   const [url, setCurrentUrl] = useState("");
 
   useEffect(() => {
-    chrome.tabs.query({ active: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url = tabs[0].url;
-      setCurrentUrl(url);
+      setCurrentUrl(GetSafeNoteUrl(url));
     });
   }, []);
 
@@ -57,7 +58,10 @@ const CurrentPageNotes = (props) => {
             return props.notes[key].notes.map((note) => {
               return (
                 <NotePadding key={note.id}>
-                  <Note popup={true} {...note} colors={props.colors} url={key} />
+                  <Note popup={true} 
+                  {...note} 
+                  tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                  colors={props.colors} url={key} />
                 </NotePadding>
               );
             });
@@ -69,7 +73,10 @@ const CurrentPageNotes = (props) => {
 };
 
 const mapStateToProps = (state) => {
-  return { notes: state, colors: COLORS };
+  return { 
+    notes: state,
+    tags: state.tags || [],
+    colors: COLORS };
 };
 
 export default connect(mapStateToProps, null)(CurrentPageNotes);

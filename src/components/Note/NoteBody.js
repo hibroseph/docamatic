@@ -10,6 +10,9 @@ export const NoteBody = props => {
     return <StyledContentEditable
         id="body"
         html={props.body}
-        onChange={bodyChange}>
+        onChange={bodyChange}
+        onKeyDown={event => event.stopPropagation()}
+        onKeyUp={event => event.stopPropagation()}
+        onBeforeInput={event => event.stopPropagation()}>
     </StyledContentEditable>
 }

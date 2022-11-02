@@ -30,14 +30,28 @@ export const Popup = (props) => {
     });
   });
   const CreateNewNote = (data) => {
-    chrome.tabs.query({ active: true }, (tabs) => {
-      console.log("tabs we have available from query are");
-      console.log(tabs);
-      chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }, (response) => {
-          props.addNoteClick(data, response);
-      });
+    chrome.tabs.query({ active: true, currentWindow: true  }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
+      .then((response) => props.addNoteClick(data, response))
+      .catch(e => {
+        console.debug("We did not get a response")
+        console.debug("lets add docamatic script to the page and then add redo this")
+       
+        chrome.scripting.executeScript(
+          {
+            target: {tabId: tabs[0].id},
+            files: ['[[script.js]]'],
+          })
+          .then(() => {
+            console.debug("we successfully added the script to the page")
+            chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
+            .then((response) => props.addNoteClick(data, response))
+          })
+          .catch(error => console.log("another error occurred " + error));
+      })
     });
   };
+
 
   const DetermineClick = (data) => {
     if (data === "new") {

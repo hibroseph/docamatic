@@ -1,7 +1,9 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
-import { NUKE_NOTES } from "./actions";
+import { ADD_TAG, REMOVE_TAG, NUKE_NOTES } from "./actions";
 import * as Sentry from "@sentry/react";
+import { generateUUID } from "../utils/GenerateUUID";
+import { getRandomTagColor} from "../utils/RandomTagColor";
 /*
 import config from
 
@@ -22,10 +24,127 @@ const NoteMessages = [
   "Wanna change the color? Press the color button",
 ];
 
+
 const REDUCER_ERROR_TITLE = "Reducer";
 
 const notesApp = (state = [], action) => {
   switch (action.type) {
+    case ADD_TAG:
+      // 3 cases, 
+      //1. tag exists but doesn't exist on the note
+      //2. tag doesn't exist
+      //3. tag exists and exists on the note
+      var tagExists = state?.tags?.find(tag => tag.text == action.text);
+      var noteHasTag = tagExists?.notes?.find(id => id == action.noteId);
+
+      if (tagExists && noteHasTag == undefined) {
+        newState = Object.assign({},
+          state,
+          {
+          [action.url]: Object.assign({}, {
+            notes: Object.assign([], 
+              state[action.url].notes.map(note => {
+                if (note.id != action.noteId)
+                  return note;
+                else 
+                  return { ...note, tags: [...state[action.url]?.tags || [],
+                  {
+                    id: tagExists.id
+                  }] 
+                }
+              })
+            )
+          })},
+          {
+            tags: [...state.tags.map(tag => {
+              if (tag.id != tagExists.id) {
+                return tag;
+              } else {
+                // we found the tag we need to add the note to
+                const {notes, ...strippedTag} = tag;
+                return {
+                  ...strippedTag,
+                  notes: [...notes, action.noteId]
+                }
+              }
+            })]
+          }
+          )
+      } else if (tagExists && noteHasTag) {
+        newState = state;
+      } else if (tagExists == undefined) {
+        var tagId = generateUUID();
+        newState = Object.assign({}, 
+          state, 
+          {
+            [action.url]: Object.assign({}, {
+              notes: Object.assign([], 
+                state[action.url].notes.map(note => {
+                  if (note.id != action.noteId)
+                    return note;
+                  else 
+                    return { ...note, tags: [...state[action.url]?.tags || [],
+                    {
+                      id: tagId
+                    }] }
+                })
+              )
+          })
+        },
+        { 
+          tags: 
+            [...state?.tags || {}, 
+              { 
+              id: tagId, 
+              color: getRandomTagColor(), 
+              text: action.text,
+              notes:[ action.noteId]
+              }
+            ]
+        })
+      };
+      return newState;
+
+    case REMOVE_TAG:
+
+      // We need to do 2 things
+      // 1. Removing the referenced tag from the notes node
+      // 2. Remove the referenced note from the tags node
+
+      let newTagState = Object.assign({}, 
+        state,
+        {
+          [action.url]: Object.assign({}, {
+            notes: Object.assign([],
+              state[action.url].notes.map(note => {
+                if (note.id != action.noteId)
+                  return note;
+                else
+                  return {
+                    ...note,
+                    tags: note.tags.filter(p => p.id != action.tagId)
+                  };
+                }
+              )
+            )
+          })
+        },
+        {
+          tags: state.tags.map(tag => {
+            if (tag.id != action.tagId) 
+              return tag;
+            else
+              return {
+                ...tag,
+                notes: tag.notes.filter(p => p != action.noteId)
+              }
+          })
+          .filter(tag => tag.notes.length > 0)
+        }
+      )
+
+      return newTagState;
+
     case NUKE_NOTES:
       return {};
 
@@ -234,6 +353,14 @@ const notesApp = (state = [], action) => {
           [action.url]: {
             notes,
           },
+        },
+        {
+          tags: state.tags?.map(tag => { 
+            return {
+              ...tag,
+              notes: tag.notes.filter(p => p != action.id)
+              }
+          }).filter(tag => tag.notes.length > 0)
         });
       } catch (error) {
         Sentry.captureException(error, {
@@ -280,7 +407,7 @@ const notesApp = (state = [], action) => {
                 },
                 stickify: false,
                 heart: false,
-                visible: true,
+                visible: true
               },
             ],
           },

@@ -36,7 +36,7 @@ export const TitleBar = styled.div`
     background-color: ${(props) => props.color.title} !important;
 
     .icons {
-        font-size: 20px;
+        width: 20px;
         color: ${(props) => props.color.text};
     }
 
@@ -60,6 +60,10 @@ export const TitleBar = styled.div`
 export const SettingsToggle = styled.span`
   margin-right: 13px;
   width: 6px;
+
+  #settings-container-toggle {
+    color: ${(props) => props.color} 
+  }
 `;
 
 export const SettingsContainer = styled.div`

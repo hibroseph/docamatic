@@ -12,6 +12,9 @@ on:
       chrome_extension_id:
         required: true
         description: the chrome extension id to publish to
+      environment:
+        required: true
+        description: environment to deploy to (ex uat, production)
       run_id:
         required: true
         description: the run of the build of the artifact
@@ -19,7 +22,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-22.04
-    
+    environment: ${{ github.event.inputs.environment }}
     steps:
     - name: Download artifact
       id: download-artifact
@@ -64,5 +67,5 @@ jobs:
         -X PUT \
         -T ./ ${{ github.event.inputs.artifact_name }} \
         -i \
-        --fail-with-body \
+        --fail-with-body \ba
         https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ github.event.inputs.chrome_extension_id }}

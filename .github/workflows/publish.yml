@@ -62,17 +62,6 @@ jobs:
         echo "::add-mask::$ACCESS_TOKEN"
         echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
         
-    - name: lol
-      run: |
-        ls
-        pwd
-        cd ..
-        pwd
-        ls
-      
-    - name: Unzip extension.txt
-      run: unzip ./extension.zip
-
     - name: Chrome Webstore Publish
       run: |
         curl \

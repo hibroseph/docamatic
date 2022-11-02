@@ -11,12 +11,11 @@ on:
         description: 'Version of docamatic to build'
       environment:
         required: true
-        description: Environment of build to create
+        description: Environment of build to create (ex uat, production)
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    environment: ${{ github.event.inputs.environment }}
 
     steps:
     - uses: actions/checkout@v3

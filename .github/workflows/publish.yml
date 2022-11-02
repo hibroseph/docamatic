@@ -12,6 +12,9 @@ on:
       chrome_extension_id:
         required: true
         description: the chrome extension id to publish to
+      build_run_id:
+        required: true
+        description: the run id of the build run from github
 
 jobs:
   publish:
@@ -26,10 +29,8 @@ jobs:
         workflow_conclusion: success
         branch: master
         event: push
-        # Optional, uploaded artifact name,
-        # will download all artifacts if not specified
-        # and extract them into respective subdirectories
-        # https://github.com/actions/download-artifact#download-all-artifacts
+        run_id: ${{ github.event.inputs.build_run_id }}
+        name: extension
         if_no_artifact_found: fail
     
     - name: Sentry Release

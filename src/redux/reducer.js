@@ -425,8 +425,8 @@ const notesApp = (state = [], action) => {
                 size: {
                   width: INITIAL_NOTE_WIDTH,
                 },
-                body: NoteMessages[noteTextIndex],
-                title: action.title,
+                body: action.highlightedText || null,
+                title: null,
                 // color: colorList[colorIndex],
                 // contrastColor: yiq >= 128 ? "#000" : "#fff",
                 date_created: action.date_created,
@@ -455,8 +455,8 @@ const notesApp = (state = [], action) => {
                   size: {
                     width: INITIAL_NOTE_WIDTH,
                   },
-                  body: NoteMessages[noteTextIndex],
-                  title: action.title,
+                  body: action.highlightedText || null, 
+                  title: null,
                   // color: colorList[colorIndex],
                   // contrastColor: yiq >= 128 ? "#000" : "#fff",
                   date_created: action.date_created,

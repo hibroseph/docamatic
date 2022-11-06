@@ -130,11 +130,10 @@ export function addText(id, text, url) {
   };
 }
 
-export function addNote(title, id, y_position, url) {
+export function addNote(id, y_position, url) {
   return {
     type: ADD_NOTE,
     id: id,
-    title,
     y_position,
     url,
     date_created: new Date().getTime(),

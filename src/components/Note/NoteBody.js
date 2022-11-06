@@ -13,6 +13,7 @@ export const NoteBody = props => {
         onChange={bodyChange}
         onKeyDown={event => event.stopPropagation()}
         onKeyUp={event => event.stopPropagation()}
-        onBeforeInput={event => event.stopPropagation()}>
+        onBeforeInput={event => event.stopPropagation()}
+        placeholder="hello">
     </StyledContentEditable>
 }

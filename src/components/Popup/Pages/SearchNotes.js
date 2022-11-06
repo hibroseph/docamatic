@@ -42,12 +42,14 @@ class SearchNotes extends Component {
             // The searching lambda
             if (this.state.search_query) {
               return (
+                (note.title != null &&
                 note.title
                   .toLowerCase()
-                  .includes(this.state.search_query.toLowerCase()) ||
-                note.body
+                  .includes(this.state.search_query.toLowerCase())) ||
+                (note.body != null && note.body
                   .toLowerCase()
-                  .includes(this.state.search_query.toLowerCase())
+                  .includes(this.state.search_query.toLowerCase()))
+                  
               );
             }
           }}

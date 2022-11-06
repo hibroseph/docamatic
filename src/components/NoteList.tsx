@@ -46,14 +46,14 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
 const mapStateToProps = (state, props) => {
   let safeUrl: string = GetSafeNoteUrl(window.location.href);
 
-  if (state[safeUrl] == null) {
+  if (state.pages[safeUrl] == null) {
     return {
       notes: [],
       tags: []
     };
   } else {
     return {
-      notes: state[safeUrl].notes,
+      notes: state.pages[safeUrl].notes,
       tags: state["tags"] || [],
       scrollYOffset: props.scrollYOffset
     };

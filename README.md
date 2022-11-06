@@ -21,7 +21,3 @@
 1. Start production build with `npm run prod`
 2. This will produce an app.zip (which we actually upload to the chrome extension store)
 3. The directory build should be in the root, this will be the production build
-
-# Todos
-1. Toolbar on note is broken on some pages (https://docs.github.com/en/authentication/connecting-to-github-with-ssh/testing-your-ssh-connection)
-2. Style of note is not consistent across webpages (css clash??)

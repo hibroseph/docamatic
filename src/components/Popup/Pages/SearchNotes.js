@@ -60,7 +60,7 @@ class SearchNotes extends Component {
 
 export default connect(
   state => {
-    return { notes: state };
+    return { notes: state.pages };
   },
   null
 )(SearchNotes);

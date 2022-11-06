@@ -127,7 +127,7 @@ class SortNotes extends Component {
 export default connect(
   state => { 
     return {
-      notes: state /* get rid of tags in state object */,
+      notes: state.pages,
       tags: state.tags
     }
   }

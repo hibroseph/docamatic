@@ -12,12 +12,12 @@ class FilterNotes extends Component {
 
   render() {
     let foundItem = false;
-    const element = Object.keys(this.props.state).map((key) => {
+    const element = Object.keys(this.props.notes).map((key) => {
       if (key != 'tags') {
         return (
           <div key={key}>
             {this.props.labels && <div className="label">{key} </div>}
-            {this.props.state[key].notes.map((note) => {
+            {this.props.notes[key].notes.map((note) => {
               // Comparing happens right here
               if (this.props.filter(note)) {
                 foundItem = true;
@@ -51,6 +51,6 @@ class FilterNotes extends Component {
 
 export default connect((state) => {
   return { 
-    state: state,
+    notes: state.pages,
     tags: state.tags || [] };
 }, null)(FilterNotes);

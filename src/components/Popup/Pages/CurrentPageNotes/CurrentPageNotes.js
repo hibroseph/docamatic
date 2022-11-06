@@ -74,7 +74,7 @@ const CurrentPageNotes = (props) => {
 
 const mapStateToProps = (state) => {
   return { 
-    notes: state,
+    notes: state.pages || [],
     tags: state.tags || [],
     colors: COLORS };
 };

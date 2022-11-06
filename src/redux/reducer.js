@@ -41,22 +41,25 @@ const notesApp = (state = [], action) => {
         newState = Object.assign({},
           state,
           {
-          [action.url]: Object.assign({}, {
+          pages: {
+            ...state.pages,
+            [action.url]: Object.assign({}, {
             notes: Object.assign([], 
-              state[action.url].notes.map(note => {
+              state.pages[action.url].notes.map(note => {
                 if (note.id != action.noteId)
                   return note;
                 else 
-                  return { ...note, tags: [...state[action.url]?.tags || [],
+                  return { ...note, tags: [...state.pages[action.url]?.tags || [],
                   {
                     id: tagExists.id
                   }] 
                 }
               })
             )
-          })},
+          })}}),
           {
-            tags: [...state.tags.map(tag => {
+            tags: [
+              ...state.tags.map(tag => {
               if (tag.id != tagExists.id) {
                 return tag;
               } else {
@@ -69,7 +72,6 @@ const notesApp = (state = [], action) => {
               }
             })]
           }
-          )
       } else if (tagExists && noteHasTag) {
         newState = state;
       } else if (tagExists == undefined) {
@@ -77,19 +79,21 @@ const notesApp = (state = [], action) => {
         newState = Object.assign({}, 
           state, 
           {
-            [action.url]: Object.assign({}, {
+            pages: {
+              ...state.pages,
+              [action.url]: Object.assign({}, {
               notes: Object.assign([], 
-                state[action.url].notes.map(note => {
+                state.pages[action.url].notes.map(note => {
                   if (note.id != action.noteId)
                     return note;
                   else 
-                    return { ...note, tags: [...state[action.url]?.tags || [],
+                    return { ...note, tags: [...state.pages[action.url]?.tags || [],
                     {
                       id: tagId
                     }] }
                 })
               )
-          })
+          })}
         },
         { 
           tags: 
@@ -114,9 +118,11 @@ const notesApp = (state = [], action) => {
       let newTagState = Object.assign({}, 
         state,
         {
-          [action.url]: Object.assign({}, {
+          pages: {
+            ...state.pages,
+            [action.url]: Object.assign({}, {
             notes: Object.assign([],
-              state[action.url].notes.map(note => {
+              state.pages[action.url].notes.map(note => {
                 if (note.id != action.noteId)
                   return note;
                 else
@@ -128,6 +134,7 @@ const notesApp = (state = [], action) => {
               )
             )
           })
+        }
         },
         {
           tags: state.tags.map(tag => {
@@ -151,7 +158,7 @@ const notesApp = (state = [], action) => {
     case "IMPORT_NOTES":
       // The following logic loops over the notes being imported and only adds ones that don't exist in the current state.
       let finalState = Object.keys(action.notes).reduce((finalReducedState, key) => {
-        if (state[key] != null) {
+        if (state.pages[key] != null) {
           let noteIds = state[key].notes.reduce((map, obj) => {
             map[obj.id] = obj;
             return map;
@@ -186,8 +193,10 @@ const notesApp = (state = [], action) => {
 
     case "HEARTIFY":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages: {
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 heart: !note.heart,
@@ -196,13 +205,15 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "STICKIFY":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages: {
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 stickify: !note.stickify,
@@ -211,13 +222,15 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "RESIZE_NOTE":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages: {
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 size: { width: action.x },
@@ -226,11 +239,11 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "CLICKED_NOTE":
-      let note = state[action.url].notes
+      let note = state.pages[action.url].notes
         .filter((note) => {
           if (note.id === action.id) {
             return note;
@@ -244,7 +257,7 @@ const notesApp = (state = [], action) => {
         return state;
       }
 
-      const new_state = state[action.url].notes.filter((notes) => {
+      const new_state = state.pages[action.url].notes.filter((notes) => {
         if (notes.id !== action.id) {
           return notes;
         }
@@ -253,15 +266,19 @@ const notesApp = (state = [], action) => {
       new_state.push(note);
 
       return Object.assign({}, state, {
-        [action.url]: {
+        pages: {
+          ...state.pages,
+          [action.url]: {
           notes: new_state,
-        },
+        }},
       });
 
     case "CHANGE_COLOR":
       let newState = Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages:{
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 color: {
@@ -273,14 +290,16 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
       return newState;
 
     case "MOVE_NOTE":
       let stateNew = Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages:{
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               // let's change the position
               return Object.assign({}, note, {
@@ -290,15 +309,17 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
       return stateNew;
 
     case "TOGGLE_VISIBILITY":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages:{
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 visible: action.visible,
@@ -307,13 +328,15 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "ADD_TITLE":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note) => {
+        pages:{
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 title: action.title,
@@ -322,13 +345,15 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "ADD_TEXT":
       return Object.assign({}, state, {
-        [action.url]: {
-          notes: state[action.url].notes.map((note, id) => {
+        pages:{
+          ...state.pages,
+          [action.url]: {
+          notes: state.pages[action.url].notes.map((note, id) => {
             if (note.id === action.id) {
               return Object.assign({}, note, {
                 body: action.body,
@@ -337,22 +362,24 @@ const notesApp = (state = [], action) => {
               return note;
             }
           }),
-        },
+        }},
       });
 
     case "REMOVE_NOTE":
       try {
         // Filter the id of the note that needs to be deleted out
-        let notes = state[action.url].notes.filter((note) => {
+        let notes = state.pages[action.url].notes.filter((note) => {
           if (note.id != action.id) {
             return note;
           }
         });
 
         return Object.assign({}, state, {
-          [action.url]: {
+          pages:{
+            ...state.pages,
+            [action.url]: {
             notes,
-          },
+          }},
         },
         {
           tags: state.tags?.map(tag => { 
@@ -386,9 +413,11 @@ const notesApp = (state = [], action) => {
       let yiq = (r * 299 + g * 587 + b * 114) / 1000;
 
       // If there are notes already on the page
-      if (state[action.url] == null) {
+      if (state.pages[action.url] == null) {
         return Object.assign({}, state, {
-          [action.url]: {
+          pages: {
+            ...state.pages,
+            [action.url]: {
             notes: [
               {
                 id: action.id,
@@ -410,33 +439,36 @@ const notesApp = (state = [], action) => {
                 visible: true
               },
             ],
-          },
-        });
+          }}
+        
+});
       } else {
         return Object.assign({}, state, {
-          [action.url]: {
-            notes: [
-              ...state[action.url].notes,
-              {
-                id: action.id,
-                position: { x: posx, y: action.y_position },
-                size: {
-                  width: INITIAL_NOTE_WIDTH,
+          pages: {
+            ...state.pages,
+            [action.url]: {
+              notes: [
+                ...state.pages[action.url].notes,
+                {
+                  id: action.id,
+                  position: { x: posx, y: action.y_position },
+                  size: {
+                    width: INITIAL_NOTE_WIDTH,
+                  },
+                  body: NoteMessages[noteTextIndex],
+                  title: action.title,
+                  // color: colorList[colorIndex],
+                  // contrastColor: yiq >= 128 ? "#000" : "#fff",
+                  date_created: action.date_created,
+                  color: {
+                    title: colorList[colorIndex],
+                    text: yiq >= 128 ? "#000" : "#fff",
+                  },
+                  visible: true,
                 },
-                body: NoteMessages[noteTextIndex],
-                title: action.title,
-                // color: colorList[colorIndex],
-                // contrastColor: yiq >= 128 ? "#000" : "#fff",
-                date_created: action.date_created,
-                color: {
-                  title: colorList[colorIndex],
-                  text: yiq >= 128 ? "#000" : "#fff",
-                },
-                visible: true,
-              },
-            ],
-          },
-        });
+              ],
+            }},
+          });
       }
 
     default:

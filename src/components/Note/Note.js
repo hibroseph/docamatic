@@ -9,7 +9,9 @@ import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
 
 export const Note = (props) => {
   return (
-    <NoteContainer color={{ ...props.color }}>
+    <NoteContainer 
+    onClick={() => props.mutateNote({id: props.id, url: props.url, type: "note_clicked"})}
+    color={{ ...props.color }}>
       <TitleBar
         {...props}
         onHeartifyClick={() => props.mutateNote({id: props.id, url: props.url, type: 'heartify'})}
@@ -38,7 +40,6 @@ export const Note = (props) => {
 const mapDispatchToProps = (dispatch) => ({
   mutateNote: (props) => {
     let action;
-
     switch (props.type) {
       case 'heartify':
          action = heartify(props.id, props.url);
@@ -64,6 +65,8 @@ const mapDispatchToProps = (dispatch) => ({
       case 'body_change':
         action = addText(props.id, props.body, props.url);
         break;
+      case 'note_clicked':
+        action = updateNoteDepth(props.id, props.url);
       default:
         console.error("Not handled with props");
         console.error(props);

@@ -49,7 +49,6 @@ class SearchNotes extends Component {
                 (note.body != null && note.body
                   .toLowerCase()
                   .includes(this.state.search_query.toLowerCase()))
-                  
               );
             }
           }}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { NoteContainer } from "./style";
 import { TitleBar } from "./TitleBar";
 import { NoteBody } from "./NoteBody";
@@ -6,15 +6,20 @@ import { connect } from "react-redux";
 import { addNote, removeNote, addText, addTitle, changeNoteColor, updateNoteDepth, stickify, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
 import { TagBubble } from "../TagBubble/TagBubble";
 import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
+import notesApp from "../../redux/reducer";
 
 export const Note = (props) => {
+  
   return (
-    <NoteContainer 
+    <NoteContainer
     onClick={() => {
-        if (!props.disableClick) {
+        /*if (!props.disableClick) {
           props.mutateNote({id: props.id, url: props.url, type: "note_clicked"})
-        }
+        }*/
+        // set z-index
+        props.setZIndex()
     }}
+    
     color={{ ...props.color }}>
       <TitleBar
         {...props}
@@ -37,7 +42,8 @@ export const Note = (props) => {
           removeTag={() => {}}
         ></TagBubble>
       </TagBubbleContainer>
-      <NoteBody onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />
+      <NoteBody
+      onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />
     </NoteContainer>
   );
 };

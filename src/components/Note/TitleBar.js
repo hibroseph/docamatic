@@ -22,8 +22,9 @@ export const TitleBar = props => {
     }
 
     return (
-        <Container color={{ ...props.color }}>
+        <Container key={props.id} color={{ ...props.color }}>
             <input
+            key={props.id}
                 ref={controls.title.ref}
                 style={{ margin: 0 }}
                 value={props.title ? props.title : ""}
@@ -34,6 +35,8 @@ export const TitleBar = props => {
                 onBeforeInput={event => {
                     event.stopPropagation()
                 }}
+                onMouseDown={event => event.stopPropagation()}
+                onMouseUp={event => event.stopPropagation()}
                 onClick={event => {
                     console.log("clicked")
                     console.log(event.target.selectionStart)

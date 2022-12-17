@@ -5,8 +5,8 @@ import { DraggableContainer } from './DraggableContainer'
 export const DraggableNote = props => {
 
     return (
-        <DraggableContainer {...props}>
-            <Note {...props} />
+        <DraggableContainer key={props.id} {...props}>
+            <Note key={props.id} {...props} />
         </DraggableContainer>
     )
 }

@@ -10,7 +10,11 @@ import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
 export const Note = (props) => {
   return (
     <NoteContainer 
-    onClick={() => props.mutateNote({id: props.id, url: props.url, type: "note_clicked"})}
+    onClick={() => {
+        if (!props.disableClick) {
+          props.mutateNote({id: props.id, url: props.url, type: "note_clicked"})
+        }
+    }}
     color={{ ...props.color }}>
       <TitleBar
         {...props}
@@ -67,6 +71,7 @@ const mapDispatchToProps = (dispatch) => ({
         break;
       case 'note_clicked':
         action = updateNoteDepth(props.id, props.url);
+        break;
       default:
         console.error("Not handled with props");
         console.error(props);

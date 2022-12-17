@@ -7,7 +7,7 @@ import {
   updateNoteSize
 } from "../redux/actions";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl"
-
+import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
 
 class NoteList extends React.Component<Types.NoteListProps, {}> {
   constructor(props) {
@@ -20,21 +20,23 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
         {this.props.url && this.props.notes.map(note => {
           if (note.visible || note.visible == undefined) {
             return (
-              <DraggableNote
-                onPositionChange={(id, x, y) =>
-                  // @ts-ignore
-                  this.props.mutateNote({ id, x, y, url: this.props.url, type: 'position_change' })
-                }
-                onSizeChange={(width) =>
-                  // @ts-ignore
-                  this.props.mutateNote({ id: note.id, width, url: this.props.url, type: 'size_change' })
-                }
-                key={note.id}
-                {...note}
-                tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
-                scrollYOffset={this.props.scrollYOffset}
-                url={this.props.url}
-              />
+              <NoRenderErrorBoundary key={note.id}>
+                <DraggableNote
+                  onPositionChange={(id, x, y) =>
+                    // @ts-ignore
+                    this.props.mutateNote({ id, x, y, url: this.props.url, type: 'position_change' })
+                  }
+                  onSizeChange={(width) =>
+                    // @ts-ignore
+                    this.props.mutateNote({ id: note.id, width, url: this.props.url, type: 'size_change' })
+                  }
+                  key={note.id}
+                  {...note}
+                  tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
+                  scrollYOffset={this.props.scrollYOffset}
+                  url={this.props.url}
+                />
+              </NoRenderErrorBoundary>
             )
           }
         })}
@@ -44,7 +46,8 @@ class NoteList extends React.Component<Types.NoteListProps, {}> {
 }
 
 const mapStateToProps = (state, props) => {
-  let safeUrl: string = GetSafeNoteUrl(window.location.href);
+  //@ts-ignore
+  let safeUrl = GetSafeNoteUrl(window.location.href);
 
   if (state.pages[safeUrl] == null) {
     return {

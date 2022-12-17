@@ -49,14 +49,17 @@ const notesApp = (state = [], action) => {
                 if (note.id != action.noteId)
                   return note;
                 else 
-                  return { ...note, tags: [...state.pages[action.url]?.tags || [],
-                  {
-                    id: tagExists.id
-                  }] 
+                  return { 
+                    ...note, 
+                    tags: [
+                      ...note?.tags?.filter(tag => tag.id != tagExists.id) || {},
+                    {
+                      id: tagExists.id
+                    }] 
                 }
               })
             )
-          })}}),
+          })}},
           {
             tags: [
               ...state.tags.map(tag => {
@@ -67,11 +70,13 @@ const notesApp = (state = [], action) => {
                 const {notes, ...strippedTag} = tag;
                 return {
                   ...strippedTag,
-                  notes: [...notes, action.noteId]
+                  notes: [
+                    ...notes, 
+                    action.noteId]
                 }
               }
             })]
-          }
+          })
       } else if (tagExists && noteHasTag) {
         newState = state;
       } else if (tagExists == undefined) {
@@ -87,10 +92,15 @@ const notesApp = (state = [], action) => {
                   if (note.id != action.noteId)
                     return note;
                   else 
-                    return { ...note, tags: [...state.pages[action.url]?.tags || [],
-                    {
-                      id: tagId
-                    }] }
+                    return { 
+                      ...note, 
+                      tags: [
+                        ...note?.tags || {},
+                        {
+                          id: tagId
+                        }
+                      ] 
+                    }
                 })
               )
           })}

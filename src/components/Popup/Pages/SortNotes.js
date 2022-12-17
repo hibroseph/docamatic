@@ -4,6 +4,7 @@ import { SortNotesByUrl } from "./SortNotesByUrl";
 import { SortingHeader } from "../SortingHeader";
 import { connect } from "react-redux";
 import { FilterNotes as Container } from "../FilterNotesStyle";
+import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary";
 
 
 class SortNotes extends Component {
@@ -90,6 +91,7 @@ class SortNotes extends Component {
             switch (this.state.groupBy) {
               case 'url':
                 return (
+                  <NoRenderErrorBoundary>
                   <SortNotesByUrl
                     pages={this.props.notes}
                     tags={this.props.tags}
@@ -98,9 +100,11 @@ class SortNotes extends Component {
                     expandTabs={this.state.expandTabs}
                     getSortingFunction={() => this.getSortingFunction()}
                   ></SortNotesByUrl>
+                  </NoRenderErrorBoundary>
                 )
               case 'date':
                 return (
+                  <NoRenderErrorBoundary>
                   <SortNotesByDate
                     pages={this.props.notes}
                     tags={this.props.tags}
@@ -109,6 +113,7 @@ class SortNotes extends Component {
                     expandTabs={this.state.expandTabs}
                     groupingKey={this.state.dateGroupingKey}
                   ></SortNotesByDate>
+                  </NoRenderErrorBoundary>
                 )
               default:
                 return (

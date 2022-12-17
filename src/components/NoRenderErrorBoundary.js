@@ -1,6 +1,6 @@
-import React from "react";
+import * as React from "react";
 
-class ErrorBoundary extends React.Component {
+class NoRenderErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
@@ -11,17 +11,19 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("WTF HAPPENED");
+    this.setState({hasError: true})
+    console.error("An error occurred");
     console.error(error);
     console.error(errorInfo);
   }
+
   render() {
     if (this.state.hasError) {
-      return <h1>Something went horribly wrong</h1>;
+      return (null);
     }
 
-    return this.props.children;
+    return <>{this.props.children}</>
   }
 }
 
-export default ErrorBoundary;
+export { NoRenderErrorBoundary };

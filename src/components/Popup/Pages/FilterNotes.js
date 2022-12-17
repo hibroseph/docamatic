@@ -4,7 +4,7 @@ import { NotePadding } from "../style";
 import { connect } from "react-redux";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
 import { PreviewUrl } from "../style";
-
+import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary"
 class FilterNotes extends Component {
   constructor(props) {
     super(props);
@@ -22,17 +22,20 @@ class FilterNotes extends Component {
               if (this.props.filter(note)) {
                 foundItem = true;
                 return (
-                  <NotePadding>
-                    <PreviewUrl href={key} target="_new">
-                      {CreateFriendlyPreviewUrl(key)}
-                    </PreviewUrl>
-                    <Note
-                    {...note} 
-                     tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
-                     popup={true}
-                     key={note.id}
-                     url={key} />
-                  </NotePadding>
+                  <NoRenderErrorBoundary key={note.id}>
+                    <NotePadding>
+                      <PreviewUrl href={key} target="_new">
+                        {CreateFriendlyPreviewUrl(key)}
+                      </PreviewUrl>
+                      <Note
+                      {...note} 
+                      tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
+                      popup={true}
+                      key={note.id}
+                      url={key} 
+                      disableClick={true}/>
+                    </NotePadding>
+                  </NoRenderErrorBoundary>
                 );
               }
             })}

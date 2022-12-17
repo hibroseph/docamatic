@@ -6,9 +6,7 @@ import { Store } from "webext-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
 import config from "../../../config.json";
 import * as Sentry from "@sentry/react";
-import config from "../../config.json";
 import { StyleSheetManager } from 'styled-components';
-
 //import ReactShadowRoot from 'react-shadow-root';
 // Initializing Sentry
 // TODO: Do we need to reinitalize sentry?s
@@ -65,18 +63,21 @@ const initPageScript = () => {
 
   function AttachRootNodeAndRender() {
     let rootNode = document.getElementById(PAGE_MOUNT_POINT);
+    
     if (!rootNode) {
       rootNode = document.createElement("div");
       Object.assign(rootNode.style, {
         top: 0,
         left: 0,
         position: "absolute",
-        zIndex: 9999999999999999,
+        zIndex: 9999999999999999
       });
 
       rootNode.id = PAGE_MOUNT_POINT;
       document.body.appendChild(rootNode);
+
     }
+
     let shadow;
 
     let styleSlot;
@@ -93,6 +94,9 @@ const initPageScript = () => {
     if (!styleSlot) {
       styleSlot = document.createElement('section');
       styleSlot.id = "__DOCAMATIC_STYLE_SLOT__";
+      Object.assign(styleSlot.style, {
+        all: "initial"
+      })
       shadow.appendChild(styleSlot)
     }
 

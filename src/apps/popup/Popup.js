@@ -34,8 +34,6 @@ export const Popup = (props) => {
       chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
       .then((response) => props.addNoteClick(response))
       .catch(e => {
-        console.debug("We did not get a response")
-        console.debug("lets add docamatic script to the page and then add redo this")
        
         chrome.scripting.executeScript(
           {
@@ -43,11 +41,10 @@ export const Popup = (props) => {
             files: ['[[script.js]]'],
           })
           .then(() => {
-            console.debug("we successfully added the script to the page")
             chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
             .then((response) => props.addNoteClick(response))
           })
-          .catch(error => console.log("another error occurred " + error));
+          .catch(error => console.error("another error occurred " + error));
       })
     });
   };

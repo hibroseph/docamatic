@@ -9,7 +9,8 @@ export interface Note {
   stickify: boolean;
   heart: boolean;
   visible: boolean;
-  tags: [id: string, text: string, color: string]
+  tags: [id: string, text: string, color: string];
+  disableClick: boolean;
 }
 
 export interface Tag {

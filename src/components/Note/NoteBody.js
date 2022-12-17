@@ -7,13 +7,12 @@ export const NoteBody = props => {
         //controls.body.setCursorPosition(event.target.selectionStart)
     }
 
+    var htmlBody = props?.body ? { html: props.body } : { html: ""};
     return <StyledContentEditable
-        id="body"
-        html={props.body}
+        {...htmlBody}
         onChange={bodyChange}
         onKeyDown={event => event.stopPropagation()}
         onKeyUp={event => event.stopPropagation()}
-        onBeforeInput={event => event.stopPropagation()}
-        placeholder="hello">
+        onBeforeInput={event => event.stopPropagation()}>
     </StyledContentEditable>
 }

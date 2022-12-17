@@ -1,37 +1,25 @@
-import React, { Component } from "react";
-import { SearchBox } from "../SearchNotesStyle";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import search_hint from "../../../assets/search_results.png";
 import no_results from "../../../assets/no_results.png";
 import FilterNotes from "./FilterNotes";
+import { SearchBox } from "../SearchBox";
 
-class SearchNotes extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      search_query: null
-    };
+export const SearchNotes = (props) => {
 
-    this.handleChange = this.handleChange.bind(this);
-  }
+  const [searchQuery, setSearchQuery] = useState({ text: null, tags: []});
 
-  handleChange(event) {
-    this.setState({ search_query: event.target.value });
-  }
-
-  // TODO: Figure out how to render no search results image if the filter notes component returns null
-  render() {
-    let foundItem = false;
     return (
       <div>
-        <SearchBox>
-          <input
-            // value={this.state.search_query}
-            placeholder="Search"
-            onChange={this.handleChange}
-          ></input>
-        </SearchBox>
-        {!this.state.search_query && (
+        <SearchBox 
+          onSearch={(searchQuery) => {
+            setSearchQuery(searchQuery)
+            console.debug("search query");
+            console.debug(searchQuery);
+          }}
+          availableTags={props.tags}
+          />
+        {!searchQuery && (
           <img
             src={search_hint}
             style={{ marginLeft: 10, marginTop: 100 }}
@@ -39,29 +27,45 @@ class SearchNotes extends Component {
         )}
         <FilterNotes
           filter={note => {
+            console.log("note")
+            console.log(note)
+            console.log("first tag check")
+            console.log(note.tags ? note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)) : false)
+            console.log("Second tag check")
+            console.log(note.tags ? note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)).length == searchQuery.tags.length : false)
+            console.log("third tag check")
+            console.log((searchQuery.tags.length > 0 ?
+              ( note.tags ? (note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)).length) == searchQuery.tags.length : false) : true))
+            console.log("note tags")
+            console.log(note.tags)
+            console.log("searchquery")
+            console.log(searchQuery)
             // The searching lambda
-            if (this.state.search_query) {
+            if (searchQuery.text || searchQuery.tags.length != 0) {
               return (
-                (note.title != null &&
+                ((note.title != null && searchQuery.text && searchQuery.text != "" &&
                 note.title
                   .toLowerCase()
-                  .includes(this.state.search_query.toLowerCase())) ||
-                (note.body != null && note.body
+                  .includes(searchQuery.text.toLowerCase())) ||
+                (note.body != null && searchQuery.text && searchQuery.text != "" &&
+                  note.body
                   .toLowerCase()
-                  .includes(this.state.search_query.toLowerCase()))
+                  .includes(searchQuery.text.toLowerCase())) || searchQuery.text == '' || !searchQuery.text)
+                  && (searchQuery.tags.length > 0 ?
+                  ( note.tags ? (note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)).length) == searchQuery.tags.length : false) : true)
               );
             }
           }}
-          noResultsImg={this.state.search_query ? no_results : null}
+          /*noResultsImg={searchQuery.text ? no_results : null}*/
         />
       </div>
     );
-  }
 }
 
 export default connect(
   state => {
-    return { notes: state.pages };
+    return { notes: state.pages,
+    tags: state.tags };
   },
   null
 )(SearchNotes);

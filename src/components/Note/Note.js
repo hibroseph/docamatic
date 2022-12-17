@@ -34,6 +34,7 @@ export const Note = (props) => {
         contentEditable={true}
         createTag={tag => {
           props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
+          removeTag={() => {}}
         ></TagBubble>
       </TagBubbleContainer>
       <NoteBody onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />

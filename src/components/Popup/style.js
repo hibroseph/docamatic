@@ -42,7 +42,7 @@ export const PreviewUrl = styled.a`
   margin: 2px 0;
   text-decoration: none;
   color: black;
-  padding: 2px;
+  padding: 5px;
   display: block;
 
   &:visited {

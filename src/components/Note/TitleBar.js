@@ -26,7 +26,7 @@ export const TitleBar = props => {
             <input
                 ref={controls.title.ref}
                 style={{ margin: 0 }}
-                value={props.title}
+                value={props.title ? props.title : ""}
                 placeholder="Title"
                 onChange={titleChange}
                 onKeyDown={event => event.stopPropagation()}

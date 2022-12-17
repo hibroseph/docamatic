@@ -27,19 +27,6 @@ export const SearchNotes = (props) => {
         )}
         <FilterNotes
           filter={note => {
-            console.log("note")
-            console.log(note)
-            console.log("first tag check")
-            console.log(note.tags ? note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)) : false)
-            console.log("Second tag check")
-            console.log(note.tags ? note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)).length == searchQuery.tags.length : false)
-            console.log("third tag check")
-            console.log((searchQuery.tags.length > 0 ?
-              ( note.tags ? (note.tags.filter(p => searchQuery.tags.map(t => t.id).includes(p.id)).length) == searchQuery.tags.length : false) : true))
-            console.log("note tags")
-            console.log(note.tags)
-            console.log("searchquery")
-            console.log(searchQuery)
             // The searching lambda
             if (searchQuery.text || searchQuery.tags.length != 0) {
               return (
@@ -56,7 +43,7 @@ export const SearchNotes = (props) => {
               );
             }
           }}
-          /*noResultsImg={searchQuery.text ? no_results : null}*/
+          noResultsImg={searchQuery.text || searchQuery.tags.length != 0 ? no_results : null}
         />
       </div>
     );

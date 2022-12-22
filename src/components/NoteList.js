@@ -1,59 +1,62 @@
-import * as React from "react";
+//@ts-ignore
+import React, { useState } from "react";
 import { DraggableNote } from "./Note/DraggableNote";
 import { connect } from "react-redux";
-import * as Types from "../types";
 import {
   updateNotePosition,
   updateNoteSize
 } from "../redux/actions";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl"
+import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
 
+export const NoteList = (props) => {
 
-class NoteList extends React.Component<Types.NoteListProps, {}> {
-  constructor(props) {
-    super(props);
-  }
+  const[noteOnTop, setNoteOnTop] = useState(0);
 
-  render() {
     return (
       <div>
-        {this.props.url && this.props.notes.map(note => {
+        {props.url && props.notes.map(note => {
           if (note.visible || note.visible == undefined) {
             return (
-              <DraggableNote
-                onPositionChange={(id, x, y) =>
-                  // @ts-ignore
-                  this.props.mutateNote({ id, x, y, url: this.props.url, type: 'position_change' })
-                }
-                onSizeChange={(width) =>
-                  // @ts-ignore
-                  this.props.mutateNote({ id: note.id, width, url: this.props.url, type: 'size_change' })
-                }
-                key={note.id}
-                {...note}
-                tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
-                scrollYOffset={this.props.scrollYOffset}
-                url={this.props.url}
-              />
+              <NoRenderErrorBoundary key={note.id}>
+                <DraggableNote
+                  onPositionChange={(id, x, y) =>
+                    // @ts-ignore
+                    props.mutateNote({ id, x, y, url: props.url, type: 'position_change' })
+                  }
+                  onSizeChange={(width) =>
+                    // @ts-ignore
+                    props.mutateNote({ id: note.id, width, url: props.url, type: 'size_change' })
+                  }
+                  key={note.id}
+                  {...note}
+                  tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                  scrollYOffset={props.scrollYOffset}
+                  url={props.url}
+                  setZIndex={() => {
+                    setNoteOnTop(note.id)}}
+                  style={{ zIndex: noteOnTop && note.id == noteOnTop ? 1 : 0 }}
+                />
+              </NoRenderErrorBoundary>
             )
           }
         })}
       </div>
     );
-  }
+  
 }
 
 const mapStateToProps = (state, props) => {
-  let safeUrl: string = GetSafeNoteUrl(window.location.href);
-
-  if (state[safeUrl] == null) {
+  //@ts-ignore
+  let safeUrl = GetSafeNoteUrl(window.location.href);
+  if (state.pages[safeUrl] == null) {
     return {
       notes: [],
       tags: []
     };
   } else {
     return {
-      notes: state[safeUrl].notes,
+      notes: state.pages[safeUrl].notes,
       tags: state["tags"] || [],
       scrollYOffset: props.scrollYOffset
     };

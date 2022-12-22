@@ -4,6 +4,7 @@ import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyDate } from "../../../utils/CreateFriendlyDate";
 import Note from "../../Note/Note";
 import { NotePadding } from "../style";
+import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary";
 
 const getGroupingDateKey = (groupByDate, date) => {
   let date = new Date(date);
@@ -42,10 +43,10 @@ const getArraySortedWithDates = (pages, sortType, groupingKey) => {
 };
 
 export const SortNotesByDate = (props) => (
-  <div className="filter-results">
-    {getArraySortedWithDates(props.pages, props.getSortingFunction(), props.groupingKey).map((noteGroup) => {
+  <NoRenderErrorBoundary className="filter-results">
+    {getArraySortedWithDates(props.pages, props.getSortingFunction(), props.groupingKey).map((noteGroup, i) => {
       return (
-        <div>
+        <NoRenderErrorBoundary key={i}>
           <div className="url-selector" onClick={() => props.handleTogglingNotes(noteGroup.date)}>
             {props.expandTabs.includes(noteGroup.date) ? (
               <FontAwesomeIcon className="caret-icon" icon={faAngleDown}></FontAwesomeIcon>
@@ -54,23 +55,28 @@ export const SortNotesByDate = (props) => (
             )}
             <h3 style={{ display: "inline" }}>{CreateFriendlyDate(noteGroup.date, props.groupingKey)}</h3>
           </div>
-          {noteGroup.notes.map((note) => {
+          {noteGroup.notes.map((note, b) => {
             return (
-              <div>
+              <div key={note.id}>
                 {props.expandTabs.includes(noteGroup.date) && (
-                  <NotePadding>
-                    <Note popup={true} 
-                    {...note} 
-                    website={note.url}
-                    tags={props.tags.filter(tag => tag.notes.includes(note.id))}
-                    ></Note>
-                  </NotePadding>
+                  <NoRenderErrorBoundary>
+                    <NotePadding>
+                      <Note
+                      hello={a+a}
+                      popup={true} 
+                      disableClick={true}
+                      {...note} 
+                      website={note.url}
+                      tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                      ></Note>
+                    </NotePadding>
+                  </NoRenderErrorBoundary>
                 )}
               </div>
             );
           })}
-        </div>
+        </NoRenderErrorBoundary>
       );
     })}
-  </div>
+  </NoRenderErrorBoundary>
 );

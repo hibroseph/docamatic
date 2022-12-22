@@ -4,7 +4,7 @@ import { NotePadding } from "../style";
 import { connect } from "react-redux";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
 import { PreviewUrl } from "../style";
-
+import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary"
 class FilterNotes extends Component {
   constructor(props) {
     super(props);
@@ -12,27 +12,30 @@ class FilterNotes extends Component {
 
   render() {
     let foundItem = false;
-    const element = Object.keys(this.props.state).map((key) => {
+    const element = Object.keys(this.props.notes).map((key) => {
       if (key != 'tags') {
         return (
           <div key={key}>
             {this.props.labels && <div className="label">{key} </div>}
-            {this.props.state[key].notes.map((note) => {
+            {this.props.notes[key].notes.map((note) => {
               // Comparing happens right here
               if (this.props.filter(note)) {
                 foundItem = true;
                 return (
-                  <NotePadding>
-                    <PreviewUrl href={key} target="_new">
-                      {CreateFriendlyPreviewUrl(key)}
-                    </PreviewUrl>
-                    <Note
-                    {...note} 
-                     tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
-                     popup={true}
-                     key={note.id}
-                     url={key} />
-                  </NotePadding>
+                  <NoRenderErrorBoundary key={note.id}>
+                    <NotePadding>
+                      <PreviewUrl href={key} target="_new">
+                        {CreateFriendlyPreviewUrl(key)}
+                      </PreviewUrl>
+                      <Note
+                      {...note} 
+                      tags={this.props.tags.filter(tag => tag.notes.includes(note.id))}
+                      popup={true}
+                      key={note.id}
+                      url={key} 
+                      disableClick={true}/>
+                    </NotePadding>
+                  </NoRenderErrorBoundary>
                 );
               }
             })}
@@ -51,6 +54,6 @@ class FilterNotes extends Component {
 
 export default connect((state) => {
   return { 
-    state: state,
+    notes: state.pages,
     tags: state.tags || [] };
 }, null)(FilterNotes);

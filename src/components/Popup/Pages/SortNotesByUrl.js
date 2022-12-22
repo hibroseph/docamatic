@@ -4,6 +4,7 @@ import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
 import Note from "../../Note/Note";
 import { NotePadding } from "../style";
+import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary";
 
 const getSortedArrayWithUrl = (pages, sortingType) => {
   return Object.keys(pages).sort((a, b) => sortingType(CreateFriendlyPreviewUrl(a), CreateFriendlyPreviewUrl(b)));
@@ -27,15 +28,18 @@ export const SortNotesByUrl = (props) => (
               <div>
                 {props.pages[key].notes.map((note) => {
                   return (
-                    <NotePadding>
-                      <Note key={note.id} 
-                      popup={true} 
-                      {...note} 
-                      url={key} 
-                      previewText={CreateFriendlyPreviewUrl(key)}
-                      tags={props.tags.filter(tag => tag.notes.includes(note.id))}
-                      ></Note>
-                    </NotePadding>
+                    <NoRenderErrorBoundary key={note.id}>
+                      <NotePadding>
+                        <Note key={note.id} 
+                        popup={true} 
+                        disableClick={true}
+                        {...note} 
+                        url={key} 
+                        previewText={CreateFriendlyPreviewUrl(key)}
+                        tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                        ></Note>
+                      </NotePadding>
+                    </NoRenderErrorBoundary>
                   );
                 })}
               </div>

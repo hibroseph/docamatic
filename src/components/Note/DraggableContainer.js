@@ -30,6 +30,7 @@ export const DraggableContainer = (props) => {
       disableDragging: props.stickify ? true : false,
       style: {
         position: props.stickify ? "fixed" : "absolute",
+        ...props.style
       },
     };
   };

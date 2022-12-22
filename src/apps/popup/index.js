@@ -3,9 +3,9 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { Store } from "webext-redux";
 import Popup from "./Popup";
-import ErrorBoundary from "../../components/ErrorBoundary";
 import config from "../../../config.json"
 import * as Sentry from "@sentry/react";
+import { NoRenderErrorBoundary } from "../../components/NoRenderErrorBoundary";
 
 // Initializing Sentry
 Sentry.init({
@@ -30,9 +30,9 @@ const initPopup = () => {
   store.ready().then(() => {
     ReactDOM.render(
       <Provider store={store}>
-        <ErrorBoundary>
+        <NoRenderErrorBoundary>
           <Popup />
-        </ErrorBoundary>
+          </NoRenderErrorBoundary>
       </Provider>,
       root
     );

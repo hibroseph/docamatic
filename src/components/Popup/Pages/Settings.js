@@ -119,7 +119,7 @@ const Settings = (props) => {
 };
 
 const mapStateToProps = (state) => {
-  return { notes: state };
+  return { notes: state.pages };
 };
 
 const mapDispatchToProps = (dispatch) => {

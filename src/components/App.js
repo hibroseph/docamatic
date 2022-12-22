@@ -1,7 +1,7 @@
 // This is the App that will be running in the chrome webpage. This handles displaying the notes that exist on the page
 import React, { Component } from "react";
 // import styled from "styled-components";
-import NoteList from "./NoteList.tsx";
+import NoteList from "./NoteList.js";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 
 class App extends Component {

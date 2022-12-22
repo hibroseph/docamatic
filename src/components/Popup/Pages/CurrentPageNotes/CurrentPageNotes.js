@@ -7,6 +7,7 @@ import ManPostingNote from "../../../../assets/man-posting-note.png";
 import Note from "../../../Note/Note";
 import { COLORS } from "../../../../utils/constants";
 import { GetSafeNoteUrl } from "../../../../utils/GetSafeNoteUrl";
+import { NoRenderErrorBoundary } from "../../../NoRenderErrorBoundary";
 
 const CurrentPageNotes = (props) => {
   const [url, setCurrentUrl] = useState("");
@@ -57,12 +58,15 @@ const CurrentPageNotes = (props) => {
           if (key == url) {
             return props.notes[key].notes.map((note) => {
               return (
-                <NotePadding key={note.id}>
-                  <Note popup={true} 
-                  {...note} 
-                  tags={props.tags.filter(tag => tag.notes.includes(note.id))}
-                  colors={props.colors} url={key} />
-                </NotePadding>
+                <NoRenderErrorBoundary key={note.id}>
+                  <NotePadding key={note.id}>
+                    <Note popup={true} 
+                    {...note} 
+                    disableClick={true}
+                    tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                    colors={props.colors} url={key} />
+                  </NotePadding>
+                </NoRenderErrorBoundary>
               );
             });
           }
@@ -74,7 +78,7 @@ const CurrentPageNotes = (props) => {
 
 const mapStateToProps = (state) => {
   return { 
-    notes: state,
+    notes: state.pages || [],
     tags: state.tags || [],
     colors: COLORS };
 };

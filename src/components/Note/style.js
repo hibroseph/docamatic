@@ -55,6 +55,11 @@ export const TitleBar = styled.div`
         outline: none !important;
         font-weight: bold !important;
       }
+
+    input::placeholder {
+      color: ${props => props.color.text};
+      opacity:0.5;
+    }
 `;
 
 export const SettingsToggle = styled.span`

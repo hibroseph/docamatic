@@ -35,7 +35,7 @@ class HeartNotes extends Component {
 
 export default connect(
   state => {
-    return { state: state };
+    return { notes: state.pages };
   },
   null
 )(HeartNotes);

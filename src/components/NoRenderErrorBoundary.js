@@ -12,9 +12,6 @@ class NoRenderErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     this.setState({hasError: true})
-    console.error("An error occurred");
-    console.error(error);
-    console.error(errorInfo);
   }
 
   render() {

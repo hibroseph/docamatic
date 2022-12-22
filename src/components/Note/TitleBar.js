@@ -15,9 +15,7 @@ export const TitleBar = props => {
     const controls = useInputControls();
 
     const titleChange = event => {
-        console.debug("title changed")
         props.onTitleChange(event);
-        console.debug("setting cursor position")
         controls.title.setCursorPosition(event.target.selectionStart);
     }
 
@@ -38,8 +36,6 @@ export const TitleBar = props => {
                 onMouseDown={event => event.stopPropagation()}
                 onMouseUp={event => event.stopPropagation()}
                 onClick={event => {
-                    console.log("clicked")
-                    console.log(event.target.selectionStart)
                     controls.title.setCursorPosition(event.target.selectionStart)
                 }}
             />

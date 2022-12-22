@@ -18,21 +18,15 @@ Sentry.init({
 let port = chrome.runtime.connect({ name: "SCRIPT" });
 let disconnected = false;
 port.onDisconnect.addListener(() => {
-  console.log("looks like we were disconnecteddddd")
   disconnected = true;
 });
 
 const  reConnectMiddleware = store => next => action => {
   if (disconnected) {
-    console.log("looks like we've disconnected, lets attempt reconnecting before dispatching")
 
     port = chrome.runtime.connect({name: "SCRIPT"});
-
-    console.log("reconnected with new port")
-    console.log(port)
     disconnected = false;
   }
-  console.log("continuing to next action")
   return next(action)
 }
 

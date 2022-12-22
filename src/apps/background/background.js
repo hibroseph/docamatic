@@ -19,12 +19,8 @@ let initialState = {
 const init = (preloadedState) => {
   const store = createStore(notesApp, preloadedState);
   store.subscribe(() => {
-    console.debug("current store state that we are about to save to storage:")
-    console.debug(store.getState())
     Sentry.wrap(() => {
       let currentState = store.getState();
-      console.debug("current state:");
-      console.debug(currentState);
       chrome.storage.local.set(currentState)
     });
   });
@@ -37,24 +33,16 @@ const init = (preloadedState) => {
 // whenever the extension "wakes up" from idle.
 chrome.runtime.onConnect.addListener(port => {
   if (port.name === "POPUP" || port.name === "SCRIPT") {
-    console.debug("Connection request from: " + port.name);
 
     // The popup was opened.
     // Gets the current state from the storage.
     chrome.storage.local.get(null, (storage) => {
       if (!isInitialized) {
-        console.debug("storage is")
-        console.debug(storage)
         // 1. Initializes the redux store and the message passing.
 
         if (Object.keys(storage).length == 0) {
-          console.debug("storage is empty")
-          console.debug("setting to initial state")
           storage = initialState;
         }
-
-        console.debug("initial state")
-        console.debug(storage);
         init( storage);
         isInitialized = true;
       }

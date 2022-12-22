@@ -26,7 +26,6 @@ export const SearchBox = (props) => {
     const [availableTags, setAvailableTags] = useState(props.availableTags)
 
     useEffect(() => {
-        console.debug("search query changed")
         props.onSearch(searchQuery)
     }, [searchQuery])
 

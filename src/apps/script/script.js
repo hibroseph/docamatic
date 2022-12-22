@@ -2,14 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import App from "../../components/App";
-import { Store } from "webext-redux";
+import { Store, applyMiddleware } from "webext-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
 import config from "../../../config.json";
 import * as Sentry from "@sentry/react";
 import { StyleSheetManager } from 'styled-components';
-//import ReactShadowRoot from 'react-shadow-root';
-// Initializing Sentry
-// TODO: Do we need to reinitalize sentry?s
+
 Sentry.init({
   dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
   environment: config.environment,
@@ -17,7 +15,26 @@ Sentry.init({
   ignoreErrors: ["ResizeObserver loop limit exceeded"],
 });
 
-chrome.runtime.connect({ name: "SCRIPT" });
+let port = chrome.runtime.connect({ name: "SCRIPT" });
+let disconnected = false;
+port.onDisconnect.addListener(() => {
+  console.log("looks like we were disconnecteddddd")
+  disconnected = true;
+});
+
+const  reConnectMiddleware = store => next => action => {
+  if (disconnected) {
+    console.log("looks like we've disconnected, lets attempt reconnecting before dispatching")
+
+    port = chrome.runtime.connect({name: "SCRIPT"});
+
+    console.log("reconnected with new port")
+    console.log(port)
+    disconnected = false;
+  }
+  console.log("continuing to next action")
+  return next(action)
+}
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -48,9 +65,9 @@ const initPageScript = () => {
     pageHeight: document.documentElement.clientHeight,
   });
 
-  const store = new Store({
+  const store = applyMiddleware(new Store({
     portName: "NOTES_STORE",
-  });
+  }), reConnectMiddleware);
 
   const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
 /*

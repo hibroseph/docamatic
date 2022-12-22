@@ -17,7 +17,10 @@ export const Note = (props) => {
           props.mutateNote({id: props.id, url: props.url, type: "note_clicked"})
         }*/
         // set z-index
-        props.setZIndex()
+      
+        if (props.setZIndex) {
+          props.setZIndex()
+        }
     }}
     
     color={{ ...props.color }}>
@@ -86,6 +89,7 @@ const mapDispatchToProps = (dispatch) => ({
       // call dispatch and handle promise once
       return dispatch(action)
       .catch(e => {
+        console.error("I REALLY DON'T EXPECT TO HIT THIS ANYMORE")
         // catch all errors and hopefully handle with retry
         // TODO: Create retry loop to only retry a few times and then error out
         chrome.runtime.connect({ name: "SCRIPT" }); 
@@ -97,9 +101,8 @@ const mapDispatchToProps = (dispatch) => ({
           } 
         });
       })
-    
-  
- } /*
+      }
+  /*
   onHeartify: (id, url) => ,
   onStickify: (id, url) => dispatch(stickify(id, url)),
   onAddClick: (text, url) => dispatch(addNote(text, url)),

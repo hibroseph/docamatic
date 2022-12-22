@@ -34,7 +34,6 @@ export const NoteList = (props) => {
                   scrollYOffset={props.scrollYOffset}
                   url={props.url}
                   setZIndex={() => {
-                    console.log("setting note on top")
                     setNoteOnTop(note.id)}}
                   style={{ zIndex: noteOnTop && note.id == noteOnTop ? 1 : 0 }}
                 />
@@ -50,7 +49,6 @@ export const NoteList = (props) => {
 const mapStateToProps = (state, props) => {
   //@ts-ignore
   let safeUrl = GetSafeNoteUrl(window.location.href);
-
   if (state.pages[safeUrl] == null) {
     return {
       notes: [],

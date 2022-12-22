@@ -17,13 +17,11 @@ export const useInputControls = () => {
     useEffect(() => {
         //textAreaRef.current.selectionStart = noteBodyCursorPosition;
         //textAreaRef.current.selectionEnd = noteBodyCursorPosition;
-        console.debug("useEffect in useInputControls " + noteTitleCursorPosition)
         titleRef.current.selectionStart = noteTitleCursorPosition;
         titleRef.current.selectionEnd = noteTitleCursorPosition;
     })
 
     useEffect(() => {
-        console.log("note title cursor position changed " + noteTitleCursorPosition)
     }, [noteTitleCursorPosition])
 
     return {

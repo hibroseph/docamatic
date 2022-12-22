@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import styled from "styled-components";
 import { getContrastingColor } from "../../utils/ContrastingColor"
+import {faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const TagSpan = styled.span`
     border-radius: 10px;
@@ -19,6 +21,17 @@ const onTagClick = (tagText, setTagText, removeTag) => {
         setTagText('');
     } else {
         removeTag();
+    }
+}
+
+const determineIcon = (icon) => {
+    switch(icon) {
+        case "add":
+            return faPlus;
+        case "remove":
+            return faMinus;
+        default:
+            throw new Error(`${icon} is not a registered valid icon for bubble tags`)
     }
 }
 
@@ -57,5 +70,5 @@ export const TagBubble = (props) => {
         blur.stopPropagation()}}
     onKeyUp={event => event.stopPropagation()}
     {...props}
-    >{tagText}</TagSpan>
+    >{tagText}{props.icon ? <FontAwesomeIcon size="xs" style={{marginLeft: "4px"}} icon={ determineIcon(props.icon) }></FontAwesomeIcon> : null }</TagSpan>
 }

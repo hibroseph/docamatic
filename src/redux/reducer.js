@@ -400,9 +400,7 @@ const notesApp = (state = [], action) => {
           }).filter(tag => tag.notes.length > 0)
         });
       } catch (error) {
-        Sentry.captureException(error, {
-          location: "Reducer:REMOTE_NOTE",
-        });
+        Sentry.captureException(error);
         return state;
       }
 

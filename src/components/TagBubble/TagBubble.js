@@ -17,9 +17,13 @@ const TagSpan = styled.span`
 `
 
 const onTagClick = (tagText, setTagText, removeTag) => {
+    console.debug("you clicked the tag")
+    console.debug(tagText)
     if (tagText == 'add tag') {
+        console.debug("the tag text is add tag")
         setTagText('');
     } else {
+        console.debug("we are removing the tag")
         removeTag();
     }
 }
@@ -70,5 +74,5 @@ export const TagBubble = (props) => {
         blur.stopPropagation()}}
     onKeyUp={event => event.stopPropagation()}
     {...props}
-    >{tagText}{props.icon ? <FontAwesomeIcon size="xs" style={{marginLeft: "4px"}} icon={ determineIcon(props.icon) }></FontAwesomeIcon> : null }</TagSpan>
+    >{tagText}</TagSpan>
 }

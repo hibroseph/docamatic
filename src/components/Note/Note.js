@@ -39,6 +39,7 @@ export const Note = (props) => {
         <TagBubble
         color="#e0e0e0" 
         text="add tag" 
+        icon="add"
         contentEditable={true}
         createTag={tag => {
           props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}

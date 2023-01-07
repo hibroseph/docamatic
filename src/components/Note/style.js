@@ -100,3 +100,28 @@ export const SettingsIconContainer = styled.div`
   align-items: center;
   height: 40px;
 `;
+
+export const SyncErrorBox = styled.div`
+  background-color: #E53C3C;
+  color: white;
+  margin:5px;
+  padding: 10px;
+  border-radius: 10px;
+  
+  display: flex;
+  flex-direction: column;  
+  h3 {
+    margin: 0px;
+  }
+`
+
+export const ReloadPageButton = styled.button`
+  background-color: white;
+  color: #e53c3c;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  border-radius: 7px;
+  padding: 10px;
+  box-shadow: 0px 2px 5px rgb(0 0 0 / 20%);
+`

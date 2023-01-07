@@ -19,10 +19,15 @@ for (let i = 0, length = assetKeys.length; i < length; i++) {
   manifestString = manifestString.replace(assetKeys[i], assets[assetKeys[i]]);
 }
 
+// update manifest.json
 fs.writeFileSync("./dist/manifest.json", manifestString);
 
+// update popup.js
 let popupFile = fs.readFileSync(`./dist/${assets["popup.js"]}`).toString()
-
 fs.writeFileSync(`./dist/${assets["popup.js"]}`, popupFile.replace("[[script.js]]", assets["script.js"]))
+
+// Update background.js file
+let backgroundFile = fs.readFileSync(`./dist/${assets["background.js"]}`).toString();
+fs.writeFileSync(`./dist/${assets["background.js"]}`, backgroundFile.replace("[[script.js]]", assets["background.js"]))
 
 console.log("Refreshed all paths and saved new manifest.json 👍");

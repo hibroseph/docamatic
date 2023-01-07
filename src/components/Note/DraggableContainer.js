@@ -10,10 +10,18 @@ export const DraggableContainer = (props) => {
         width: props.size.width,
       },
       onDragStop: (e, d) => {
-        props.onPositionChange(props.id, d.x, d.y);
+        try {
+          props.onPositionChange(props.id, d.x, d.y);
+        } catch(error) {
+          console.error("Unable to update note position")
+        }
       },
       onResizeStop: (e, d, ref, delta, position) => {
-        props.onSizeChange(props.size.width + delta.width);
+        try {
+          props.onSizeChange(props.size.width + delta.width);
+        } catch(error) {
+          console.error("Unable to update note size")
+        }
       },
       dragHandleClassName: "drag-handle",
       bounds: "window",
@@ -35,5 +43,5 @@ export const DraggableContainer = (props) => {
     };
   };
 
-  return <Rnd {...RndConfiguration()}>{props.children}</Rnd>;
+  return <Rnd {...RndConfiguration()} id={props.idd}>{props.children}</Rnd>;
 };

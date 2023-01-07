@@ -12,12 +12,23 @@ class App extends Component {
       scrollYOffset: window.pageYOffset,
       current_url: GetSafeNoteUrl(location.href),
       timer: null,
+      disconnected: false
     };
 
     this.listenToScroll = this.listenToScroll.bind(this);
     this.listenForUrlChange = this.listenForUrlChange.bind(this);
     this.listenForHistoryChanges = this.listenForHistoryChanges.bind(this);
+    this.listenForDisconnect = this.listenForDisconnect.bind(this);
     //chrome.runtime.sendMessage({ action: CHROME_MESSAGES.ERROR_OCCURRED }, () => {});
+  }
+
+  listenForDisconnect() {
+    console.log("adding global listener for disconnect")
+
+    document.addEventListener('docamatic-disconnect', () => {
+      console.log("docamatic-disconnect event occurred")
+      this.setState({disconnected: true});
+    })
   }
 
   /*
@@ -57,6 +68,7 @@ class App extends Component {
     window.addEventListener("scroll", this.listenToScroll);
     this.listenForUrlChange();
     this.listenForHistoryChanges();
+    this.listenForDisconnect();
   }
 
   componentWillUnmount() {
@@ -78,7 +90,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NoteList url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
+        <NoteList disconnected={this.state.disconnected} url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
       </div>
     );
   }

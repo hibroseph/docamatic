@@ -17,13 +17,18 @@ Sentry.init({
 
 let port = chrome.runtime.connect({ name: "SCRIPT" });
 let disconnected = false;
+
 port.onDisconnect.addListener(() => {
+  console.log("we got disconnected")
   disconnected = true;
+
+  document.dispatchEvent(new CustomEvent('docamatic-disconnect'));
 });
 
 const  reConnectMiddleware = store => next => action => {
+  console.log("hitting reConnectMiddleware")
   if (disconnected) {
-
+    console.log("we need to reconnect")
     port = chrome.runtime.connect({name: "SCRIPT"});
     disconnected = false;
   }
@@ -127,7 +132,6 @@ const initPageScript = () => {
           </StyleSheetManager>
         </Provider>,
         renderIn
-
       );
   });
   }

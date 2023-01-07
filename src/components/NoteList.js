@@ -1,5 +1,5 @@
 //@ts-ignore
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DraggableNote } from "./Note/DraggableNote";
 import { connect } from "react-redux";
 import {
@@ -11,8 +11,9 @@ import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
 
 export const NoteList = (props) => {
 
-  const[noteOnTop, setNoteOnTop] = useState(0);
+  const [noteOnTop, setNoteOnTop] = useState(0);
 
+  useEffect(() => { console.log("disconnected changed in notelist " + props.disconnected)}, [props.disconnected])
     return (
       <div>
         {props.url && props.notes.map(note => {
@@ -36,6 +37,7 @@ export const NoteList = (props) => {
                   setZIndex={() => {
                     setNoteOnTop(note.id)}}
                   style={{ zIndex: noteOnTop && note.id == noteOnTop ? 1 : 0 }}
+                  disconnected={props.disconnected}
                 />
               </NoRenderErrorBoundary>
             )

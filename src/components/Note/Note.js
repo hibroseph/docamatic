@@ -11,8 +11,9 @@ import notesApp from "../../redux/reducer";
 export const Note = (props) => {
 
   useEffect(() => {
-    console.log("disconnected changed " + props.disconnected), [props.disconnected]
-  })
+    console.log("disconnected changed " + props.disconnected)
+  }, [props.disconnected])
+
   return (
     <NoteContainer
     onClick={() => {

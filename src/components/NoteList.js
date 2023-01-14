@@ -21,6 +21,7 @@ export const NoteList = (props) => {
             return (
               <NoRenderErrorBoundary key={note.id}>
                 <DraggableNote
+                  windowWidth={props.windowWidth}
                   onPositionChange={(id, x, y) =>
                     // @ts-ignore
                     props.mutateNote({ id, x, y, url: props.url, type: 'position_change' })

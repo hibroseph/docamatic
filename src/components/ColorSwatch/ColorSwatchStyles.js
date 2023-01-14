@@ -3,9 +3,9 @@ import styled from "styled-components";
 export const ColorSwatchContainer = styled.div`
 
 width: 100%;
-height: 50px
+height: 50px;
 background-color: lightgrey;
-display: flex
+display: flex;
 transition: 0.3s ease left;
 
 .color {

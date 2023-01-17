@@ -30,4 +30,27 @@ fs.writeFileSync(`./dist/${assets["popup.js"]}`, popupFile.replace("[[script.js]
 let backgroundFile = fs.readFileSync(`./dist/${assets["background.js"]}`).toString();
 fs.writeFileSync(`./dist/${assets["background.js"]}`, backgroundFile.replace("[[script.js]]", assets["background.js"]))
 
+// update html
+
+if (!fs.existsSync("./dist/site")){
+  fs.mkdirSync("./dist/site")
+}
+
+/*let homepage = fs.readFileSync(`./site/index.html`).toString();
+fs.writeFileSync(`./dist/site/index.html`, homepage.replace("[[script.js]]", assets["script.js"]))*/
+
+fs.copyFileSync("./dist/homepage.html", "./dist/site/index.html")
+fs.copyFileSync(`./dist/${assets["homepage.js"]}`, `./dist/site/${assets["homepage.js"]}`)
+
+fs.copyFileSync("./src/apps/homepage/styles.css", "./dist/site/styles.css")
+fs.copyFileSync("./src/apps/homepage/changelog.html", "./dist/site/changelog.html")
+fs.copyFileSync("./src/apps/homepage/contactus.html", "./dist/site/contactus.html")
+console.log("copying images")
+if (!fs.existsSync("./dist/site/images")) {
+  fs.mkdirSync("./dist/site/images");
+}
+
+fs.copyFileSync("./images/docamatic-logo.png", "./dist/site/images/docamatic-logo.png")
+fs.copyFileSync("./images/docamatic-text-logo.png", "./dist/site/images/docamatic-text-logo.png")
+
 console.log("Refreshed all paths and saved new manifest.json 👍");

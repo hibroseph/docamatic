@@ -1,7 +1,7 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
 import { ADD_TAG, REMOVE_TAG, NUKE_NOTES } from "./actions";
-import * as Sentry from "@sentry/react";
+//import * as Sentry from "@sentry/react";
 import { generateUUID } from "../utils/GenerateUUID";
 import { getRandomTagColor} from "../utils/RandomTagColor";
 /*

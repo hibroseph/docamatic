@@ -1,0 +1,47 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+        .create-note {
+            padding: 20px;
+            font-size: 2em;
+            border-radius: 20px;
+            background-color: #0072cc;
+            border: none;
+        }
+
+        .create-note:hover {
+            opacity: 0.7;
+        }
+    </style>
+    <script>
+        var homepageMode = true;
+        const createnote = () => {
+            console.log("creating note")
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body class="background">
+    <div id="docamatic-render"></div>
+    <nav class="nav-bar">
+        <!--These are referencing which is this file, after the build process -->
+        <a href="./index.html"><img src="./images/docamatic-logo.png"></a>
+        <a href="./index.html"><img class="docamatic-text-logo" src="./images/docamatic-text-logo.png"></a>
+        <ul class="nav-links">
+            <li><a class="page-link" href="./changelog.html">Change Log</a></li>
+            <li><a class="page-link" href="./contactus.html">Contact Us</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h1 class="docamatic-header">Add Sticky Notes to the Web</h1>
+        <p>Click the button to demo adding notes to this webpage</p>
+        <button id="create-note-button" class="create-note">Create Note</button>
+    </div>
+</body>
+
+</html>

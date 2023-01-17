@@ -1,0 +1,72 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.background {
+    background-color: #008EFF;
+}
+
+a:visited {
+    text-decoration: none;
+    color: black;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.nav-bar {
+    display: flex;
+    align-items: center;
+    margin: 25px;
+    padding: 10px;
+    border-radius: 35px;
+    background-color: #0072cc;
+
+}
+
+.docamatic-text-logo {
+    height: 6em;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    width: 100%;
+    justify-content: space-evenly;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.page-link {
+    padding: 10px;
+}
+
+.page-link:hover {
+    opacity: 0.5;
+    background-color: lightblue;
+    border-radius: 10px;
+}
+
+.nav-bar img {
+    padding: 10px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.docamatic-header {
+    font-size: 5em;
+}
+
+#docamatic-header {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}

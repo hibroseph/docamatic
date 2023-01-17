@@ -53,4 +53,6 @@ cp site/* homepage/
 
 zip -r app.zip app/
 
+zip -r homepage.zip homepage/
+
 echo "Done creating the $2 build with semver version" $1

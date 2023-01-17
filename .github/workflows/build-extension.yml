@@ -39,5 +39,5 @@ jobs:
       uses: actions/upload-artifact@v3.1.0
       with:
         name: homepage
-        path: ./dist/homepage.zip
+        path: ./dist/homepage
         if-no-files-found: error

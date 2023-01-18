@@ -1,7 +1,7 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
 import { ADD_TAG, REMOVE_TAG, NUKE_NOTES } from "./actions";
-import * as Sentry from "@sentry/react";
+//import * as Sentry from "@sentry/react";
 import { generateUUID } from "../utils/GenerateUUID";
 import { getRandomTagColor} from "../utils/RandomTagColor";
 /*
@@ -400,9 +400,7 @@ const notesApp = (state = [], action) => {
           }).filter(tag => tag.notes.length > 0)
         });
       } catch (error) {
-        Sentry.captureException(error, {
-          location: "Reducer:REMOTE_NOTE",
-        });
+        Sentry.captureException(error);
         return state;
       }
 

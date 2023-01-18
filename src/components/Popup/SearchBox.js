@@ -33,7 +33,11 @@ export const SearchBox = (props) => {
     <div>
         <SearchContainer>
         <SearchInput onChange={event => setSearchQuery({text: event.target.value, tags: searchQuery.tags})} placeholder="Search Notes"></SearchInput>
-        <TagBubbleContainer style={{padding: "5px"}}>
+        <TagBubbleContainer 
+            style={searchQuery.tags.length > 0 ? {
+                padding: "5px",
+                borderTop: "2px solid lightgray"
+                } : {}}>
             {searchQuery.tags.map(tag => 
                 <TagBubble 
                 key={tag.id}
@@ -42,7 +46,8 @@ export const SearchBox = (props) => {
                  removeTag={() => {
                     setAvailableTags([...availableTags, tag])
                     setSearchQuery({text: searchQuery.text, tags: searchQuery.tags.filter(p => p.id != tag.id)})
-                }}/>
+                }}
+                icon="remove"/>
             )}
         </TagBubbleContainer>
     </SearchContainer>
@@ -55,7 +60,8 @@ export const SearchBox = (props) => {
             removeTag={() => {
                 setAvailableTags(availableTags.filter(p => p.id != tag.id))
                 setSearchQuery({ text: searchQuery.text, tags: [...searchQuery.tags, tag]})
-            }} />)}
+            }}
+            icon="add" />)}
     </TagBubbleContainer>
     </div>)
 } 

@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import { NoteContainer } from "./style";
+import React, {useState, useEffect} from "react";
+import { NoteContainer, SyncErrorBox, ReloadPageButton } from "./style";
 import { TitleBar } from "./TitleBar";
 import { NoteBody } from "./NoteBody";
 import { connect } from "react-redux";
@@ -9,7 +9,11 @@ import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
 import notesApp from "../../redux/reducer";
 
 export const Note = (props) => {
-  
+
+  useEffect(() => {
+    console.log("disconnected changed " + props.disconnected)
+  }, [props.disconnected])
+
   return (
     <NoteContainer
     onClick={() => {
@@ -38,13 +42,21 @@ export const Note = (props) => {
         )}
         <TagBubble
         color="#e0e0e0" 
-        text="add tag" 
+        text="add tag"
+        icon="add"
         contentEditable={true}
         createTag={tag => {
           props.mutateNote({ id: props.id, url:props.url, tag, type:'add_tag'})}}
           removeTag={() => {}}
         ></TagBubble>
       </TagBubbleContainer>
+      {props.disconnected && 
+      <SyncErrorBox>
+        <h3>Sync Error</h3>
+        <p>Please reload the page for Docamatic to function correctly</p>
+        <ReloadPageButton onClick={() => document.location.reload()}>Reload Page</ReloadPageButton>
+      </SyncErrorBox>
+      }
       <NoteBody
       onBodyChange={(event) => props.mutateNote({id:props.id, body:event.target.value, url: props.url, type: 'body_change'})} {...props} />
     </NoteContainer>

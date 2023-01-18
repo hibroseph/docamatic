@@ -12,12 +12,35 @@ class App extends Component {
       scrollYOffset: window.pageYOffset,
       current_url: GetSafeNoteUrl(location.href),
       timer: null,
+      disconnected: false,
+      windowWidth: window.innerWidth
     };
 
     this.listenToScroll = this.listenToScroll.bind(this);
     this.listenForUrlChange = this.listenForUrlChange.bind(this);
     this.listenForHistoryChanges = this.listenForHistoryChanges.bind(this);
+    this.listenForDisconnect = this.listenForDisconnect.bind(this);
+    this.listenForWindowResize = this.listenForWindowResize.bind(this);
     //chrome.runtime.sendMessage({ action: CHROME_MESSAGES.ERROR_OCCURRED }, () => {});
+  }
+
+  listenForDisconnect() {
+    console.log("adding global listener for disconnect")
+
+    // This gets called when the service worker goes inactive AND on app restart
+    document.addEventListener('docamatic-disconnect', () => {
+      console.log("docamatic-disconnect event occurred")
+      this.setState({disconnected: true});
+    })
+  }
+
+  listenForWindowResize() {
+    console.log("adding window event listener")
+
+    window.addEventListener('resize', (event) => {
+      console.log("resizing")
+      this.setState({ windowWidth: window.innerWidth })
+    })
   }
 
   /*
@@ -57,6 +80,8 @@ class App extends Component {
     window.addEventListener("scroll", this.listenToScroll);
     this.listenForUrlChange();
     this.listenForHistoryChanges();
+    this.listenForDisconnect();
+    this.listenForWindowResize();
   }
 
   componentWillUnmount() {
@@ -78,7 +103,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NoteList url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
+        <NoteList windowWidth={this.state.windowWidth} disconnected={this.state.disconnected} url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
       </div>
     );
   }

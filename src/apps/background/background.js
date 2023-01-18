@@ -28,6 +28,7 @@ const init = (preloadedState) => {
   wrapStore(store, { portName: "NOTES_STORE" });
 
 }
+
 // Listens for incomming connections from content
 // scripts, or from the popup. This will be triggered
 // whenever the extension "wakes up" from idle.

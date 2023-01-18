@@ -3,17 +3,19 @@ import { Rnd } from "react-rnd";
 export const DraggableContainer = (props) => {
   const RndConfiguration = () => {
     return {
-      default: {
-        x: props.position.x,
-        y: props.position.y,
-
-        width: props.size.width,
-      },
       onDragStop: (e, d) => {
-        props.onPositionChange(props.id, d.x, d.y);
+        try {
+          props.onPositionChange(props.id, d.x, d.y);
+        } catch(error) {
+          console.error("Unable to update note position")
+        }
       },
       onResizeStop: (e, d, ref, delta, position) => {
-        props.onSizeChange(props.size.width + delta.width);
+        try {
+          props.onSizeChange(props.size.width + delta.width);
+        } catch(error) {
+          console.error("Unable to update note size")
+        }
       },
       dragHandleClassName: "drag-handle",
       bounds: "window",
@@ -35,5 +37,22 @@ export const DraggableContainer = (props) => {
     };
   };
 
-  return <Rnd {...RndConfiguration()}>{props.children}</Rnd>;
+  let isOffScreen = props.position.x + props.size.width > props.windowWidth - 17;
+
+  if (isOffScreen) {
+    console.log("note with id " + props.id + " is off screen!")
+
+    console.log("note x position: " + (props.windowWidth - props.size.width))
+  }
+
+  return <Rnd 
+    position={{
+      x: isOffScreen ? (props.windowWidth - props.size.width - 17)  : props.position.x,
+      y: props.position.y
+    }}
+    size={{
+      width: props.size.width
+    }}
+    {...RndConfiguration()} 
+    id={props.id}>{props.children}</Rnd>;
 };

@@ -14,6 +14,7 @@ module.exports = {
     popup: "./src/apps/popup/index.js",
     background: "./src/apps/background/background.js",
     script: "./src/apps/script/script.js",
+    homepage: "./src/apps/homepage/index.js"
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
@@ -74,6 +75,12 @@ module.exports = {
       hash: true,
       filename: "index.html",
       template: "./src/apps/popup/index.html",
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["homepage"],
+      hash: true,
+      filename: "homepage.html",
+      template: "./src/apps/homepage/homepage.html",
     }),
     // copy extension manifest and icons
     new CopyWebpackPlugin({

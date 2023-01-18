@@ -48,6 +48,11 @@ cp *.js sentry
 cp *.map sentry
 cp manifest sentry
 
+mkdir homepage
+cp site/* homepage/
+
 zip -r app.zip app/
+
+zip -r homepage.zip homepage/
 
 echo "Done creating the $2 build with semver version" $1

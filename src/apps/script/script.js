@@ -17,17 +17,31 @@ Sentry.init({
 
 let port = chrome.runtime.connect({ name: "SCRIPT" });
 let disconnected = false;
+
+
 port.onDisconnect.addListener(() => {
+  console.log("we got disconnected")
   disconnected = true;
 });
 
 const  reConnectMiddleware = store => next => action => {
+  console.log("hitting reConnectMiddleware")
   if (disconnected) {
+    console.log("we need to reconnect")
+    
+    try {
+      port = chrome.runtime.connect({name: "SCRIPT"});
+      disconnected = false;
 
-    port = chrome.runtime.connect({name: "SCRIPT"});
-    disconnected = false;
+      return next(action)
+    } catch (error) {
+      console.log("There was probably a problem reconnecting")
+      document.dispatchEvent(new CustomEvent('docamatic-disconnect'));
+    }
+  } else {
+    return next(action)
   }
-  return next(action)
+  
 }
 
 // This is used to communicate with the chrome extension
@@ -127,7 +141,6 @@ const initPageScript = () => {
           </StyleSheetManager>
         </Provider>,
         renderIn
-
       );
   });
   }

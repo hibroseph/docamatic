@@ -34,3 +34,10 @@ jobs:
         name: extension
         path: ./dist/app.zip
         if-no-files-found: error
+        
+    - name: Upload homepage artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: homepage
+        path: ./dist/homepage.zip
+        if-no-files-found: error

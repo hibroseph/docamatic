@@ -35,7 +35,7 @@ a {
     list-style: none;
     width: 100%;
     justify-content: space-evenly;
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: bold;
 }
 
@@ -51,6 +51,7 @@ a {
 
 .nav-bar img {
     padding: 10px;
+    height: 50px;
 }
 
 .content {
@@ -62,11 +63,5 @@ a {
 
 .docamatic-header {
     font-size: 5em;
-}
-
-#docamatic-header {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 1;
+    color: white;
 }

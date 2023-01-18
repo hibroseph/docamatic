@@ -49,7 +49,7 @@ cp *.map sentry
 cp manifest sentry
 
 mkdir homepage
-cp site/* homepage/
+cp -r site/* homepage/
 
 zip -r app.zip app/
 

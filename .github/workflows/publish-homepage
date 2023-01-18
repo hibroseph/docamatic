@@ -1,0 +1,44 @@
+name: publish homepage
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        description: environment to deploy to (ex uat, production)
+      run_id:
+        required: true
+        description: the run of the build of the artifact
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2.3.1
+    
+    - name: Download artifact
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: build-extension.yml
+        workflow_conclusion: success
+        event: push
+        run_id: ${{ github.event.inputs.run_id }}
+        name: homepage
+        if_no_artifact_found: fail
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v2
+        
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        # Upload entire repository
+        path: 'homepage.zip'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v1
+    
+    

@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export const NotValidWebpage = styled.div`
     display:flex;
-    flex-direction: column
+    flex-direction: column;
     align-items:center;
 `
 

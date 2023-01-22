@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Provider } from "react-redux";
-import { Store } from "webext-redux";
 import Popup from "./Popup";
 import config from "../../../config.json"
 import * as Sentry from "@sentry/react";
 import { NoRenderErrorBoundary } from "../../components/NoRenderErrorBoundary";
+import { Provider } from "react-redux";
+import { Store } from "webext-redux";
 
 // Initializing Sentry
 Sentry.init({

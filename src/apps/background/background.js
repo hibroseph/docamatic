@@ -12,16 +12,44 @@ let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 chrome.runtime.setUninstallURL(feedbackUrl);
 let initialState = {
   pages: {},
-  tags: []
+  tags: [],
+  metadata: {
+    onboarded: false
+  }
 };
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.tabs.create({url : "/onboarding.html"}, () =>{ })
-})
+const getStateFromStorage = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.local.get(null, (storage) => {
+        if (Object.keys(storage).length == 0) {
+          console.log("storage was empty, returning initial state")
+          resolve(initialState);
+        } else {
+          console.log("there was something stored in storage.local, returning that")
+          resolve(storage);
+        }
+      })
+    } catch (err) {
+      console.log("rejecting")
+      reject(err)
+    }
+  })
+};
+
 
 
 const init = (preloadedState) => {
   const store = createStore(notesApp, preloadedState);
+
+  if (!preloadedState?.metadata?.onboarded) {
+    console.log("you are not onboarded")
+    chrome.runtime.onInstalled.addListener(() => {
+      chrome.tabs.create({url : "/onboarding.html"}, () =>{ })
+    })
+  } else {
+    console.log("you are already onboardded")
+  }
   store.subscribe(() => {
     Sentry.wrap(() => {
       let currentState = store.getState();
@@ -42,16 +70,15 @@ chrome.runtime.onConnect.addListener(port => {
 
     // The popup was opened.
     // Gets the current state from the storage.
-    chrome.storage.local.get(null, (storage) => {
-      if (!isInitialized) {
-        // 1. Initializes the redux store and the message passing.
 
-        if (Object.keys(storage).length == 0) {
-          storage = initialState;
-        }
-        init( storage);
+    getStateFromStorage()
+    .then(storage => {
+      // 1. See if we are initialized
+      if (!isInitialized) {
+        init(storage);
         isInitialized = true;
       }
+
       // 2. Sends a message to notify that the store is ready.
       if (splitPort[0] === "POPUP") 
         chrome.runtime.sendMessage({ type: "STORE_INITIALIZED" });
@@ -67,7 +94,22 @@ chrome.runtime.onConnect.addListener(port => {
               console.log("swollowing exception")
             }  });
         })
-    });
+    })
   }
 })
 
+console.log("calling getStateFromStorage")
+
+getStateFromStorage().then(storage => {
+  console.log("we got storage")
+  console.log(storage)
+
+  if (!storage?.metadata?.onboarded) {
+    console.log("you are not onboarded")
+    chrome.tabs.create({url : "/onboarding.html"}, () =>{ })
+  } else {
+    console.log("you are already onboarded")
+  }
+})
+
+console.log("after getStateFromStorage")

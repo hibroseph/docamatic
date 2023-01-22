@@ -14,6 +14,7 @@ export const IMPORT_NOTES = "IMPORT_NOTES";
 export const NUKE_NOTES = "NUKE_NOTES";
 export const ADD_TAG = "ADD_TAG";
 export const REMOVE_TAG = "REMOVE_TAG"
+export const USER_ONBOARDED = "USER_ONBOARDED"
 
 /*
  * action creators
@@ -145,5 +146,11 @@ export function removeNote(id, url) {
     type: REMOVE_NOTE,
     id,
     url,
-  };
+  }; 
+}
+
+export function userOnboarded() {
+  return {
+    type: USER_ONBOARDED
+  }
 }

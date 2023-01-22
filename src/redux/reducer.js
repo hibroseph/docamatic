@@ -1,6 +1,6 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
-import { ADD_TAG, REMOVE_TAG, NUKE_NOTES } from "./actions";
+import { ADD_TAG, REMOVE_TAG, NUKE_NOTES, USER_ONBOARDED } from "./actions";
 //import * as Sentry from "@sentry/react";
 import { generateUUID } from "../utils/GenerateUUID";
 import { getRandomTagColor} from "../utils/RandomTagColor";
@@ -478,6 +478,11 @@ const notesApp = (state = [], action) => {
             }},
           });
       }
+    case USER_ONBOARDED:
+      console.log("setting onboarded flag")
+      let newestState = Object.assign({}, state, { metadata: { ...state?.metadata, onboarded: true}})
+      console.log(newestState)
+      return newestState;
 
     default:
       return state;

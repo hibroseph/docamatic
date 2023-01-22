@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import docamaticLogo from "../../../images/docamatic-logo.png"
@@ -7,7 +7,11 @@ import step1Gif from "../../assets/onboarding/step1.gif"
 import step2Gif from "../../assets/onboarding/step2.gif"
 import step3Gif from "../../assets/onboarding/step3.gif"
 import step4Gif from "../../assets/onboarding/step4.gif"
-import step4Gif from "../../assets/onboarding/step5.gif"
+import step5Gif from "../../assets/onboarding/step5.gif"
+import { connect } from "react-redux";
+import { Provider } from "react-redux";
+import { Store } from "webext-redux";
+import { userOnboarded} from "../../redux/actions"
 
 const Header = styled.div`
     display: flex;
@@ -62,7 +66,14 @@ const TutorialSteps = styled.div`
     display: flex;
     flex-direction: column;
 `
-const Onboarding = ( props ) => {
+const Onboarding = connect(null,dispatch => {
+    return {onboarded: () => dispatch(userOnboarded())}
+})(( props ) => {
+
+    useEffect(() => {
+        console.log("setting onboarded")
+        props.onboarded()
+    })
         return (
         <Background>
             <Header>
@@ -111,7 +122,28 @@ const Onboarding = ( props ) => {
             </TutorialSteps>
         </Background>)
     }
+)
 
 let element = document.getElementById("__tabpage_mount_point__")
 
-ReactDOM.render(<Onboarding></Onboarding>, element);
+chrome.runtime.onMessage.addListener((req) => {
+    if (req.type === "STORE_INITIALIZED") {
+      // Initializes the popup logic
+      console.log("creating store")
+      const store = new Store({
+        portName: "NOTES_STORE",
+      });
+    
+      console.log("setting store.ready()")
+      store.ready().then(() => {
+        console.log("store is ready ")
+      ReactDOM.render(<Provider store={store}>
+        <Onboarding>
+        </Onboarding>
+        </Provider>, element)})
+    }
+});
+
+chrome.runtime.connect({name: "POPUP"})
+
+

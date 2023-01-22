@@ -117,10 +117,6 @@ module.exports = {
         scripts: [
           "node refresh-paths.js"
         ]
-      },
-      onBuildStart: {
-        scripts: [
-          "rm -rf dist/"],
       }
     }),
     //new BundleAnalyzerPlugin(),

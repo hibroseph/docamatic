@@ -15,6 +15,10 @@ let initialState = {
   tags: []
 };
 
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.create({url : "/onboarding.html"}, () =>{ })
+})
+
 
 const init = (preloadedState) => {
   const store = createStore(notesApp, preloadedState);
@@ -26,14 +30,15 @@ const init = (preloadedState) => {
   });
 
   wrapStore(store, { portName: "NOTES_STORE" });
-
 }
 
 // Listens for incomming connections from content
 // scripts, or from the popup. This will be triggered
 // whenever the extension "wakes up" from idle.
 chrome.runtime.onConnect.addListener(port => {
-  if (port.name === "POPUP" || port.name === "SCRIPT") {
+  
+  let splitPort = port.name.split(";;")
+  if (splitPort[0] === "POPUP" || splitPort[0] === "SCRIPT") {
 
     // The popup was opened.
     // Gets the current state from the storage.
@@ -48,11 +53,19 @@ chrome.runtime.onConnect.addListener(port => {
         isInitialized = true;
       }
       // 2. Sends a message to notify that the store is ready.
-      if (port.name === "POPUP") 
+      if (splitPort[0] === "POPUP") 
         chrome.runtime.sendMessage({ type: "STORE_INITIALIZED" });
-      else if (port.name === "SCRIPT")
-        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-          chrome.tabs.sendMessage(tabs[0].id,{ type: "STORE_INITIALIZED" })
+      else if (splitPort[0] === "SCRIPT")
+        chrome.tabs.query({url: splitPort[1], lastFocusedWindow: true}, tabs => {
+          console.log("tabs returned with query " + splitPort[1])
+          console.log(tabs)
+          tabs.map(tab => {
+            try {
+              chrome.tabs.sendMessage(tab.id,{ type: "STORE_INITIALIZED" }).catch(err => console.log("oppsie"))
+            } 
+            catch(ex) {
+              console.log("swollowing exception")
+            }  });
         })
     });
   }

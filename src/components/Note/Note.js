@@ -101,9 +101,7 @@ const mapDispatchToProps = (dispatch) => ({
       // call dispatch and handle promise once
       return dispatch(action)
       .catch(e => {
-        console.error("I REALLY DON'T EXPECT TO HIT THIS ANYMORE")
-        // catch all errors and hopefully handle with retry
-        // TODO: Create retry loop to only retry a few times and then error out
+      
         chrome.runtime.connect({ name: "SCRIPT" }); 
         
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

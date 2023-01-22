@@ -14,7 +14,9 @@ module.exports = {
     popup: "./src/apps/popup/index.js",
     background: "./src/apps/background/background.js",
     script: "./src/apps/script/script.js",
-    homepage: "./src/apps/homepage/index.js"
+    homepage: "./src/apps/homepage/index.js",
+    onboarding: "./src/apps/tabpage/onboarding.js",
+    webboard: "./src/apps/tabpage/webboard.js"
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
@@ -82,6 +84,18 @@ module.exports = {
       filename: "homepage.html",
       template: "./src/apps/homepage/homepage.html",
     }),
+    new HtmlWebpackPlugin({
+      chunks: ["onboarding"],
+      hash: true,
+      filename: "onboarding.html",
+      template: "./src/apps/tabpage/tabpage.html"
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["webboard"],
+      hash:true,
+      filename:"webboard.html",
+      template:"./src/apps/tabpage/tabpage.html"
+    }),
     // copy extension manifest and icons
     new CopyWebpackPlugin({
       patterns: [{ from: "./manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
@@ -92,10 +106,6 @@ module.exports = {
       onBeforeBuild: {
         scripts: ["echo onBeforeBuild",
           "./watch.sh"]
-      },
-      onBuildEnd: {
-        scripts: ["echo onBuildEnd",
-        "node refresh-paths.js"]
       },
       onDoneWatch: {
         scripts: [

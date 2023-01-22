@@ -15,7 +15,9 @@ Sentry.init({
   ignoreErrors: ["ResizeObserver loop limit exceeded"],
 });
 
-let port = chrome.runtime.connect({ name: "SCRIPT" });
+
+let port = chrome.runtime.connect({ name: "SCRIPT;;" + location.href});
+
 let disconnected = false;
 
 
@@ -43,6 +45,9 @@ const  reConnectMiddleware = store => next => action => {
   }
   
 }
+  
+
+
 
 // This is used to communicate with the chrome extension
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

@@ -7,7 +7,7 @@
     "default_popup": "index.html"
   },
   "permissions": [
-    "activeTab",
+    "tabs",
     "storage",
     "scripting"
   ],

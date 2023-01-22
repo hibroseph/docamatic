@@ -78,8 +78,8 @@ const Onboarding = connect(null,dispatch => {
         <Background>
             <Header>
                 <div>
-                    <img className="docamatic-image" src={docamaticLogo}></img>
-                    <img className="docamatic-image" src={docamaticTextLogo}></img>
+                    <img style={{width: "80px"}}className="docamatic-image" src={docamaticLogo}></img>
+                    <img style={{width: "400px"}} className="docamatic-image" src={docamaticTextLogo}></img>
                 </div>
                 <h1 className="title">Tutorial</h1>
             </Header>

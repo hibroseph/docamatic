@@ -83,7 +83,7 @@ const mapDispatchToProps = dispatch => ({
     }
 
     return dispatch(action)
-      .catch(e => {
+      /*.catch(e => {
         // catch all errors and hopefully handle with retry
         // TODO: Create retry loop to only retry a few times and then error out
         // TODO: Get types for chrome
@@ -96,7 +96,7 @@ const mapDispatchToProps = dispatch => ({
             mapDispatchToProps(dispatch).mutateNote(props);
           }
         });
-      })
+      })*/
 
     /*
       onSizeChange: (id, x, url) => dispatch(updateNoteSize(id, x, url)),

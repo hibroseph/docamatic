@@ -8,6 +8,7 @@ import { importNotes, nukeNotes } from "../../../redux/actions";
 import { saveAs } from "file-saver";
 import PopupWindow from "../PopupWindow";
 import { useState } from "react";
+import { CHROME_MESSAGES } from "../../../utils/constants";
 
 const SettingButton = styled.button`
   border: none;
@@ -95,11 +96,16 @@ const Settings = (props) => {
   return (
     <div>
       <PageTitle>Settings</PageTitle>
-      <MessageHeader bold>Export/Import</MessageHeader>
+      {/*<MessageHeader bold>Export/Import</MessageHeader>
       <HorizontalItems>
         <SettingButton onClick={() => SaveNotesToFile(props.notes)}>Export Notes</SettingButton>
         <SettingButton onClick={() => OpenNotesToFile()}>Import Notes</SettingButton>
         <input id="inputFile" hidden type="file" name="Import" onChange={(event) => OpenFile(event, props.importNotes)} />
+      </HorizontalItems>
+      */}
+      <HorizontalItems>
+        <SettingButton onClick={() => chrome.tabs.create({url : "/onboarding.html"}, () =>{ })}>Tutorial</SettingButton>
+        <SettingButton onClick={() => chrome.tabs.create({url : "https://hibroseph.github.io/docamatic/contactus.html"}, () => {})}>Contact Us</SettingButton>
       </HorizontalItems>
       <MessageHeader bold>Nuke</MessageHeader>
       <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>

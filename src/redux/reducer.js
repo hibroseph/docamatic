@@ -4,6 +4,7 @@ import { ADD_TAG, REMOVE_TAG, NUKE_NOTES, USER_ONBOARDED } from "./actions";
 //import * as Sentry from "@sentry/react";
 import { generateUUID } from "../utils/GenerateUUID";
 import { getRandomTagColor} from "../utils/RandomTagColor";
+import { GetInitialState } from "../utils/GetInitialState";
 /*
 import config from
 
@@ -163,7 +164,7 @@ const notesApp = (state = [], action) => {
       return newTagState;
 
     case NUKE_NOTES:
-      return {};
+      return GetInitialState();
 
     case "IMPORT_NOTES":
       // The following logic loops over the notes being imported and only adds ones that don't exist in the current state.

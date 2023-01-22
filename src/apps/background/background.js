@@ -3,6 +3,7 @@ import { wrapStore } from "webext-redux";
 import { createStore } from "redux";
 import * as Sentry from "@sentry/browser";
 import config from "../../../config.json";
+import { GetInitialState } from "../../utils/GetInitialState";
 
 let isInitialized = false;
 
@@ -10,13 +11,6 @@ console.debug(`Starting up Docamatic Background ${config.environment}:${config.r
 let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 
 chrome.runtime.setUninstallURL(feedbackUrl);
-let initialState = {
-  pages: {},
-  tags: [],
-  metadata: {
-    onboarded: false
-  }
-};
 
 const getStateFromStorage = () => {
   return new Promise((resolve, reject) => {
@@ -24,7 +18,7 @@ const getStateFromStorage = () => {
       chrome.storage.local.get(null, (storage) => {
         if (Object.keys(storage).length == 0) {
           console.log("storage was empty, returning initial state")
-          resolve(initialState);
+          resolve(GetInitialState());
         } else {
           console.log("there was something stored in storage.local, returning that")
           resolve(storage);

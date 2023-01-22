@@ -100,7 +100,7 @@ const mapDispatchToProps = (dispatch) => ({
       }
       // call dispatch and handle promise once
       return dispatch(action)
-      .catch(e => {
+      /*.catch(e => {
       
         chrome.runtime.connect({ name: "SCRIPT" }); 
         
@@ -110,7 +110,7 @@ const mapDispatchToProps = (dispatch) => ({
             mapDispatchToProps(dispatch).mutateNote(props);
           } 
         });
-      })
+      })*/
       }
   /*
   onHeartify: (id, url) => ,

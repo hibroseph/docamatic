@@ -32,6 +32,7 @@ rm tmp_config.json
 #start production build
 rm -rf app.zip
 rm -rf dist/
+rm -rf app/
 npx webpack --mode=production
 
 cd dist
@@ -39,6 +40,7 @@ cd dist
 mkdir app
 cp *.js app
 cp index.html app
+cp onboarding.html app
 cp -r assets app
 cp manifest.json app
 cp -r icons app

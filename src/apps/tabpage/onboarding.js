@@ -87,7 +87,7 @@ const Onboarding = connect(null,dispatch => {
             <Step>
                 <h1 className="step-number">1.</h1>
                 <StepDescription>
-                    <p className="step-text">Go to a website you’d like to add a note to (for example wikipedia.com)</p>
+                    <p className="step-text">Go to a website you'd like to add a note to (for example wikipedia.com)</p>
                     <img src={step1Gif}></img>
                 </StepDescription>
             </Step>
@@ -101,7 +101,7 @@ const Onboarding = connect(null,dispatch => {
             <Step>
                 <h1 className="step-number">3.</h1>
                 <StepDescription>
-                    <p className="step-text">Click the “Add Note button” at the top of the popup</p>
+                    <p className="step-text">Click the "Add Note button" at the top of the popup</p>
                     <img src={step3Gif}></img>
                 </StepDescription>
             </Step>

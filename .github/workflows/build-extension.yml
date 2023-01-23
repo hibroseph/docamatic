@@ -41,3 +41,10 @@ jobs:
         name: homepage
         path: ./dist/homepage
         if-no-files-found: error
+        
+    - name: Upload sentry artifact
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: sentry
+        path: ./dist/sentry
+        if-no-files-found: error

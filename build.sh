@@ -46,9 +46,10 @@ cp manifest.json app
 cp -r icons app
 
 mkdir sentry
-cp *.js sentry
-cp *.map sentry
-cp manifest sentry
+mkdir sentry/sentry
+cp *.js sentry/sentry
+cp *.map sentry/sentry
+cp manifest sentry/sentry
 
 mkdir homepage
 cp -r site/* homepage/

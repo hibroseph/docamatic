@@ -66,6 +66,7 @@ jobs:
         version_prefix: "docamatic@"
         # Space-separated list of projects. Defaults to the env variable "SENTRY_PROJECT" if not provided.
         projects: "docamatic"
+        url-prefix: "~/${{github.event.inputs.chrome_extension_id}}"
 
     - name: Chrome Webstore Access Token
       run: |

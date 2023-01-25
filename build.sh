@@ -26,7 +26,7 @@ jq '.name="Docamatic - Add Sticky Notes to the Web"' tmp_manifest.json > manifes
 rm tmp_manifest.json
 
 jq '.version=$number' --arg number $1 config.json > tmp_config.json
-jq '.environment="$2"' tmp_config.json > config.json
+jq '.environment=$env' --arg env $2 tmp_config.json > config.json
 rm tmp_config.json
 
 #start production build

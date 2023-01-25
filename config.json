@@ -1,5 +1,5 @@
 {
-  "environment": "$2",
+  "environment": "local",
   "version": "5.0.0",
   "release_prefix": "docamatic@"
 }

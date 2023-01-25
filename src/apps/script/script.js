@@ -31,6 +31,7 @@ const  reConnectMiddleware = store => next => action => {
   if (disconnected) {
     console.log("we need to reconnect")
     
+    thisis.abug()
     try {
       port = chrome.runtime.connect({name: "SCRIPT"});
       disconnected = false;

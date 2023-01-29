@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Docamatic.Data;
+using Docamatic.Data.Models;
+using Docamatic.Data.Repositories;
 
-namespace Docamatic.Services
+namespace Docamatic.Services.Services
 {
     public interface IMetricsService
     {
-        Task AddMetricsAsync();
+        Task AddMetricsAsync(List<BasicMetric> metrics);
     }
 
     public class MetricsService : IMetricsService
@@ -20,9 +21,9 @@ namespace Docamatic.Services
         {
             _metricsRepository = metricsRepository;
         }
-        public Task AddMetricsAsync()
+        public Task AddMetricsAsync(List<BasicMetric> metrics)
         {
-            return _metricsRepository.AddMetricsAsync();
+            return _metricsRepository.AddMetricsAsync(metrics);
         }
     }
 }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Docamatic.Services;
-using Docamatic.Data;
+using Docamatic.Services.Services;
+using Docamatic.Data.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +21,10 @@ builder.Services.AddApiVersioning(opt =>
                                                                                         new HeaderApiVersionReader("x-api-version"),
                                                                                         new MediaTypeApiVersionReader("x-api-version"));
                                     });
+
 builder.Services.AddSingleton<IMetricsRepository, MetricsRepository>();
 builder.Services.AddSingleton<IMetricsService, MetricsService>();
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 var app = builder.Build();
 app.Use(async (context, next) =>
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Api.Models
 {
-    public class BasicMetricModel
+    public class BasicMetric
     {
         public Guid User { get; set; }
         public string Event { get; set; }

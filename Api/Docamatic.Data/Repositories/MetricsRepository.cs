@@ -12,11 +12,23 @@ namespace Docamatic.Data.Repositories
     }
     public class MetricsRepository : IMetricsRepository
     {
-        public Task AddMetricsAsync(List<BasicMetric> metrics)
-        {
-            System.Console.WriteLine($"Adding {metrics.Count} metrics to db");
+        private IDatabaseContext _dbContext;
 
-            return Task.CompletedTask;
+        private string _insertMetricsSql = @$"INSERT INTO metrics.basic_metrics (date_added, date_occurred, event, data, ""user"") VALUES ('{DateTime.UtcNow}', 
+                                                @{nameof(BasicMetric.Date)}, 
+                                                @{nameof(BasicMetric.Event)},
+                                                @{nameof(BasicMetric.Data)},
+                                                @{nameof(BasicMetric.User)})";
+        public MetricsRepository(IDatabaseContext databaseContext)
+        {
+            _dbContext = databaseContext;
+        }
+
+        public async Task AddMetricsAsync(List<BasicMetric> metrics)
+        {
+            System.Console.WriteLine($"Adding {metrics.Count} metrics to db: new");
+
+            await _dbContext.ExecuteCommandAsync(_insertMetricsSql, metrics);
         }
     }
 }

@@ -14,11 +14,11 @@ namespace Docamatic.Data.Repositories
     {
         private IDatabaseContext _dbContext;
 
-        private string _insertMetricsSql = @$"INSERT INTO metrics.basic_metrics (date_added, date_occurred, event, data, ""user"") VALUES ('{DateTime.UtcNow}', 
+        private string _insertMetricsSql = @$"INSERT INTO basic_metrics (date_added, date_occurred, event, data, person) VALUES ('{DateTime.UtcNow}', 
                                                 @{nameof(BasicMetric.Date)}, 
                                                 @{nameof(BasicMetric.Event)},
                                                 @{nameof(BasicMetric.Data)},
-                                                @{nameof(BasicMetric.User)})";
+                                                @{nameof(BasicMetric.Person)})";
         public MetricsRepository(IDatabaseContext databaseContext)
         {
             _dbContext = databaseContext;

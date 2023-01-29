@@ -6,6 +6,7 @@ using Docamatic.Data.Configuration;
 using System.Data;
 using Npgsql;
 using Dapper;
+using Docamatic.Data;
 
 namespace Docamatic.Data
 {
@@ -19,7 +20,7 @@ namespace Docamatic.Data
         private readonly string _connectionString;
         public PostgresDatabaseContext(DatabaseConfiguration config)
         {
-            _connectionString = $"Host={config.Host};Username={config.Username};Password={config.Password};Database={config.Database};";
+            _connectionString = Utilities.CreatePostgresConnectionString(config);
         }
 
         public async Task<int> ExecuteCommandAsync(string sql, object? parms)

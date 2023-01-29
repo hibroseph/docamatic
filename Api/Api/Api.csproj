@@ -9,5 +9,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Docamatic.Services\Docamatic.Services.csproj" />
+    <ProjectReference Include="..\Docamatic.Data\Docamatic.Data.csproj" />
+  </ItemGroup>
 
 </Project>

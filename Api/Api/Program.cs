@@ -31,6 +31,12 @@ app.Use(async (context, next) =>
     await next.Invoke();
 });
 
+app.UseCors(builder => builder
+ .AllowAnyOrigin()
+ .AllowAnyMethod()
+ .AllowAnyHeader()
+);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -41,8 +47,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

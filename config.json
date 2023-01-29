@@ -1,5 +1,6 @@
 {
   "environment": "local",
   "version": "5.0.0",
-  "release_prefix": "docamatic@"
+  "release_prefix": "docamatic@",
+  "docamatic_api_url": "http://localhost:5275/api/v1"
 }

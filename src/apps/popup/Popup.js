@@ -3,7 +3,7 @@ import { PopupStyle as Container } from "../../components/Popup/style";
 import { PopupContent } from "../../components/Popup/PopupContent";
 import { IconList } from "../../components/Popup/PopupNavigation/IconList";
 import { generateUUID } from "../../utils/GenerateUUID";
-import { addNote } from "../../redux/actions";
+import { addNote, addTrackingEvent } from "../../redux/actions";
 import { faStickyNote, faSearch, faHeart, faCog, faBell, faCompass, faSortAmountDown } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
@@ -62,7 +62,11 @@ export const Popup = (props) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs
         .sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION })
-        .then((response) => props.addNoteClick(response))
+        .then((response) => {
+          props.addNoteClick(response);
+          console.debug("adding metric");
+          props.addMetric("create-note", "created from popup");
+        })
         .catch((e) => {
           chrome.scripting
             .executeScript({
@@ -70,7 +74,11 @@ export const Popup = (props) => {
               files: ["[[script.js]]"],
             })
             .then(() => {
-              chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }).then((response) => props.addNoteClick(response));
+              chrome.tabs.sendMessage(tabs[0].id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION }).then((response) => {
+                props.addNoteClick(response);
+                console.debug("adding metric");
+                props.addMetric("create-note", "created from popup");
+              });
             })
             .catch((error) => {
               setTimeout(() => {
@@ -106,6 +114,10 @@ const mapDispatchToProps = (dispatch) => {
   return {
     addNoteClick: (response) => {
       dispatch(addNote(generateUUID(), response.scrollPosition, GetSafeNoteUrl(response.page)));
+    },
+    addMetric: (event, data) => {
+      console.debug("map dispatch to props, adding tracking event");
+      dispatch(addTrackingEvent(event, data));
     },
   };
 };

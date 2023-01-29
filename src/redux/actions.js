@@ -18,13 +18,26 @@ export const USER_ONBOARDED = "USER_ONBOARDED";
 export const SAVE_ERROR = "SAVE_ERROR";
 export const ADD_TRACKING_EVENT = "ADD_TRACKING_EVENT";
 export const CAN_TRACK = "CAN_TRACK";
+export const CLEAR_TRACKING_EVENTS = "CLEAR_TRACKING_EVENTS";
+export const RESET_TRACKING_TIMER = "RESET_TRACkING_TIMER";
+export const clearTrackingEvents = () => {
+  return {
+    type: CLEAR_TRACKING_EVENTS,
+  };
+};
 
+export const resetTrackingTimer = (time) => {
+  return {
+    type: RESET_TRACKING_TIMER,
+    time,
+  };
+};
 export const saveError = (message, stackTrace) => {
   return {
     type: SAVE_ERROR,
     message,
     stacktrace,
-    date: Date.now(),
+    date: new Date().toISOString(),
   };
 };
 
@@ -38,11 +51,12 @@ export const setCanTrack = (canTrack) => {
 export const clearErrors = () => {};
 
 export const addTrackingEvent = (event, data) => {
+  console.debug("in actions.js adding tracking event");
   return {
     type: ADD_TRACKING_EVENT,
     event,
     data,
-    date: Date.now(),
+    date: new Date().toISOString(),
   };
 };
 /*

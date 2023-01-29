@@ -7,7 +7,7 @@ namespace Api.Models
 {
     public class BasicMetric
     {
-        public Guid User { get; set; }
+        public Guid Person { get; set; }
         public string Event { get; set; }
         public string? Data { get; set; }
         public DateTimeOffset Date { get; set; }

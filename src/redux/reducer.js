@@ -525,7 +525,7 @@ const notesApp = (state = [], action) => {
           tracking: [
             ...state.metadata.tracking,
             {
-              user: state.metadata.user,
+              person: state.metadata.user,
               event: action.event,
               date: action.date,
               data: action.data,

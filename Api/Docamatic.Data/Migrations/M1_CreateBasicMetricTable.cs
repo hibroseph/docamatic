@@ -8,16 +8,16 @@ using FluentMigrator.Postgres;
 namespace Docamatic.Data.Migrations
 {
     [Migration(1)]
-    public class CreateBasicMetricTable : Migration
+    public class M1_CreateBasicMetricTable : Migration
     {
         public override void Up()
         {
             Create.Table("basic_metrics")
             .WithColumn("id").AsInt32().NotNullable().PrimaryKey().Identity()
-            .WithColumn("date_added").AsDateTimeOffset().NotNullable()
-            .WithColumn("date").AsDateTimeOffset().NotNullable().Indexed()
+            .WithColumn("date_occurred").AsDateTimeOffset().NotNullable().Indexed()
+            .WithColumn("date_created").AsDateTimeOffset().NotNullable().WithDefault(SystemMethods.CurrentUTCDateTime)
             .WithColumn("event").AsString().NotNullable().Indexed()
-            .WithColumn("data").AsString()
+            .WithColumn("data").AsString().Nullable()
             .WithColumn("person").AsGuid().Indexed().NotNullable();
         }
 

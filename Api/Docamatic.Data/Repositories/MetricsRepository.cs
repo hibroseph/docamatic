@@ -14,7 +14,7 @@ namespace Docamatic.Data.Repositories
     {
         private IDatabaseContext _dbContext;
 
-        private string _insertMetricsSql = @$"INSERT INTO basic_metrics (date_added, date_occurred, event, data, person) VALUES ('{DateTime.UtcNow}', 
+        private string _insertMetricsSql = @$"INSERT INTO basic_metrics (date_occurred, event, data, person) VALUES ( 
                                                 @{nameof(BasicMetric.Date)}, 
                                                 @{nameof(BasicMetric.Event)},
                                                 @{nameof(BasicMetric.Data)},

@@ -1,8 +1,13 @@
-export const GetInitialState = () => { return {
+import { generateUUID } from "./GenerateUUID";
+
+export const GetInitialState = () => {
+  return {
     pages: {},
     tags: [],
     metadata: {
-      onboarded: false
-    }
-  }
-}
+      onboarded: false,
+      user: generateUUID(),
+      errors: [],
+    },
+  };
+};

@@ -13,9 +13,38 @@ export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY";
 export const IMPORT_NOTES = "IMPORT_NOTES";
 export const NUKE_NOTES = "NUKE_NOTES";
 export const ADD_TAG = "ADD_TAG";
-export const REMOVE_TAG = "REMOVE_TAG"
-export const USER_ONBOARDED = "USER_ONBOARDED"
+export const REMOVE_TAG = "REMOVE_TAG";
+export const USER_ONBOARDED = "USER_ONBOARDED";
+export const SAVE_ERROR = "SAVE_ERROR";
+export const ADD_TRACKING_EVENT = "ADD_TRACKING_EVENT";
+export const CAN_TRACK = "CAN_TRACK";
 
+export const saveError = (message, stackTrace) => {
+  return {
+    type: SAVE_ERROR,
+    message,
+    stacktrace,
+    date: Date.now(),
+  };
+};
+
+export const setCanTrack = (canTrack) => {
+  return {
+    type: CAN_TRACK,
+    canTrack,
+  };
+};
+
+export const clearErrors = () => {};
+
+export const addTrackingEvent = (event, data) => {
+  return {
+    type: ADD_TRACKING_EVENT,
+    event,
+    data,
+    date: Date.now(),
+  };
+};
 /*
  * action creators
  */
@@ -24,19 +53,18 @@ export const addTag = (noteId, url, text) => {
     type: ADD_TAG,
     noteId,
     text,
-    url
-  }
-}
-
+    url,
+  };
+};
 
 export const removeTag = (noteId, url, tagId) => {
   return {
     type: REMOVE_TAG,
     noteId,
     url,
-    tagId
-  }
-}
+    tagId,
+  };
+};
 
 export function nukeNotes() {
   return {
@@ -146,11 +174,11 @@ export function removeNote(id, url) {
     type: REMOVE_NOTE,
     id,
     url,
-  }; 
+  };
 }
 
 export function userOnboarded() {
   return {
-    type: USER_ONBOARDED
-  }
+    type: USER_ONBOARDED,
+  };
 }

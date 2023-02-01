@@ -15,7 +15,7 @@ namespace Docamatic.Data.Configuration
 {
     public static class ServiceRegistration
     {
-        public static void AddDataServiceRegistration(this IServiceCollection collection, DatabaseConfiguration dbConfig)
+        public static async Task AddDataServiceRegistration(this IServiceCollection collection, DatabaseConfiguration dbConfig)
         {
             System.Console.WriteLine("Configuring database configuration");
             collection.AddSingleton<DatabaseConfiguration>(dbConfig);
@@ -23,16 +23,34 @@ namespace Docamatic.Data.Configuration
             collection.AddSingleton<IMetricsRepository, MetricsRepository>();
 
             AddMigrationService(collection, dbConfig);
-            MigrateDatabase(collection);
+            await MigrateDatabaseAsync(collection);
         }
 
-        private static void MigrateDatabase(IServiceCollection collection)
+        private static async Task VerifyDatabaseExistsAsync(IServiceProvider provider)
+        {
+            var dbContext = provider.GetRequiredService<IDatabaseContext>();
+
+            var dbs = await dbContext.ExecuteDefaultQuery<string>("SELECT datname FROM pg_catalog.pg_database WHERE lower(datname) = lower('docamatic');");
+
+            if (dbs.Count() == 0)
+            {
+                System.Console.WriteLine("docamatic database does not exists. Creating");
+                await dbContext.ExecuteDefaultCommandAsync("CREATE DATABASE docamatic");
+                System.Console.WriteLine("docamatic database created. Continuing with starting the app");
+            }
+        }
+
+        private static async Task MigrateDatabaseAsync(IServiceCollection collection)
         {
             System.Console.WriteLine("Migrating database");
 
             using (var serviceProvider = collection.BuildServiceProvider())
             {
+
+                await VerifyDatabaseExistsAsync(serviceProvider);
                 var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+                System.Console.WriteLine("Migrating up");
+                // Make sure database is created
 
                 runner.MigrateUp();
             }

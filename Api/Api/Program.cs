@@ -23,7 +23,8 @@ builder.Services.AddApiVersioning(opt =>
                                                                                         new MediaTypeApiVersionReader("x-api-version"));
                                     });
 var dbConfig = builder.Configuration.GetSection("Database").Get<DatabaseConfiguration>();
-builder.Services.AddDataServiceRegistration(dbConfig);
+System.Console.WriteLine($"Value of db config: {dbConfig}");
+await builder.Services.AddDataServiceRegistration(dbConfig);
 builder.Services.AddServicesServiceRegistration();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 var app = builder.Build();

@@ -1,0 +1,21 @@
+version: "3"
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8000:80"
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:15.1-bullseye
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=local
+    healthcheck:
+      test: pg_isready -U postgres
+    volumes:
+    - ./database:/var/lib/postgresql/data

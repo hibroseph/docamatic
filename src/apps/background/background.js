@@ -4,71 +4,18 @@ import { createStore } from "redux";
 import * as Sentry from "@sentry/browser";
 import config from "../../../config.json";
 import { GetInitialState } from "../../utils/GetInitialState";
-import { generateUUID } from "../../utils/GenerateUUID";
-import { clearTrackingEvents, CLEAR_TRACKING_EVENTS, resetTrackingTimer } from "../../redux/actions";
+import { migrate } from "./migrations";
+import { handleMetrics } from "./metrics";
 
 let isInitialized = false;
-const SEND_METRICS_EVERY_SECONDS = 60;
 
 console.debug(`Starting up Docamatic Background ${config.environment}:${config.release_prefix}:${config.version}`);
-let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 
-chrome.runtime.setUninstallURL(feedbackUrl);
+if (config.environment == "uat" || config.environment == "production") {
+  chrome.runtime.setUninstallURL(config.feedbackUrl);
+}
 
-const migrate = (storage) => {
-  console.debug("migrating");
-
-  var migrationsApplied = 0;
-
-  if (!storage.metadata) {
-    console.debug("Adding metadata node");
-    storage.metadata = {
-      onboarded: false,
-      user: generateUUID(),
-    };
-
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.onboarded) {
-    console.debug("User has not onboarded and has no onboarded indicator");
-    storage.metadata.onboarded = false;
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.user) {
-    console.debug("Giving user a uuid");
-    storage.metadata.user = generateUUID();
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.errors) {
-    console.debug("User does not have errors node");
-    storage.metadata.errors = [];
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.tracking) {
-    console.debug("User does not have tracking data");
-    storage.metadata.tracking = [];
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.canTrack) {
-    console.debug("User does not have tracking indicator");
-    storage.metadata.canTrack = true;
-    migrationsApplied++;
-  }
-
-  if (!storage.metadata.trackingTime) {
-    console.debug("User does not have last tracking data sent");
-    storage.metadata.trackingTime = Date.now();
-    migrationsApplied++;
-  }
-
-  console.debug("Successfully migrated " + (migrationsApplied > 0 ? " with " + migrationsApplied + " migrations applied" : ""));
-  return storage;
-};
+let store;
 
 const getStateFromStorage = () => {
   return new Promise((resolve, reject) => {
@@ -95,64 +42,12 @@ const getStateFromStorage = () => {
   });
 };
 
-const shouldSendMetrics = (state) =>
-  state.metadata.trackingTime && (Date.now() - state.metadata.trackingTime) / 1000 > SEND_METRICS_EVERY_SECONDS && state.metadata.tracking.length > 0;
-
-const sendMetrics = (store) => {
-  console.log("sending metrics");
-  let state = store.getState();
-  console.log("sending metrics to url: " + `${config.docamatic_api_url}/metrics`);
-  console.log("with body");
-  console.log(state.metadata.tracking);
-  console.log("string ified");
-  console.log(JSON.stringify(state.metadata.tracking));
-  fetch(`${config.docamatic_api_url}/metrics`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    mode: "cors",
-    body: JSON.stringify(state.metadata.tracking),
-  })
-    .then((p) => {
-      console.debug("successfully sent metrics");
-      // clear out tracking items
-      // reset timer
-      store.dispatch(clearTrackingEvents());
-      store.dispatch(resetTrackingTimer(Date.now()));
-    })
-    .catch((p) => {
-      console.error("failed to send metrics");
-      console.error(p);
-    });
-};
-
-const handleMetrics = (store) => {
-  console.log("seeing if I should send metrics");
-  if (shouldSendMetrics(store.getState())) {
-    console.log("sending metrics because " + SEND_METRICS_EVERY_SECONDS + " has elapsed");
-    sendMetrics(store);
-  } else {
-    console.log("not sending metrics");
-  }
-};
-const init = (preloadedState) => {
-  const store = createStore(notesApp, preloadedState);
-
-  handleMetrics(store);
-
-  if (!preloadedState?.metadata?.onboarded) {
-    console.log("you are not onboarded");
-    chrome.runtime.onInstalled.addListener(() => {
-      chrome.tabs.create({ url: "/onboarding.html" }, () => {});
-    });
-  } else {
-    console.log("you are already onboardded");
-  }
+const CreateAndWrapStore = (storage) => {
+  console.debug("Creating and wrapping store");
+  store = createStore(notesApp, storage);
   store.subscribe(() => {
     Sentry.wrap(() => {
-      console.debug("saving store");
+      console.debug("New state happened, let's get it and save it to local storage");
       let currentState = store.getState();
       console.log("Current State After Saving");
       console.debug(currentState);
@@ -160,7 +55,20 @@ const init = (preloadedState) => {
     });
   });
 
+  console.debug("Wrapping store");
   wrapStore(store, { portName: "NOTES_STORE" });
+};
+
+const init = (preloadedState) => {
+  if (!store) {
+    CreateAndWrapStore(storage);
+  }
+
+  if (!preloadedState?.metadata?.onboarded) {
+    chrome.runtime.onInstalled.addListener(() => {
+      chrome.tabs.create({ url: "/onboarding.html" }, () => {});
+    });
+  }
 };
 
 // Listens for incomming connections from content
@@ -213,6 +121,27 @@ getStateFromStorage().then((storage) => {
   } else {
     console.log("you are already onboarded");
   }
+
+  if (!store) {
+    CreateAndWrapStore(storage);
+    store = createStore(notesApp, storage);
+    store.subscribe(() => {
+      Sentry.wrap(() => {
+        console.debug("saving store");
+        let currentState = store.getState();
+        console.log("Current State After Saving");
+        console.debug(currentState);
+        chrome.storage.local.set(currentState);
+      });
+    });
+
+    wrapStore(store, { portName: "NOTES_STORE" });
+  }
+
+  setTimeout(() => {
+    console.debug("Checking to see if we should send metrics in timeout");
+    handleMetrics(store);
+  }, config.send_metrics_every_x_seconds * 1000);
 });
 
 console.log("after getStateFromStorage");

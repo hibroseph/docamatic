@@ -2,5 +2,7 @@
   "environment": "local",
   "version": "5.0.0",
   "release_prefix": "docamatic@",
-  "docamatic_api_url": "http://localhost:5275/api/v1"
+  "docamatic_api_url": "http://localhost:5275/api/v1",
+  "feedback_url":"https://forms.gle/Wn3GFbDQwq4YqzFs9",
+  "send_metrics_every_x_seconds": 60
 }

@@ -1,14 +1,5 @@
 version: "3"
 services:
-  api:
-    build:
-      dockerfile: Dockerfile
-      context: .
-    ports:
-      - "8000:80"
-    depends_on:
-      database:
-        condition: service_healthy
   database:
     image: postgres:15.1-bullseye
     ports:
@@ -18,4 +9,13 @@ services:
     healthcheck:
       test: pg_isready -U postgres
     volumes:
-    - ./database:/var/lib/postgresql/data
+      - ./database:/var/lib/postgresql/data
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8000:80"
+    depends_on:
+      database:
+        condition: service_healthy

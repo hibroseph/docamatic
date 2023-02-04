@@ -26,6 +26,7 @@ namespace Docamatic.Data
         {
             _connectionString = Utilities.CreatePostgresConnectionString(config);
             _defaultDatabaseConnectionString = _connectionString.Replace("docamatic", "postgres");
+            System.Console.WriteLine($"The connection string we will be using in the API is {_connectionString} and default connection string is {_defaultDatabaseConnectionString}");
         }
 
         public async Task<int> ExecuteCommandAsync(string sql, object? parms = null)

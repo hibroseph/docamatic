@@ -15,4 +15,5 @@ FROM base AS final
 WORKDIR /app
 COPY  --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Api.dll"]
+ENV ASPNETCORE_URLS=HTTP://+:7156
 EXPOSE 7156

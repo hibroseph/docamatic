@@ -29,44 +29,38 @@ jobs:
     
     - name: Download Extension Artifact
       id: download-artifact
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v12
       with:
         workflow: build-extension.yml
         workflow_conclusion: success
-        event: push
         run_id: ${{ github.event.inputs.run_id }}
         name: extension
         if_no_artifact_found: fail
     
     - name: Download Sentry Artifact
       id: download-sentry-artifact
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v12
       with:
         workflow: build-extension.yml
         workflow_conclusion: success
-        event: push
         run_id: ${{ github.event.inputs.run_id }}
         name: sentry
+        path: ./sentry
         if_no_artifact_found: fail
-    
-    - name: Sentry Release
-      # You may pin to the exact commit or the version.
-      # uses: getsentry/action-release@426b54786363ee2ecb27129f04b99cf714a36d3
-      uses: getsentry/action-release@v1.2.0
-      env: 
-        SENTRY_ORG: "joe-patrol"      
+
+    # The bundles were given debug ids at build time (see build.sh), which is
+    # how Sentry matches a stack trace to its source map. No url prefix is
+    # needed, so this works for every extension id/environment.
+    - name: Upload source maps to Sentry
+      env:
+        SENTRY_ORG: "joe-patrol"
+        SENTRY_PROJECT: "docamatic"
         SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      with:
-        environment: "uat"
-        sourcemaps: ./sentry
-        finalize: false #false because build needs to go through google review process and wont be published for a few days
-        # Identifier that uniquely identifies the releases. Omit to auto-generate one.
-        version: ${{ github.event.inputs.build_version }}
-        # Value prepended to auto-generated version.
-        version_prefix: "docamatic@"
-        # Space-separated list of projects. Defaults to the env variable "SENTRY_PROJECT" if not provided.
-        projects: "docamatic"
-        url_prefix: "chrome-extension://${{github.event.inputs.chrome_extension_id}}"
+        SENTRY_RELEASE: "docamatic@${{ github.event.inputs.build_version }}"
+      run: |
+        npx --yes @sentry/cli@2 releases new "$SENTRY_RELEASE"
+        npx --yes @sentry/cli@2 sourcemaps upload --release "$SENTRY_RELEASE" ./sentry
+        # Not finalized: the build still has to go through Chrome Web Store review
 
     - name: Chrome Webstore Access Token
       run: |

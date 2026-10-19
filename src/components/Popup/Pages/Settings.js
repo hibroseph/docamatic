@@ -4,7 +4,7 @@ import { PageTitle } from "../style";
 import config from "../../../../config.json";
 import { MessageHeader, SubMessage } from "../Pages/CurrentPageNotes/style";
 import { connect } from "react-redux";
-import { importNotes, nukeNotes } from "../../../redux/actions";
+import { importNotes, nukeNotes, setAnalyticsEnabled } from "../../../redux/actions";
 import { saveAs } from "file-saver";
 import PopupWindow from "../PopupWindow";
 import { useState } from "react";
@@ -107,6 +107,17 @@ const Settings = (props) => {
         <SettingButton onClick={() => chrome.tabs.create({url : "/onboarding.html"}, () =>{ })}>Tutorial</SettingButton>
         <SettingButton onClick={() => chrome.tabs.create({url : "https://hibroseph.github.io/docamatic/contactus.html"}, () => {})}>Contact Us</SettingButton>
       </HorizontalItems>
+      <MessageHeader bold>Privacy</MessageHeader>
+      <SubMessage>
+        <label>
+          <input
+            type="checkbox"
+            checked={props.analyticsEnabled}
+            onChange={(event) => props.setAnalyticsEnabled(event.target.checked)}
+          />{" "}
+          Share anonymous usage statistics (like how many notes are created). Never your notes or the sites you visit.
+        </label>
+      </SubMessage>
       <MessageHeader bold>Nuke</MessageHeader>
       <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>
       <HorizontalItems>
@@ -125,7 +136,10 @@ const Settings = (props) => {
 };
 
 const mapStateToProps = (state) => {
-  return { notes: state.pages };
+  return {
+    notes: state.pages,
+    analyticsEnabled: state.metadata?.analytics_enabled !== false,
+  };
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -135,6 +149,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     nukeNotes: () => {
       dispatch(nukeNotes());
+    },
+    setAnalyticsEnabled: (enabled) => {
+      dispatch(setAnalyticsEnabled(enabled));
     },
   };
 };

@@ -1,5 +1,8 @@
 import * as React from "react";
+import { captureException } from "../utils/sentry";
 
+// Hides a component that failed to render rather than breaking the whole
+// page/popup, and reports the error so it isn't silently lost.
 class NoRenderErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -11,7 +14,7 @@ class NoRenderErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    this.setState({hasError: true})
+    captureException(error, { componentStack: errorInfo?.componentStack });
   }
 
   render() {

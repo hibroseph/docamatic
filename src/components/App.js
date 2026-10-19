@@ -1,6 +1,5 @@
 // This is the App that will be running in the chrome webpage. This handles displaying the notes that exist on the page
 import React, { Component } from "react";
-// import styled from "styled-components";
 import NoteList from "./NoteList.js";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 
@@ -9,101 +8,69 @@ class App extends Component {
     super(props);
 
     this.state = {
-      scrollYOffset: window.pageYOffset,
       current_url: GetSafeNoteUrl(location.href),
-      timer: null,
       disconnected: false,
       windowWidth: window.innerWidth
     };
 
-    this.listenToScroll = this.listenToScroll.bind(this);
-    this.listenForUrlChange = this.listenForUrlChange.bind(this);
-    this.listenForHistoryChanges = this.listenForHistoryChanges.bind(this);
-    this.listenForDisconnect = this.listenForDisconnect.bind(this);
-    this.listenForWindowResize = this.listenForWindowResize.bind(this);
-    //chrome.runtime.sendMessage({ action: CHROME_MESSAGES.ERROR_OCCURRED }, () => {});
+    this.resizeFrame = null;
+    this.updateUrl = this.updateUrl.bind(this);
+    this.onResize = this.onResize.bind(this);
+    this.onDisconnect = this.onDisconnect.bind(this);
   }
 
-  listenForDisconnect() {
-    console.log("adding global listener for disconnect")
-
-    // This gets called when the service worker goes inactive AND on app restart
-    document.addEventListener('docamatic-disconnect', () => {
-      console.log("docamatic-disconnect event occurred")
-      this.setState({disconnected: true});
-    })
+  // Single page apps (x.com, YouTube, ...) change the url without reloading
+  // the page, so the content script has to notice and show that page's notes.
+  updateUrl() {
+    const url = GetSafeNoteUrl(location.href);
+    if (url !== this.state.current_url) {
+      this.setState({ current_url: url });
+    }
   }
 
-  listenForWindowResize() {
-    console.log("adding window event listener")
-
-    window.addEventListener('resize', (event) => {
-      console.log("resizing")
-      this.setState({ windowWidth: window.innerWidth })
-    })
-  }
-
-  /*
-  This listener is used to update the notes when the page doesn't do a full refresh
-  */
-  listenForUrlChange() {
-    let url = GetSafeNoteUrl(location.href);
-
-    document.body.addEventListener(
-      "click",
-      () => {
-        requestAnimationFrame(() => {
-          if (url !== GetSafeNoteUrl(location.href)) {
-            url = GetSafeNoteUrl(location.href);
-            this.setState({
-              current_url: url,
-            });
-          }
-        });
-      },
-      true
-    );
-  }
-
-  /*
-  This listener is used to update the url when a user uses the back and forwards buttons on history
-   */
-  listenForHistoryChanges() {
-    window.addEventListener("popstate", (event) => {
-      this.setState({
-        current_url: event.currentTarget.location.href,
-      });
+  onResize() {
+    // Resize fires many times per second while dragging the window edge;
+    // re-render at most once per frame
+    if (this.resizeFrame) return;
+    this.resizeFrame = requestAnimationFrame(() => {
+      this.resizeFrame = null;
+      this.setState({ windowWidth: window.innerWidth });
     });
   }
 
+  // Fired by the store middleware when the extension was reloaded/updated and
+  // this page's content script can no longer reach it
+  onDisconnect() {
+    this.setState({ disconnected: true });
+  }
+
   componentDidMount() {
-    window.addEventListener("scroll", this.listenToScroll);
-    this.listenForUrlChange();
-    this.listenForHistoryChanges();
-    this.listenForDisconnect();
-    this.listenForWindowResize();
+    // The Navigation API reports every same-document navigation, including
+    // history.pushState from the page's own scripts (Chrome 102+)
+    window.navigation?.addEventListener("navigatesuccess", this.updateUrl);
+    // Fallback for anything the above misses: most SPA navigations start with
+    // a click. updateUrl is a no-op when the url hasn't changed.
+    this.onClick = () => requestAnimationFrame(this.updateUrl);
+    document.body.addEventListener("click", this.onClick, true);
+    // Back/forward buttons
+    window.addEventListener("popstate", this.updateUrl);
+    window.addEventListener("resize", this.onResize);
+    document.addEventListener("docamatic-disconnect", this.onDisconnect);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.listenToScroll);
-  }
-
-  listenToScroll() {
-    if (this.state.timer !== null) {
-      clearTimeout(this.state.timer);
-    }
-
-    let timer = setTimeout(() => {
-      // update the position of the note we are currently on
-    }, 500);
-
-    this.setState({ scrollYOffset: window.pageYOffset, timer: timer });
+    window.navigation?.removeEventListener("navigatesuccess", this.updateUrl);
+    document.body.removeEventListener("click", this.onClick, true);
+    window.removeEventListener("popstate", this.updateUrl);
+    window.removeEventListener("resize", this.onResize);
+    document.removeEventListener("docamatic-disconnect", this.onDisconnect);
+    cancelAnimationFrame(this.resizeFrame);
   }
 
   render() {
     return (
       <div>
-        <NoteList windowWidth={this.state.windowWidth} disconnected={this.state.disconnected} url={this.state.current_url} scrollYOffset={this.state.scrollYOffset} />
+        <NoteList windowWidth={this.state.windowWidth} disconnected={this.state.disconnected} url={this.state.current_url} />
       </div>
     );
   }

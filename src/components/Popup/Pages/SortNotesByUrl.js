@@ -1,5 +1,5 @@
 import React from "react";
-import { FontAwesomeIcon } from "../../../../node_modules/@fortawesome/react-fontawesome/index";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
 import Note from "../../Note/Note";

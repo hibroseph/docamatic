@@ -26,7 +26,7 @@ const CurrentPageNotes = (props) => {
         <MessageHeader bold>We can't place a note on this page. </MessageHeader>
         <SubMessage>
           Go to any webpage to add a note such as{" "}
-          <Link href="https://google.com" target="_blank">
+          <Link href="https://google.com" target="_blank" rel="noopener noreferrer">
             google.com
           </Link>
         </SubMessage>

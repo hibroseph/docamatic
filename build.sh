@@ -25,6 +25,10 @@ jq '.version=$number' --arg number $1 manifest.json > tmp_manifest.json
 jq '.name="Docamatic - Add Sticky Notes to the Web"' tmp_manifest.json > manifest.json
 rm tmp_manifest.json
 
+# package.json too, so all three always report the same version
+jq '.version=$number' --arg number $1 package.json > tmp_package.json
+mv tmp_package.json package.json
+
 jq '.version=$number' --arg number $1 config.json > tmp_config.json
 jq '.environment=$env' --arg env $2 tmp_config.json > config.json
 rm tmp_config.json
@@ -35,21 +39,26 @@ rm -rf dist/
 rm -rf app/
 npx webpack --mode=production
 
+# Give each bundle and its source map a matching debug id. Sentry uses it to
+# find the right source map for a stack trace, independent of the extension
+# id or file names. This must happen before the bundles are copied/zipped.
+npx sentry-cli sourcemaps inject ./dist
+
 cd dist
 
 mkdir app
 cp *.js app
 cp index.html app
 cp onboarding.html app
+cp offscreen.html app
 cp -r assets app
 cp manifest.json app
 cp -r icons app
 
+# Bundles + source maps for Sentry. The maps are not shipped in the extension.
 mkdir sentry
-mkdir sentry/sentry
-cp *.js sentry/sentry
-cp *.map sentry/sentry
-cp manifest sentry/sentry
+cp *.js sentry
+cp *.map sentry
 
 mkdir homepage
 cp -r site/* homepage/

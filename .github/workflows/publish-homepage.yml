@@ -27,11 +27,10 @@ jobs:
     steps:
     - name: Download artifact
       id: download-artifact
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v12
       with:
         workflow: build-extension.yml
         workflow_conclusion: success
-        event: push
         run_id: ${{ github.event.inputs.run_id }}
         name: homepage
         if_no_artifact_found: fail

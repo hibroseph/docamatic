@@ -18,32 +18,33 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js 18
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
+    - name: Use Node.js (version from .nvmrc)
+      uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version-file: .nvmrc
         cache: 'npm'
     - run: ./setup-env.sh
     - run: npm ci
+    - run: npm test
     - run: ./build.sh ${{ github.event.inputs.build_version }} ${{ github.event.inputs.environment }}
   
     - name: Upload extension artifact
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v4
       with:
         name: extension
         path: ./dist/app.zip
         if-no-files-found: error
         
     - name: Upload homepage artifact
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v4
       with:
         name: homepage
         path: ./dist/homepage
         if-no-files-found: error
         
     - name: Upload sentry artifact
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v4
       with:
         name: sentry
         path: ./dist/sentry

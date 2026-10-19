@@ -1,19 +1,19 @@
 //@ts-ignore
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { DraggableNote } from "./Note/DraggableNote";
 import { connect } from "react-redux";
 import {
   updateNotePosition,
   updateNoteSize
 } from "../redux/actions";
-import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl"
 import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
+
+const NO_NOTES = [];
 
 export const NoteList = (props) => {
 
   const [noteOnTop, setNoteOnTop] = useState(0);
 
-  useEffect(() => { console.log("disconnected changed in notelist " + props.disconnected)}, [props.disconnected])
     return (
       <div>
         {props.url && props.notes.map(note => {
@@ -32,8 +32,7 @@ export const NoteList = (props) => {
                   }
                   key={note.id}
                   {...note}
-                  tags={props.tags.filter(tag => tag.notes.includes(note.id))}
-                  scrollYOffset={props.scrollYOffset}
+                  tags={props.tags.filter(tag => tag.notes?.includes(note.id))}
                   url={props.url}
                   setZIndex={() => {
                     setNoteOnTop(note.id)}}
@@ -46,24 +45,16 @@ export const NoteList = (props) => {
         })}
       </div>
     );
-  
+
 }
 
+// Uses the url App is tracking (rather than reading location again) so the
+// notes shown and the url used to save edits can never disagree
 const mapStateToProps = (state, props) => {
-  //@ts-ignore
-  let safeUrl = GetSafeNoteUrl(window.location.href);
-  if (state.pages[safeUrl] == null) {
-    return {
-      notes: [],
-      tags: []
-    };
-  } else {
-    return {
-      notes: state.pages[safeUrl].notes,
-      tags: state["tags"] || [],
-      scrollYOffset: props.scrollYOffset
-    };
-  }
+  return {
+    notes: state.pages?.[props.url]?.notes || NO_NOTES,
+    tags: state.tags || NO_NOTES,
+  };
 };
 
 const mapDispatchToProps = dispatch => ({
@@ -79,28 +70,10 @@ const mapDispatchToProps = dispatch => ({
         break;
       default:
         console.error("mutateNote state " + props.type + "not handled")
-        console.error(props);
+        return;
     }
 
     return dispatch(action)
-      /*.catch(e => {
-        // catch all errors and hopefully handle with retry
-        // TODO: Create retry loop to only retry a few times and then error out
-        // TODO: Get types for chrome
-        // @ts-ignore
-        chrome.runtime.connect({ name: "SCRIPT" });
-        // @ts-ignore
-        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-          if (request.type === "STORE_INITIALIZED") {
-            // Initializes the popup logic
-            mapDispatchToProps(dispatch).mutateNote(props);
-          }
-        });
-      })*/
-
-    /*
-      onSizeChange: (id, x, url) => dispatch(updateNoteSize(id, x, url)),
-    onPositionChange: (id, x, y, url) => dispatch(updateNotePosition(id, x, y, url))*/
   }
 });
 

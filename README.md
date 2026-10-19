@@ -1,14 +1,14 @@
-[![Build Status](https://dev.azure.com/iwillridgley/iwillridgley/_apis/build/status/hibroseph.Docamatic?branchName=master)](https://dev.azure.com/iwillridgley/iwillridgley/_build/latest?definitionId=1&branchName=master)
 # Steps to develop:
 1. Clone using `git clone https://github.com/hibroseph/sticky-notes`
-2. Install packages `npm i`
-3. Start development `npm run start`
-4. Cross your fingers that webpack can successfully build and bundle the app
-5. Open chrome and enter `chrome://extensions` in the url
-6. Top right click on `Developer mode`
-7. Click `Load unpacked` on the top left bar
-8. Find where dist was built in your file directory
-9. Pray to the almighty that it worked and hopefully it should be visible in chrome as a normal extension
+2. Use Node 22 (see `.nvmrc`; with nvm: `nvm install 22` then `nvm use 22`)
+3. Install packages `npm ci`
+4. Start development `npm run watch` (rebuilds on save), or build once with `npm run build`. Run the tests with `npm test`
+5. Cross your fingers that webpack can successfully build and bundle the app
+6. Open chrome and enter `chrome://extensions` in the url
+7. Top right click on `Developer mode`
+8. Click `Load unpacked` on the top left bar
+9. Find where dist was built in your file directory
+10. Pray to the almighty that it worked and hopefully it should be visible in chrome as a normal extension
 
 # Development practice
 1. Find an issue that you would like to work on (Preferably ones listed on the current milestone)

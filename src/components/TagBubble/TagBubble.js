@@ -1,8 +1,6 @@
 import React, {useState} from "react";
 import styled from "styled-components";
 import { getContrastingColor } from "../../utils/ContrastingColor"
-import {faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const TagSpan = styled.span`
     border-radius: 10px;
@@ -17,25 +15,10 @@ const TagSpan = styled.span`
 `
 
 const onTagClick = (tagText, setTagText, removeTag) => {
-    console.debug("you clicked the tag")
-    console.debug(tagText)
     if (tagText == 'add tag') {
-        console.debug("the tag text is add tag")
         setTagText('');
     } else {
-        console.debug("we are removing the tag")
         removeTag();
-    }
-}
-
-const determineIcon = (icon) => {
-    switch(icon) {
-        case "add":
-            return faPlus;
-        case "remove":
-            return faMinus;
-        default:
-            throw new Error(`${icon} is not a registered valid icon for bubble tags`)
     }
 }
 
@@ -73,6 +56,6 @@ export const TagBubble = (props) => {
         setTagText("add tag")
         blur.stopPropagation()}}
     onKeyUp={event => event.stopPropagation()}
-    {...props}
+    color={props.color}
     >{tagText}</TagSpan>
 }

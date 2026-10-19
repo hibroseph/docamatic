@@ -5,6 +5,7 @@ import { faArrowsAlt, faHeart, faEye, faEyeSlash, faTrashAlt, faExternalLinkAlt 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SettingsContainer, SettingsIconContainer } from "./style";
 import { COLORS } from "../../utils/constants";
+import { safeHref, EXTERNAL_LINK_PROPS } from "../../utils/SafeLink";
 
 export const SettingsBar = (props) => {
   return (
@@ -14,7 +15,7 @@ export const SettingsBar = (props) => {
         <FontAwesomeIcon onClick={props.onDeleteClick} className="icons" icon={faTrashAlt} />
         <FontAwesomeIcon onClick={() => props.onToggleVisibility(!props.visible)} className="icons" icon={props.visible ? faEye : faEyeSlash} />
         {props.popup ? (
-          <a href={props.url} target="_new">
+          <a href={safeHref(props.url)} {...EXTERNAL_LINK_PROPS}>
             <FontAwesomeIcon className="icons" icon={faExternalLinkAlt} />
           </a>
         ) : (

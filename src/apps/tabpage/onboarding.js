@@ -10,7 +10,8 @@ import step4Gif from "../../assets/onboarding/step4.gif"
 import step5Gif from "../../assets/onboarding/step5.gif"
 import { connect } from "react-redux";
 import { Provider } from "react-redux";
-import { Store } from "webext-redux";
+import { initSentry } from "../../utils/sentry";
+import { createProxyStore } from "../../utils/createProxyStore";
 import { userOnboarded} from "../../redux/actions"
 
 const Header = styled.div`
@@ -70,10 +71,10 @@ const Onboarding = connect(null,dispatch => {
     return {onboarded: () => dispatch(userOnboarded())}
 })(( props ) => {
 
+    // Runs once when the page opens (it used to run on every render)
     useEffect(() => {
-        console.log("setting onboarded")
         props.onboarded()
-    })
+    }, [])
         return (
         <Background>
             <Header>
@@ -126,24 +127,13 @@ const Onboarding = connect(null,dispatch => {
 
 let element = document.getElementById("__tabpage_mount_point__")
 
-chrome.runtime.onMessage.addListener((req) => {
-    if (req.type === "STORE_INITIALIZED") {
-      // Initializes the popup logic
-      console.log("creating store")
-      const store = new Store({
-        portName: "NOTES_STORE",
-      });
-    
-      console.log("setting store.ready()")
-      store.ready().then(() => {
-        console.log("store is ready ")
-      ReactDOM.render(<Provider store={store}>
-        <Onboarding>
-        </Onboarding>
-        </Provider>, element)})
-    }
+initSentry("onboarding");
+
+const store = createProxyStore();
+
+store.ready().then(() => {
+  ReactDOM.render(<Provider store={store}>
+    <Onboarding>
+    </Onboarding>
+    </Provider>, element)
 });
-
-chrome.runtime.connect({name: "POPUP"})
-
-

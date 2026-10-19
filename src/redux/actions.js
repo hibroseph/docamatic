@@ -4,10 +4,7 @@ export const ADD_TEXT = "ADD_TEXT";
 export const ADD_TITLE = "ADD_TITLE";
 export const MOVE_NOTE = "MOVE_NOTE";
 export const CHANGE_COLOR = "CHANGE_COLOR";
-export const CLICKED_NOTE = "CLICKED_NOTE";
 export const RESIZE_NOTE = "RESIZE_NOTE";
-export const NOTE_DEPTH = "MOVE_NOTE";
-export const STICKIFY = "STICKIFY";
 export const HEARTIFY = "HEARTIFY";
 export const TOGGLE_VISIBILITY = "TOGGLE_VISIBILITY";
 export const IMPORT_NOTES = "IMPORT_NOTES";
@@ -15,6 +12,9 @@ export const NUKE_NOTES = "NUKE_NOTES";
 export const ADD_TAG = "ADD_TAG";
 export const REMOVE_TAG = "REMOVE_TAG"
 export const USER_ONBOARDED = "USER_ONBOARDED"
+export const SET_ANALYTICS_ENABLED = "SET_ANALYTICS_ENABLED"
+// Not a state change: carries an analytics event to the background
+export const TRACK = "TRACK"
 
 /*
  * action creators
@@ -69,27 +69,11 @@ export function heartify(id, url) {
   };
 }
 
-export function stickify(id, url) {
-  return {
-    type: STICKIFY,
-    id,
-    url,
-  };
-}
-
 export function updateNoteSize(id, x, url) {
   return {
     type: RESIZE_NOTE,
     id,
     x,
-    url,
-  };
-}
-
-export function updateNoteDepth(id, url) {
-  return {
-    type: CLICKED_NOTE,
-    id,
     url,
   };
 }
@@ -153,4 +137,19 @@ export function userOnboarded() {
   return {
     type: USER_ONBOARDED
   }
+}
+
+export function setAnalyticsEnabled(enabled) {
+  return {
+    type: SET_ANALYTICS_ENABLED,
+    enabled,
+  };
+}
+
+export function trackEvent(event, properties) {
+  return {
+    type: TRACK,
+    event,
+    properties,
+  };
 }

@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import { CreateFriendlyPreviewUrl } from "../../../utils/CreateFriendlyPreviewUrl";
 import { PreviewUrl } from "../style";
 import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary"
+import { safeHref, EXTERNAL_LINK_PROPS } from "../../../utils/SafeLink";
 class FilterNotes extends Component {
   constructor(props) {
     super(props);
@@ -24,7 +25,7 @@ class FilterNotes extends Component {
                 return (
                   <NoRenderErrorBoundary key={note.id}>
                     <NotePadding>
-                      <PreviewUrl href={key} target="_new">
+                      <PreviewUrl href={safeHref(key)} {...EXTERNAL_LINK_PROPS}>
                         {CreateFriendlyPreviewUrl(key)}
                       </PreviewUrl>
                       <Note

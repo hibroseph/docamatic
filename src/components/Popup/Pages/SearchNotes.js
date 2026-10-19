@@ -14,8 +14,6 @@ export const SearchNotes = (props) => {
         <SearchBox 
           onSearch={(searchQuery) => {
             setSearchQuery(searchQuery)
-            console.debug("search query");
-            console.debug(searchQuery);
           }}
           availableTags={props.tags}
           />

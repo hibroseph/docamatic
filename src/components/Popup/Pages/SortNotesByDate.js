@@ -6,9 +6,10 @@ import Note from "../../Note/Note";
 import { NotePadding } from "../style";
 import { NoRenderErrorBoundary } from "../../NoRenderErrorBoundary";
 
-const getGroupingDateKey = (groupByDate, date) => {
-  let date = new Date(date);
+const getGroupingDateKey = (groupByDate, timestamp) => {
+  let date = new Date(timestamp);
   switch (groupByDate) {
+    // Each case falls through to also clear the smaller units
     case "day":
       date.setSeconds(0, 0);
       date.setMinutes(0, 0);
@@ -28,8 +29,8 @@ const getGroupingDateKey = (groupByDate, date) => {
 const getArraySortedWithDates = (pages, sortType, groupingKey) => {
   let newArray = {};
 
-  Object.keys(pages).map((key) => {
-    pages[key].notes.map((note) => {
+  Object.keys(pages).forEach((key) => {
+    (pages[key]?.notes || []).forEach((note) => {
       if (newArray[getGroupingDateKey(groupingKey, note.date_created)] == undefined) {
         newArray[getGroupingDateKey(groupingKey, note.date_created)] = [{ ...note, url: key }];
       } else {
@@ -43,7 +44,7 @@ const getArraySortedWithDates = (pages, sortType, groupingKey) => {
 };
 
 export const SortNotesByDate = (props) => (
-  <NoRenderErrorBoundary className="filter-results">
+  <div className="filter-results">
     {getArraySortedWithDates(props.pages, props.getSortingFunction(), props.groupingKey).map((noteGroup, i) => {
       return (
         <NoRenderErrorBoundary key={i}>
@@ -62,7 +63,6 @@ export const SortNotesByDate = (props) => (
                   <NoRenderErrorBoundary>
                     <NotePadding>
                       <Note
-                      hello={a+a}
                       popup={true} 
                       disableClick={true}
                       {...note} 
@@ -78,5 +78,5 @@ export const SortNotesByDate = (props) => (
         </NoRenderErrorBoundary>
       );
     })}
-  </NoRenderErrorBoundary>
+  </div>
 );

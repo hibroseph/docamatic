@@ -22,22 +22,15 @@ for (let i = 0, length = assetKeys.length; i < length; i++) {
 // update manifest.json
 fs.writeFileSync("./dist/manifest.json", manifestString);
 
-// update popup.js
-let popupFile = fs.readFileSync(`./dist/${assets["popup.js"]}`).toString()
-fs.writeFileSync(`./dist/${assets["popup.js"]}`, popupFile.replace("[[script.js]]", assets["script.js"]))
-
-// Update background.js file
-let backgroundFile = fs.readFileSync(`./dist/${assets["background.js"]}`).toString();
-fs.writeFileSync(`./dist/${assets["background.js"]}`, backgroundFile.replace("[[script.js]]", assets["background.js"]))
+// Note: don't rewrite anything inside the built .js files here. They are
+// minified onto a single line, so any edit after webpack shifts every column
+// after it and the source maps (used by Sentry) would point at the wrong code.
 
 // update html
 
 if (!fs.existsSync("./dist/site")){
   fs.mkdirSync("./dist/site")
 }
-
-/*let homepage = fs.readFileSync(`./site/index.html`).toString();
-fs.writeFileSync(`./dist/site/index.html`, homepage.replace("[[script.js]]", assets["script.js"]))*/
 
 fs.copyFileSync("./dist/homepage.html", "./dist/site/index.html")
 fs.copyFileSync(`./dist/${assets["homepage.js"]}`, `./dist/site/${assets["homepage.js"]}`)

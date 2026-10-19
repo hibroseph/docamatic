@@ -3,25 +3,28 @@ const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 const WebpackShellPluginNext = require("webpack-shell-plugin-next");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
-module.exports = {
+const config = {
   // Entry files for our popup and background pages
   entry: {
     popup: "./src/apps/popup/index.js",
     background: "./src/apps/background/background.js",
-    script: "./src/apps/script/script.js",
+    // "script" is the content script in manifest.json; keep the name
+    script: "./src/apps/script/loader.js",
+    "notes-ui": "./src/apps/script/notes-ui.js",
     homepage: "./src/apps/homepage/index.js",
     onboarding: "./src/apps/tabpage/onboarding.js",
-    webboard: "./src/apps/tabpage/webboard.js"
+    offscreen: "./src/apps/offscreen/offscreen.js"
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].[fullhash].js",
+    // The notes UI is injected by the background by file name, so it has no
+    // hash (see NOTES_UI_FILE in src/utils/constants.js)
+    filename: (pathData) => (pathData.chunk.name === "notes-ui" ? "[name].js" : "[name].[fullhash].js"),
     publicPath: "",
   },
   // Here we define loaders for different file types
@@ -39,32 +42,18 @@ module.exports = {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
+      // Webpack 5 asset modules (replace the deprecated url-loader/file-loader)
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 8192,
-              name: "assets/[name].[ext]",
-            },
-          },
-        ],
+        // Images under 8KB are inlined as data URLs, larger ones become files
+        type: "asset",
+        parser: { dataUrlCondition: { maxSize: 8192 } },
+        generator: { filename: "assets/[name][ext]" },
       },
       {
         test: /\.(ttf|woff|woff2?)$/,
-        use: {
-          loader: "file-loader",
-          options: {
-            name: "css/fonts/[name]-[fullhash:8].[ext]",
-          },
-        },
-      },
-      {
-        enforce: "pre",
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: "source-map-loader",
+        type: "asset/resource",
+        generator: { filename: "css/fonts/[name]-[hash:8][ext]" },
       },
     ],
   },
@@ -91,26 +80,24 @@ module.exports = {
       template: "./src/apps/tabpage/tabpage.html"
     }),
     new HtmlWebpackPlugin({
-      chunks: ["webboard"],
-      hash:true,
-      filename:"webboard.html",
-      template:"./src/apps/tabpage/tabpage.html"
+      chunks: ["offscreen"],
+      filename: "offscreen.html",
+      template: "./src/apps/offscreen/offscreen.html"
     }),
     // copy extension manifest and icons
     new CopyWebpackPlugin({
       patterns: [{ from: "./manifest.json" }, { context: "./icons/", from: "docamatic-icon*", to: "./icons/" }],
     }),
-    //new CleanWebpackPlugin(["dist"]),
     new WebpackManifestPlugin({ fileName: "assetManifest.json", basePath: "" }),
     new WebpackShellPluginNext({
       onBeforeBuild: {
         scripts: ["echo onBeforeBuild",
-          "./watch.sh"]
+          "node clean-dist.js"]
       },
       onDoneWatch: {
         scripts: [
           "echo onWatchRun",
-          "./watch.sh"
+          "node clean-dist.js"
         ]
       },
       onAfterDone : {
@@ -121,5 +108,12 @@ module.exports = {
     }),
     //new BundleAnalyzerPlugin(),
   ],
-  devtool: "source-map",
 };
+
+module.exports = (env, argv) => ({
+  ...config,
+  // Production uses "hidden" source maps: the .map files are still written
+  // (and uploaded to Sentry) but the shipped bundles don't reference them, so
+  // users' DevTools don't try to load maps that aren't in the extension zip
+  devtool: argv.mode === "production" ? "hidden-source-map" : "source-map",
+});

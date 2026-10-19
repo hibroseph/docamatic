@@ -1,489 +1,187 @@
 import { COLORS as colorList, INITIAL_NOTE_WIDTH } from "../utils/constants";
 import { getContrastingColor } from "../utils/ContrastingColor";
-import { ADD_TAG, REMOVE_TAG, NUKE_NOTES, USER_ONBOARDED } from "./actions";
-//import * as Sentry from "@sentry/react";
+import {
+  ADD_NOTE,
+  ADD_TAG,
+  ADD_TEXT,
+  ADD_TITLE,
+  CHANGE_COLOR,
+  HEARTIFY,
+  IMPORT_NOTES,
+  MOVE_NOTE,
+  NUKE_NOTES,
+  REMOVE_NOTE,
+  REMOVE_TAG,
+  RESIZE_NOTE,
+  SET_ANALYTICS_ENABLED,
+  TOGGLE_VISIBILITY,
+  USER_ONBOARDED,
+} from "./actions";
 import { generateUUID } from "../utils/GenerateUUID";
-import { getRandomTagColor} from "../utils/RandomTagColor";
+import { getRandomTagColor } from "../utils/RandomTagColor";
 import { GetInitialState } from "../utils/GetInitialState";
+
 /*
-import config from
+ * State shape:
+ * {
+ *   pages: { [url]: { notes: Note[] } },
+ *   tags: [{ id, text, color, notes: noteId[] }],
+ *   metadata: { onboarded, analytics_enabled }
+ * }
+ */
 
-Sentry.init({
-  dsn: "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219",
-  environment: ENVIRONMENT,
-  release: RELEASE + VERSION,
-});*/
+// Applies `update` to the notes of a single page. If the page doesn't exist
+// (e.g. the note was already deleted from another tab, or the url changed
+// under a single page app) the state is returned unchanged instead of
+// throwing "Cannot read properties of undefined".
+const updatePageNotes = (state, url, update) => {
+  const page = state.pages?.[url];
+  if (!page) return state;
 
-// Messages to appear when a note is created
-const NoteMessages = [
-  "Wanna Remember Something? Put it here!",
-  "Here is your new note! Enter text here",
-  "You should probably put something more useful than this message",
-  "CONGRATS! You made a note!",
-  "What do you want to remember today?",
-  "Ooo what a nice color",
-  "Wanna change the color? Press the color button",
-];
+  return {
+    ...state,
+    pages: {
+      ...state.pages,
+      [url]: { ...page, notes: update(page.notes || []) },
+    },
+  };
+};
 
+// Merges the result of `update(note)` into the note with the given id
+const updateNote = (state, url, id, update) =>
+  updatePageNotes(state, url, (notes) => notes.map((note) => (note.id === id ? { ...note, ...update(note) } : note)));
 
-const REDUCER_ERROR_TITLE = "Reducer";
+const createNote = (action) => {
+  const color = colorList[Math.floor(Math.random() * colorList.length)];
 
-const notesApp = (state = [], action) => {
+  return {
+    id: action.id,
+    // Random horizontal position so new notes don't stack exactly on top of each other
+    position: { x: Math.floor(Math.random() * (600 + 1)), y: action.y_position },
+    size: { width: INITIAL_NOTE_WIDTH },
+    body: action.highlightedText || null,
+    title: null,
+    date_created: action.date_created,
+    color: { title: color, text: getContrastingColor(color) },
+    stickify: false,
+    heart: false,
+    visible: true,
+  };
+};
+
+const notesApp = (state = GetInitialState(), action) => {
   switch (action.type) {
-    case ADD_TAG:
-      // 3 cases, 
-      //1. tag exists but doesn't exist on the note
-      //2. tag doesn't exist
-      //3. tag exists and exists on the note
-      var tagExists = state?.tags?.find(tag => tag.text == action.text);
-      var noteHasTag = tagExists?.notes?.find(id => id == action.noteId);
+    case ADD_TAG: {
+      const tags = state.tags || [];
+      const existingTag = tags.find((tag) => tag.text == action.text);
 
-      if (tagExists && noteHasTag == undefined) {
-        newState = Object.assign({},
-          state,
-          {
-          pages: {
-            ...state.pages,
-            [action.url]: Object.assign({}, {
-            notes: Object.assign([], 
-              state.pages[action.url].notes.map(note => {
-                if (note.id != action.noteId)
-                  return note;
-                else 
-                  return { 
-                    ...note, 
-                    tags: [
-                      ...note?.tags?.filter(tag => tag.id != tagExists.id) || {},
-                    {
-                      id: tagExists.id
-                    }] 
-                }
-              })
-            )
-          })}},
-          {
-            tags: [
-              ...state.tags.map(tag => {
-              if (tag.id != tagExists.id) {
-                return tag;
-              } else {
-                // we found the tag we need to add the note to
-                const {notes, ...strippedTag} = tag;
-                return {
-                  ...strippedTag,
-                  notes: [
-                    ...notes, 
-                    action.noteId]
-                }
-              }
-            })]
-          })
-      } else if (tagExists && noteHasTag) {
-        newState = state;
-      } else if (tagExists == undefined) {
-        var tagId = generateUUID();
-        newState = Object.assign({}, 
-          state, 
-          {
-            pages: {
-              ...state.pages,
-              [action.url]: Object.assign({}, {
-              notes: Object.assign([], 
-                state.pages[action.url].notes.map(note => {
-                  if (note.id != action.noteId)
-                    return note;
-                  else 
-                    return { 
-                      ...note, 
-                      tags: [
-                        ...note?.tags || {},
-                        {
-                          id: tagId
-                        }
-                      ] 
-                    }
-                })
-              )
-          })}
-        },
-        { 
-          tags: 
-            [...state?.tags || {}, 
-              { 
-              id: tagId, 
-              color: getRandomTagColor(), 
-              text: action.text,
-              notes:[ action.noteId]
-              }
-            ]
-        })
+      if (existingTag?.notes?.includes(action.noteId)) {
+        return state;
+      }
+
+      const tagId = existingTag ? existingTag.id : generateUUID();
+
+      const newState = updateNote(state, action.url, action.noteId, (note) => ({
+        tags: [...(note.tags || []).filter((tag) => tag.id != tagId), { id: tagId }],
+      }));
+
+      if (newState === state) {
+        return state;
+      }
+
+      return {
+        ...newState,
+        tags: existingTag
+          ? tags.map((tag) => (tag.id === tagId ? { ...tag, notes: [...(tag.notes || []), action.noteId] } : tag))
+          : [...tags, { id: tagId, color: getRandomTagColor(), text: action.text, notes: [action.noteId] }],
       };
-      return newState;
+    }
 
-    case REMOVE_TAG:
+    case REMOVE_TAG: {
+      // Remove the tag from the note, and the note from the tag. Tags that are
+      // no longer on any note are deleted.
+      const newState = updateNote(state, action.url, action.noteId, (note) => ({
+        tags: (note.tags || []).filter((tag) => tag.id != action.tagId),
+      }));
 
-      // We need to do 2 things
-      // 1. Removing the referenced tag from the notes node
-      // 2. Remove the referenced note from the tags node
-
-      let newTagState = Object.assign({}, 
-        state,
-        {
-          pages: {
-            ...state.pages,
-            [action.url]: Object.assign({}, {
-            notes: Object.assign([],
-              state.pages[action.url].notes.map(note => {
-                if (note.id != action.noteId)
-                  return note;
-                else
-                  return {
-                    ...note,
-                    tags: note.tags.filter(p => p.id != action.tagId)
-                  };
-                }
-              )
-            )
-          })
-        }
-        },
-        {
-          tags: state.tags.map(tag => {
-            if (tag.id != action.tagId) 
-              return tag;
-            else
-              return {
-                ...tag,
-                notes: tag.notes.filter(p => p != action.noteId)
-              }
-          })
-          .filter(tag => tag.notes.length > 0)
-        }
-      )
-
-      return newTagState;
+      return {
+        ...newState,
+        tags: (state.tags || [])
+          .map((tag) => (tag.id != action.tagId ? tag : { ...tag, notes: (tag.notes || []).filter((id) => id != action.noteId) }))
+          .filter((tag) => tag.notes?.length > 0),
+      };
+    }
 
     case NUKE_NOTES:
-      return GetInitialState();
+      // Keep metadata so the user isn't treated as brand new
+      return { ...GetInitialState(), metadata: state.metadata };
 
-    case "IMPORT_NOTES":
-      // The following logic loops over the notes being imported and only adds ones that don't exist in the current state.
-      let finalState = Object.keys(action.notes).reduce((finalReducedState, key) => {
-        if (state.pages[key] != null) {
-          let noteIds = state[key].notes.reduce((map, obj) => {
-            map[obj.id] = obj;
-            return map;
-          }, {});
+    case IMPORT_NOTES: {
+      // action.notes is an exported `pages` object. Only notes that don't
+      // already exist (by id) are added.
+      const pages = { ...state.pages };
 
-          let newStateCombinedWithNewNotes = action.notes[key].notes.reduce((reducedState, note) => {
-            if (noteIds[note.id] == null) {
-              return Object.assign({}, reducedState, {
-                [key]: {
-                  notes: [...reducedState[key].notes, note],
-                },
-              });
-            } else {
-              return newState;
-            }
-          }, finalReducedState);
+      Object.entries(action.notes || {}).forEach(([url, page]) => {
+        const existingNotes = pages[url]?.notes || [];
+        const existingIds = new Set(existingNotes.map((note) => note.id));
+        const newNotes = (page?.notes || []).filter((note) => !existingIds.has(note.id));
+        pages[url] = { ...pages[url], notes: [...existingNotes, ...newNotes] };
+      });
 
-          finalReducedState = Object.assign({}, finalReducedState, newStateCombinedWithNewNotes);
+      return { ...state, pages };
+    }
 
-          return finalReducedState;
-        } else {
-          // add notes to state since the key doesn't exist
-          return Object.assign({}, finalReducedState, {
-            [key]: {
-              notes: action.notes[key].notes,
-            },
-          });
-        }
-      }, state);
+    case HEARTIFY:
+      return updateNote(state, action.url, action.id, (note) => ({ heart: !note.heart }));
 
-      return finalState;
+    case RESIZE_NOTE:
+      return updateNote(state, action.url, action.id, () => ({ size: { width: action.x } }));
 
-    case "HEARTIFY":
-      return Object.assign({}, state, {
+    case CHANGE_COLOR:
+      return updateNote(state, action.url, action.id, () => ({
+        color: { title: action.color, text: getContrastingColor(action.color) },
+      }));
+
+    case MOVE_NOTE:
+      return updateNote(state, action.url, action.id, () => ({ position: { x: action.x, y: action.y } }));
+
+    case TOGGLE_VISIBILITY:
+      return updateNote(state, action.url, action.id, () => ({ visible: action.visible }));
+
+    case ADD_TITLE:
+      return updateNote(state, action.url, action.id, () => ({ title: action.title }));
+
+    case ADD_TEXT:
+      return updateNote(state, action.url, action.id, () => ({ body: action.body }));
+
+    case REMOVE_NOTE: {
+      const newState = updatePageNotes(state, action.url, (notes) => notes.filter((note) => note.id != action.id));
+
+      return {
+        ...newState,
+        tags: (state.tags || [])
+          .map((tag) => ({ ...tag, notes: (tag.notes || []).filter((id) => id != action.id) }))
+          .filter((tag) => tag.notes.length > 0),
+      };
+    }
+
+    case ADD_NOTE:
+      return {
+        ...state,
         pages: {
           ...state.pages,
           [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                heart: !note.heart,
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "STICKIFY":
-      return Object.assign({}, state, {
-        pages: {
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                stickify: !note.stickify,
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "RESIZE_NOTE":
-      return Object.assign({}, state, {
-        pages: {
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                size: { width: action.x },
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "CLICKED_NOTE":
-      let note = state.pages[action.url].notes
-        .filter((note) => {
-          if (note.id === action.id) {
-            return note;
-          }
-        })
-        .find((note) => {
-          return note.id === action.id;
-        });
-
-      if (note === undefined) {
-        return state;
-      }
-
-      const new_state = state.pages[action.url].notes.filter((notes) => {
-        if (notes.id !== action.id) {
-          return notes;
-        }
-      });
-
-      new_state.push(note);
-
-      return Object.assign({}, state, {
-        pages: {
-          ...state.pages,
-          [action.url]: {
-          notes: new_state,
-        }},
-      });
-
-    case "CHANGE_COLOR":
-      let newState = Object.assign({}, state, {
-        pages:{
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                color: {
-                  title: action.color,
-                  text: getContrastingColor(action.color),
-                },
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-      return newState;
-
-    case "MOVE_NOTE":
-      let stateNew = Object.assign({}, state, {
-        pages:{
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              // let's change the position
-              return Object.assign({}, note, {
-                position: { x: action.x, y: action.y },
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-      return stateNew;
-
-    case "TOGGLE_VISIBILITY":
-      return Object.assign({}, state, {
-        pages:{
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                visible: action.visible,
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "ADD_TITLE":
-      return Object.assign({}, state, {
-        pages:{
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                title: action.title,
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "ADD_TEXT":
-      return Object.assign({}, state, {
-        pages:{
-          ...state.pages,
-          [action.url]: {
-          notes: state.pages[action.url].notes.map((note, id) => {
-            if (note.id === action.id) {
-              return Object.assign({}, note, {
-                body: action.body,
-              });
-            } else {
-              return note;
-            }
-          }),
-        }},
-      });
-
-    case "REMOVE_NOTE":
-      try {
-        // Filter the id of the note that needs to be deleted out
-        let notes = state.pages[action.url].notes.filter((note) => {
-          if (note.id != action.id) {
-            return note;
-          }
-        });
-
-        return Object.assign({}, state, {
-          pages:{
-            ...state.pages,
-            [action.url]: {
-            notes,
-          }},
+            ...state.pages?.[action.url],
+            notes: [...(state.pages?.[action.url]?.notes || []), createNote(action)],
+          },
         },
-        {
-          tags: state.tags?.map(tag => { 
-            return {
-              ...tag,
-              notes: tag.notes.filter(p => p != action.id)
-              }
-          }).filter(tag => tag.notes.length > 0)
-        });
-      } catch (error) {
-        Sentry.captureException(error);
-        return state;
-      }
+      };
 
-    case "ADD_NOTE":
-      // Generates a random position on the page
-      const posx = Math.floor(Math.random() * (600 + 1));
-
-      // Generates a random int for a random color for the note
-      let colorIndex = Math.floor(Math.random() * colorList.length);
-
-      // Generates a random int for random text
-      const noteTextIndex = Math.floor(Math.random() * NoteMessages.length);
-
-      // Calculating the color contrast when a note is created
-      let r = parseInt(colorList[colorIndex].substr(1, 2), 16);
-      let g = parseInt(colorList[colorIndex].substr(3, 2), 16);
-      let b = parseInt(colorList[colorIndex].substr(5, 2), 16);
-      let yiq = (r * 299 + g * 587 + b * 114) / 1000;
-
-      // If there are notes already on the page
-      if (state.pages[action.url] == null) {
-        return Object.assign({}, state, {
-          pages: {
-            ...state.pages,
-            [action.url]: {
-            notes: [
-              {
-                id: action.id,
-                position: { x: posx, y: action.y_position },
-                size: {
-                  width: INITIAL_NOTE_WIDTH,
-                },
-                body: action.highlightedText || null,
-                title: null,
-                // color: colorList[colorIndex],
-                // contrastColor: yiq >= 128 ? "#000" : "#fff",
-                date_created: action.date_created,
-                color: {
-                  title: colorList[colorIndex],
-                  text: yiq >= 128 ? "#000" : "#fff",
-                },
-                stickify: false,
-                heart: false,
-                visible: true
-              },
-            ],
-          }}
-        
-});
-      } else {
-        return Object.assign({}, state, {
-          pages: {
-            ...state.pages,
-            [action.url]: {
-              notes: [
-                ...state.pages[action.url].notes,
-                {
-                  id: action.id,
-                  position: { x: posx, y: action.y_position },
-                  size: {
-                    width: INITIAL_NOTE_WIDTH,
-                  },
-                  body: action.highlightedText || null, 
-                  title: null,
-                  // color: colorList[colorIndex],
-                  // contrastColor: yiq >= 128 ? "#000" : "#fff",
-                  date_created: action.date_created,
-                  color: {
-                    title: colorList[colorIndex],
-                    text: yiq >= 128 ? "#000" : "#fff",
-                  },
-                  visible: true,
-                },
-              ],
-            }},
-          });
-      }
     case USER_ONBOARDED:
-      console.log("setting onboarded flag")
-      let newestState = Object.assign({}, state, { metadata: { ...state?.metadata, onboarded: true}})
-      console.log(newestState)
-      return newestState;
+      return { ...state, metadata: { ...state.metadata, onboarded: true } };
+
+    case SET_ANALYTICS_ENABLED:
+      return { ...state, metadata: { ...state.metadata, analytics_enabled: action.enabled } };
 
     default:
       return state;

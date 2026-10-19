@@ -37,13 +37,8 @@ export const DraggableContainer = (props) => {
     };
   };
 
+  // 17px leaves room for the page's vertical scrollbar
   let isOffScreen = props.position.x + props.size.width > props.windowWidth - 17;
-
-  if (isOffScreen) {
-    console.log("note with id " + props.id + " is off screen!")
-
-    console.log("note x position: " + (props.windowWidth - props.size.width))
-  }
 
   return <Rnd 
     position={{

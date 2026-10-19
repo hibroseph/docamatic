@@ -9,7 +9,8 @@ import { importNotes } from "../../redux/actions";
 import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
 import { CHROME_MESSAGES, NOTES_UI_FILE } from "../../utils/constants";
 import { LEGACY_STORAGE_KEYS, STATE_KEYS, normalizeState, pagesFromLegacy } from "../../redux/legacyState";
-import { initSentry, captureException, reportReducerErrors } from "../../utils/sentry";
+import { initSentry, captureException, captureMessage, reportReducerErrors } from "../../utils/sentry";
+import { migrateState, schemaVersionOf } from "../../redux/migrations";
 import { track, trackActions, trackDailyActive } from "../../utils/analytics";
 
 // This runs as a Manifest V3 service worker. Chrome will shut it down when it
@@ -91,11 +92,21 @@ const loadState = async () => {
     return GetInitialState();
   }
 
-  const state = normalizeState(storage, (err) => captureException(err, { during: "legacy storage migration" }));
+  // Older, unversioned layouts are converted to the version 0 shape first,
+  // then the numbered migrations bring it up to the current version
+  const normalized = normalizeState(storage, (err) => captureException(err, { during: "legacy storage migration" }));
+  const state = migrateState(normalized, {
+    onNewerVersion: (version) =>
+      captureMessage("Saved notes are from a newer version of the extension", { schema_version: version }),
+  });
 
   if (!storage.pages) {
     // Replace the early MV3 layout (storage.local.set() only adds keys)
     await chrome.storage.local.remove(LEGACY_STORAGE_KEYS);
+  }
+
+  // Save migrated data right away, rather than whenever the next edit happens
+  if (!storage.pages || schemaVersionOf(state) !== schemaVersionOf(storage)) {
     await chrome.storage.local.set(state);
   }
 
@@ -106,7 +117,8 @@ const LEGACY_IMPORT_DONE_KEY = "legacyLocalStorageImported";
 const OFFSCREEN_URL = "offscreen.html";
 
 // Opens the offscreen document and waits for it to send the MV2 notes
-// (a JSON string, or null if there are none)
+// (a JSON string, or null if there are none). The offscreen API needs
+// Chrome 109+, which is why manifest.json sets minimum_chrome_version.
 const readLegacyLocalStorage = async () => {
   const fromOffscreen = new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -153,7 +165,10 @@ const importLegacyLocalStorage = async (store) => {
   let pages = {};
   try {
     const legacyNotes = await readLegacyLocalStorage();
-    pages = legacyNotes ? pagesFromLegacy(legacyNotes) : {};
+    // pagesFromLegacy produces version 0 notes; run them through the
+    // migrations so they match the current format before merging them in
+    const legacyPages = legacyNotes ? pagesFromLegacy(legacyNotes) : {};
+    pages = migrateState({ pages: legacyPages, tags: [], metadata: { schema_version: 0 } }).pages;
   } catch (err) {
     // Not marked as done, so it is retried the next time the worker starts
     captureException(err, { during: "legacy localStorage import" });

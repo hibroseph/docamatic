@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import PopupWindow from "../PopupWindow";
 import { useState } from "react";
 import { CHROME_MESSAGES } from "../../../utils/constants";
+import { TEST_IDS } from "../../../utils/testIds";
 
 const SettingButton = styled.button`
   border: none;
@@ -84,8 +85,8 @@ const Settings = (props) => {
         <div>
           <SubMessage>This will delete all your notes. This is a non-reversible action!</SubMessage>
           <HorizontalItems>
-            <SettingButton onClick={() => AreYouSureYouWantToNukeConfirmation()}>Yes! Nuke it all!</SettingButton>
-            <SettingButton onClick={() => ClosePopup()}>No! Abort!</SettingButton>
+            <SettingButton data-testid={TEST_IDS.settingsNukeConfirm} onClick={() => AreYouSureYouWantToNukeConfirmation()}>Yes! Nuke it all!</SettingButton>
+            <SettingButton data-testid={TEST_IDS.settingsNukeCancel} onClick={() => ClosePopup()}>No! Abort!</SettingButton>
           </HorizontalItems>
         </div>
       ),
@@ -112,6 +113,7 @@ const Settings = (props) => {
         <label>
           <input
             type="checkbox"
+            data-testid={TEST_IDS.settingsAnalyticsToggle}
             checked={props.analyticsEnabled}
             onChange={(event) => props.setAnalyticsEnabled(event.target.checked)}
           />{" "}
@@ -122,7 +124,7 @@ const Settings = (props) => {
       <MessageHeader bold>Nuke</MessageHeader>
       <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>
       <HorizontalItems>
-        <SettingButton onClick={() => NukeNotes(props.nukeNotes)}>Nuke</SettingButton>
+        <SettingButton data-testid={TEST_IDS.settingsNuke} onClick={() => NukeNotes(props.nukeNotes)}>Nuke</SettingButton>
       </HorizontalItems>
       {showPopup && (
         <PopupWindow title={popupContent.title}>

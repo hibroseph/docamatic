@@ -23,9 +23,12 @@ jobs:
   publish:
     runs-on: ubuntu-22.04
     environment: ${{ github.event.inputs.environment }}
+    permissions:
+      contents: write # create the GitHub Release
+      actions: read   # download artifacts from the build run
     steps:
     - name: "Checkout"
-      uses: actions/checkout@v2.3.1
+      uses: actions/checkout@v4
     
     - name: Download Extension Artifact
       id: download-artifact
@@ -61,6 +64,29 @@ jobs:
         npx --yes @sentry/cli@2 releases new "$SENTRY_RELEASE"
         npx --yes @sentry/cli@2 sourcemaps upload --release "$SENTRY_RELEASE" ./sentry
         # Not finalized: the build still has to go through Chrome Web Store review
+
+    # Keep the exact package users get, attached to a GitHub Release tagged
+    # v<version>. The upgrade test downloads the previous release's app.zip
+    # from here, so it tests what users really have installed. Created before
+    # the Web Store upload because that step may need to be done by hand.
+    - name: Create GitHub Release
+      if: github.event.inputs.environment == 'production'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ github.event.inputs.build_version }}
+        RUN_ID: ${{ github.event.inputs.run_id }}
+      run: |
+        TAG="v$VERSION"
+        if gh release view "$TAG" > /dev/null 2>&1; then
+          echo "Release $TAG already exists, leaving it as is"
+          exit 0
+        fi
+        # Tag the commit the package was built from, not the current branch head
+        COMMIT=$(gh run view "$RUN_ID" --json headSha --jq .headSha)
+        gh release create "$TAG" ./app.zip \
+          --target "$COMMIT" \
+          --title "Docamatic $VERSION" \
+          --notes "Package uploaded to the Chrome Web Store. Built by workflow run $RUN_ID."
 
     - name: Chrome Webstore Access Token
       run: |

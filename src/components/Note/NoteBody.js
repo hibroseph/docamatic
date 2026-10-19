@@ -1,6 +1,7 @@
 import React from 'react'
 import DOMPurify from 'dompurify'
 import { StyledContentEditable } from './style'
+import { TEST_IDS } from '../../utils/testIds'
 
 export const NoteBody = props => {
     const bodyChange = event => {
@@ -16,6 +17,7 @@ export const NoteBody = props => {
 
     return <StyledContentEditable
         html={html}
+        data-testid={TEST_IDS.noteBody}
         onChange={bodyChange}
         onKeyDown={event => event.stopPropagation()}
         onKeyUp={event => event.stopPropagation()}

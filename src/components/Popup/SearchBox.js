@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import { TagBubble } from '../TagBubble/TagBubble'
 import { TagBubbleContainer } from '../TagBubble/TagBubbleContainer'
+import { TEST_IDS } from '../../utils/testIds'
 
 export const SearchInput = styled.input`
     width: 100%;
@@ -32,7 +33,7 @@ export const SearchBox = (props) => {
     return (
     <div>
         <SearchContainer>
-        <SearchInput onChange={event => setSearchQuery({text: event.target.value, tags: searchQuery.tags})} placeholder="Search Notes"></SearchInput>
+        <SearchInput data-testid={TEST_IDS.searchInput} onChange={event => setSearchQuery({text: event.target.value, tags: searchQuery.tags})} placeholder="Search Notes"></SearchInput>
         <TagBubbleContainer 
             style={searchQuery.tags.length > 0 ? {
                 padding: "5px",
@@ -41,6 +42,7 @@ export const SearchBox = (props) => {
             {searchQuery.tags.map(tag => 
                 <TagBubble 
                 key={tag.id}
+                testId={TEST_IDS.searchSelectedTag}
                 text={tag.text} 
                 color={tag.color}
                  removeTag={() => {
@@ -55,6 +57,7 @@ export const SearchBox = (props) => {
         {availableTags.map(tag => 
             <TagBubble 
             key={tag.id}
+            testId={TEST_IDS.searchAvailableTag}
             text={tag.text} 
             color={tag.color}
             removeTag={() => {

@@ -1,5 +1,6 @@
 import React from "react";
 import { ColorSwatchContainer as Container } from "./ColorSwatchStyles";
+import { TEST_IDS } from "../../utils/testIds";
 
 const ColorSwatch = props => {
   return (
@@ -9,6 +10,8 @@ const ColorSwatch = props => {
           <div
             key={color}
             className="color"
+            data-testid={TEST_IDS.noteColor}
+            data-color={color}
             onClick={() => props.onColorChange(color)}
             style={{ backgroundColor: color }}
           ></div>

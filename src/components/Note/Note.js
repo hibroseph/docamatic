@@ -6,6 +6,7 @@ import { connect } from "react-redux";
 import { removeNote, addText, addTitle, changeNoteColor, heartify, toggleVisibility, removeTag, addTag } from "../../redux/actions";
 import { TagBubble } from "../TagBubble/TagBubble";
 import { TagBubbleContainer }  from "../TagBubble/TagBubbleContainer";
+import { TEST_IDS } from "../../utils/testIds";
 
 export const Note = (props) => {
 
@@ -18,7 +19,9 @@ export const Note = (props) => {
         }
     }}
 
-    color={{ ...props.color }}>
+    color={{ ...props.color }}
+    data-testid={TEST_IDS.note}
+    data-note-id={props.id}>
       <TitleBar
         {...props}
         onHeartifyClick={() => props.mutateNote({id: props.id, url: props.url, type: 'heartify'})}
@@ -29,9 +32,10 @@ export const Note = (props) => {
       />
       <TagBubbleContainer>
           {props?.tags?.map(tag => 
-          <TagBubble key={tag.id} removeTag={() => props.mutateNote({id: props.id, url:props.url, tagId:tag.id, type: 'remove_tag'})} text={tag.text} color={tag.color}></TagBubble>
+          <TagBubble key={tag.id} testId={TEST_IDS.noteTag} removeTag={() => props.mutateNote({id: props.id, url:props.url, tagId:tag.id, type: 'remove_tag'})} text={tag.text} color={tag.color}></TagBubble>
         )}
         <TagBubble
+        testId={TEST_IDS.noteAddTag}
         color="#e0e0e0" 
         text="add tag"
         icon="add"
@@ -42,7 +46,7 @@ export const Note = (props) => {
         ></TagBubble>
       </TagBubbleContainer>
       {props.disconnected && 
-      <SyncErrorBox>
+      <SyncErrorBox data-testid={TEST_IDS.noteSyncError}>
         <h3>Sync Error</h3>
         <p>Please reload the page for Docamatic to function correctly</p>
         <ReloadPageButton onClick={() => document.location.reload()}>Reload Page</ReloadPageButton>

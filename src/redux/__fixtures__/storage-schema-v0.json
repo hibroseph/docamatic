@@ -1,0 +1,69 @@
+{
+  "pages": {
+    "https://www.example.com/recipes/pasta": {
+      "notes": [
+        {
+          "id": "8f14e45f-ceea-4e7a-9c1d-1a2b3c4d5e6f",
+          "position": {
+            "x": 412,
+            "y": 260
+          },
+          "size": {
+            "width": 225
+          },
+          "body": "Use half the salt",
+          "title": "Pasta tweaks",
+          "date_created": 1609459200000,
+          "color": {
+            "title": "#f8ac59",
+            "text": "#000"
+          },
+          "stickify": false,
+          "heart": true,
+          "tags": [
+            {
+              "id": "tag-1"
+            }
+          ],
+          "visible": true
+        }
+      ]
+    },
+    "https://news.example.org/": {
+      "notes": [
+        {
+          "id": "c9f0f895-fb98-4b91-a1f2-0e1d2c3b4a59",
+          "position": {
+            "x": 30,
+            "y": 1200
+          },
+          "size": {
+            "width": 300
+          },
+          "body": "<div>Read later</div><div><b>Important</b></div>",
+          "title": null,
+          "date_created": 1609545600000,
+          "color": {
+            "title": "#08597d",
+            "text": "#fff"
+          },
+          "stickify": false,
+          "heart": false
+        }
+      ]
+    }
+  },
+  "tags": [
+    {
+      "id": "tag-1",
+      "text": "cooking",
+      "color": "#c1e5ef",
+      "notes": [
+        "8f14e45f-ceea-4e7a-9c1d-1a2b3c4d5e6f"
+      ]
+    }
+  ],
+  "metadata": {
+    "onboarded": true
+  }
+}

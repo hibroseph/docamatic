@@ -57,5 +57,7 @@ export const TagBubble = (props) => {
         blur.stopPropagation()}}
     onKeyUp={event => event.stopPropagation()}
     color={props.color}
+    data-testid={props.testId}
+    data-tag-text={props.text}
     >{tagText}</TagSpan>
 }

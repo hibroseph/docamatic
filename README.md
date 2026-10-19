@@ -21,3 +21,8 @@
 1. Start production build with `npm run prod`
 2. This will produce an app.zip (which we actually upload to the chrome extension store)
 3. The directory build should be in the root, this will be the production build
+# Changing the saved data format
+Notes are saved in `chrome.storage.local` with a `metadata.schema_version`. Any change to what gets saved must be a new numbered migration in `src/redux/migrations.js` (the steps are at the top of that file), plus a fixture of the previous release's data in `src/redux/__fixtures__/`. The tests run every fixture through the migrations and fail if a note, tag or setting is lost.
+
+# Test hooks
+UI elements that automated browser tests interact with have `data-testid` attributes, defined in `src/utils/testIds.js`. Never rename or remove a shipped id: the upgrade test drives the previously published version with them.

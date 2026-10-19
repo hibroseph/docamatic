@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { useInputControls } from "../../utils/useInputControls";
 import { SettingsBar } from "./SettingsBar";
+import { TEST_IDS } from "../../utils/testIds";
 
 
 export const TitleBar = props => {
@@ -24,6 +25,7 @@ export const TitleBar = props => {
             <input
             key={props.id}
                 ref={controls.title.ref}
+                data-testid={TEST_IDS.noteTitle}
                 style={{ margin: 0 }}
                 value={props.title ? props.title : ""}
                 placeholder="Title"

@@ -8,6 +8,7 @@ import Note from "../../../Note/Note";
 import { COLORS } from "../../../../utils/constants";
 import { GetSafeNoteUrl } from "../../../../utils/GetSafeNoteUrl";
 import { NoRenderErrorBoundary } from "../../../NoRenderErrorBoundary";
+import { TEST_IDS } from "../../../../utils/testIds";
 
 const CurrentPageNotes = (props) => {
   const [url, setCurrentUrl] = useState("");
@@ -40,7 +41,7 @@ const CurrentPageNotes = (props) => {
         <CreateNewNote>
           <MessageHeader bold>There are no notes on this page. </MessageHeader>
           <Image src={ManPostingNote}></Image>
-          <button onClick={props.createNewNote}>Create New Note</button>
+          <button data-testid={TEST_IDS.popupCreateNote} onClick={props.createNewNote}>Create New Note</button>
         </CreateNewNote>
       );
     }

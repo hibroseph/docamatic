@@ -1,5 +1,5 @@
 import { IMPORT_NOTES, NUKE_NOTES, REPLACE_STATE, SET_ANALYTICS_ENABLED, TRACK } from "./actions";
-import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
+import { noteUrlsFor } from "../utils/noteUrl";
 import { captureMessage } from "../utils/sentry";
 
 // Actions that affect every page, or settings/analytics. Only our own
@@ -36,7 +36,8 @@ export const authorizeSender = () => (next) => (action) => {
 
   if (fromExtensionPage) return next(action);
 
-  const fromOwnPage = fromThisExtension && Boolean(action.url) && action.url === GetSafeNoteUrl(sender.url);
+  // Any url this page's notes may be saved under (see utils/noteUrl.js)
+  const fromOwnPage = fromThisExtension && Boolean(action.url) && noteUrlsFor(sender.url).includes(action.url);
 
   if (PRIVILEGED_ACTIONS.has(action.type) || !fromOwnPage) {
     captureMessage("Blocked an action a content script isn't allowed to send", {

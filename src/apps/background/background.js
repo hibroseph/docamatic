@@ -6,7 +6,7 @@ import config from "../../../config.json";
 import { GetInitialState } from "../../utils/GetInitialState";
 import { authorizeSender } from "../../redux/authorizeSender";
 import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../../redux/actions";
-import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
+import { noteUrlsFor } from "../../utils/noteUrl";
 import { CHROME_MESSAGES, NOTES_UI_FILE } from "../../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../../redux/legacyState";
 import { initSentry, captureException, reportReducerErrors } from "../../utils/sentry";
@@ -19,7 +19,7 @@ import {
   validateState,
 } from "../../redux/statePipeline";
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../../redux/backups";
-import { urlsThatGainedNotes } from "../../redux/pageNotes";
+import { pageHasNotes, urlsThatGainedNotes } from "../../redux/pageNotes";
 import { track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../../utils/analytics";
 
 // This runs as a Manifest V3 service worker. Chrome will shut it down when it
@@ -58,8 +58,7 @@ const mountNotesUi = async (sender) => {
   const store = await storeReady;
   // Decided from the url Chrome reports for the sender, not anything in the
   // message, so a page can't probe whether other urls have notes
-  const notes = store.getState().pages?.[GetSafeNoteUrl(sender.url)]?.notes;
-  if (!notes?.length) return false;
+  if (!pageHasNotes(store.getState(), noteUrlsFor(sender.url))) return false;
 
   await injectNotesUi(sender.tab.id, sender.frameId);
   return true;
@@ -76,10 +75,32 @@ function injectNotesUi(tabId, frameId = 0) {
 // Loads the notes UI into every open tab showing one of these pages
 const showNotesInOpenTabs = async (urls) => {
   const tabs = await chrome.tabs.query({});
-  const matching = tabs.filter((tab) => tab.url && urls.includes(GetSafeNoteUrl(tab.url)));
+  const matching = tabs.filter((tab) => noteUrlsFor(tab.url).some((key) => urls.includes(key)));
   // Fails for tabs Chrome has unloaded to save memory; they load the UI
   // themselves when they're reopened
   await Promise.all(matching.map((tab) => injectNotesUi(tab.id).catch(() => {})));
+};
+
+// Single page apps (GitHub, X, YouTube, ...) change the url with
+// history.pushState instead of loading a new page. Chrome reports every url
+// change here, including those, which is more reliable than detecting it
+// inside the page (where e.g. GitHub only updates the url after fetching the
+// next page). Listened to at the top level so it works when the worker wakes.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (!changeInfo.url) return;
+  handleUrlChange(tabId, changeInfo.url).catch((err) => captureException(err, { during: "handling url change" }));
+});
+
+const handleUrlChange = async (tabId, url) => {
+  // A notes UI already on the page switches to the new page's notes. Fails
+  // harmlessly when there isn't one (or the page is still loading).
+  chrome.tabs.sendMessage(tabId, { action: CHROME_MESSAGES.URL_CHANGED }).catch(() => {});
+
+  // Pages that only have the small loader get the UI if the new url has notes
+  const store = await storeReady;
+  if (pageHasNotes(store.getState(), noteUrlsFor(url))) {
+    await injectNotesUi(tabId).catch(() => {});
+  }
 };
 
 // When a page gets its first note (created, imported or restored), show the

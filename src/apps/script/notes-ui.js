@@ -9,12 +9,39 @@ import { StyleSheetManager } from 'styled-components';
 import { config as fontAwesomeConfig, dom as fontAwesomeDom } from "@fortawesome/fontawesome-svg-core";
 import { initSentry } from "../../utils/sentry";
 import { createProxyStore } from "../../utils/createProxyStore";
+import { CHROME_MESSAGES } from "../../utils/constants";
+import { notifyUrlChange } from "../../utils/urlChanges";
 
 // Font Awesome normally adds its stylesheet to document.head. Here that is
 // the host page's head: it would add global .fa-* rules to every site (and
 // clash with sites using their own Font Awesome), while not reaching our icons
 // inside the shadow root at all. Its CSS is added to the shadow root instead.
 fontAwesomeConfig.autoAddCss = false;
+
+// Some sites replace the whole <body> when navigating (GitHub's Turbo does on
+// every link click), or clear the body's children, which takes the notes'
+// root element with it. Put it back whenever that happens: moving the element
+// keeps its shadow root and the React tree inside it intact. Only direct
+// children of <html> and <body> are watched, so this costs next to nothing.
+const keepAttached = (rootNode) => {
+  const observer = new MutationObserver(() => reattach());
+
+  const watch = () => {
+    observer.disconnect();
+    observer.observe(document.documentElement, { childList: true });
+    if (document.body) observer.observe(document.body, { childList: true });
+  };
+
+  const reattach = () => {
+    if (!rootNode.isConnected && document.body) {
+      document.body.appendChild(rootNode);
+    }
+    // The body may be a new element now, so watch that one
+    watch();
+  };
+
+  watch();
+};
 
 // Guard against being injected twice into the same page (e.g. the loader
 // asking again while the first injection is still loading). Scripts injected
@@ -39,6 +66,11 @@ const initPageScript = () => {
     if (event.persisted) store.resync();
   });
   document.addEventListener("resume", () => store.resync());
+
+  // The background tells us when a single page app changes the url
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.action === CHROME_MESSAGES.URL_CHANGED) notifyUrlChange();
+  });
 
   const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
   AttachRootNodeAndRender();
@@ -66,6 +98,7 @@ const initPageScript = () => {
     });
     rootNode.id = PAGE_MOUNT_POINT;
     document.body.appendChild(rootNode);
+    keepAttached(rootNode);
 
     // "closed" so the page's own scripts can't reach the notes through
     // element.shadowRoot. Otherwise analytics/session-replay tools on the site

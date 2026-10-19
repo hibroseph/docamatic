@@ -63,6 +63,9 @@ const createNote = (action) => {
     body: action.highlightedText || null,
     title: null,
     date_created: action.date_created,
+    // Where the note was created, in full (credentials removed). Lets future
+    // changes to which url notes are saved under re-file notes precisely.
+    ...(action.created_on_url ? { created_on_url: action.created_on_url } : {}),
     color: { title: color, text: getContrastingColor(color) },
     stickify: false,
     heart: false,

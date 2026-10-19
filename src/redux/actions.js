@@ -126,12 +126,18 @@ export function addText(id, text, url) {
   };
 }
 
-export function addNote(id, y_position, url) {
+/**
+ * @param url the url the note is saved under (noteUrlFor)
+ * @param createdOnUrl the full address it was created on, credentials
+ *   removed (redactUrl); kept as a record, see utils/noteUrl.js
+ */
+export function addNote(id, y_position, url, createdOnUrl) {
   return {
     type: ADD_NOTE,
     id: id,
     y_position,
     url,
+    created_on_url: createdOnUrl,
     date_created: new Date().getTime(),
   };
 }

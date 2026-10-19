@@ -1,4 +1,7 @@
-// Removes query strings and other variances in urls so your note shows up where you want it/expect it
+// The original rule for which url a note is saved under: drops everything
+// after "?" or "#". Replaced by noteUrlFor() in noteUrl.js, which keeps the
+// parts that identify a page; this is still used to find notes saved under
+// the old rule. Never change what it returns, or those notes stop showing.
 
 export const GetSafeNoteUrl = (url) => {
   if (!url) return url;

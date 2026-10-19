@@ -48,7 +48,8 @@
             "text": "#fff"
           },
           "stickify": false,
-          "heart": false
+          "heart": false,
+          "created_on_url": "https://news.example.org/?utm_source=newsletter#top"
         }
       ]
     }

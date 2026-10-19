@@ -1,4 +1,4 @@
-import { pagesWithNotes, urlsThatGainedNotes } from "./pageNotes";
+import { notesOnPage, pageHasNotes, pagesWithNotes, urlsThatGainedNotes } from "./pageNotes";
 
 const state = (pages) => ({ pages, tags: [], metadata: {} });
 
@@ -20,4 +20,19 @@ test("Nothing gained when notes are edited or deleted", () => {
     const before = state({ "https://a.com/": { notes: [{ id: 1 }] } });
     expect(urlsThatGainedNotes(before, state({ "https://a.com/": { notes: [{ id: 1, body: "x" }] } }))).toEqual([]);
     expect(urlsThatGainedNotes(before, state({}))).toEqual([]);
+})
+
+test("Collects a page's notes from every url they may be saved under, with that url", () => {
+    const s = state({
+        "https://www.youtube.com/watch?v=abc": { notes: [{ id: "new" }] },
+        "https://www.youtube.com/watch": { notes: [{ id: "old" }] },
+        "https://www.youtube.com/watch?v=xyz": { notes: [{ id: "other-video" }] },
+    });
+    const keys = ["https://www.youtube.com/watch?v=abc", "https://www.youtube.com/watch"];
+    expect(notesOnPage(s, keys)).toEqual([
+        { note: { id: "new" }, pageUrl: "https://www.youtube.com/watch?v=abc" },
+        { note: { id: "old" }, pageUrl: "https://www.youtube.com/watch" },
+    ]);
+    expect(pageHasNotes(s, keys)).toBe(true);
+    expect(pageHasNotes(s, ["https://elsewhere.com/"])).toBe(false);
 })

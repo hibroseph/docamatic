@@ -7,7 +7,7 @@ import { addNote, trackEvent } from "../../redux/actions";
 import { faStickyNote, faSearch, faHeart, faCog, faBell, faCompass, faSortAmountDown } from "@fortawesome/free-solid-svg-icons";
 import { connect } from "react-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
-import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
+import { noteUrlFor, redactUrl } from "../../utils/noteUrl";
 import { TEST_IDS } from "../../utils/testIds";
 import styled from "styled-components";
 
@@ -106,7 +106,7 @@ export const Popup = (props) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     addNoteClick: (response) => {
-      return dispatch(addNote(generateUUID(), response.scrollPosition, GetSafeNoteUrl(response.page)));
+      return dispatch(addNote(generateUUID(), response.scrollPosition, noteUrlFor(response.page), redactUrl(response.page)));
     },
     trackPageView: (page) => {
       dispatch(trackEvent("popup_page_viewed", { page }));

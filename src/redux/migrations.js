@@ -19,7 +19,8 @@
 //   0: Saved before versioning existed (2022-2023 builds). Same shape as 1.
 //      Older formats (the MV2 localStorage data and the 2022 JSON string in
 //      storage.local) are first converted to this shape by legacyState.js.
-//   1: 5.0.0. { pages: { [url]: { notes } }, tags, metadata }.
+//   1: 5.0.0. { pages: { [url]: { notes } }, tags, metadata }. Notes created
+//      from 5.0.0 on also have created_on_url (optional; older notes don't).
 
 export const CURRENT_SCHEMA_VERSION = 1;
 

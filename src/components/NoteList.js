@@ -7,6 +7,8 @@ import {
   updateNoteSize
 } from "../redux/actions";
 import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
+import { noteUrlsFor } from "../utils/noteUrl";
+import { notesOnPage } from "../redux/pageNotes";
 
 const NO_NOTES = [];
 
@@ -16,7 +18,7 @@ export const NoteList = (props) => {
 
     return (
       <div>
-        {props.url && props.notes.map(note => {
+        {props.url && props.notes.map(({ note, pageUrl }) => {
           if (note.visible || note.visible == undefined) {
             return (
               <NoRenderErrorBoundary key={note.id}>
@@ -24,16 +26,17 @@ export const NoteList = (props) => {
                   windowWidth={props.windowWidth}
                   onPositionChange={(id, x, y) =>
                     // @ts-ignore
-                    props.mutateNote({ id, x, y, url: props.url, type: 'position_change' })
+                    props.mutateNote({ id, x, y, url: pageUrl, type: 'position_change' })
                   }
                   onSizeChange={(width) =>
                     // @ts-ignore
-                    props.mutateNote({ id: note.id, width, url: props.url, type: 'size_change' })
+                    props.mutateNote({ id: note.id, width, url: pageUrl, type: 'size_change' })
                   }
                   key={note.id}
                   {...note}
                   tags={props.tags.filter(tag => tag.notes?.includes(note.id))}
-                  url={props.url}
+                  // The url this note is saved under, which edits must use
+                  url={pageUrl}
                   setZIndex={() => {
                     setNoteOnTop(note.id)}}
                   style={{ zIndex: noteOnTop && note.id == noteOnTop ? 1 : 0 }}
@@ -48,12 +51,32 @@ export const NoteList = (props) => {
 
 }
 
-// Uses the url App is tracking (rather than reading location again) so the
-// notes shown and the url used to save edits can never disagree
-const mapStateToProps = (state, props) => {
-  return {
-    notes: state.pages?.[props.url]?.notes || NO_NOTES,
-    tags: state.tags || NO_NOTES,
+// Uses the url App is tracking (rather than reading location again). A page's
+// notes can be saved under more than one url (see utils/noteUrl.js), so they
+// are collected from each. The result is reused while those note arrays are
+// unchanged, so updates to other pages' notes don't re-render this page.
+const makeMapStateToProps = () => {
+  let lastKey = null;
+  let lastSources = [];
+  let lastNotes = NO_NOTES;
+
+  return (state, props) => {
+    const keys = noteUrlsFor(props.url);
+    const sources = keys.map((key) => state.pages?.[key]?.notes);
+    const keyString = keys.join(" ");
+    const unchanged = keyString === lastKey && sources.every((notes, i) => notes === lastSources[i]);
+
+    if (!unchanged) {
+      lastKey = keyString;
+      lastSources = sources;
+      const notes = notesOnPage(state, keys);
+      lastNotes = notes.length > 0 ? notes : NO_NOTES;
+    }
+
+    return {
+      notes: lastNotes,
+      tags: state.tags || NO_NOTES,
+    };
   };
 };
 
@@ -77,4 +100,4 @@ const mapDispatchToProps = dispatch => ({
   }
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(NoteList);
+export default connect(makeMapStateToProps, mapDispatchToProps)(NoteList);

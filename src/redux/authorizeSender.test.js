@@ -59,3 +59,12 @@ test("Blocks content scripts from sending analytics events or changing settings"
     expect(run({ type: "TRACK", event: "spam", url: "https://evil.com/", _sender: sender }).allowed).toBe(false);
     expect(run({ type: "SET_ANALYTICS_ENABLED", enabled: true, url: "https://evil.com/", _sender: sender }).allowed).toBe(false);
 })
+
+test("Content scripts can edit notes saved under their page's current or older url", () => {
+    const sender = contentScriptOn("https://www.youtube.com/watch?v=abc&t=10s");
+    expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch?v=abc", _sender: sender }).allowed).toBe(true);
+    // Saved before urls kept ?v=
+    expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch", _sender: sender }).allowed).toBe(true);
+    // A different video is a different page
+    expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch?v=xyz", _sender: sender }).allowed).toBe(false);
+})

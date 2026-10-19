@@ -1,0 +1,152 @@
+// Which "page" a note belongs to: the url it is saved under.
+//
+// A page's address can contain things that identify the content (YouTube's
+// ?v=, a forum's ?t=, an app's #/route) and things that don't (tracking
+// parameters, timestamps, #section anchors). Notes are saved under the url
+// with only the identifying parts kept, so a note shows on that content and
+// nowhere else, however the page was reached.
+//
+// Before this, everything after "?" or "#" was dropped (see GetSafeNoteUrl.js),
+// so e.g. a note on one YouTube video showed on every video. Notes saved that
+// way keep their old key, and noteUrlsFor() returns both keys so those notes
+// still show where they always have.
+import { GetSafeNoteUrl as legacyNoteUrl } from "./GetSafeNoteUrl";
+
+export { legacyNoteUrl };
+
+// Query parameters that commonly identify what a page shows. Anything else
+// is dropped: keeping a parameter by mistake makes notes "disappear" when the
+// page is reached through a link with different tracking parameters, while
+// dropping one by mistake only shares notes between those pages (the old
+// behavior). Extend this, or SITE_RULES, when a site needs it.
+const IDENTIFYING_PARAMS = new Set([
+  "id",
+  "p", // WordPress posts
+  "page_id",
+  "q", // search queries
+  "query",
+  "search",
+  "t", // forum topics (phpBB, vBulletin)
+  "topic",
+  "f", // forum sections
+  "thread",
+  "item",
+  "story",
+  "article",
+  "product",
+  "pid",
+  "title", // e.g. MediaWiki index.php?title=
+]);
+
+// Sites where the generic rules get it wrong. `params` replaces the
+// identifying parameters for matching urls.
+const SITE_RULES = [
+  {
+    // Only v identifies the video; t is a timestamp, list/index a playlist
+    matches: (url) => /(^|\.)youtube\.com$/.test(url.hostname) && url.pathname === "/watch",
+    params: ["v"],
+  },
+];
+
+// Fragments that are routes (#/inbox, #!/settings), not in-page anchors
+const isRouteFragment = (hash) => /^#!?\//.test(hash);
+
+/**
+ * The url a note on this page is saved under.
+ * e.g. https://www.youtube.com/watch?v=abc&t=42s&utm_source=x -> https://www.youtube.com/watch?v=abc
+ */
+export const noteUrlFor = (href) => {
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return legacyNoteUrl(href);
+  }
+  // Only web pages have meaningful parts to keep (not about:, data:, ...)
+  if (!["http:", "https:", "file:"].includes(url.protocol)) {
+    return legacyNoteUrl(href);
+  }
+
+  const rule = SITE_RULES.find((siteRule) => siteRule.matches(url));
+  const keep = rule ? new Set(rule.params) : IDENTIFYING_PARAMS;
+
+  const params = [...url.searchParams]
+    .filter(([name, value]) => keep.has(name) && value !== "")
+    .sort(([a, aValue], [b, bValue]) => (a === b ? aValue.localeCompare(bValue) : a.localeCompare(b)));
+  const query = params.length > 0 ? "?" + new URLSearchParams(params).toString() : "";
+
+  const path = url.pathname.replace(/\/{2,}/g, "/");
+  const fragment = isRouteFragment(url.hash) ? url.hash : "";
+
+  return `${url.protocol}//${url.host}${path}${query}${fragment}`;
+};
+
+/**
+ * Every url notes for this page may be saved under: the current key, and the
+ * key notes saved before these rules used (when different).
+ */
+export const noteUrlsFor = (href) => {
+  if (!href) return [];
+  const current = noteUrlFor(href);
+  const legacy = legacyNoteUrl(href);
+  return current === legacy ? [current] : [current, legacy];
+};
+
+// Parameter names that may hold credentials: tokens, OAuth codes, sessions,
+// keys, signatures, passwords. Deliberately broad (e.g. "author" matches
+// "auth"): dropping a harmless parameter costs nothing, keeping a secret does.
+const SENSITIVE_PARAM = /token|secret|passw|pwd|session|sessid|signature|auth|credential|apikey|api_key|^(code|state|key|sig|sid|otp|nonce|ticket|jwt|saml\w*)$/i;
+
+// Removes credential-like parameters from a query string (without "?").
+// Returns it untouched when there's nothing to remove, so the record keeps
+// its exact original encoding.
+const redactQuery = (query) => {
+  const params = new URLSearchParams(query);
+  const sensitive = [...params.keys()].filter((name) => SENSITIVE_PARAM.test(name));
+  if (sensitive.length === 0) return query;
+  sensitive.forEach((name) => params.delete(name));
+  return params.toString();
+};
+
+/**
+ * The page address a note was created on, kept with the note as a record
+ * (notes are found by noteUrlFor, not this). Everything is kept except
+ * anything that may be a credential, because notes end up in backup files
+ * people send around and possibly synced storage later: credential-like
+ * query/fragment parameters and any user:password@ in the address.
+ */
+export const redactUrl = (href) => {
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return undefined;
+  }
+  if (!["http:", "https:", "file:"].includes(url.protocol)) return undefined;
+
+  url.username = "";
+  url.password = "";
+
+  const query = redactQuery(url.search.slice(1));
+  url.search = query ? "?" + query : "";
+
+  // Fragments can carry tokens too: OAuth puts them in "#access_token=...",
+  // and #-routed apps in "#/callback?code=..."
+  const fragment = url.hash.slice(1);
+  if (isRouteFragment(url.hash)) {
+    const [route, routeQuery] = splitOnce(fragment, "?");
+    if (routeQuery !== undefined) {
+      const redacted = redactQuery(routeQuery);
+      url.hash = redacted ? `${route}?${redacted}` : route;
+    }
+  } else if (fragment.includes("=")) {
+    url.hash = redactQuery(fragment);
+  }
+
+  return url.toString();
+};
+
+const splitOnce = (text, separator) => {
+  const index = text.indexOf(separator);
+  return index === -1 ? [text, undefined] : [text.slice(0, index), text.slice(index + 1)];
+};

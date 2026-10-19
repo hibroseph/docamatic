@@ -6,7 +6,8 @@ import WomanLookingAtWebPageImage from "../../../../assets/woman-looking-at-webp
 import ManPostingNote from "../../../../assets/man-posting-note.png";
 import Note from "../../../Note/Note";
 import { COLORS } from "../../../../utils/constants";
-import { GetSafeNoteUrl } from "../../../../utils/GetSafeNoteUrl";
+import { noteUrlsFor } from "../../../../utils/noteUrl";
+import { notesOnPage } from "../../../../redux/pageNotes";
 import { NoRenderErrorBoundary } from "../../../NoRenderErrorBoundary";
 import { TEST_IDS } from "../../../../utils/testIds";
 
@@ -15,8 +16,9 @@ const CurrentPageNotes = (props) => {
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      let url = tabs[0].url;
-      setCurrentUrl(GetSafeNoteUrl(url));
+      // The full address; the notes shown are those saved under any url that
+      // applies to it (see utils/noteUrl.js)
+      setCurrentUrl(tabs[0].url);
     });
   }, []);
 
@@ -35,8 +37,10 @@ const CurrentPageNotes = (props) => {
     );
   };
 
+  const pageNotes = notesOnPage({ pages: props.notes }, noteUrlsFor(url));
+
   const RenderNoValidNote = () => {
-    if ((!Object.keys(props.notes).includes(url) || props.notes[url].notes.length == 0) && IsValidUrl()) {
+    if (pageNotes.length == 0 && IsValidUrl()) {
       return (
         <CreateNewNote>
           <MessageHeader bold>There are no notes on this page. </MessageHeader>
@@ -55,22 +59,18 @@ const CurrentPageNotes = (props) => {
       <PageTitle>Current Notes on Page</PageTitle>
       {!IsValidUrl(url) && NotValidPage()}
       {IsValidUrl(url) &&
-        Object.keys(props.notes).map((key) => {
-          if (key == url) {
-            return props.notes[key].notes.map((note) => {
-              return (
-                <NoRenderErrorBoundary key={note.id}>
-                  <NotePadding key={note.id}>
-                    <Note popup={true} 
-                    {...note} 
-                    disableClick={true}
-                    tags={props.tags.filter(tag => tag.notes.includes(note.id))}
-                    colors={props.colors} url={key} />
-                  </NotePadding>
-                </NoRenderErrorBoundary>
-              );
-            });
-          }
+        pageNotes.map(({ note, pageUrl }) => {
+          return (
+            <NoRenderErrorBoundary key={note.id}>
+              <NotePadding key={note.id}>
+                <Note popup={true} 
+                {...note} 
+                disableClick={true}
+                tags={props.tags.filter(tag => tag.notes.includes(note.id))}
+                colors={props.colors} url={pageUrl} />
+              </NotePadding>
+            </NoRenderErrorBoundary>
+          );
         })}
       {RenderNoValidNote()}
     </NoteList>

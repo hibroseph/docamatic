@@ -12,3 +12,14 @@ export const urlsThatGainedNotes = (before, after) => {
   const had = new Set(pagesWithNotes(before));
   return pagesWithNotes(after).filter((url) => !had.has(url));
 };
+
+/**
+ * The notes to show on a page, from every url they may be saved under (see
+ * noteUrlsFor). Each comes with the `pageUrl` it is saved under, which is
+ * the url edits to it must use.
+ * @param keys from noteUrlsFor(location.href)
+ */
+export const notesOnPage = (state, keys) =>
+  keys.flatMap((pageUrl) => (state?.pages?.[pageUrl]?.notes || []).map((note) => ({ note, pageUrl })));
+
+export const pageHasNotes = (state, keys) => keys.some((pageUrl) => state?.pages?.[pageUrl]?.notes?.length > 0);

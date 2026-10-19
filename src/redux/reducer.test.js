@@ -83,3 +83,12 @@ test("Replace state swaps in the restored notes", () => {
     const restored = { pages: {}, tags: [], metadata: { onboarded: true, schema_version: 1 } };
     expect(notesApp(stateWithNote(), replaceState(restored))).toBe(restored);
 })
+
+test("New notes remember the full address they were created on", () => {
+    const state = notesApp(GetInitialState(), addNote("n1", 0, "https://www.youtube.com/watch?v=abc", "https://www.youtube.com/watch?v=abc&t=42s"));
+    expect(state.pages["https://www.youtube.com/watch?v=abc"].notes[0].created_on_url).toBe("https://www.youtube.com/watch?v=abc&t=42s");
+})
+
+test("Notes without a known creation address don't get an empty field", () => {
+    expect("created_on_url" in stateWithNote().pages[URL].notes[0]).toBe(false);
+})

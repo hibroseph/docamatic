@@ -12,6 +12,8 @@ export const CHROME_MESSAGES = {
   GET_PAGE_INFORMATION: "get_page_information",
   // Page -> background: inject the notes UI into this tab
   MOUNT_NOTES_UI: "mount_notes_ui",
+  // Background -> page: the url changed without a page load (single page app)
+  URL_CHANGED: "url_changed",
   // Backup & restore page -> background
   GET_BACKUP_STATUS: "get_backup_status",
   IMPORT_BACKUP: "import_backup",

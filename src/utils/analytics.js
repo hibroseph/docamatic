@@ -1,5 +1,7 @@
-// Minimal, anonymous usage analytics sent to PostHog from the background
-// service worker.
+// Minimal usage analytics sent to PostHog from the background service
+// worker. Not linked to anyone's identity, but PostHog does store the
+// sender's IP address (used for approximate location); the privacy policy
+// (src/apps/homepage/privacy.html) says so.
 //
 // Why not the posthog-js SDK: it expects a web page (window, localStorage),
 // so it can't run in an MV3 service worker, and by default it downloads extra
@@ -62,7 +64,7 @@ export const track = async (event, properties = {}) => {
           ...properties,
           extension_version: config.version,
           environment: config.environment,
-          // Anonymous event: no person profile is created for the install id
+          // No PostHog person profile is created for the install id
           $process_person_profile: false,
         },
       }),

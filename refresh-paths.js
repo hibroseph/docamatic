@@ -38,6 +38,7 @@ fs.copyFileSync(`./dist/${assets["homepage.js"]}`, `./dist/site/${assets["homepa
 fs.copyFileSync("./src/apps/homepage/styles.css", "./dist/site/styles.css")
 fs.copyFileSync("./src/apps/homepage/changelog.html", "./dist/site/changelog.html")
 fs.copyFileSync("./src/apps/homepage/contactus.html", "./dist/site/contactus.html")
+fs.copyFileSync("./src/apps/homepage/privacy.html", "./dist/site/privacy.html")
 console.log("copying images")
 if (!fs.existsSync("./dist/site/images")) {
   fs.mkdirSync("./dist/site/images");

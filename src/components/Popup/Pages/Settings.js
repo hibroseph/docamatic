@@ -115,8 +115,9 @@ const Settings = (props) => {
             checked={props.analyticsEnabled}
             onChange={(event) => props.setAnalyticsEnabled(event.target.checked)}
           />{" "}
-          Share anonymous usage statistics (like how many notes are created). Never your notes or the sites you visit.
-        </label>
+          Share usage statistics (like how many notes are created). Never your notes or the sites you visit.
+        </label>{" "}
+        <a href="https://hibroseph.github.io/docamatic/privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a>
       </SubMessage>
       <MessageHeader bold>Nuke</MessageHeader>
       <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>

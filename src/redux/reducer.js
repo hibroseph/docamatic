@@ -12,6 +12,7 @@ import {
   NUKE_NOTES,
   REMOVE_NOTE,
   REMOVE_TAG,
+  REPLACE_STATE,
   RESIZE_NOTE,
   SET_ANALYTICS_ENABLED,
   TOGGLE_VISIBILITY,
@@ -117,8 +118,9 @@ const notesApp = (state = GetInitialState(), action) => {
       return { ...GetInitialState(), metadata: state.metadata };
 
     case IMPORT_NOTES: {
-      // action.notes is an exported `pages` object. Only notes that don't
-      // already exist (by id) are added.
+      // action.notes is a `pages` object, action.tags a tags array. Only adds:
+      // notes that already exist (by id) are kept as they are, and tags that
+      // already exist (by id) just gain the imported notes.
       const pages = { ...state.pages };
 
       Object.entries(action.notes || {}).forEach(([url, page]) => {
@@ -128,8 +130,23 @@ const notesApp = (state = GetInitialState(), action) => {
         pages[url] = { ...pages[url], notes: [...existingNotes, ...newNotes] };
       });
 
-      return { ...state, pages };
+      const tags = [...(state.tags || [])];
+      (action.tags || []).forEach((importedTag) => {
+        const index = tags.findIndex((tag) => tag.id === importedTag.id);
+        if (index === -1) {
+          tags.push(importedTag);
+        } else {
+          const noteIds = new Set([...(tags[index].notes || []), ...(importedTag.notes || [])]);
+          tags[index] = { ...tags[index], notes: [...noteIds] };
+        }
+      });
+
+      return { ...state, pages, tags };
     }
+
+    case REPLACE_STATE:
+      // Validated (and the current notes backed up) by the background first
+      return action.state;
 
     case HEARTIFY:
       return updateNote(state, action.url, action.id, (note) => ({ heart: !note.heart }));

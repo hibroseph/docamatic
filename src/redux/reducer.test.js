@@ -1,5 +1,5 @@
 import notesApp from './reducer';
-import { addNote, addTag, addText, heartify, importNotes, nukeNotes, removeNote, removeTag, setAnalyticsEnabled, updateNotePosition } from './actions';
+import { addNote, addTag, addText, heartify, importNotes, nukeNotes, removeNote, removeTag, replaceState, setAnalyticsEnabled, updateNotePosition } from './actions';
 import { GetInitialState } from '../utils/GetInitialState';
 
 const URL = "https://x.com/";
@@ -65,4 +65,21 @@ test("Nuke clears notes but remembers the user was onboarded", () => {
 test("Turning analytics off is remembered in metadata", () => {
     const state = notesApp(GetInitialState(), setAnalyticsEnabled(false));
     expect(state.metadata.analytics_enabled).toBe(false);
+})
+
+test("Import merges tags: new tags are added, existing ones gain the imported notes", () => {
+    const state = { ...stateWithNote(), tags: [{ id: "t1", text: "work", color: "#fff", notes: ["note-1"] }] };
+    const imported = notesApp(state, importNotes(
+        { [URL]: { notes: [{ id: "note-9" }] } },
+        [{ id: "t1", text: "work", color: "#fff", notes: ["note-9"] }, { id: "t2", text: "home", color: "#000", notes: ["note-9"] }]
+    ));
+    expect(imported.tags).toEqual([
+        { id: "t1", text: "work", color: "#fff", notes: ["note-1", "note-9"] },
+        { id: "t2", text: "home", color: "#000", notes: ["note-9"] },
+    ]);
+})
+
+test("Replace state swaps in the restored notes", () => {
+    const restored = { pages: {}, tags: [], metadata: { onboarded: true, schema_version: 1 } };
+    expect(notesApp(stateWithNote(), replaceState(restored))).toBe(restored);
 })

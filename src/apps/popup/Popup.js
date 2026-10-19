@@ -8,6 +8,22 @@ import { faStickyNote, faSearch, faHeart, faCog, faBell, faCompass, faSortAmount
 import { connect } from "react-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
 import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
+import { TEST_IDS } from "../../utils/testIds";
+import styled from "styled-components";
+
+const SafeModeBanner = styled.div`
+  padding: 20px;
+  line-height: 1.5;
+  button {
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 14px;
+    background-color: #08597d;
+    color: white;
+    cursor: pointer;
+  }
+`;
 
 // The list of icons to generate in the side bar
 const icons = [
@@ -62,6 +78,24 @@ export const Popup = (props) => {
     }
   };
 
+  // The background couldn't load the notes safely (see safe mode in
+  // apps/background/background.js), so nothing here would work
+  if (props.safeMode) {
+    return (
+      <Container>
+        <SafeModeBanner data-testid={TEST_IDS.popupSafeModeBanner}>
+          <h3>Docamatic is in safe mode</h3>
+          <p>
+            Your notes couldn't be loaded safely after an update, so Docamatic isn't showing or changing them. They are
+            still saved on this computer.
+          </p>
+          <p>Please download a backup and email it to sticknoteapp@gmail.com so we can help.</p>
+          <button onClick={() => chrome.runtime.openOptionsPage()}>Backup &amp; Restore</button>
+        </SafeModeBanner>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <IconList icons={icons} page={currentPage} onClicky={(data) => DetermineClick(data)}></IconList>
@@ -81,4 +115,8 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(Popup);
+const mapStateToProps = (state) => ({
+  safeMode: state.metadata?.safe_mode,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Popup);

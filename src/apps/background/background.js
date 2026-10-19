@@ -5,12 +5,20 @@ import { applyMiddleware, createStore } from "redux";
 import config from "../../../config.json";
 import { GetInitialState } from "../../utils/GetInitialState";
 import { authorizeSender } from "../../redux/authorizeSender";
-import { importNotes } from "../../redux/actions";
+import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../../redux/actions";
 import { GetSafeNoteUrl } from "../../utils/GetSafeNoteUrl";
 import { CHROME_MESSAGES, NOTES_UI_FILE } from "../../utils/constants";
-import { LEGACY_STORAGE_KEYS, STATE_KEYS, normalizeState, pagesFromLegacy } from "../../redux/legacyState";
-import { initSentry, captureException, captureMessage, reportReducerErrors } from "../../utils/sentry";
-import { migrateState, schemaVersionOf } from "../../redux/migrations";
+import { STATE_KEYS, pagesFromLegacy } from "../../redux/legacyState";
+import { initSentry, captureException, reportReducerErrors } from "../../utils/sentry";
+import { migrateState } from "../../redux/migrations";
+import {
+  assertNoNotesLost,
+  countNotes,
+  isEmptyStorage,
+  prepareStoredState,
+  validateState,
+} from "../../redux/statePipeline";
+import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../../redux/backups";
 import { track, trackActions, trackDailyActive } from "../../utils/analytics";
 
 // This runs as a Manifest V3 service worker. Chrome will shut it down when it
@@ -85,32 +93,85 @@ chrome.runtime.setUninstallURL(feedbackUrl);
 // pending write can't be lost to the worker shutting down.
 const SAVE_DELAY_MS = 500;
 
+// --- Keeping notes safe -----------------------------------------------------
+//
+// The rule: stored notes are never changed unless the change is known to be
+// good. Before converting or migrating stored data, an untouched copy is
+// saved as an automatic backup; the new data is written and read back to
+// confirm every note survived; only then are old keys removed. If any of that
+// fails, or the data can't be understood, the extension runs in safe mode:
+// read-only, nothing is written, and the Backup & restore page explains what
+// to do. A failure must never lead to starting with empty notes and saving
+// that over the user's data.
+
+// Set when stored notes couldn't be loaded safely: { reason, message }
+let safeMode = null;
+
+const enterSafeMode = (err) => {
+  safeMode = { reason: err?.reason || "load_failed", message: err?.message || String(err) };
+  console.error("Docamatic is in safe mode; notes will not be changed", err);
+  captureException(err, { during: "loading notes", safe_mode_reason: safeMode.reason });
+  track("safe_mode_entered", { reason: safeMode.reason });
+};
+
+// What the store shows in safe mode: no notes (they couldn't be read safely)
+// and a flag the popup uses to show the safe mode message. Never saved.
+const safeModeState = () => {
+  const initial = GetInitialState();
+  return { ...initial, metadata: { ...initial.metadata, safe_mode: safeMode } };
+};
+
+// Saves an automatic backup of the notes data currently in storage
+const backupStoredNotes = async (storage, reason) => {
+  const entry = createBackupEntry(storage, { reason, extensionVersion: config.version });
+  const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+  await chrome.storage.local.set({ [BACKUPS_STORAGE_KEY]: addBackup(backups, entry) });
+};
+
+// Writes state, then reads it back to confirm it was saved intact
+const saveAndVerify = async (state) => {
+  await chrome.storage.local.set(state);
+  const saved = await chrome.storage.local.get(STATE_KEYS);
+  validateState(saved);
+  assertNoNotesLost(state, saved);
+};
+
+// Throws (and changes nothing) if the stored notes can't be loaded safely
 const loadState = async () => {
   const storage = await chrome.storage.local.get(null);
 
-  if (!STATE_KEYS.some((key) => key in storage) && !LEGACY_STORAGE_KEYS.some((key) => key in storage)) {
+  if (isEmptyStorage(storage)) {
     return GetInitialState();
   }
 
-  // Older, unversioned layouts are converted to the version 0 shape first,
-  // then the numbered migrations bring it up to the current version
-  const normalized = normalizeState(storage, (err) => captureException(err, { during: "legacy storage migration" }));
-  const state = migrateState(normalized, {
-    onNewerVersion: (version) =>
-      captureMessage("Saved notes are from a newer version of the extension", { schema_version: version }),
-  });
+  // Converts older layouts and runs migrations in memory, checking that
+  // every note is still there. Throws instead of returning partial data.
+  const { state, changed, legacyKeys } = prepareStoredState(storage);
 
-  if (!storage.pages) {
-    // Replace the early MV3 layout (storage.local.set() only adds keys)
-    await chrome.storage.local.remove(LEGACY_STORAGE_KEYS);
-  }
-
-  // Save migrated data right away, rather than whenever the next edit happens
-  if (!storage.pages || schemaVersionOf(state) !== schemaVersionOf(storage)) {
-    await chrome.storage.local.set(state);
+  if (changed) {
+    // 1. Keep an untouched copy of the data as it was
+    await backupStoredNotes(storage, BACKUP_REASONS.BEFORE_UPDATE);
+    // 2. Save the converted data and confirm it saved correctly
+    await saveAndVerify(state);
+    // 3. Only now remove the old layout's keys
+    if (legacyKeys.length > 0) {
+      await chrome.storage.local.remove(legacyKeys);
+    }
   }
 
   return state;
+};
+
+// One automatic backup per day, so a bug that damages notes later can be
+// undone from the Backup & restore page
+const backupDaily = async () => {
+  const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+  const today = new Date().toISOString().slice(0, 10);
+  const doneToday = (backups || []).some(
+    (backup) => backup.reason === BACKUP_REASONS.DAILY && backup.created_at.startsWith(today)
+  );
+  if (doneToday) return;
+  await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.DAILY);
 };
 
 const LEGACY_IMPORT_DONE_KEY = "legacyLocalStorageImported";
@@ -159,6 +220,7 @@ const readLegacyLocalStorage = async () => {
  * The old localStorage copy is left in place as a backup.
  */
 const importLegacyLocalStorage = async (store) => {
+  if (safeMode) return;
   const { [LEGACY_IMPORT_DONE_KEY]: done } = await chrome.storage.local.get(LEGACY_IMPORT_DONE_KEY);
   if (done) return;
 
@@ -179,28 +241,108 @@ const importLegacyLocalStorage = async (store) => {
 
   if (noteCount > 0) {
     store.dispatch(importNotes(pages));
-    // Save right away rather than waiting for the debounced save, so the
-    // notes are in chrome.storage before the import is marked as done
-    await chrome.storage.local.set(store.getState());
+    // Save right away and confirm it, so the notes are safely in
+    // chrome.storage before the import is marked as done (the old copy in
+    // localStorage is never deleted either way)
+    await saveAndVerify(store.getState());
     track("legacy_notes_imported", { note_count: noteCount, page_count: Object.keys(pages).length });
   }
 
   await chrome.storage.local.set({ [LEGACY_IMPORT_DONE_KEY]: true });
 };
 
+// Restores an automatic backup, replacing the current notes. The current
+// notes are backed up first, so a restore can itself be undone.
+const restoreBackup = async (store, backupId) => {
+  const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+  const backup = (backups || []).find((entry) => entry.id === backupId);
+  if (!backup) throw new Error("That backup no longer exists.");
+
+  const { state } = prepareStoredState(backup.storage);
+  await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.BEFORE_RESTORE);
+  store.dispatch(replaceState(state));
+  await saveAndVerify(store.getState());
+  track("backup_restored", { note_count: countNotes(state) });
+  return { noteCount: countNotes(state) };
+};
+
+// Merges notes from a backup file into the current notes (only adds)
+const importBackup = async (store, importedState) => {
+  // Checked again here rather than trusting what the page parsed
+  const { state } = prepareStoredState(importedState || {});
+  await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.BEFORE_IMPORT);
+  const before = countNotes(store.getState());
+  store.dispatch(importNotes(state.pages, state.tags));
+  await saveAndVerify(store.getState());
+  const added = countNotes(store.getState()) - before;
+  track("backup_imported", { note_count: countNotes(state), added_count: added });
+  return { noteCount: countNotes(state), addedCount: added };
+};
+
+// Messages from the Backup & restore page (extension pages only)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const handlers = {
+    [CHROME_MESSAGES.GET_BACKUP_STATUS]: async () => ({ safeMode }),
+    [CHROME_MESSAGES.IMPORT_BACKUP]: async (store) => importBackup(store, message.state),
+    [CHROME_MESSAGES.RESTORE_BACKUP]: async (store) => restoreBackup(store, message.backupId),
+  };
+  const handler = handlers[message?.type];
+  if (!handler) return;
+  if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+
+  storeReady
+    .then((store) => {
+      if (safeMode && message.type !== CHROME_MESSAGES.GET_BACKUP_STATUS) {
+        throw new Error("Docamatic is in safe mode, so it won't change your notes. Download a backup and contact us.");
+      }
+      return handler(store);
+    })
+    .then(
+      (result) => sendResponse({ ok: true, ...result }),
+      (err) => {
+        captureException(err, { during: message.type });
+        sendResponse({ ok: false, error: err?.message || String(err) });
+      }
+    );
+  return true; // responding asynchronously
+});
+
+// In safe mode nothing may change the notes (the store holds a placeholder,
+// not the real notes). Analytics events are still allowed through.
+const blockChangesInSafeMode = () => (next) => (action) => {
+  if (safeMode && action.type !== TRACK) return;
+  return next(action);
+};
+
+// Deleting every note is the one destructive thing users can do, so keep a
+// backup first. If the backup can't be saved, the delete doesn't happen.
+const backupBeforeDeleteAll = () => (next) => (action) => {
+  if (action.type !== NUKE_NOTES) return next(action);
+  return chrome.storage.local
+    .get(null)
+    .then((storage) => backupStoredNotes(storage, BACKUP_REASONS.BEFORE_DELETE_ALL))
+    .then(() => next(action));
+};
+
 loadState()
   .catch((err) => {
-    console.error("Failed to read notes from storage, starting with initial state", err);
-    captureException(err, { during: "loading state" });
-    return GetInitialState();
+    enterSafeMode(err);
+    return safeModeState();
   })
   .then((preloadedState) => {
-    const store = createStore(notesApp, preloadedState, applyMiddleware(authorizeSender, reportReducerErrors, trackActions));
+    const store = createStore(
+      notesApp,
+      preloadedState,
+      applyMiddleware(authorizeSender, blockChangesInSafeMode, backupBeforeDeleteAll, reportReducerErrors, trackActions)
+    );
 
     let lastSavedState = preloadedState;
     let saveTimer = null;
 
     store.subscribe(() => {
+      // Never write in safe mode: storage still holds the user's real notes
+      if (safeMode) return;
+
       clearTimeout(saveTimer);
       saveTimer = setTimeout(() => {
         const state = store.getState();
@@ -220,5 +362,10 @@ loadState()
     wrapStore(store, { diffStrategy: deepDiff });
     resolveStoreReady(store);
 
-    importLegacyLocalStorage(store).finally(() => trackDailyActive(store.getState()));
+    if (safeMode) return;
+
+    importLegacyLocalStorage(store)
+      .then(() => backupDaily())
+      .catch((err) => captureException(err, { during: "startup backups" }))
+      .finally(() => trackDailyActive(store.getState()));
   });

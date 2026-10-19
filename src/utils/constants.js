@@ -14,6 +14,10 @@ export const CHROME_MESSAGES = {
   SHOW_NOTES: "show_notes",
   // Page -> background: inject the notes UI into this tab
   MOUNT_NOTES_UI: "mount_notes_ui",
+  // Backup & restore page -> background
+  GET_BACKUP_STATUS: "get_backup_status",
+  IMPORT_BACKUP: "import_backup",
+  RESTORE_BACKUP: "restore_backup",
 };
 
 // The notes UI bundle the background injects into pages that have notes

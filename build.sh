@@ -51,6 +51,7 @@ cp *.js app
 cp index.html app
 cp onboarding.html app
 cp offscreen.html app
+cp options.html app
 cp -r assets app
 cp manifest.json app
 cp -r icons app

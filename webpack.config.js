@@ -17,7 +17,8 @@ const config = {
     "notes-ui": "./src/apps/script/notes-ui.js",
     homepage: "./src/apps/homepage/index.js",
     onboarding: "./src/apps/tabpage/onboarding.js",
-    offscreen: "./src/apps/offscreen/offscreen.js"
+    offscreen: "./src/apps/offscreen/offscreen.js",
+    options: "./src/apps/options/options.js"
   },
   // Extension will be built into ./dist folder, which we can then load as unpacked extension in Chrome
   output: {
@@ -78,6 +79,11 @@ const config = {
       hash: true,
       filename: "onboarding.html",
       template: "./src/apps/tabpage/tabpage.html"
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["options"],
+      filename: "options.html",
+      template: "./src/apps/options/options.html"
     }),
     new HtmlWebpackPlugin({
       chunks: ["offscreen"],

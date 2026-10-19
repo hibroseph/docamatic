@@ -4,11 +4,9 @@ import { PageTitle } from "../style";
 import config from "../../../../config.json";
 import { MessageHeader, SubMessage } from "../Pages/CurrentPageNotes/style";
 import { connect } from "react-redux";
-import { importNotes, nukeNotes, setAnalyticsEnabled } from "../../../redux/actions";
-import { saveAs } from "file-saver";
+import { nukeNotes, setAnalyticsEnabled } from "../../../redux/actions";
 import PopupWindow from "../PopupWindow";
 import { useState } from "react";
-import { CHROME_MESSAGES } from "../../../utils/constants";
 import { TEST_IDS } from "../../../utils/testIds";
 
 const SettingButton = styled.button`
@@ -34,10 +32,6 @@ const Settings = (props) => {
   const [showPopup, setPopupVisibility] = useState(false);
   const [popupContent, setPopupContent] = useState(null);
 
-  /*
-  const [showToast, setToastVisibility] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
-*/
   const NukeNotes = () => {
     setPopupContent(GetNukeConfirmationPopup());
     setPopupVisibility(true);
@@ -52,38 +46,11 @@ const Settings = (props) => {
     setPopupVisibility(false);
   };
 
-  const SaveNotesToFile = (notes) => {
-    var blob = new Blob([JSON.stringify(notes)], { type: "application/json;charset=utf-8" });
-    saveAs(blob, "docamatic-notes.json");
-  };
-
-  const OpenFile = (event, importNotes) => {
-    /*
-    setToastMessage("Importing Your Notes");
-    setToastVisibility(true);
-*/
-    var input = event.target;
-
-    var reader = new FileReader();
-
-    reader.onload = function () {
-      var notes = JSON.parse(reader.result);
-      importNotes(notes, ClosePopup);
-    };
-
-    reader.readAsText(input.files[0]);
-  };
-
-  const OpenNotesToFile = () => {
-    let fileElement = document.getElementById("inputFile");
-    fileElement.click();
-  };
-
   const GetNukeConfirmationPopup = () => {
     return {
       jsx: (
         <div>
-          <SubMessage>This will delete all your notes. This is a non-reversible action!</SubMessage>
+          <SubMessage>This will delete all your notes. A backup is saved first, which you can restore from Backup &amp; Restore.</SubMessage>
           <HorizontalItems>
             <SettingButton data-testid={TEST_IDS.settingsNukeConfirm} onClick={() => AreYouSureYouWantToNukeConfirmation()}>Yes! Nuke it all!</SettingButton>
             <SettingButton data-testid={TEST_IDS.settingsNukeCancel} onClick={() => ClosePopup()}>No! Abort!</SettingButton>
@@ -97,13 +64,11 @@ const Settings = (props) => {
   return (
     <div>
       <PageTitle>Settings</PageTitle>
-      {/*<MessageHeader bold>Export/Import</MessageHeader>
+      <MessageHeader bold>Backup &amp; Restore</MessageHeader>
+      <SubMessage>Download your notes, import a backup, or restore an automatic backup.</SubMessage>
       <HorizontalItems>
-        <SettingButton onClick={() => SaveNotesToFile(props.notes)}>Export Notes</SettingButton>
-        <SettingButton onClick={() => OpenNotesToFile()}>Import Notes</SettingButton>
-        <input id="inputFile" hidden type="file" name="Import" onChange={(event) => OpenFile(event, props.importNotes)} />
+        <SettingButton data-testid={TEST_IDS.settingsBackupRestore} onClick={() => chrome.runtime.openOptionsPage()}>Backup &amp; Restore</SettingButton>
       </HorizontalItems>
-      */}
       <HorizontalItems>
         <SettingButton onClick={() => chrome.tabs.create({url : "/onboarding.html"}, () =>{ })}>Tutorial</SettingButton>
         <SettingButton onClick={() => chrome.tabs.create({url : "https://hibroseph.github.io/docamatic/contactus.html"}, () => {})}>Contact Us</SettingButton>
@@ -122,7 +87,7 @@ const Settings = (props) => {
         <a href="https://hibroseph.github.io/docamatic/privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a>
       </SubMessage>
       <MessageHeader bold>Nuke</MessageHeader>
-      <SubMessage>Warning! This will delete all notes. There is no recovery</SubMessage>
+      <SubMessage>Deletes all notes. A backup is saved first, so this can be undone from Backup &amp; Restore.</SubMessage>
       <HorizontalItems>
         <SettingButton data-testid={TEST_IDS.settingsNuke} onClick={() => NukeNotes(props.nukeNotes)}>Nuke</SettingButton>
       </HorizontalItems>
@@ -132,7 +97,6 @@ const Settings = (props) => {
         </PopupWindow>
       )}
 
-      {/*showToast && <Toast message={toastMessage}></Toast>*/}
       <p>Docamatic Version: {config.version}</p>
     </div>
   );
@@ -140,16 +104,12 @@ const Settings = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    notes: state.pages,
     analyticsEnabled: state.metadata?.analytics_enabled !== false,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    importNotes: (notes, closePopup) => {
-      dispatch(importNotes(notes, closePopup));
-    },
     nukeNotes: () => {
       dispatch(nukeNotes());
     },

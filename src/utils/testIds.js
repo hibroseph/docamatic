@@ -37,4 +37,17 @@ export const TEST_IDS = {
   noteTag: "note-tag",
   noteAddTag: "note-add-tag",
   noteSyncError: "note-sync-error",
+
+  settingsBackupRestore: "settings-backup-restore",
+  popupSafeModeBanner: "popup-safe-mode-banner",
+
+  // The Backup & restore page (options.html). Written as literals in
+  // apps/options/options.html and options.js, which avoid other imports.
+  backupSafeModeBanner: "backup-safe-mode-banner",
+  backupDownload: "backup-download",
+  backupImportFile: "backup-import-file",
+  backupList: "backup-list",
+  // One per automatic backup row, and its restore button
+  backupEntry: "backup-entry",
+  backupRestore: "backup-restore",
 };

@@ -15,6 +15,8 @@ export const USER_ONBOARDED = "USER_ONBOARDED"
 export const SET_ANALYTICS_ENABLED = "SET_ANALYTICS_ENABLED"
 // Not a state change: carries an analytics event to the background
 export const TRACK = "TRACK"
+// Replaces all notes, tags and settings (restoring an automatic backup)
+export const REPLACE_STATE = "REPLACE_STATE"
 
 /*
  * action creators
@@ -44,11 +46,20 @@ export function nukeNotes() {
   };
 }
 
-export function importNotes(notes, closePopup) {
+// Merges notes (a url-keyed `pages` object) and tags into the current ones.
+// Only adds: notes and tags that already exist are left as they are.
+export function importNotes(pages, tags = []) {
   return {
     type: IMPORT_NOTES,
-    notes,
-    closePopup: closePopup,
+    notes: pages,
+    tags,
+  };
+}
+
+export function replaceState(state) {
+  return {
+    type: REPLACE_STATE,
+    state,
   };
 }
 

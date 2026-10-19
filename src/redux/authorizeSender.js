@@ -1,10 +1,10 @@
-import { IMPORT_NOTES, NUKE_NOTES, SET_ANALYTICS_ENABLED, TRACK } from "./actions";
+import { IMPORT_NOTES, NUKE_NOTES, REPLACE_STATE, SET_ANALYTICS_ENABLED, TRACK } from "./actions";
 import { GetSafeNoteUrl } from "../utils/GetSafeNoteUrl";
 import { captureMessage } from "../utils/sentry";
 
 // Actions that affect every page, or settings/analytics. Only our own
 // extension pages (popup, onboarding) may send these.
-const PRIVILEGED_ACTIONS = new Set([NUKE_NOTES, IMPORT_NOTES, SET_ANALYTICS_ENABLED, TRACK]);
+const PRIVILEGED_ACTIONS = new Set([NUKE_NOTES, IMPORT_NOTES, REPLACE_STATE, SET_ANALYTICS_ENABLED, TRACK]);
 
 const hostnameOf = (url) => {
   try {

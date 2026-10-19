@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { CURRENT_SCHEMA_VERSION, MIGRATION_VERSIONS, migrateState, schemaVersionOf } from "./migrations";
 import { normalizeState, pagesFromLegacy } from "./legacyState";
+import { noteIdsIn } from "./statePipeline";
 import { GetInitialState } from "../utils/GetInitialState";
 
 const FIXTURES_DIR = path.join(__dirname, "__fixtures__");
@@ -15,19 +16,6 @@ const loadFixture = (file) => {
         return { raw: data, state: migrateState({ pages, tags: [], metadata: { schema_version: 0 } }) };
     }
     return { raw: data, state: migrateState(normalizeState(data)) };
-};
-
-// Every note id anywhere in the raw saved data (parsing the 2022 JSON string)
-const noteIdsIn = (value) => {
-    if (typeof value === "string") {
-        try { return noteIdsIn(JSON.parse(value)); } catch { return []; }
-    }
-    if (!value || typeof value !== "object") return [];
-    return Object.entries(value).flatMap(([key, child]) =>
-        key === "notes" && Array.isArray(child) && child.every((n) => n && typeof n === "object")
-            ? child.map((note) => note.id)
-            : noteIdsIn(child)
-    );
 };
 
 const noteIdsInState = (state) => Object.values(state.pages).flatMap((page) => page.notes.map((note) => note.id));

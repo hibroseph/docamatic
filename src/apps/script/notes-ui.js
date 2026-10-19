@@ -32,6 +32,14 @@ const initPageScript = () => {
   // know the page needs a refresh.
   const store = createProxyStore(() => document.dispatchEvent(new CustomEvent('docamatic-disconnect')));
 
+  // Pages kept in Chrome's back/forward cache, or frozen in the background,
+  // don't receive state updates while they're away. Fetch the whole state
+  // again when they come back, so they don't keep showing outdated notes.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) store.resync();
+  });
+  document.addEventListener("resume", () => store.resync());
+
   const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
   AttachRootNodeAndRender();
 

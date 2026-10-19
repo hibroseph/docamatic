@@ -62,10 +62,9 @@ export const Popup = (props) => {
       }
     }
 
-    await props.addNoteClick(pageInformation);
-    // The notes UI is only loaded on pages that have notes, and this page
-    // might not have had any until now
-    chrome.tabs.sendMessage(tab.id, { action: CHROME_MESSAGES.SHOW_NOTES }).catch(() => {});
+    // The background shows the notes UI in every tab with this page open
+    // once the note is added (see showNotesWhenPagesGainNotes)
+    props.addNoteClick(pageInformation);
   };
 
   const DetermineClick = (data) => {

@@ -19,7 +19,8 @@ import {
   validateState,
 } from "../../redux/statePipeline";
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../../redux/backups";
-import { track, trackActions, trackDailyActive } from "../../utils/analytics";
+import { urlsThatGainedNotes } from "../../redux/pageNotes";
+import { track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../../utils/analytics";
 
 // This runs as a Manifest V3 service worker. Chrome will shut it down when it
 // is idle and start it again when an event comes in, so this file runs from
@@ -53,20 +54,45 @@ const storeReady = new Promise((resolve) => (resolveStoreReady = resolve));
 // be injected into its tab. Injecting from here rather than having the page
 // load it means the UI bundle doesn't need to be web accessible, so websites
 // can't use it to detect the extension.
-const mountNotesUi = async ({ onlyIfPageHasNotes }, sender) => {
-  if (onlyIfPageHasNotes) {
-    const store = await storeReady;
-    // Decided from the url Chrome reports for the sender, not anything in the
-    // message, so a page can't probe whether other urls have notes
-    const notes = store.getState().pages?.[GetSafeNoteUrl(sender.url)]?.notes;
-    if (!notes?.length) return false;
-  }
+const mountNotesUi = async (sender) => {
+  const store = await storeReady;
+  // Decided from the url Chrome reports for the sender, not anything in the
+  // message, so a page can't probe whether other urls have notes
+  const notes = store.getState().pages?.[GetSafeNoteUrl(sender.url)]?.notes;
+  if (!notes?.length) return false;
 
-  await chrome.scripting.executeScript({
-    target: { tabId: sender.tab.id, frameIds: [sender.frameId] },
+  await injectNotesUi(sender.tab.id, sender.frameId);
+  return true;
+};
+
+// The notes UI guards against being injected twice, so this is safe to repeat
+function injectNotesUi(tabId, frameId = 0) {
+  return chrome.scripting.executeScript({
+    target: { tabId, frameIds: [frameId] },
     files: [NOTES_UI_FILE],
   });
-  return true;
+}
+
+// Loads the notes UI into every open tab showing one of these pages
+const showNotesInOpenTabs = async (urls) => {
+  const tabs = await chrome.tabs.query({});
+  const matching = tabs.filter((tab) => tab.url && urls.includes(GetSafeNoteUrl(tab.url)));
+  // Fails for tabs Chrome has unloaded to save memory; they load the UI
+  // themselves when they're reopened
+  await Promise.all(matching.map((tab) => injectNotesUi(tab.id).catch(() => {})));
+};
+
+// When a page gets its first note (created, imported or restored), show the
+// notes UI in every tab that has that page open. Otherwise those tabs, which
+// only have the small loader, wouldn't show the note until they reload.
+const showNotesWhenPagesGainNotes = (store) => (next) => (action) => {
+  const before = store.getState();
+  const result = next(action);
+  const urls = urlsThatGainedNotes(before, store.getState());
+  if (urls.length > 0) {
+    showNotesInOpenTabs(urls).catch((err) => captureException(err, { during: "showing notes in open tabs" }));
+  }
+  return result;
 };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -74,7 +100,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only our own content scripts, and only into the tab they are running in
   if (sender.id !== chrome.runtime.id || !sender.tab) return;
 
-  mountNotesUi(message, sender).then(
+  mountNotesUi(sender).then(
     (mounted) => sendResponse({ mounted }),
     (err) => {
       captureException(err, { during: "mounting notes UI" });
@@ -333,7 +359,14 @@ loadState()
     const store = createStore(
       notesApp,
       preloadedState,
-      applyMiddleware(authorizeSender, blockChangesInSafeMode, backupBeforeDeleteAll, reportReducerErrors, trackActions)
+      applyMiddleware(
+        authorizeSender,
+        blockChangesInSafeMode,
+        backupBeforeDeleteAll,
+        reportReducerErrors,
+        showNotesWhenPagesGainNotes,
+        trackActions
+      )
     );
 
     let lastSavedState = preloadedState;
@@ -363,6 +396,10 @@ loadState()
     resolveStoreReady(store);
 
     if (safeMode) return;
+
+    // Read the analytics opt-out from the live state from now on (not in safe
+    // mode, where the store only holds a placeholder)
+    useStoreForAnalyticsSetting(store.getState);
 
     importLegacyLocalStorage(store)
       .then(() => backupDaily())

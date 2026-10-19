@@ -10,8 +10,6 @@ export const INITIAL_NOTE_WIDTH = 225;
 export const CHROME_MESSAGES = {
   // Popup -> page: where to put a new note
   GET_PAGE_INFORMATION: "get_page_information",
-  // Popup -> page: a note was just created here, show the notes UI
-  SHOW_NOTES: "show_notes",
   // Page -> background: inject the notes UI into this tab
   MOUNT_NOTES_UI: "mount_notes_ui",
   // Backup & restore page -> background

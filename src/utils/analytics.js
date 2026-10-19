@@ -29,28 +29,55 @@ const STORAGE_KEY = "analytics";
 const isConfigured = () => Boolean(config.posthog_api_key && config.posthog_host);
 
 // Users can turn analytics off in the popup settings. The setting lives in
-// the notes state (metadata), which the background also saves to storage.
+// the notes state (metadata). Once the background's store is loaded it is
+// read from there, so turning it off takes effect immediately; before that
+// (e.g. the install event) it is read from storage.
+let readEnabledFromStore = null;
+
+export const useStoreForAnalyticsSetting = (getState) => {
+  readEnabledFromStore = () => getState().metadata?.analytics_enabled !== false;
+};
+
 const isEnabled = async () => {
+  if (readEnabledFromStore) return readEnabledFromStore();
   const { metadata } = await chrome.storage.local.get("metadata");
   return metadata?.analytics_enabled !== false;
 };
 
 // A random id per install, so PostHog can count unique users without knowing
-// anything about who they are
-const getAnalyticsState = async () => {
-  const stored = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY];
-  if (stored?.installId) return stored;
+// anything about who they are. Several events can be sent at once while the
+// service worker starts (e.g. install + daily active), so the id is looked up
+// or created once and shared; otherwise each could create its own id and one
+// install would count as several users.
+let installIdPromise = null;
 
-  const created = { installId: generateUUID() };
-  await chrome.storage.local.set({ [STORAGE_KEY]: created });
-  return created;
+export const getInstallId = () => {
+  if (!installIdPromise) {
+    installIdPromise = (async () => {
+      const stored = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY];
+      if (stored?.installId) return stored.installId;
+      const installId = generateUUID();
+      await chrome.storage.local.set({ [STORAGE_KEY]: { ...stored, installId } });
+      return installId;
+    })().catch((err) => {
+      installIdPromise = null; // try again next time
+      throw err;
+    });
+  }
+  return installIdPromise;
+};
+
+// For tests
+export const resetAnalyticsForTests = () => {
+  installIdPromise = null;
+  readEnabledFromStore = null;
 };
 
 export const track = async (event, properties = {}) => {
   try {
     if (!isConfigured() || !(await isEnabled())) return;
 
-    const { installId } = await getAnalyticsState();
+    const installId = await getInstallId();
 
     await fetch(`${config.posthog_host}/i/v0/e/`, {
       method: "POST",
@@ -128,7 +155,9 @@ const today = () => new Date().toISOString().slice(0, 10);
 export const trackDailyActive = async (state) => {
   if (!isConfigured()) return;
 
-  const analytics = await getAnalyticsState();
+  // Make sure the shared install id exists before reading the stored entry
+  await getInstallId();
+  const analytics = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY];
   if (analytics.lastDailyActive === today()) return;
 
   await chrome.storage.local.set({ [STORAGE_KEY]: { ...analytics, lastDailyActive: today() } });

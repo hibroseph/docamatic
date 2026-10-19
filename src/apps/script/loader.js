@@ -13,12 +13,13 @@ if (!window.__DOCAMATIC_LOADER__) {
   let uiMounted = false;
   let lastUrl = null;
 
-  // Asks the background to inject the notes UI into this tab. With
-  // onlyIfPageHasNotes it only does so when this page has notes.
-  const requestNotesUi = async (onlyIfPageHasNotes) => {
+  // Asks the background to inject the notes UI into this tab if this page
+  // has notes. (When a page gets its first note, the background injects the
+  // UI into open tabs itself.)
+  const requestNotesUi = async () => {
     if (uiMounted) return;
     try {
-      const response = await chrome.runtime.sendMessage({ type: CHROME_MESSAGES.MOUNT_NOTES_UI, onlyIfPageHasNotes });
+      const response = await chrome.runtime.sendMessage({ type: CHROME_MESSAGES.MOUNT_NOTES_UI });
       if (response?.mounted) {
         uiMounted = true;
         // From here on the UI tracks url changes itself
@@ -35,7 +36,7 @@ if (!window.__DOCAMATIC_LOADER__) {
   const checkUrl = () => {
     if (location.href === lastUrl) return;
     lastUrl = location.href;
-    requestNotesUi(true);
+    requestNotesUi();
   };
   const checkUrlAfterClick = () => requestAnimationFrame(checkUrl);
 
@@ -58,12 +59,6 @@ if (!window.__DOCAMATIC_LOADER__) {
         pageWidth: document.documentElement.clientWidth,
         pageHeight: document.documentElement.clientHeight,
       });
-    }
-
-    // A note was just created on this page from the popup
-    if (request.action === CHROME_MESSAGES.SHOW_NOTES) {
-      requestNotesUi(false).then(() => sendResponse({}));
-      return true; // responding asynchronously
     }
   });
 

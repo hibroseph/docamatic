@@ -29,7 +29,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   the basis for the UI redesign. The browsable version is the design system
   artifact linked in `design-system/ABOUT.md`.
 
+### Changed
+- Website change log: added the history of versions before 5.0.0 (2019–2020
+  updates, and the 2020 version's known issues, labeled as such).
+
 ### Fixed
+- Website change log: removed a stray `</script>` tag from the page's head.
 - Publish workflow: an expired or revoked Chrome Web Store refresh token now
   fails at the token step with Google's error, instead of passing an access
   token of `null` on and failing at the upload. Uses Google's current token

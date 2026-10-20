@@ -14,6 +14,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+### Fixed
+- Publish workflow: a rejected Web Store upload (e.g. `ITEM_NOT_UPDATABLE`
+  while a review is pending) now fails the workflow with the Web Store's
+  error. The API answers HTTP 200 either way, so it passed before.
+
 ## 5.0.1 (2026-10-20)
 
 ### Added

@@ -108,13 +108,31 @@ jobs:
         echo "::add-mask::$ACCESS_TOKEN"
         echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> "$GITHUB_ENV"
 
-    - name: Chrome Webstore Publish
+    # Uploads the package as the item's new draft. It still has to be
+    # submitted for review in the developer dashboard.
+    # The API answers HTTP 200 even when the upload is rejected (e.g.
+    # ITEM_NOT_UPDATABLE while a review is pending), with the result in
+    # uploadState, so that is checked rather than the HTTP status.
+    - name: Chrome Webstore Upload
+      env:
+        EXTENSION_ID: ${{ github.event.inputs.chrome_extension_id }}
       run: |
-        curl \
-        -H "Authorization: Bearer ${{ env.ACCESS_TOKEN }}"  \
-        -H "x-goog-api-version: 2" \
-        -X PUT \
-        -T ./app.zip \
-        -i \
-        --fail-with-body \
-        https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ github.event.inputs.chrome_extension_id }}
+        set -euo pipefail
+        RESPONSE=$(curl --silent --show-error --fail-with-body \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          -H "x-goog-api-version: 2" \
+          -X PUT \
+          -T ./app.zip \
+          "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$EXTENSION_ID")
+        echo "$RESPONSE" | jq .
+        STATE=$(echo "$RESPONSE" | jq -r '.uploadState // "UNKNOWN"')
+        case "$STATE" in
+          SUCCESS)
+            echo "Uploaded. Submit it for review in the Chrome Web Store developer dashboard." ;;
+          IN_PROGRESS)
+            echo "::warning::The Web Store is still processing the upload. Check the developer dashboard to see whether it succeeded." ;;
+          *)
+            echo "$RESPONSE" | jq -r '.itemError[]? | "::error::\(.error_code): \(.error_detail)"'
+            echo "::error::Upload failed (uploadState $STATE)."
+            exit 1 ;;
+        esac

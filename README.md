@@ -26,3 +26,10 @@ Notes are saved in `chrome.storage.local` with a `metadata.schema_version`. Any 
 
 # Test hooks
 UI elements that automated browser tests interact with have `data-testid` attributes, defined in `src/utils/testIds.js`. Never rename or remove a shipped id: the upgrade test drives the previously published version with them.
+
+# Releasing: Chrome Web Store credentials
+The **publish extension** workflow uploads with three repository/environment secrets: `CHROME_WEBSTORE_CLIENT_ID`, `CHROME_WEBSTORE_CLIENT_SECRET` and `CHROME_WEBSTORE_REFRESH_TOKEN`. If it fails with "Couldn't get a Chrome Web Store access token", make a new refresh token:
+1. In Google Cloud Console (the project with the OAuth client): **APIs & Services → OAuth consent screen**. Make sure the publishing status is **In production**, not Testing; in Testing, refresh tokens expire after 7 days.
+2. **Credentials**: use the existing OAuth client (type Web application) or create one, with `https://developers.google.com/oauthplayground` as an authorized redirect URI. The Chrome Web Store API must be enabled.
+3. In the [OAuth Playground](https://developers.google.com/oauthplayground): gear icon → "Use your own OAuth credentials" → enter client ID and secret. Scope: `https://www.googleapis.com/auth/chromewebstore`. Authorize with the Google account that owns the extension, then "Exchange authorization code for tokens".
+4. Put the new refresh token (and client ID/secret if they changed) into the GitHub secrets. If the workflow's job uses an environment (e.g. `production`), update them there.

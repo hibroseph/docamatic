@@ -1,4 +1,4 @@
-import { getInstallId, resetAnalyticsForTests, track, useStoreForAnalyticsSetting } from "./analytics";
+import { getInstallId, isInternalInstall, resetAnalyticsForTests, setInternalInstall, track, useStoreForAnalyticsSetting } from "./analytics";
 
 // A fake chrome.storage.local that, like the real one, answers asynchronously
 const fakeStorage = (initial = {}) => {
@@ -14,7 +14,7 @@ let storage;
 beforeEach(() => {
     resetAnalyticsForTests();
     storage = fakeStorage();
-    global.chrome = { storage: { local: storage } };
+    global.chrome = { storage: { local: storage }, management: { getSelf: async () => ({ installType: "normal" }) } };
     global.fetch = jest.fn(async () => ({ ok: true }));
 });
 
@@ -49,4 +49,25 @@ test("Before the store is loaded, the setting is read from storage", async () =>
     storage.data.metadata = { analytics_enabled: false };
     await track("extension_installed");
     expect(global.fetch).not.toHaveBeenCalled();
+})
+
+const sentProperties = () => JSON.parse(global.fetch.mock.calls[0][1].body).properties;
+
+test("Web Store installs aren't internal by default", async () => {
+    await track("popup_opened");
+    expect(sentProperties().internal).toBe(false);
+})
+
+test("Unpacked (development) installs are always internal", async () => {
+    chrome.management.getSelf = async () => ({ installType: "development" });
+    await track("popup_opened");
+    expect(sentProperties().internal).toBe(true);
+})
+
+test("Any install can be marked internal by hand, and unmarked", async () => {
+    await setInternalInstall(true);
+    expect(await isInternalInstall()).toBe(true);
+    expect(storage.data.analytics.installId).toBeDefined(); // id kept
+    await setInternalInstall(false);
+    expect(await isInternalInstall()).toBe(false);
 })

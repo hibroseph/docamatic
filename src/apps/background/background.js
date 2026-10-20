@@ -22,7 +22,7 @@ import {
 } from "../../redux/statePipeline";
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../../redux/backups";
 import { pageHasNotes, urlsThatGainedNotes } from "../../redux/pageNotes";
-import { track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../../utils/analytics";
+import { setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../../utils/analytics";
 
 // This runs as a Manifest V3 service worker. Chrome will shut it down when it
 // is idle and start it again when an event comes in, so this file runs from
@@ -171,6 +171,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 initSentry("background");
+
+// For the developer's own Web Store install: run docamaticMarkInternal() in
+// the service worker's DevTools console so its analytics events are marked
+// internal and filtered out of the numbers (unpacked installs always are).
+// docamaticMarkInternal(false) undoes it.
+self.docamaticMarkInternal = async (internal = true) => {
+  await setInternalInstall(internal);
+  return internal ? "This install's events are now marked internal." : "This install's events are no longer marked internal.";
+};
 
 // For checking that error reporting works: run docamaticSentryTest() in the
 // service worker's DevTools console. Throwing an error directly in the console

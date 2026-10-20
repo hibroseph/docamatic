@@ -78,7 +78,36 @@ export const getInstallId = () => {
 // For tests
 export const resetAnalyticsForTests = () => {
   installIdPromise = null;
+  internalPromise = null;
   readEnabledFromStore = null;
+};
+
+// Marks the developer's own installs so PostHog can filter them out of the
+// numbers ("Filter out internal and test users": internal != true). Event
+// properties are used because events have no person profiles, so PostHog
+// cohorts can't be used for this.
+// - Unpacked installs ("Load unpacked") are always internal.
+// - Any other install can be marked by hand: run docamaticMarkInternal() in
+//   the service worker's DevTools console (see background.js).
+let internalPromise = null;
+
+export const isInternalInstall = () => {
+  if (!internalPromise) {
+    internalPromise = (async () => {
+      const self = await chrome.management?.getSelf?.().catch(() => null);
+      if (self?.installType === "development") return true;
+      const stored = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY];
+      return stored?.internal === true;
+    })().catch(() => false);
+  }
+  return internalPromise;
+};
+
+export const setInternalInstall = async (internal) => {
+  await getInstallId(); // make sure the stored entry exists
+  const stored = (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY];
+  await chrome.storage.local.set({ [STORAGE_KEY]: { ...stored, internal } });
+  internalPromise = null;
 };
 
 export const track = async (event, properties = {}) => {
@@ -86,6 +115,7 @@ export const track = async (event, properties = {}) => {
     if (!isConfigured() || !(await isEnabled())) return;
 
     const installId = await getInstallId();
+    const internal = await isInternalInstall();
 
     await fetch(`${config.posthog_host}/i/v0/e/`, {
       method: "POST",
@@ -99,6 +129,7 @@ export const track = async (event, properties = {}) => {
           ...properties,
           extension_version: config.version,
           browser: browserName(),
+          internal,
           environment: config.environment,
           // No PostHog person profile is created for the install id
           $process_person_profile: false,

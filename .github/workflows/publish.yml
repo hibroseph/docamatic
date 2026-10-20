@@ -88,12 +88,26 @@ jobs:
           --title "Docamatic $VERSION" \
           --notes "Package uploaded to the Chrome Web Store. Built by workflow run $RUN_ID."
 
+    # Exchanges the stored refresh token for a short-lived access token.
+    # pipefail + the check below make a bad/expired refresh token fail here
+    # with a clear message (before, jq turned the error into the token "null").
     - name: Chrome Webstore Access Token
+      env:
+        CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+        REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
       run: |
-        ACCESS_TOKEN=$(curl --fail-with-body -v "https://accounts.google.com/o/oauth2/token" -d "client_id=${{secrets.CHROME_WEBSTORE_CLIENT_ID}}&client_secret=${{secrets.CHROME_WEBSTORE_CLIENT_SECRET}}&refresh_token=${{secrets.CHROME_WEBSTORE_REFRESH_TOKEN}}&grant_type=refresh_token" | jq -r '.access_token')
+        set -euo pipefail
+        RESPONSE=$(curl --silent --show-error "https://oauth2.googleapis.com/token"           --data-urlencode "client_id=$CLIENT_ID"           --data-urlencode "client_secret=$CLIENT_SECRET"           --data-urlencode "refresh_token=$REFRESH_TOKEN"           --data-urlencode "grant_type=refresh_token")
+        ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token // empty')
+        if [ -z "$ACCESS_TOKEN" ]; then
+          echo "::error::Couldn't get a Chrome Web Store access token: $(echo "$RESPONSE" | jq -r '.error + ": " + (.error_description // "")')"
+          echo "::error::The refresh token has probably expired or been revoked. See 'Releasing' in the README to make a new one."
+          exit 1
+        fi
         echo "::add-mask::$ACCESS_TOKEN"
-        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
-        
+        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> "$GITHUB_ENV"
+
     - name: Chrome Webstore Publish
       run: |
         curl \

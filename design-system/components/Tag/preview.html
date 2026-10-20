@@ -1,0 +1,24 @@
+<!-- @dsCard group="Content" height=80 subtitle="Highlighter tags, add tag" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); }
+  .stage { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding: var(--space-4); }
+  
+</style>
+</head>
+<body class="dm-root">
+<div class="stage" style="gap: var(--space-2);">
+  <span class="dm-tag">learning <button class="dm-tag__remove" type="button" aria-label="Remove tag learning">×</button></span>
+  <span class="dm-tag dm-tag--blue">spanish</span>
+  <span class="dm-tag dm-tag--green">to try</span>
+  <span class="dm-tag dm-tag--pink">quotes</span>
+  <span class="dm-tag dm-tag--orange">recipes</span>
+  <span class="dm-tag dm-tag--purple">work</span>
+  <button class="dm-tag dm-tag--add" type="button">+ add tag</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!-- @dsCard group="Content" height=250 subtitle="At rest, and picked up while dragged" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); }
+  .stage { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); padding: var(--space-4); }
+  
+</style>
+</head>
+<body class="dm-root">
+<div class="stage" style="align-items: flex-start; gap: var(--space-6); padding: var(--space-6) var(--space-4);">
+  <article class="dm-note ">
+    <div class="dm-note__head">
+      <span class="dm-note__grip" aria-hidden="true"><svg viewBox="0 0 10 14" fill="currentColor" aria-hidden="true"><circle cx="2.5" cy="2.5" r="1.4"/><circle cx="7.5" cy="2.5" r="1.4"/><circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/><circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/></svg></span>
+      <h3 class="dm-note__title">Spaced repetition</h3>
+      <div class="dm-note__actions">
+        <button class="dm-note__action" type="button" aria-label="Favorite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 4.9a2.8 2.8 0 0 1 5.5 1.4c0 3.9-5.5 7.2-5.5 7.2Z"/></svg></button>
+        <button class="dm-note__action" type="button" aria-label="More"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="12.5" cy="8" r="1.5"/></svg></button>
+      </div>
+    </div>
+    <p class="dm-note__body">Review at growing intervals: 1 day, 3 days, 1 week. Try this for the Spanish vocab.</p><div class="dm-note__tags"><span class="dm-tag">learning</span><span class="dm-tag dm-tag--blue">spanish</span></div>
+  </article>
+  <article class="dm-note dm-note--blue is-dragging">
+    <div class="dm-note__head">
+      <span class="dm-note__grip" aria-hidden="true"><svg viewBox="0 0 10 14" fill="currentColor" aria-hidden="true"><circle cx="2.5" cy="2.5" r="1.4"/><circle cx="7.5" cy="2.5" r="1.4"/><circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/><circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/></svg></span>
+      <h3 class="dm-note__title">Testing effect</h3>
+      <div class="dm-note__actions">
+        <button class="dm-note__action" type="button" aria-label="Favorite"><svg viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 4.9a2.8 2.8 0 0 1 5.5 1.4c0 3.9-5.5 7.2-5.5 7.2Z"/></svg></button>
+        <button class="dm-note__action" type="button" aria-label="More"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="12.5" cy="8" r="1.5"/></svg></button>
+      </div>
+    </div>
+    <p class="dm-note__body">Recalling beats re-reading. Quiz myself instead of re-reading notes.</p><span class="dm-note__meta">Oct 18 · howmemoryworks.org</span>
+  </article>
+  <article class="dm-note dm-note--pink" style="width: 200px;">
+    <div class="dm-note__head">
+      <span class="dm-note__grip" aria-hidden="true"><svg viewBox="0 0 10 14" fill="currentColor" aria-hidden="true"><circle cx="2.5" cy="2.5" r="1.4"/><circle cx="7.5" cy="2.5" r="1.4"/><circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/><circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/></svg></span>
+      <span style="flex:1"></span>
+      <div class="dm-note__actions">
+        <button class="dm-note__action" type="button" aria-label="Favorite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 4.9a2.8 2.8 0 0 1 5.5 1.4c0 3.9-5.5 7.2-5.5 7.2Z"/></svg></button>
+        <button class="dm-note__action" type="button" aria-label="More"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="12.5" cy="8" r="1.5"/></svg></button>
+      </div>
+    </div>
+    <p class="dm-note__body">Ask Sam about the chunking chapter.</p>
+  </article>
+</div>
+</body>
+</html>

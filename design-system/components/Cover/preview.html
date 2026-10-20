@@ -1,0 +1,53 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Docamatic</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); overflow: hidden; }
+  .cover { position: relative; height: 288px; overflow: hidden; }
+  .art { position: absolute; top: 0; left: 480px; width: 480px; height: 288px; overflow: hidden; }
+  .art svg { display: block; width: 480px; height: 288px; }
+  .yellow { fill: var(--hl-yellow); }
+  .blue { fill: var(--hl-blue); }
+  .deep { fill: var(--ink); }
+  .pink { fill: var(--hl-pink); }
+  .cut { fill: var(--paper); }
+  .blk { rx: var(--radius-lg); }
+  .swipe { rx: var(--space-3); }
+  .words { position: absolute; left: var(--space-6); right: var(--space-6); bottom: var(--space-6); max-width: 440px; }
+  .name { margin: 0; font-family: var(--font-display); font-size: 80px; line-height: .95; font-weight: 700; letter-spacing: -.03em; color: var(--ink); }
+  .tag { margin: var(--space-2) 0 0 4px; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      hl-yellow 176x312 slab bled off top and bottom (the primary) · ink 168x168 · hl-blue 96x120 bled off the right edge · about 30% of 960x288
+  arrangement one tall yellow slab with two satellites, space-4 gutters, the blue one dropped to the baseline
+  pattern     highlighter swipes, from "the highlighter swipe is the signature mark": five space-6-tall pills tilted -6deg, pink and yellow over the ink, paper cut out of the yellow slab
+  scales      swipe height space-6 (rx space-3, half of it); gutters space-4; block corners radius-lg
+-->
+<rect class="yellow blk" x="40" y="-12" width="176" height="312" rx="16"/>
+<rect class="deep blk" x="232" y="32" width="168" height="168" rx="16"/>
+<rect class="blue blk" x="416" y="152" width="96" height="120" rx="16"/>
+<g transform="rotate(-6 240 144)">
+  <rect class="pink swipe" x="252" y="70" width="136" height="24" rx="12"/>
+  <rect class="yellow swipe" x="268" y="120" width="96" height="24" rx="12"/>
+  <rect class="cut swipe" x="60" y="196" width="128" height="24" rx="12"/>
+  <rect class="cut swipe" x="84" y="232" width="84" height="24" rx="12"/>
+  <rect class="pink swipe" x="244" y="236" width="140" height="24" rx="12"/>
+</g>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Docamatic</h1>
+<p class="tag">Mark up the web.</p>
+</div>
+</div>
+</body>
+</html>

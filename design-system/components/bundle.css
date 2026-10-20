@@ -1,0 +1,233 @@
+/* Docamatic components: plain CSS classes built only from tokens.css.
+   Prefix dm-. Load after tokens.css. Works inside a shadow root too
+   (put tokens.css and this file in the same root). */
+
+.dm-root {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* ---------- Button ---------- */
+.dm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  box-shadow: var(--sticker-sm);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+.dm-btn:hover { transform: translate(-1px, -1px); box-shadow: var(--sticker); }
+.dm-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.dm-btn:focus-visible { outline: none; box-shadow: var(--sticker-sm), var(--focus-ring); }
+.dm-btn:disabled { cursor: not-allowed; opacity: .5; transform: none; box-shadow: none; }
+.dm-btn--primary { background: var(--primary); color: var(--on-primary); }
+.dm-btn--danger { background: var(--danger-fill); color: var(--on-primary); }
+.dm-btn--ghost { border-color: transparent; background: transparent; box-shadow: none; }
+.dm-btn--ghost:hover { transform: none; box-shadow: none; background: var(--paper-2); }
+.dm-btn--ghost:active { transform: none; background: var(--paper-3); }
+.dm-btn--sm { min-height: 28px; padding: 0 var(--space-3); font-size: 13px; }
+.dm-btn--icon { width: 32px; min-height: 32px; padding: 0; border-radius: var(--radius-sm); }
+.dm-btn svg { width: 16px; height: 16px; flex: none; }
+
+/* ---------- Input ---------- */
+.dm-field { display: grid; gap: var(--space-1); }
+.dm-field__label { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink); }
+.dm-field__help { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.dm-field__help--error { color: var(--danger); }
+.dm-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+.dm-input::placeholder { color: var(--ink-muted); }
+.dm-input:focus { outline: none; box-shadow: var(--focus-ring); }
+.dm-search { position: relative; }
+.dm-search .dm-input { padding-left: 36px; background: var(--paper-2); }
+.dm-search .dm-input:focus { background: var(--paper); }
+.dm-search svg { position: absolute; left: var(--space-3); top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--ink-muted); pointer-events: none; }
+
+/* ---------- Tabs (segmented) ---------- */
+.dm-tabs {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: 3px;
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+}
+.dm-tab {
+  padding: var(--space-1) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dm-tab:hover { background: var(--paper-2); }
+.dm-tab[aria-selected="true"] { background: var(--primary); color: var(--on-primary); box-shadow: inset 0 0 0 var(--stroke-bold) var(--note-ink); }
+.dm-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* ---------- Tag ---------- */
+.dm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border: var(--stroke-bold) solid var(--note-ink);
+  border-radius: var(--radius-pill);
+  background: var(--hl-yellow);
+  color: var(--on-primary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.dm-tag--pink { background: var(--hl-pink); }
+.dm-tag--blue { background: var(--hl-blue); }
+.dm-tag--green { background: var(--hl-green); }
+.dm-tag--orange { background: var(--hl-orange); }
+.dm-tag--purple { background: var(--hl-purple); }
+.dm-tag--add { background: transparent; color: var(--ink); border-color: var(--ink); border-style: dashed; cursor: pointer; }
+.dm-tag__remove { display: inline-grid; place-items: center; width: 14px; height: 14px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; font: inherit; line-height: 1; cursor: pointer; }
+.dm-tag__remove:hover { background: #1e24331f; }
+
+/* ---------- Highlight (marked text on a page) ---------- */
+.dm-hl {
+  --dm-hl-color: var(--hl-yellow);
+  padding: 0 .15em;
+  margin: 0 -.05em;
+  border-radius: .3em .5em .4em .6em;
+  background: linear-gradient(100deg, transparent 0%, var(--dm-hl-color) 3%, var(--dm-hl-color) 96%, transparent 100%);
+  color: var(--note-ink);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.dm-hl--pink { --dm-hl-color: var(--hl-pink); }
+.dm-hl--blue { --dm-hl-color: var(--hl-blue); }
+.dm-hl--green { --dm-hl-color: var(--hl-green); }
+.dm-hl--orange { --dm-hl-color: var(--hl-orange); }
+.dm-hl--purple { --dm-hl-color: var(--hl-purple); }
+.dm-hl--noted { text-decoration: underline wavy var(--note-ink); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* ---------- List row (a page or a note in a list) ---------- */
+.dm-list { list-style: none; margin: 0; padding: 0; }
+.dm-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--stroke-hair) solid var(--hairline);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+.dm-row:hover { background: var(--paper-2); }
+.dm-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.dm-row__icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--paper-3); color: var(--ink); font-weight: 700; font-size: 13px; overflow: hidden; }
+.dm-row__icon img { width: 16px; height: 16px; }
+.dm-row__text { min-width: 0; display: grid; gap: 2px; }
+.dm-row__title { font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-row__meta { font-size: 13px; line-height: 18px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.dm-row__count { min-width: 24px; padding: 0 var(--space-2); border: var(--stroke-bold) solid var(--note-ink); border-radius: var(--radius-pill); background: var(--note-yellow); color: var(--note-ink); font-size: 12px; line-height: 18px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* ---------- Highlighter swipe (the signature mark) ---------- */
+/* A marker stroke behind one word: emphasis in titles and empty states.
+   Use it once per view at most. */
+.dm-swipe {
+  --dm-swipe-color: var(--swipe-yellow);
+  padding: 0 .12em;
+  border-radius: .35em .55em .45em .6em;
+  background: linear-gradient(100deg, transparent 0%, var(--dm-swipe-color) 4%, var(--dm-swipe-color) 95%, transparent 100%);
+  background-size: 100% 62%;
+  background-position: 0 78%;
+  background-repeat: no-repeat;
+  color: inherit;
+}
+.dm-swipe--pink { --dm-swipe-color: var(--swipe-pink); }
+.dm-swipe--blue { --dm-swipe-color: var(--swipe-blue); }
+.dm-swipe--green { --dm-swipe-color: var(--swipe-green); }
+
+/* ---------- Sticky note ---------- */
+.dm-note {
+  --dm-note-color: var(--note-yellow);
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  width: 240px;
+  box-sizing: border-box;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--dm-note-color);
+  color: var(--note-ink);
+  box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), var(--note-lift);
+  font-family: var(--font-body);
+  transition: transform 160ms cubic-bezier(.2, .8, .3, 1.2), box-shadow 160ms ease;
+}
+/* the playful twist: picked up off the page when hovered or dragged */
+.dm-note:hover,
+.dm-note.is-dragging { transform: translateY(-2px) rotate(-.6deg); box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), var(--note-lift-hover); }
+.dm-note.is-dragging { transform: translateY(-3px) rotate(-1.2deg) scale(1.01); }
+.dm-note--pink { --dm-note-color: var(--note-pink); }
+.dm-note--blue { --dm-note-color: var(--note-blue); }
+.dm-note--green { --dm-note-color: var(--note-green); }
+.dm-note--orange { --dm-note-color: var(--note-orange); }
+.dm-note--purple { --dm-note-color: var(--note-purple); }
+.dm-note__head { display: flex; align-items: center; gap: var(--space-1); }
+/* drag handle: a small grip that shows on hover */
+.dm-note__grip { display: grid; place-items: center; width: 16px; height: 24px; margin-left: -4px; color: var(--note-ink-muted); opacity: 0; cursor: grab; transition: opacity 120ms ease; }
+.dm-note:hover .dm-note__grip, .dm-note:focus-within .dm-note__grip { opacity: 1; }
+.dm-note__grip svg { width: 10px; height: 14px; }
+.dm-note__title { flex: 1; margin: 0; min-width: 0; font-family: var(--font-display); font-size: 15px; line-height: 20px; font-weight: 650; letter-spacing: -.005em; }
+.dm-note__body { margin: 0; font-size: 14px; line-height: 20px; }
+.dm-note__actions { display: flex; gap: 2px; margin-left: auto; }
+.dm-note__action { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--note-ink); cursor: pointer; }
+.dm-note__action:hover { background: #1e24331a; }
+.dm-note__action:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--note-ink); }
+.dm-note__action svg { width: 15px; height: 15px; }
+.dm-note__tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.dm-note__meta { font-size: 12px; line-height: 16px; color: var(--note-ink-muted); }
+
+/* ---------- Empty state ---------- */
+.dm-empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--stroke-bold) dashed var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+}
+.dm-empty__title { margin: 0; font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -.01em; }
+.dm-empty__text { margin: 0; max-width: 34ch; color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-btn, .dm-note { transition: none; }
+  .dm-btn:hover, .dm-note:hover, .dm-note.is-dragging { transform: none; }
+}

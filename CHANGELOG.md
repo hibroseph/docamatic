@@ -23,6 +23,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   (`docamaticMarkInternal(false)` undoes it).
 - README section on renewing the Chrome Web Store credentials used by the
   publish workflow.
+- `design-system/`: the new design system ("Approved direction v1"): brand
+  book, tokens for light and dark themes, `dm-` CSS components, and the
+  Bricolage Grotesque and Figtree fonts. Not used by the extension yet; it's
+  the basis for the UI redesign. The browsable version is the design system
+  artifact linked in `design-system/ABOUT.md`.
 
 ### Fixed
 - Publish workflow: an expired or revoked Chrome Web Store refresh token now

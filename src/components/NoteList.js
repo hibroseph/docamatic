@@ -20,7 +20,10 @@ const reportedShown = new Set();
 // Tells the background when a note that was just created becomes visible:
 // the last step of the note-creation funnel (see redux/noteShown.js). Only
 // recently created notes are reported; others are just a page being revisited.
-const reportNewlyShownNotes = (notes) => {
+// The homepage demo renders this same list on a normal website, where there's
+// no extension to tell, so it does nothing there.
+export const reportNewlyShownNotes = (notes) => {
+  if (!globalThis.chrome?.runtime?.id) return;
   const now = Date.now();
   notes.forEach(({ note }) => {
     if (reportedShown.has(note.id) || !(now - Number(note.date_created) <= NEW_NOTE_WINDOW_MS)) return;

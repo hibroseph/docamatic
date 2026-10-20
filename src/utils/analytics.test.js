@@ -2,7 +2,7 @@ import { eventForAction } from './analytics';
 import { addNote, addText, addTitle, removeNote, trackEvent, updateNotePosition } from '../redux/actions';
 
 test("Maps note actions to events", () => {
-    expect(eventForAction(addNote("n1", 0, "https://a.com/"))).toEqual({ event: "note_created" });
+    expect(eventForAction(addNote("n1", 0, "https://a.com/"))).toEqual({ event: "note_created", properties: { note_id: "n1" } });
     expect(eventForAction(removeNote("n1", "https://a.com/"))).toEqual({ event: "note_deleted" });
 })
 
@@ -23,6 +23,6 @@ test("Passes through explicit events from the popup", () => {
 })
 
 test("Never includes the page url in note events", () => {
-    const { properties } = eventForAction(addNote("n4", 0, "https://private.example/"));
+    const { properties } = eventForAction(addNote("n4", 0, "https://private.example/", "https://private.example/?q=1"));
     expect(JSON.stringify(properties || {})).not.toContain("private.example");
 })

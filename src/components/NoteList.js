@@ -1,5 +1,5 @@
 //@ts-ignore
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DraggableNote } from "./Note/DraggableNote";
 import { connect } from "react-redux";
 import {
@@ -9,12 +9,34 @@ import {
 import { NoRenderErrorBoundary } from "./NoRenderErrorBoundary";
 import { noteUrlsFor } from "../utils/noteUrl";
 import { notesOnPage } from "../redux/pageNotes";
+import { NEW_NOTE_WINDOW_MS } from "../redux/noteShown";
+import { CHROME_MESSAGES } from "../utils/constants";
 
 const NO_NOTES = [];
+
+// Notes already reported as shown on this page
+const reportedShown = new Set();
+
+// Tells the background when a note that was just created becomes visible:
+// the last step of the note-creation funnel (see redux/noteShown.js). Only
+// recently created notes are reported; others are just a page being revisited.
+const reportNewlyShownNotes = (notes) => {
+  const now = Date.now();
+  notes.forEach(({ note }) => {
+    if (reportedShown.has(note.id) || !(now - Number(note.date_created) <= NEW_NOTE_WINDOW_MS)) return;
+    reportedShown.add(note.id);
+    chrome.runtime.sendMessage({ type: CHROME_MESSAGES.NOTE_SHOWN, noteId: note.id }).catch(() => {});
+  });
+};
 
 export const NoteList = (props) => {
 
   const [noteOnTop, setNoteOnTop] = useState(0);
+
+  // After rendering, so "shown" means actually on the page
+  useEffect(() => {
+    if (props.url) reportNewlyShownNotes(props.notes);
+  }, [props.notes, props.url]);
 
     return (
       <div>

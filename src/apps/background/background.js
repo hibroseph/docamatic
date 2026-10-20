@@ -9,7 +9,9 @@ import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../../redux/action
 import { noteUrlsFor } from "../../utils/noteUrl";
 import { CHROME_MESSAGES, NOTES_UI_FILE } from "../../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../../redux/legacyState";
-import { initSentry, captureException, reportReducerErrors } from "../../utils/sentry";
+import { initSentry, captureException, captureMessage, reportReducerErrors } from "../../utils/sentry";
+import { hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../../utils/expectedFailures";
+import { noteShownEvent } from "../../redux/noteShown";
 import { migrateState } from "../../redux/migrations";
 import {
   assertNoNotesLost,
@@ -72,14 +74,51 @@ function injectNotesUi(tabId, frameId = 0) {
   });
 }
 
+// Failing to show notes on a page is only a bug when Chrome didn't have a good
+// reason (closed or unloaded tab, page that can't be scripted). Report the rest.
+const reportShowNotesFailure = (error, pageUrl, stage) => {
+  if (isExpectedScriptingError(error)) return;
+  captureMessage("Couldn't show notes on a page", {
+    stage,
+    page_host: hostnameOf(pageUrl),
+    error: messageWithoutUrls(error),
+  });
+};
+
 // Loads the notes UI into every open tab showing one of these pages
 const showNotesInOpenTabs = async (urls) => {
   const tabs = await chrome.tabs.query({});
   const matching = tabs.filter((tab) => noteUrlsFor(tab.url).some((key) => urls.includes(key)));
   // Fails for tabs Chrome has unloaded to save memory; they load the UI
   // themselves when they're reopened
-  await Promise.all(matching.map((tab) => injectNotesUi(tab.id).catch(() => {})));
+  await Promise.all(
+    matching.map((tab) => injectNotesUi(tab.id).catch((err) => reportShowNotesFailure(err, tab.url, "new_note_open_tabs")))
+  );
 };
+
+// The page reports when a note it was just asked to show is visible (the
+// last step of the note-creation funnel). The background checks the report
+// against its own data and builds the analytics event itself, so a web page
+// can't invent events or properties (see redux/noteShown.js).
+const reportedShownNotes = new Set();
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type !== CHROME_MESSAGES.NOTE_SHOWN) return;
+  if (sender.id !== chrome.runtime.id || !sender.tab) return;
+
+  storeReady.then((store) => {
+    const properties = noteShownEvent({
+      state: store.getState(),
+      noteId: message.noteId,
+      senderUrl: sender.url,
+      now: Date.now(),
+      alreadyReported: reportedShownNotes,
+    });
+    if (!properties) return;
+    reportedShownNotes.add(message.noteId);
+    track("note_shown", properties);
+  });
+});
 
 // Single page apps (GitHub, X, YouTube, ...) change the url with
 // history.pushState instead of loading a new page. Chrome reports every url
@@ -99,7 +138,7 @@ const handleUrlChange = async (tabId, url) => {
   // Pages that only have the small loader get the UI if the new url has notes
   const store = await storeReady;
   if (pageHasNotes(store.getState(), noteUrlsFor(url))) {
-    await injectNotesUi(tabId).catch(() => {});
+    await injectNotesUi(tabId).catch((err) => reportShowNotesFailure(err, url, "url_change"));
   }
 };
 
@@ -124,7 +163,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   mountNotesUi(sender).then(
     (mounted) => sendResponse({ mounted }),
     (err) => {
-      captureException(err, { during: "mounting notes UI" });
+      reportShowNotesFailure(err, sender.url, "page_request");
       sendResponse({ mounted: false });
     }
   );
@@ -132,6 +171,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 initSentry("background");
+
+// For checking that error reporting works: run docamaticSentryTest() in the
+// service worker's DevTools console. Throwing an error directly in the console
+// doesn't test anything: Chrome doesn't pass console errors to error
+// handlers, and only errors from the extension's own code are reported. This
+// throws an uncaught error from the extension's code, like a real bug would.
+self.docamaticSentryTest = () => {
+  setTimeout(() => {
+    throw new Error("Docamatic Sentry test (uncaught error in the background)");
+  });
+  return "Thrown. Look for 'Docamatic Sentry test' in Sentry.";
+};
 chrome.runtime.setUninstallURL(feedbackUrl);
 
 // Wait this long after the last change before writing to storage. Typing in

@@ -9,6 +9,8 @@ import { connect } from "react-redux";
 import { CHROME_MESSAGES } from "../../utils/constants";
 import { noteUrlFor, redactUrl } from "../../utils/noteUrl";
 import { TEST_IDS } from "../../utils/testIds";
+import { captureMessage } from "../../utils/sentry";
+import { canHaveNotes, hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../../utils/expectedFailures";
 import styled from "styled-components";
 
 const SafeModeBanner = styled.div`
@@ -38,8 +40,31 @@ const icons = [
 export const Popup = (props) => {
   const [currentPage, setCurrentPage] = useState("current");
 
+  // Creating a note is the core flow, so each step is measured: a funnel of
+  // note_create_started -> note_created -> note_shown in PostHog shows how
+  // often it works, and note_create_failed says where it breaks. Failures that
+  // aren't expected (i.e. bugs) also go to Sentry.
   const CreateNewNote = async () => {
+    props.track("note_create_started");
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    const fail = (stage, expected, error) => {
+      props.track("note_create_failed", { stage, expected });
+      if (!expected) {
+        captureMessage("Creating a note failed", {
+          stage,
+          page_host: hostnameOf(tab?.url),
+          error: error ? messageWithoutUrls(error) : undefined,
+        });
+      }
+    };
+
+    // chrome:// pages, the extension stores, ...: no extension can add to these
+    if (!tab || !canHaveNotes(tab.url)) {
+      fail("page_not_supported", true);
+      return;
+    }
+
     const getPageInformation = () => chrome.tabs.sendMessage(tab.id, { action: CHROME_MESSAGES.GET_PAGE_INFORMATION });
 
     let pageInformation;
@@ -54,10 +79,16 @@ export const Popup = (props) => {
           target: { tabId: tab.id },
           files: chrome.runtime.getManifest().content_scripts[0].js,
         });
+      } catch (error) {
+        // Often expected (e.g. a page Chrome won't let extensions script)
+        fail("add_content_script", isExpectedScriptingError(error), error);
+        return;
+      }
+      try {
         pageInformation = await getPageInformation();
       } catch (error) {
-        // Expected on pages extensions can't script, like chrome:// pages
-        console.warn("Unable to add a note to this page: " + error);
+        // The script was added but the page still doesn't answer: always a bug
+        fail("page_unresponsive", false, error);
         return;
       }
     }
@@ -110,6 +141,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     trackPageView: (page) => {
       dispatch(trackEvent("popup_page_viewed", { page }));
+    },
+    track: (event, properties) => {
+      dispatch(trackEvent(event, properties));
     },
   };
 };

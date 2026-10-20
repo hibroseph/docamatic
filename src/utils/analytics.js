@@ -26,6 +26,14 @@ import { generateUUID } from "./GenerateUUID";
 
 const STORAGE_KEY = "analytics";
 
+// Which Chromium browser this is (Chrome, Edge, Brave, Opera, ...), from the
+// browser's own client hints, for spotting browser-specific problems.
+// Brands include generic entries ("Chromium", "Not A(Brand") to skip.
+export const browserName = (brands = globalThis.navigator?.userAgentData?.brands) => {
+  const specific = (brands || []).map((b) => b.brand).filter((name) => !/chromium|not.?a.?brand/i.test(name));
+  return specific[0] || (brands?.length ? "Chromium" : "unknown");
+};
+
 const isConfigured = () => Boolean(config.posthog_api_key && config.posthog_host);
 
 // Users can turn analytics off in the popup settings. The setting lives in
@@ -90,6 +98,7 @@ export const track = async (event, properties = {}) => {
         properties: {
           ...properties,
           extension_version: config.version,
+          browser: browserName(),
           environment: config.environment,
           // No PostHog person profile is created for the install id
           $process_person_profile: false,
@@ -114,7 +123,8 @@ const editedNotes = new Set();
 export const eventForAction = (action) => {
   switch (action.type) {
     case ADD_NOTE:
-      return { event: "note_created" };
+      // The note id (random, not personal) links this to note_shown
+      return { event: "note_created", properties: { note_id: action.id } };
     case REMOVE_NOTE:
       return { event: "note_deleted" };
     case ADD_TAG:

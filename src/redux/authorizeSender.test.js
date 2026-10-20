@@ -1,4 +1,4 @@
-import { authorizeSender } from './authorizeSender';
+import { authorizeSender, reasonToBlock } from './authorizeSender';
 import { NUKE_NOTES, MOVE_NOTE } from './actions';
 
 const EXTENSION_ID = "abc";
@@ -60,11 +60,32 @@ test("Blocks content scripts from sending analytics events or changing settings"
     expect(run({ type: "SET_ANALYTICS_ENABLED", enabled: true, url: "https://evil.com/", _sender: sender }).allowed).toBe(false);
 })
 
-test("Content scripts can edit notes saved under their page's current or older url", () => {
+test("Content scripts can edit notes anywhere on their own site", () => {
     const sender = contentScriptOn("https://www.youtube.com/watch?v=abc&t=10s");
     expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch?v=abc", _sender: sender }).allowed).toBe(true);
-    // Saved before urls kept ?v=
+    // Saved under the old url rules
     expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch", _sender: sender }).allowed).toBe(true);
-    // A different video is a different page
-    expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch?v=xyz", _sender: sender }).allowed).toBe(false);
+    // Right after a single page app navigates, before the notes UI has caught up
+    expect(run({ type: MOVE_NOTE, url: "https://www.youtube.com/watch?v=previous", _sender: sender }).allowed).toBe(true);
+})
+
+test("Content scripts can't edit notes on other sites, even subdomains", () => {
+    const sender = contentScriptOn("https://evil.example.com/");
+    expect(run({ type: MOVE_NOTE, url: "https://bank.example.com/", _sender: sender }).allowed).toBe(false);
+    expect(run({ type: MOVE_NOTE, url: "http://evil.example.com/", _sender: sender }).allowed).toBe(false);
+})
+
+test("Local files can edit local-file notes", () => {
+    const sender = contentScriptOn("file:///C:/notes/a.html");
+    expect(run({ type: MOVE_NOTE, url: "file:///C:/notes/b.html", _sender: sender }).allowed).toBe(true);
+    expect(run({ type: MOVE_NOTE, url: "https://a.com/", _sender: sender }).allowed).toBe(false);
+})
+
+test("Says why an action was blocked", () => {
+    const page = contentScriptOn("https://a.com/");
+    expect(reasonToBlock({ type: MOVE_NOTE, url: "https://a.com/" }, { id: "other", url: "https://a.com/" }, EXTENSION_ID)).toBe("other_extension");
+    expect(reasonToBlock({ type: NUKE_NOTES }, page, EXTENSION_ID)).toBe("privileged_action");
+    expect(reasonToBlock({ type: MOVE_NOTE }, page, EXTENSION_ID)).toBe("no_url");
+    expect(reasonToBlock({ type: MOVE_NOTE, url: "https://b.com/" }, page, EXTENSION_ID)).toBe("different_site");
+    expect(reasonToBlock({ type: MOVE_NOTE, url: "https://a.com/x" }, page, EXTENSION_ID)).toBeNull();
 })

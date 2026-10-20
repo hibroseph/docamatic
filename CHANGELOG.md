@@ -108,6 +108,8 @@ and the extension is built with WXT so it can ship to Firefox too.
   redesigned; links to the Chrome Web Store listing. The home page also
   shows notes in a scrolling panel (live), a picture of the new popup, and
   the smaller features (undo, shortcut, themes, colors).
+  The built pages load their stylesheet and script as plain tags, so they
+  also work opened from disk (`file://`), not only from a server.
 - Welcome page rewritten with a practice note instead of GIFs of the old UI.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).

@@ -4,7 +4,7 @@
 3. Install packages: `npm ci`
 4. `npm run dev` opens Chrome with the extension loaded and reloads it as you edit (`npm run dev:firefox` for Firefox). Or build once with `npm run build` and load `dist/chrome-mv3` yourself: `chrome://extensions`, turn on **Developer mode**, **Load unpacked**.
 5. `npm test` runs the tests (Vitest), `npm run typecheck` checks types.
-6. The website: `npm run site` serves it locally, `npm run site:build` builds it into `dist/site`.
+6. The website: `npm run site` serves it locally at http://localhost:5173 (opening `site/index.html` directly shows it without styles: its styles and demo are built by Vite). `npm run site:build` builds it into `dist/site`, whose pages also work opened straight from disk.
 
 # How it's put together
 - Built with [WXT](https://wxt.dev) (Vite), which writes the manifest for Chrome and Firefox from `wxt.config.ts` and the entrypoints in `src/entrypoints/`: background, content script (a tiny loader), `notes-ui` (the notes on pages, injected only where there are notes), popup, side panel, options (Backup & restore), onboarding, offscreen (Chrome only, for importing 2019-2022 notes).

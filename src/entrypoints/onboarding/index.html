@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Docamatic</title>
+</head>
+
+<body class="dm-root">
+    <main class="page welcome">
+        <p class="page__brand">Docamatic</p>
+        <h1 class="page__title welcome__title">Sticky notes for <span class="dm-swipe">the web</span>.</h1>
+        <p class="page__lede">Put a note on any page. It stays exactly where you left it, and you can find it again
+            from anywhere: search everything you've written, tag notes, keep favorites.</p>
+
+        <section class="panel try">
+            <h2>Try it here</h2>
+            <p>Add a practice note to this page. Drag it by its top edge, type in it, give it a tag. It disappears
+                when you close this tab.</p>
+            <button id="try-note" type="button" class="dm-btn dm-btn--primary">Add a practice note</button>
+        </section>
+
+        <ol class="steps">
+            <li class="step">
+                <span class="step__number" aria-hidden="true">1</span>
+                <div>
+                    <h2>Keep it handy</h2>
+                    <p>Click the puzzle piece in the toolbar, then the pin next to Docamatic, so it's one click
+                        away.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">2</span>
+                <div>
+                    <h2>Add a note</h2>
+                    <p>On any website, click Docamatic, then <strong>New note on this page</strong><span
+                            id="shortcut-hint"></span>.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">3</span>
+                <div>
+                    <h2>Find it again</h2>
+                    <p>Docamatic lists the notes on the page you're on, and searches all the others. Notes you
+                        made with earlier versions are all still here, in the same spots.</p>
+                </div>
+            </li>
+        </ol>
+
+        <p class="welcome__foot">Your notes stay on this computer.
+            <a href="https://hibroseph.github.io/docamatic/privacy.html" target="_blank" rel="noopener noreferrer">Privacy
+                policy</a></p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

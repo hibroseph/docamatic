@@ -38,7 +38,7 @@ const GLOBAL_INTEGRATIONS = ["GlobalHandlers", "TryCatch", "Breadcrumbs", "HttpC
 let hub = null;
 
 /**
- * @param {"background" | "popup" | "onboarding" | "content_script"} context
+ * @param {"background" | "popup" | "sidepanel" | "onboarding" | "content_script"} context
  *   Which part of the extension this is, attached to every event as a tag so
  *   issues can be filtered in Sentry.
  */
@@ -51,7 +51,7 @@ export const initSentry = (context) => {
       environment: config.environment,
       ignoreErrors: IGNORED_ERRORS,
       // Only report errors whose stack trace points at our own bundles
-      allowUrls: [/^chrome-extension:\/\//],
+      allowUrls: [/^(chrome|moz)-extension:\/\//],
       // Console output can contain note text or search queries; never send it
       beforeBreadcrumb: (breadcrumb) => (breadcrumb.category === "console" ? null : breadcrumb),
     };

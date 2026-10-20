@@ -1,10 +1,8 @@
+// The note colors before 5.1. Notes that have one keep it; new notes use the
+// palette in model/colors.ts. Still used to repair very old notes saved
+// without a color (redux/legacyState.js).
 export const COLORS = ["#ed5565", "#f8ac59", "#c1e5ef", "#1799c6", "#08597d"];
-export const THEME = {
-  Primary: "#08597d",
-  Secondary: "#f8ac59",
-  Accent: "#1799c6",
-  Active: "#0d8cc5",
-};
+// Width of notes created without one (new notes: model/placement.ts)
 export const INITIAL_NOTE_WIDTH = 225;
 
 export const CHROME_MESSAGES = {
@@ -20,7 +18,14 @@ export const CHROME_MESSAGES = {
   GET_BACKUP_STATUS: "get_backup_status",
   IMPORT_BACKUP: "import_backup",
   RESTORE_BACKUP: "restore_backup",
+  // Popup / side panel -> background: add a note to a tab (since 5.1; the
+  // background does it so the popup, side panel and keyboard shortcut share
+  // one path)
+  CREATE_NOTE: "create_note",
 };
+
+// Keyboard shortcut command (wxt.config.ts)
+export const CREATE_NOTE_COMMAND = "create-note";
 
 // The notes UI bundle the background injects into pages that have notes
 // (built without a hash in its name so the background can reference it)

@@ -1,9 +1,28 @@
-import { IMPORT_NOTES, NUKE_NOTES, REPLACE_STATE, SET_ANALYTICS_ENABLED, TRACK } from "./actions";
+import {
+  DELETE_TAG,
+  IMPORT_NOTES,
+  NUKE_NOTES,
+  REPLACE_STATE,
+  SET_ANALYTICS_ENABLED,
+  SET_PREFERENCES,
+  TRACK,
+  UPDATE_TAG,
+} from "./actions";
 import { captureMessage } from "../utils/sentry";
 
 // Actions that affect every page, or settings/analytics. Only our own
-// extension pages (popup, onboarding) may send these.
-const PRIVILEGED_ACTIONS = new Set([NUKE_NOTES, IMPORT_NOTES, REPLACE_STATE, SET_ANALYTICS_ENABLED, TRACK]);
+// extension pages (popup, side panel, onboarding) may send these. Tags are
+// shared by notes on every site, so renaming or deleting one is too.
+const PRIVILEGED_ACTIONS = new Set([
+  NUKE_NOTES,
+  IMPORT_NOTES,
+  REPLACE_STATE,
+  SET_ANALYTICS_ENABLED,
+  SET_PREFERENCES,
+  UPDATE_TAG,
+  DELETE_TAG,
+  TRACK,
+]);
 
 const parse = (url) => {
   try {

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docamatic: sticky notes for the web</title>
+    <meta name="description" content="Put a sticky note on any web page. It stays where you left it, and you can search everything you've written. Free, and your notes stay on your computer.">
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXKG400VDN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-FXKG400VDN');
+    </script>
+</head>
+
+<body class="dm-root">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="wrap site-header__inner">
+            <a class="wordmark" href="./index.html" aria-current="page">Docamatic</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+            <a class="dm-btn dm-btn--sm site-header__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob">Add to Chrome</a>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="hero">
+            <div class="wrap hero__inner">
+                <div class="hero__text">
+                    <h1 class="hero__title">Sticky notes for <span class="dm-swipe">the web</span>.</h1>
+                    <p class="hero__lede">Put a note on any page, right next to what you're reading. It's still there
+                        when you come back, and everything you've written is one search away.</p>
+                    <div class="hero__actions">
+                        <a class="dm-btn dm-btn--primary hero__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob">Add to Chrome, free</a>
+                        <button id="try-note" type="button" class="dm-btn">Add a note to this page</button>
+                    </div>
+                    <p class="hero__fine">No account. Your notes stay on your computer.</p>
+                </div>
+                <!-- The demo's notes start here (main.ts) -->
+                <div id="hero-art" class="hero__art" aria-label="Example notes you can move and edit"></div>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="how">
+            <div class="wrap">
+                <h2 class="section__title" id="how">How it works</h2>
+                <ol class="steps">
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">1</span>
+                        <h3>Open any page</h3>
+                        <p>A recipe, a paper, a pull request, a video. If you can read it in Chrome, you can mark it
+                            up.</p>
+                    </li>
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">2</span>
+                        <h3>Add a note</h3>
+                        <p>Click Docamatic and <strong>New note</strong>, or press Alt+Shift+N. Drag it beside the
+                            part it's about.</p>
+                    </li>
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">3</span>
+                        <h3>Come back to it</h3>
+                        <p>Next time you open the page, your note is waiting in the same spot. On YouTube, it's on
+                            that one video.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="section section--tinted" aria-labelledby="find">
+            <div class="wrap split">
+                <div class="split__text">
+                    <h2 class="section__title" id="find">Find it again</h2>
+                    <p>Docamatic shows the notes for the page you're on, and keeps the rest close by.</p>
+                    <ul class="ticks">
+                        <li><strong>Search everything.</strong> Titles, text, tags and page names, even with a typo.</li>
+                        <li><strong>Tag notes</strong> to group them across sites: “recipes”, “to read”, “thesis”.</li>
+                        <li><strong>Favorites</strong> for the few you keep coming back to.</li>
+                        <li><strong>Sort</strong> by newest, recently edited, or website.</li>
+                    </ul>
+                </div>
+                <div class="mock" aria-hidden="true">
+                    <div class="mock__bar"><span class="mock__wordmark">Docamatic</span></div>
+                    <div class="dm-search mock__search">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+                        <input class="dm-input" value="pasta" tabindex="-1" readonly>
+                    </div>
+                    <div class="mock__list">
+                        <div class="dm-note mock__note">
+                            <div class="dm-note__head"><h4 class="dm-note__title">Weeknight carbonara</h4></div>
+                            <p class="dm-note__body">Use half the salt. Pasta water, not cream.</p>
+                            <div class="dm-note__tags"><span class="dm-tag dm-tag--pink">recipes</span></div>
+                            <span class="dm-note__meta">seriouseats.com · 2 days ago</span>
+                        </div>
+                        <div class="dm-note dm-note--green mock__note">
+                            <div class="dm-note__head"><h4 class="dm-note__title">Shopping</h4></div>
+                            <p class="dm-note__body">Rigatoni, guanciale, pecorino.</p>
+                            <span class="dm-note__meta">notes.example.com · Oct 3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="private">
+            <div class="wrap narrow">
+                <h2 class="section__title" id="private">Yours, and only yours</h2>
+                <p>Your notes are saved in your browser, on your computer. They aren't uploaded anywhere, and there's
+                    no account to make. Download a backup whenever you like from Settings.</p>
+                <p><a href="./privacy.html">Read the privacy policy</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap site-footer__inner">
+            <span class="wordmark wordmark--small">Docamatic</span>
+            <span class="site-footer__note">Sticky notes for the web, since 2019.</span>
+            <nav class="site-footer__nav" aria-label="More">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+        </div>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

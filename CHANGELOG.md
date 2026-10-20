@@ -14,7 +14,37 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+The redesign: the design system in `design-system/` is now used everywhere,
+and the extension is built with WXT so it can ship to Firefox too.
+
 ### Added
+- New look for notes on pages, the popup, Backup & restore, the welcome
+  page and the website, from the design system (tokens, `dm-` components,
+  Bricolage Grotesque and Figtree bundled; nothing loads from the internet).
+- Popup: one "New note on this page" button (closes the popup so you can
+  type straight away), fuzzy search across every note (titles, text, tags,
+  page titles; Fuse.js) with tag filters, and tabs for This page, All notes
+  (sort: newest, oldest, recently edited, by website), Favorites and Tags.
+  `/` focuses search.
+- Tags tab: every tag with its note count; open a tag to see its notes;
+  rename (renaming to an existing tag merges them), recolor or delete a tag
+  everywhere. New tags get the highlighter color fewest tags use.
+- Side panel (preview; Chrome 116+, Firefox sidebar): notes for the page
+  you're on, following tab switches. Notes added there stay in the panel
+  (saved with `visible: false`) until put on the page from their menu.
+- Keyboard shortcut for a new note: Alt+Shift+N (changeable in the browser).
+- Undo after deleting a note, on pages and in lists; undo after hiding one
+  from a page.
+- New notes are placed near the top right of what's on screen (beside the
+  text) and get the cursor.
+- Settings: default color for new notes, theme (System, Light, Dark).
+- Page titles are saved with notes (when a note is added, and when a page
+  with notes is visited), so lists show titles instead of urls.
+- Firefox build (`npm run build:firefox`, `dist/app-firefox.zip`), untested.
+- Typecheck (`npm run typecheck`) in CI.
+- Tests for the model (colors, search, sorting, placement, dates), the new
+  reducer cases, and that a pre-5.1 note renders at its saved position and
+  width in its own color.
 - Analytics events have an `internal` property, `true` for the developer's own
   installs, so they can be left out of PostHog numbers (PostHog: "Filter out
   internal and test users": `internal` is not `true`). Unpacked installs are
@@ -30,6 +60,42 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   artifact linked in `design-system/ABOUT.md`.
 
 ### Changed
+- Build: webpack, Babel and Jest replaced by WXT (Vite) and Vitest. Output is
+  `dist/chrome-mv3/`; pages are `popup.html` (was `index.html`),
+  `options.html`, `onboarding.html`, `sidepanel.html`; the content script is
+  `content-scripts/content.js`. `build.sh` produces the same artifacts as
+  before. React 17 -> 18; styled-components and Font Awesome removed (plain
+  CSS from the design system, inline SVG icons). Store-only images moved
+  from `icons/` to `store-assets/` so they're no longer shipped.
+- Code layout: `src/model/` (typed note model, selectors, search, colors,
+  placement), `src/page/` (notes on pages), `src/app/` (popup and side panel,
+  one app), `src/ui/` (note parts shared by both: a note on a page and a note
+  in a list behave the same, but are laid out for where they are). Creating
+  a note moved to the background (`background/createNote.js`), shared by the
+  popup, side panel and shortcut.
+- Saved data (still schema version 1, readable by 5.0.0): new notes save a
+  palette color name (`color.name`) alongside its hex values; notes from
+  before keep their colors and render with that color as a band across the
+  top. Changing an old note's color remembers it as `color.original`, offered
+  in the color menu. Also optional: `page.title`, `note.updated_at`,
+  `metadata.preferences`. Positions and sizes of existing notes are untouched
+  and render at the same place.
+- Tags are matched ignoring case and surrounding spaces.
+- Renaming, recoloring and deleting tags and changing preferences are
+  privileged actions (extension pages only); restoring a deleted note and
+  saving a page title are allowed for content scripts on their own site.
+- Test ids: every shipped id still exists. Note actions (color, show/hide,
+  delete) are in the note's More menu, which stays in the DOM when closed;
+  `popup-nav-sort` is the All notes tab, `popup-nav-search` the search field;
+  new `popup-nav-tags`. Color choices' `data-color` values are the new
+  palette (plus the note's original color).
+- Analytics: `popup_page_viewed` includes `surface`; new events
+  `sidepanel_opened`, `note_restored`, `tag_edited`, `tag_deleted`;
+  `note_create_*` events include `source` (popup, sidepanel, shortcut) and
+  `placement`. Privacy policy mentions the side panel.
+- Website: same pages and content (demo, change log, privacy, contact),
+  redesigned; links to the Chrome Web Store listing.
+- Welcome page rewritten with a practice note instead of GIFs of the old UI.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).
 

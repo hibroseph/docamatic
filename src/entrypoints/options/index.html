@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docamatic: Backup &amp; restore</title>
+    <meta name="manifest.open_in_tab" content="true">
+</head>
+
+<body class="dm-root">
+    <main class="page">
+        <p class="page__brand">Docamatic</p>
+        <h1 class="page__title">Backup &amp; <span class="dm-swipe dm-swipe--green">restore</span></h1>
+        <p class="page__lede">Your notes are saved in this browser, on this computer. Keep a copy, move them, or go back to
+            an earlier version.</p>
+
+        <div id="safe-mode-banner" class="banner" hidden data-testid="backup-safe-mode-banner" role="alert">
+            <strong>Docamatic is in safe mode.</strong>
+            Your notes couldn't be loaded safely after an update, so Docamatic isn't showing or changing them. They
+            are still saved on this computer. Please download a backup below and email it to
+            <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a> so we can help.
+            <div id="safe-mode-detail" class="banner__detail"></div>
+        </div>
+
+        <section class="panel">
+            <h2>Download your notes</h2>
+            <p>Saves all your notes, tags and settings to a file you can keep or import later.</p>
+            <button id="download-current" class="dm-btn dm-btn--primary" data-testid="backup-download">Download backup</button>
+            <div id="download-result" class="result" role="status"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Import a backup</h2>
+            <p>Adds the notes from a backup file to your current notes. Nothing you already have is changed or
+                removed.</p>
+            <label class="file">
+                <input type="file" id="import-file" accept=".json,application/json" data-testid="backup-import-file">
+                <span class="dm-btn">Choose a backup file</span>
+            </label>
+            <div id="import-result" class="result" role="status"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Automatic backups</h2>
+            <p>Docamatic keeps recent copies of your notes on this computer: one a day, and one before every update
+                or restore. Restoring replaces your current notes, and your current notes are backed up first, so you
+                can always undo it.</p>
+            <div id="backup-list" data-testid="backup-list">Loading…</div>
+            <div id="restore-result" class="result" role="status"></div>
+        </section>
+
+        <section class="panel">
+            <h2>Moving notes or starting fresh</h2>
+            <ol>
+                <li>Click <strong>Download backup</strong> above.</li>
+                <li>Uninstall and reinstall Docamatic (or install it on another computer).</li>
+                <li>Open this page again: in the Docamatic popup, open <strong>Settings</strong>, then
+                    <strong>Backup &amp; restore</strong>.</li>
+                <li>Choose the file under <strong>Import a backup</strong>.</li>
+            </ol>
+        </section>
+    </main>
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+.welcome__title { font-size: 40px; line-height: 44px; }
+.dm-swipe { white-space: nowrap; }
+.try { margin: var(--space-8) 0; }
+.steps { display: grid; gap: var(--space-6); margin: 0 0 var(--space-8); padding: 0; list-style: none; }
+.step { display: grid; grid-template-columns: 40px 1fr; gap: var(--space-4); align-items: start; }
+.step h2 { margin: 6px 0 var(--space-1); font-size: 15px; line-height: 22px; font-weight: 700; }
+.step p { margin: 0; color: var(--ink-muted); max-width: 56ch; }
+.step__number {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: 50%;
+  background: var(--hl-yellow);
+  color: var(--on-primary);
+  box-shadow: var(--sticker-sm);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+}
+.step:nth-child(2) .step__number { background: var(--hl-pink); }
+.step:nth-child(3) .step__number { background: var(--hl-blue); }
+.welcome__foot { color: var(--ink-muted); font-size: 13px; line-height: 18px; }

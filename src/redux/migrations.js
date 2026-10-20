@@ -21,6 +21,11 @@
 //      storage.local) are first converted to this shape by legacyState.js.
 //   1: 5.0.0. { pages: { [url]: { notes } }, tags, metadata }. Notes created
 //      from 5.0.0 on also have created_on_url (optional; older notes don't).
+//      5.1 added optional fields only (still version 1): page.title,
+//      note.updated_at, note.color.name / color.original, and
+//      metadata.preferences. 5.0.0 reads such data fine (it ignores them), so
+//      no new version: a version bump would put 5.0.0 into safe mode for no
+//      reason. Older notes keep their colors and positions untouched.
 
 export const CURRENT_SCHEMA_VERSION = 1;
 

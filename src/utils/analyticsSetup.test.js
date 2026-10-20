@@ -5,8 +5,8 @@ const fakeStorage = (initial = {}) => {
     const data = { ...initial };
     return {
         data,
-        get: jest.fn(async (key) => (key === null ? { ...data } : { [key]: data[key] })),
-        set: jest.fn(async (values) => Object.assign(data, values)),
+        get: vi.fn(async (key) => (key === null ? { ...data } : { [key]: data[key] })),
+        set: vi.fn(async (values) => Object.assign(data, values)),
     };
 };
 
@@ -15,7 +15,7 @@ beforeEach(() => {
     resetAnalyticsForTests();
     storage = fakeStorage();
     global.chrome = { storage: { local: storage }, management: { getSelf: async () => ({ installType: "normal" }) } };
-    global.fetch = jest.fn(async () => ({ ok: true }));
+    global.fetch = vi.fn(async () => ({ ok: true }));
 });
 
 afterEach(() => {

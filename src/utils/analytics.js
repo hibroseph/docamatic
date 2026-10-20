@@ -17,8 +17,11 @@ import {
   ADD_TAG,
   ADD_TEXT,
   ADD_TITLE,
+  DELETE_TAG,
   NUKE_NOTES,
   REMOVE_NOTE,
+  RESTORE_NOTE,
+  UPDATE_TAG,
   TRACK,
   USER_ONBOARDED,
 } from "../redux/actions";
@@ -158,8 +161,14 @@ export const eventForAction = (action) => {
       return { event: "note_created", properties: { note_id: action.id } };
     case REMOVE_NOTE:
       return { event: "note_deleted" };
+    case RESTORE_NOTE:
+      return { event: "note_restored" };
     case ADD_TAG:
       return { event: "tag_added" };
+    case UPDATE_TAG:
+      return { event: "tag_edited" };
+    case DELETE_TAG:
+      return { event: "tag_deleted" };
     case NUKE_NOTES:
       return { event: "all_notes_deleted" };
     case USER_ONBOARDED:

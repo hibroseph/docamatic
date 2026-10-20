@@ -24,7 +24,7 @@ if (art && tryButton) {
       y: top + 8,
       width,
       title: "Try me",
-      body: "Drag me by my top edge. Type anywhere in here. The ⋯ menu has colors.",
+      body: "Drag me by my top edge. Type anywhere in here. The ⋯ menu has colors and tags.",
       tags: ["demo"],
     },
     {
@@ -49,6 +49,24 @@ if (art && tryButton) {
           },
         ]),
   ];
+
+  // A note on one message in the example inbox; it scrolls with the list
+  const panel = document.getElementById("demo-panel");
+  const row = panel?.children[1];
+  if (panel && row) {
+    const rowBox = row.getBoundingClientRect();
+    const panelBox = panel.getBoundingClientRect();
+    const noteWidth = Math.min(200, panelBox.width - 24);
+    seed.push({
+      x: panelBox.right + window.scrollX - noteWidth - 12,
+      y: rowBox.top + window.scrollY + 6,
+      width: noteWidth,
+      color: "green",
+      title: "By Tuesday",
+      body: "Send Sam the budget numbers.",
+      inPanel: "#demo-panel",
+    });
+  }
 
   const demo = startDemo(seed);
   tryButton.addEventListener("click", () => demo.addNote());

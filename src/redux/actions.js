@@ -110,13 +110,19 @@ export function changeNoteColor(id, url, color) {
   };
 }
 
-export function updateNotePosition(id, x, y, url) {
+/**
+ * @param x, y page coordinates of the note's top left corner
+ * @param anchor since 5.1: what the note moves with when things scroll
+ *   (page/anchor.ts), or null for the page. Left out: unchanged.
+ */
+export function updateNotePosition(id, x, y, url, anchor) {
   return {
     type: MOVE_NOTE,
     id,
     x,
     y,
     url,
+    ...(anchor !== undefined ? { anchor } : {}),
   };
 }
 

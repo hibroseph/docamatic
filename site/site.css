@@ -72,9 +72,32 @@ a:focus-visible, button:focus-visible { outline: none; box-shadow: var(--focus-r
 .ticks li:nth-child(3)::before { background: var(--hl-green); }
 .ticks li:nth-child(4)::before { background: var(--hl-blue); }
 
+.split--reverse { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+.split--reverse .split__text { order: 2; }
+.hint { color: var(--ink-muted); font-size: 15px; }
+
+/* An example web app whose message list scrolls (the demo note lives in it).
+   Fixed light colors: it's a picture of somebody else's app. */
+.appmock { overflow: hidden; border: var(--stroke-bold) solid var(--ink); border-radius: var(--radius-lg); background: #ffffff; color: #1e2433; box-shadow: 6px 6px 0 var(--sticker-shadow); font-size: 14px; line-height: 20px; }
+.appmock__bar { padding: var(--space-3) var(--space-4); background: #2b3a55; color: #ffffff; font-weight: 700; }
+.appmock__body { display: grid; grid-template-columns: 120px minmax(0, 1fr); height: 320px; }
+.appmock__side { display: grid; align-content: start; gap: var(--space-2); padding: var(--space-4); background: #eef1f6; color: #3d4659; }
+.appmock__list { overflow-y: auto; padding: 0 var(--space-4); overscroll-behavior: contain; }
+.appmock__list:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--focus); }
+.appmock__row { display: grid; gap: 2px; padding: var(--space-3) 0; border-bottom: 1px solid #e3e6ec; }
+.appmock__row span { color: #596072; }
+
+.details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-8); margin: var(--space-6) 0 0; }
+.details dt { margin-bottom: var(--space-1); font-weight: 700; }
+.details dd { margin: 0; color: var(--ink-muted); }
+
 /* A picture of the popup, made of the same components */
 .mock { padding: var(--space-4); border: var(--stroke-bold) solid var(--ink); border-radius: var(--radius-lg); background: var(--paper); box-shadow: 6px 6px 0 var(--sticker-shadow); transform: rotate(1deg); font-size: 14px; line-height: 20px; }
-.mock__bar { margin-bottom: var(--space-3); }
+.mock__bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+.mock__gear { width: 16px; height: 16px; }
+.dm-btn.mock__new { display: flex; width: 100%; box-sizing: border-box; margin-bottom: var(--space-3); cursor: default; }
+.dm-btn.mock__new:hover { transform: none; box-shadow: var(--sticker-sm); }
+.section p.mock__count { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: 13px; }
 .mock__wordmark { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
 .mock__search { margin-bottom: var(--space-4); }
 .mock__list { display: grid; gap: var(--space-3); }
@@ -116,6 +139,10 @@ a:focus-visible, button:focus-visible { outline: none; box-shadow: var(--focus-r
   .steps { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
   .mock { transform: none; }
   .section { padding: 56px 0; }
+  .split--reverse .split__text { order: 0; }
+  .appmock__body { grid-template-columns: minmax(0, 1fr); }
+  .appmock__side { display: none; }
+  .details { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .site-header__inner { flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding-top: var(--space-3); padding-bottom: var(--space-3); }
@@ -126,3 +153,4 @@ a:focus-visible, button:focus-visible { outline: none; box-shadow: var(--focus-r
 @media (prefers-reduced-motion: reduce) {
   .mock { transform: none; }
 }
+.section--after { padding-top: 0; }

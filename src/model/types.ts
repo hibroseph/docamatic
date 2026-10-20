@@ -20,6 +20,16 @@ export interface NoteColor {
   original?: string;
 }
 
+/**
+ * Since 5.1: what a note moves with when things scroll (page/anchor.ts).
+ * Absent: the page, as every older note. `position` is kept either way.
+ */
+export type NoteAnchor =
+  /** Inside a scrolling panel; x/y within the panel's scrolled content */
+  | { kind: "element"; selector: string; x: number; y: number }
+  /** Over something fixed; x/y on screen */
+  | { kind: "viewport"; x: number; y: number };
+
 export interface Note {
   id: string;
   /** Page coordinates of the note's top left corner, in CSS pixels */
@@ -36,6 +46,8 @@ export interface Note {
   heart?: boolean;
   /** Shown on the page. False: only in the popup and side panel. */
   visible?: boolean;
+  /** Since 5.1, see NoteAnchor */
+  anchor?: NoteAnchor;
   /** Pinned to the window instead of the page (no UI to set it today) */
   stickify?: boolean;
   /** Tag ids, mirrored by Tag.notes */

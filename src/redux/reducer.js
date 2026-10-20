@@ -95,6 +95,17 @@ const createNote = (action) => ({
   visible: action.visible !== false,
 });
 
+// Anchors come from web pages (content scripts), so only well-formed ones are kept
+const finite = (n) => typeof n === "number" && Number.isFinite(n);
+const validAnchor = (anchor) => {
+  if (!anchor || typeof anchor !== "object" || !finite(anchor.x) || !finite(anchor.y)) return null;
+  if (anchor.kind === "viewport") return { kind: "viewport", x: anchor.x, y: anchor.y };
+  if (anchor.kind === "element" && typeof anchor.selector === "string" && anchor.selector && anchor.selector.length <= 500) {
+    return { kind: "element", selector: anchor.selector, x: anchor.x, y: anchor.y };
+  }
+  return null;
+};
+
 const sameText = (a, b) => String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
 
 // Removes a note id from every tag, dropping tags left without notes
@@ -284,7 +295,18 @@ const notesApp = (state = GetInitialState(), action) => {
       });
 
     case MOVE_NOTE:
-      return updateNote(state, action.url, action.id, () => ({ position: { x: action.x, y: action.y } }));
+      // Replaces the note (rather than merging) so an anchor can be removed
+      return updatePageNotes(state, action.url, (notes) =>
+        notes.map((note) => {
+          if (note.id !== action.id) return note;
+          const { anchor: oldAnchor, ...rest } = note;
+          const moved = { ...rest, position: { x: action.x, y: action.y } };
+          if (!("anchor" in action)) return oldAnchor ? { ...moved, anchor: oldAnchor } : moved;
+          const anchor = validAnchor(action.anchor);
+          // No valid anchor: back on the page, like notes have always been
+          return anchor ? { ...moved, anchor } : moved;
+        })
+      );
 
     case TOGGLE_VISIBILITY:
       return updateNote(state, action.url, action.id, () => ({ visible: action.visible }));

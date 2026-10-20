@@ -30,6 +30,7 @@ export const NoteCard = ({
   const allTags = useSelector((state: State) => state.tags) || NO_TAGS;
   const label = useSelector((state: State) => pageLabel(state, pageUrl));
   const [menuOpen, setMenuOpen] = useState(false);
+  const [addingTag, setAddingTag] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const bodyWrap = useRef<HTMLDivElement>(null);
@@ -83,7 +84,7 @@ export const NoteCard = ({
       <div className={`note-card__body ${long ? "is-long" : ""}`} ref={bodyWrap}>
         <BodyField note={note} actions={actions} className="dm-note__body" />
       </div>
-      <TagEditor note={note} tags={tagsOfNote(allTags, note)} actions={actions} />
+      <TagEditor tags={tagsOfNote(allTags, note)} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
       <div className="dm-note__meta note-card__meta">
         {showPage && href && (
           <a className="note-card__page" href={href} title={label} {...EXTERNAL_LINK_PROPS}>
@@ -97,7 +98,7 @@ export const NoteCard = ({
           </span>
         )}
       </div>
-      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} />
+      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} />
     </article>
   );
 };

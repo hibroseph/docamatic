@@ -3,7 +3,7 @@
 // Nothing here may rely on extension APIs, which don't exist on a website.
 import { createStore } from "redux";
 import notesApp from "../redux/reducer";
-import { addNote, addText, addTitle, addTag } from "../redux/actions";
+import { addNote, addText, addTitle, addTag, updateNotePosition } from "../redux/actions";
 import { generateUUID } from "../utils/GenerateUUID";
 import { noteUrlFor } from "../utils/noteUrl";
 import { NEW_NOTE_WIDTH, placeNewNote } from "../model/placement";
@@ -19,6 +19,8 @@ export interface DemoNote {
   color?: NoteColorName;
   tags?: string[];
   width?: number;
+  /** A scrolling element the note sits in and scrolls with (page/anchor.ts) */
+  inPanel?: string;
 }
 
 export const startDemo = (seed: DemoNote[] = []) => {
@@ -50,6 +52,17 @@ export const startDemo = (seed: DemoNote[] = []) => {
     if (note.title) store.dispatch(addTitle(id, note.title, pageUrl));
     if (note.body) store.dispatch(addText(id, note.body, pageUrl));
     note.tags?.forEach((tag) => store.dispatch(addTag(id, pageUrl, tag)));
+    const panel = note.inPanel ? document.querySelector(note.inPanel) : null;
+    if (panel) {
+      const box = panel.getBoundingClientRect();
+      const anchor = {
+        kind: "element" as const,
+        selector: note.inPanel!,
+        x: Math.round(position.x - window.scrollX - box.left - panel.clientLeft + panel.scrollLeft),
+        y: Math.round(position.y - window.scrollY - box.top - panel.clientTop + panel.scrollTop),
+      };
+      store.dispatch(updateNotePosition(id, position.x, position.y, pageUrl, anchor));
+    }
     return id;
   };
 

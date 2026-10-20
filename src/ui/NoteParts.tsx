@@ -20,7 +20,7 @@ import {
 } from "../model/colors";
 import type { Note, NoteRecord, State, Tag } from "../model/types";
 import type { NoteActions } from "./useNoteActions";
-import { CloseIcon, ExternalIcon, EyeIcon, EyeOffIcon, TrashIcon } from "./icons";
+import { CloseIcon, ExternalIcon, EyeIcon, EyeOffIcon, TagIcon, TrashIcon } from "./icons";
 
 // --- Color --------------------------------------------------------------------
 
@@ -207,14 +207,30 @@ export const TagPill = ({
 
 const EMPTY_TAGS: Tag[] = [];
 
-export const TagEditor = ({ note, tags, actions }: { note: Note; tags: Tag[]; actions: NoteActions }) => {
+/**
+ * A note's tags. Nothing shows on a note without tags: "Add tag" in the
+ * note's menu opens the field (`adding`), which closes again when it's left
+ * empty, so notes stay plain unless someone uses tags.
+ */
+export const TagEditor = ({
+  tags,
+  actions,
+  adding,
+  onDoneAdding,
+}: {
+  tags: Tag[];
+  actions: NoteActions;
+  adding: boolean;
+  onDoneAdding: () => void;
+}) => {
   const allTags = useSelector((state: State) => state.tags) || EMPTY_TAGS;
   const [text, setText] = useState("");
-  const [focused, setFocused] = useState(false);
+
+  if (!adding && tags.length === 0) return null;
 
   const query = text.trim().toLowerCase();
   const onNote = new Set(tags.map((tag) => tag.id));
-  const suggestions = focused
+  const suggestions = adding
     ? allTags.filter((tag) => !onNote.has(tag.id) && (!query || tag.text.toLowerCase().includes(query))).slice(0, 5)
     : [];
 
@@ -224,40 +240,48 @@ export const TagEditor = ({ note, tags, actions }: { note: Note; tags: Tag[]; ac
     setText("");
   };
 
+  const finish = () => {
+    setText("");
+    onDoneAdding();
+  };
+
   return (
     <div className="tag-editor">
       <div className="dm-note__tags">
         {tags.map((tag) => (
           <TagPill key={tag.id} tag={tag} testId={TEST_IDS.noteTag} onRemove={() => actions.removeTag(tag.id)} />
         ))}
-        <input
-          className="dm-tag dm-tag--add tag-input"
-          data-testid={TEST_IDS.noteAddTag}
-          value={text}
-          placeholder="+ Tag"
-          aria-label="Add a tag"
-          size={Math.max(5, text.length + 1)}
-          maxLength={40}
-          onChange={(event) => setText(event.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={(event) => {
-            // Clicking a suggestion moves focus into the list; let that click land
-            if ((event.relatedTarget as HTMLElement | null)?.closest?.(".tag-suggestions")) return;
-            setFocused(false);
-            add(text);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
+        {adding && (
+          <input
+            className="dm-tag dm-tag--add tag-input"
+            value={text}
+            placeholder="Tag name"
+            aria-label="New tag"
+            autoFocus
+            size={Math.max(8, text.length + 1)}
+            maxLength={40}
+            onChange={(event) => setText(event.target.value)}
+            onBlur={(event) => {
+              // Clicking a suggestion moves focus into the list; let that click land
+              if ((event.relatedTarget as HTMLElement | null)?.closest?.(".tag-suggestions")) return;
               add(text);
-            } else if (event.key === "Escape") {
-              setText("");
-              (event.target as HTMLInputElement).blur();
-            } else if (event.key === "Backspace" && !text && tags.length > 0) {
-              actions.removeTag(tags[tags.length - 1]!.id);
-            }
-          }}
-        />
+              finish();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                // Enter on an empty field is done; otherwise add it and stay for another
+                if (text.trim()) add(text);
+                else finish();
+              } else if (event.key === "Escape") {
+                event.stopPropagation();
+                finish();
+              } else if (event.key === "Backspace" && !text && tags.length > 0) {
+                actions.removeTag(tags[tags.length - 1]!.id);
+              }
+            }}
+          />
+        )}
       </div>
       {suggestions.length > 0 && (
         <div className="tag-suggestions" aria-label="Your tags">
@@ -325,8 +349,8 @@ export const useDismiss = (open: boolean, close: () => void, ...refs: React.RefO
  */
 export const NoteMenu = React.forwardRef<
   HTMLDivElement,
-  { open: boolean; record: NoteRecord; actions: NoteActions; inList?: boolean; onDone: () => void }
->(({ open, record, actions, inList = false, onDone }, ref) => {
+  { open: boolean; record: NoteRecord; actions: NoteActions; inList?: boolean; onDone: () => void; onAddTag: () => void }
+>(({ open, record, actions, inList = false, onDone, onAddTag }, ref) => {
   const { note, pageUrl } = record;
   const visible = note.visible !== false;
   const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
@@ -340,6 +364,19 @@ export const NoteMenu = React.forwardRef<
         }}
       />
       <div className="menu__sep" role="separator" />
+      <button
+        type="button"
+        role="menuitem"
+        className="menu__item"
+        data-testid={TEST_IDS.noteAddTag}
+        onClick={() => {
+          onDone();
+          onAddTag();
+        }}
+      >
+        <TagIcon />
+        Add tag
+      </button>
       <button
         type="button"
         role="menuitem"

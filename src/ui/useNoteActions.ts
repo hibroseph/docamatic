@@ -16,7 +16,7 @@ import {
   updateNotePosition,
   updateNoteSize,
 } from "../redux/actions";
-import type { NoteRecord, State } from "../model/types";
+import type { NoteAnchor, NoteRecord, State } from "../model/types";
 import { tagsOfNote } from "../model/notes";
 import { useUndo } from "./undo";
 
@@ -45,7 +45,8 @@ export const useNoteActions = ({ note, pageUrl }: NoteRecord) => {
       },
       addTag: (text: string) => dispatch(addTag(id, pageUrl, text)),
       removeTag: (tagId: string) => dispatch(removeTag(id, pageUrl, tagId)),
-      move: (x: number, y: number) => dispatch(updateNotePosition(id, x, y, pageUrl)),
+      /** anchor: what it moves with (page/anchor.ts); null for the page, left out for unchanged */
+      move: (x: number, y: number, anchor?: NoteAnchor | null) => dispatch(updateNotePosition(id, x, y, pageUrl, anchor)),
       resize: (width: number) => dispatch(updateNoteSize(id, width, pageUrl)),
       remove: () => {
         // Keep what's needed to put it back exactly as it was

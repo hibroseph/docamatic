@@ -39,7 +39,7 @@
 .note-title:focus-visible { box-shadow: 0 0 0 2px var(--note-ink); }
 
 .note-body {
-  min-height: 40px;
+  min-height: 20px;
   margin: 0;
   outline: none;
   color: var(--note-ink);
@@ -50,6 +50,9 @@
   white-space: pre-wrap;
   cursor: text;
 }
+/* An empty note keeps room to click into */
+.note-body:empty,
+.note-body:has(> br:only-child) { min-height: 40px; }
 .note-body:empty::before,
 .note-body:has(> br:only-child)::before {
   content: attr(data-placeholder);

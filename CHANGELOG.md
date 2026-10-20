@@ -40,6 +40,15 @@ and the extension is built with WXT so it can ship to Firefox too.
 - Settings: default color for new notes, theme (System, Light, Dark).
 - Page titles are saved with notes (when a note is added, and when a page
   with notes is visited), so lists show titles instead of urls.
+- Notes move with what they're on (`page/anchor.ts`). A note dropped (or
+  added) over a scrolling panel, like a web app's message list, scrolls with
+  that panel and is cut off at its edges; over a fixed part of the page
+  (header, sidebar) it stays put on screen. Saved as an optional
+  `note.anchor` (`element`: a CSS path to the panel plus the offset in its
+  content; `viewport`: screen position); `position` keeps the page
+  coordinates as a fallback and for older versions. Notes are only anchored
+  when moved or added, so existing notes render exactly as before. The
+  website demos it in an example inbox.
 - Firefox build (`npm run build:firefox`, `dist/app-firefox.zip`), untested.
 - Typecheck (`npm run typecheck`) in CI.
 - Tests for the model (colors, search, sorting, placement, dates), the new
@@ -80,7 +89,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   in the color menu. Also optional: `page.title`, `note.updated_at`,
   `metadata.preferences`. Positions and sizes of existing notes are untouched
   and render at the same place.
-- Tags are matched ignoring case and surrounding spaces.
+- Tags are matched ignoring case and surrounding spaces. A note shows no tag
+  field until it has tags: "Add tag" in its menu opens one
+  (`note-add-tag` is now that menu item).
 - Renaming, recoloring and deleting tags and changing preferences are
   privileged actions (extension pages only); restoring a deleted note and
   saving a page title are allowed for content scripts on their own site.
@@ -94,7 +105,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   `note_create_*` events include `source` (popup, sidepanel, shortcut) and
   `placement`. Privacy policy mentions the side panel.
 - Website: same pages and content (demo, change log, privacy, contact),
-  redesigned; links to the Chrome Web Store listing.
+  redesigned; links to the Chrome Web Store listing. The home page also
+  shows notes in a scrolling panel (live), a picture of the new popup, and
+  the smaller features (undo, shortcut, themes, colors).
 - Welcome page rewritten with a practice note instead of GIFs of the old UI.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).

@@ -1,6 +1,6 @@
 {
   "environment": "local",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "release_prefix": "docamatic@",
   "posthog_host": "https://us.i.posthog.com",
   "posthog_api_key": "phc_CTYSHigvVMoiU78Sp4TniqQoisiEqbu9H8UyoMGhmaAj"

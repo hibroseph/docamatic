@@ -14,6 +14,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+## 5.0.1 (2026-10-20)
+
 ### Added
 - Analytics events have an `internal` property, `true` for the developer's own
   installs, so they can be left out of PostHog numbers (PostHog: "Filter out
@@ -28,8 +30,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   Bricolage Grotesque and Figtree fonts. Not used by the extension yet; it's
   the basis for the UI redesign. The browsable version is the design system
   artifact linked in `design-system/ABOUT.md`.
+- Error reports for problems that make Docamatic unusable carry everything
+  needed to fix them, sent the moment they happen:
+  - Safe mode: a description of the stored data (types, sizes and counts of
+    `pages`, `tags`, `metadata` and the legacy keys, schema version, storage
+    key names, how many notes exist anywhere; never urls or note text, see
+    `src/redux/storageShape.js`), storage size, which loading step failed,
+    and the install's update history. Level `fatal`.
+  - Failed saves and failed imports of the MV2 notes get the same kind of
+    description, and the import reports which stage failed.
+  - Every report is tagged `impact` (`unusable`, `notes_not_saved`,
+    `old_notes_missing`) so these can be found and alerted on in Sentry.
+- Every Sentry report, from any part of the extension, is tagged with
+  `previous_version`, `install_reason`, `internal` and `install_type`, and
+  linked to the PostHog install id (unless usage statistics are off).
+- Updates and installs are remembered in storage (`lifecycle`, last 5), since
+  Chrome only reports the previous version once.
+- `safe_mode_entered` events include the load step, the type of `pages` and
+  the schema version.
+- Breadcrumbs for each startup step when loading notes.
+- Privacy policy: says what the new error report details are.
 
 ### Changed
+- Invalid saved data errors say what was found (e.g. "pages is not an object
+  (found string)") and no longer include page urls in the message, which
+  went to Sentry and the Backup & restore page.
+- A failed save while importing the MV2 notes is reported as part of the
+  import (it was reported as "startup backups").
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).
 

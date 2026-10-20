@@ -9,7 +9,17 @@ import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../../redux/action
 import { noteUrlsFor } from "../../utils/noteUrl";
 import { CHROME_MESSAGES, NOTES_UI_FILE } from "../../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../../redux/legacyState";
-import { initSentry, captureException, captureMessage, reportReducerErrors } from "../../utils/sentry";
+import {
+  IMPACT,
+  addBreadcrumb,
+  captureException,
+  captureMessage,
+  initSentry,
+  reportReducerErrors,
+  tagReportsFromStorage,
+} from "../../utils/sentry";
+import { describeNotesValue, describeStorage, storageSizes } from "../../redux/storageShape";
+import { LIFECYCLE_STORAGE_KEY, lifecycleContext, recordInstallEvent } from "../../utils/lifecycle";
 import { hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../../utils/expectedFailures";
 import { noteShownEvent } from "../../redux/noteShown";
 import { migrateState } from "../../redux/migrations";
@@ -38,6 +48,13 @@ let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 // until wrapStore() is called once the state has been loaded from storage.
 const wrapStore = createWrapStore({ channelName: "NOTES_STORE" });
 
+// Chrome fires onInstalled soon after the worker starts, on the first run
+// after an install or update. Reports of errors that stop Docamatic working
+// wait briefly for it, so they can say which version the user came from.
+let resolveInstallEventSeen;
+const installEventSeen = new Promise((resolve) => (resolveInstallEventSeen = resolve));
+const waitForInstallEvent = (ms = 3000) => Promise.race([installEventSeen, new Promise((resolve) => setTimeout(resolve, ms))]);
+
 chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   // Only show onboarding on a fresh install, not on every worker restart
   if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
@@ -46,6 +63,15 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
   } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
     track("extension_updated", { previous_version: previousVersion });
   }
+
+  if (reason !== chrome.runtime.OnInstalledReason.INSTALL && reason !== chrome.runtime.OnInstalledReason.UPDATE) {
+    resolveInstallEventSeen();
+    return;
+  }
+  recordInstallEvent({ reason, previousVersion }, { version: config.version })
+    .then(() => tagReportsFromStorage())
+    .catch((err) => captureException(err, { during: "recording install event" }))
+    .finally(resolveInstallEventSeen);
 });
 
 // Resolves with the redux store once the state has been loaded from storage
@@ -214,11 +240,73 @@ const SAVE_DELAY_MS = 500;
 // Set when stored notes couldn't be loaded safely: { reason, message }
 let safeMode = null;
 
+// Which step of loading the notes is running, so a failure's report says
+// where it stopped (prepareStoredState only reads; the later steps write)
+let loadStep = "not started";
+
 const enterSafeMode = (err) => {
   safeMode = { reason: err?.reason || "load_failed", message: err?.message || String(err) };
   console.error("Docamatic is in safe mode; notes will not be changed", err);
-  captureException(err, { during: "loading notes", safe_mode_reason: safeMode.reason });
-  track("safe_mode_entered", { reason: safeMode.reason });
+  // Not awaited: starting the (read-only) store mustn't wait for the report
+  reportSafeMode(err, safeMode.reason, loadStep);
+};
+
+/**
+ * Reports safe mode with everything needed to fix it without having to ask
+ * the user: the shape of the stored data (never its contents), how big it
+ * is, and how this install got to this version. The data isn't changed in
+ * safe mode, so reading it again here sees what loading saw.
+ */
+const reportSafeMode = async (err, reason, step) => {
+  let shape = {};
+  let sizes = {};
+  let history = {};
+  try {
+    const storage = await chrome.storage.local.get(null);
+    shape = describeStorage(storage);
+    sizes = { ...storageSizes(storage), bytes_in_use: await chrome.storage.local.getBytesInUse(null).catch(() => "unknown") };
+    await track("safe_mode_entered", {
+      reason,
+      step,
+      pages_type: shape["pages.type"],
+      pages_json_type: shape["pages.json.type"],
+      schema_version: shape["metadata.schema_version"],
+      notes_found_anywhere: shape.notes_found_anywhere,
+      storage_keys: shape["storage.keys"],
+    });
+    // Tags it with the install id (created by the event above) and, on the
+    // first run after an update, the version it came from
+    await waitForInstallEvent();
+    await tagReportsFromStorage();
+    history = lifecycleContext((await chrome.storage.local.get(LIFECYCLE_STORAGE_KEY))[LIFECYCLE_STORAGE_KEY]);
+  } catch (diagnosticsErr) {
+    shape = { ...shape, diagnostics_error: String(diagnosticsErr?.message || diagnosticsErr) };
+  }
+  // Always sent, with whatever could be gathered
+  captureException(
+    err,
+    { during: "loading notes", safe_mode_reason: reason, load_step: step },
+    {
+      level: "fatal",
+      tags: { impact: IMPACT.UNUSABLE, safe_mode_reason: reason, load_step: step },
+      contexts: { stored_data: shape, storage_size: sizes, install_history: history },
+    }
+  );
+};
+
+// A failed save means changes made since the last good save will be lost
+// when the worker stops
+const reportSaveFailure = async (err, state) => {
+  const bytesInUse = await chrome.storage.local.getBytesInUse(null).catch(() => "unknown");
+  captureException(
+    err,
+    { during: "saving state" },
+    {
+      level: "error",
+      tags: { impact: IMPACT.NOTES_NOT_SAVED },
+      contexts: { unsaved_state: describeStorage(state), storage_size: { ...storageSizes(state), bytes_in_use: bytesInUse } },
+    }
+  );
 };
 
 // What the store shows in safe mode: no notes (they couldn't be read safely)
@@ -245,27 +333,37 @@ const saveAndVerify = async (state) => {
 
 // Throws (and changes nothing) if the stored notes can't be loaded safely
 const loadState = async () => {
+  loadStep = "reading storage";
   const storage = await chrome.storage.local.get(null);
 
   if (isEmptyStorage(storage)) {
+    addBreadcrumb({ category: "startup", message: "No saved notes (new install)" });
     return GetInitialState();
   }
+  addBreadcrumb({ category: "startup", message: "Read saved notes", data: { keys: describeStorage(storage)["storage.keys"] } });
 
   // Converts older layouts and runs migrations in memory, checking that
   // every note is still there. Throws instead of returning partial data.
+  loadStep = "preparing";
   const { state, changed, legacyKeys } = prepareStoredState(storage);
+  addBreadcrumb({ category: "startup", message: "Prepared saved notes", data: { changed, legacy_keys: legacyKeys.join(",") } });
 
   if (changed) {
     // 1. Keep an untouched copy of the data as it was
+    loadStep = "backing up before converting";
     await backupStoredNotes(storage, BACKUP_REASONS.BEFORE_UPDATE);
     // 2. Save the converted data and confirm it saved correctly
+    loadStep = "saving converted notes";
     await saveAndVerify(state);
     // 3. Only now remove the old layout's keys
     if (legacyKeys.length > 0) {
+      loadStep = "removing old keys";
       await chrome.storage.local.remove(legacyKeys);
     }
+    addBreadcrumb({ category: "startup", message: "Saved converted notes" });
   }
 
+  loadStep = "loaded";
   return state;
 };
 
@@ -331,31 +429,41 @@ const importLegacyLocalStorage = async (store) => {
   const { [LEGACY_IMPORT_DONE_KEY]: done } = await chrome.storage.local.get(LEGACY_IMPORT_DONE_KEY);
   if (done) return;
 
-  let pages = {};
+  let stage = "reading localStorage";
+  let legacyNotes;
   try {
-    const legacyNotes = await readLegacyLocalStorage();
+    legacyNotes = await readLegacyLocalStorage();
     // pagesFromLegacy produces version 0 notes; run them through the
     // migrations so they match the current format before merging them in
+    stage = "converting";
     const legacyPages = legacyNotes ? pagesFromLegacy(legacyNotes) : {};
-    pages = migrateState({ pages: legacyPages, tags: [], metadata: { schema_version: 0 } }).pages;
+    const pages = migrateState({ pages: legacyPages, tags: [], metadata: { schema_version: 0 } }).pages;
+
+    const noteCount = Object.values(pages).reduce((count, page) => count + page.notes.length, 0);
+
+    if (noteCount > 0) {
+      stage = "saving";
+      store.dispatch(importNotes(pages));
+      // Save right away and confirm it, so the notes are safely in
+      // chrome.storage before the import is marked as done (the old copy in
+      // localStorage is never deleted either way)
+      await saveAndVerify(store.getState());
+      track("legacy_notes_imported", { note_count: noteCount, page_count: Object.keys(pages).length });
+    }
+
+    stage = "marking done";
+    await chrome.storage.local.set({ [LEGACY_IMPORT_DONE_KEY]: true });
   } catch (err) {
     // Not marked as done, so it is retried the next time the worker starts
-    captureException(err, { during: "legacy localStorage import" });
-    return;
+    captureException(
+      err,
+      { during: "legacy localStorage import", stage, offscreen_api: typeof chrome.offscreen?.createDocument },
+      {
+        tags: { impact: IMPACT.OLD_NOTES_MISSING, import_stage: stage },
+        contexts: { old_notes: legacyNotes === undefined ? { read: false } : describeNotesValue(legacyNotes) },
+      }
+    );
   }
-
-  const noteCount = Object.values(pages).reduce((count, page) => count + page.notes.length, 0);
-
-  if (noteCount > 0) {
-    store.dispatch(importNotes(pages));
-    // Save right away and confirm it, so the notes are safely in
-    // chrome.storage before the import is marked as done (the old copy in
-    // localStorage is never deleted either way)
-    await saveAndVerify(store.getState());
-    track("legacy_notes_imported", { note_count: noteCount, page_count: Object.keys(pages).length });
-  }
-
-  await chrome.storage.local.set({ [LEGACY_IMPORT_DONE_KEY]: true });
 };
 
 // Restores an automatic backup, replacing the current notes. The current
@@ -465,7 +573,7 @@ loadState()
 
         chrome.storage.local.set(state).then(
           () => (lastSavedState = state),
-          (err) => captureException(err, { during: "saving state" })
+          (err) => reportSaveFailure(err, state)
         );
       }, SAVE_DELAY_MS);
     });
@@ -485,5 +593,9 @@ loadState()
     importLegacyLocalStorage(store)
       .then(() => backupDaily())
       .catch((err) => captureException(err, { during: "startup backups" }))
-      .finally(() => trackDailyActive(store.getState()));
-  });
+      .finally(() => trackDailyActive(store.getState()).finally(() => tagReportsFromStorage()));
+  })
+  .catch((err) =>
+    // Creating the store failed: nothing in Docamatic will respond
+    captureException(err, { during: "starting the background", load_step: loadStep }, { level: "fatal", tags: { impact: IMPACT.UNUSABLE } })
+  );

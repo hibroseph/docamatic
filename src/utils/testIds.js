@@ -12,6 +12,8 @@ export const TEST_IDS = {
   // Popup navigation, one per section: new, current, search, sort, hearted, settings
   popupNav: (name) => `popup-nav-${name}`,
   popupCreateNote: "popup-create-note",
+  // Opens the board page (board.html)
+  popupOpenBoard: "popup-open-board",
 
   searchInput: "search-input",
   searchAvailableTag: "search-available-tag",

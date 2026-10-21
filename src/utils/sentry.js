@@ -38,7 +38,7 @@ const GLOBAL_INTEGRATIONS = ["GlobalHandlers", "TryCatch", "Breadcrumbs", "HttpC
 let hub = null;
 
 /**
- * @param {"background" | "popup" | "sidepanel" | "onboarding" | "content_script"} context
+ * @param {"background" | "popup" | "sidepanel" | "onboarding" | "board" | "content_script"} context
  *   Which part of the extension this is, attached to every event as a tag so
  *   issues can be filtered in Sentry.
  */

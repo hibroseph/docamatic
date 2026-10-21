@@ -20,6 +20,15 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Board (preview): `board.html`, opened from a new button in the popup's top
+  bar (test id `popup-open-board`). "Board" shows every note on a canvas,
+  grouped by its set of tags; groups of notes with several tags sit right
+  after their main tag's group, untagged notes last (`model/board.ts`,
+  unit tested). Notes can be dragged anywhere and the background dragged to
+  pan; positions are kept in storage.local under `board` (not part of the
+  notes' state or backups), and "Arrange by tag" clears them. "By tag" shows
+  a section per tag with the popup's editable note cards. Analytics:
+  `board_opened`, `board_view_changed`.
 - New look for notes on pages, the popup, Backup & restore, the welcome
   page and the website, from the design system (tokens, `dm-` components,
   Bricolage Grotesque and Figtree bundled; nothing loads from the internet).

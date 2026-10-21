@@ -2,5 +2,11 @@ Project Description:
 - I want to add an extension page which opens in the browser tab. I want this to be a place where you can see all your notes in a visual space and you can organize them in different ways. 1 way would be on a board or canvas. Maybe pregroup them if they have tags, if they have multiple tabs put them closer together.
 
 Another view could be a plane tags view where they show in a grid pattern according to a tag.
+Status (October 2026): a first, simple version is in 5.1 as a preview: `board.html`, opened from the
+popup's board button.
+- Board: a canvas with notes grouped by their tags (notes with several tags next to their main tag's
+  group, untagged last), drag notes anywhere, drag the background to pan, "Arrange by tag" to reset.
+- By tag: a section per tag with editable note cards.
 
-The idea is I want to maybe create a possible mood board. This is much bigger than the notes but I eventually want to add saving anything, a picture, some text, a screenshot from the screen which can be tagged easily and then displayed on this canvas so you can organize your thoughts and the things you find on the internet. IF you want you can take a shot at that, I would just hide it behind a switch to enable if there are things you add like right clicking an image adds it. There are a lot of design decisions there like this is getting into territory of using index db. This is the first step to saving "the web" and organzing it. Simple tags can do some preorganization but then its on you to take it visually futher if you'd like. At that point, you should be able to save anything, a link to a website, or a quote from a website. Like if you highlight text and right click you can add to you ____. I still need to come up with that name.
+Ideas for next steps: zoom, search and filter on the board, grouping by website, positions saved with
+the notes (so they're in backups and sync), drawing connections between notes, editing on the canvas.

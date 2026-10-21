@@ -174,6 +174,15 @@ export const ChevronIcon = ({ up, ...p }: IconProps & { up: boolean }) => (
   </Svg>
 );
 
+/** Cards spread on a board */
+export const BoardIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="2" y="2.5" width="5.5" height="5" rx="1" />
+    <rect x="9" y="4" width="5" height="4.5" rx="1" />
+    <rect x="3.5" y="9.5" width="5" height="4.5" rx="1" />
+  </Svg>
+);
+
 export const BringHereIcon = (p: IconProps) => (
   <Svg {...p}>
     <rect x="2.5" y="3" width="11" height="10" rx="2" />

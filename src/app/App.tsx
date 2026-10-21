@@ -12,7 +12,7 @@ import { trackEvent } from "../redux/actions";
 import type { State, Tag } from "../model/types";
 import { isEmptyQuery, type SearchQuery } from "../model/search";
 import { TagPill } from "../ui/NoteParts";
-import { CloseIcon, GearIcon, PanelIcon, PlusIcon, SearchIcon } from "../ui/icons";
+import { BoardIcon, CloseIcon, GearIcon, PanelIcon, PlusIcon, SearchIcon } from "../ui/icons";
 import { UndoProvider } from "../ui/undo";
 import {
   createFailureMessage,
@@ -138,6 +138,19 @@ export const App = ({ surface }: { surface: Surface }) => {
           <span className="wordmark">Docamatic</span>
           {surface === "sidepanel" && <span className="dm-tag dm-tag--blue preview-tag">Preview</span>}
           <span className="bar__spacer" />
+          <button
+            type="button"
+            className="dm-btn dm-btn--ghost dm-btn--icon"
+            aria-label="Open the board: all notes, grouped by tag"
+            title="Board: all your notes, grouped by tag (preview)"
+            data-testid={TEST_IDS.popupOpenBoard}
+            onClick={() => {
+              chrome.tabs.create({ url: chrome.runtime.getURL("/board.html") });
+              if (surface === "popup") window.close();
+            }}
+          >
+            <BoardIcon />
+          </button>
           {surface === "popup" && sidePanelSupported() && (
             <button
               type="button"

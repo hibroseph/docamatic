@@ -46,7 +46,8 @@ export interface Note {
   id: string;
   /** Page coordinates of the note's top left corner, in CSS pixels */
   position: { x: number; y: number };
-  size: { width: number };
+  /** height since 5.1: absent means as tall as its text */
+  size: { width: number; height?: number };
   title: string | null;
   /** HTML from the note editor (sanitized before it's rendered) */
   body: string | null;
@@ -60,8 +61,14 @@ export interface Note {
   visible?: boolean;
   /** Since 5.1, see NoteAnchor */
   anchor?: NoteAnchor;
-  /** Pinned to the window instead of the page (no UI to set it today) */
+  /**
+   * Kept on screen while the page scrolls ("Keep on screen"); `position` is
+   * then on screen, not on the page. Older versions had this flag without a
+   * way to set it.
+   */
   stickify?: boolean;
+  /** Since 5.1: only its top bar shows */
+  collapsed?: boolean;
   /** Tag ids, mirrored by Tag.notes */
   tags?: { id: string }[];
   /** The full address the note was created on, credentials removed */
@@ -90,6 +97,8 @@ export interface Preferences {
   new_note_color?: NoteColorName;
   /** Notes move with scrolling panels and fixed parts of pages (page/anchor.ts). Off unless turned on. */
   follow_panels?: boolean;
+  /** Text size of notes on pages. Medium unless set. */
+  note_text_size?: "small" | "medium" | "large";
 }
 
 export interface Metadata {

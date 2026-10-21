@@ -13,7 +13,7 @@ import { useDismiss, TagPill } from "../ui/NoteParts";
 import { BackIcon, MoreIcon, PencilIcon, TrashIcon } from "../ui/icons";
 import { useUndo } from "../ui/undo";
 import { EmptyState, GroupedNoteList, NoteList } from "./lists";
-import { useRemembered, type Surface } from "./hooks";
+import { bringNoteHere, useNotePlaces, useRemembered, type Surface } from "./hooks";
 
 const NO_TAGS: Tag[] = [];
 
@@ -32,6 +32,7 @@ export const ThisPageView = ({
 }) => {
   const url = tab?.url;
   const pages = useSelector((state: State) => state.pages);
+  const places = useNotePlaces(tab);
   // Top to bottom, the order they're in on the page
   const records = useMemo(
     () =>
@@ -78,7 +79,13 @@ export const ThisPageView = ({
           </button>
         </EmptyState>
       ) : (
-        <NoteList records={records} showPage={false} focusNoteId={focusNoteId} />
+        <NoteList
+          records={records}
+          showPage={false}
+          focusNoteId={focusNoteId}
+          places={places}
+          onBringHere={(record) => bringNoteHere(tab, record.note.id)}
+        />
       )}
     </>
   );

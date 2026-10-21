@@ -17,6 +17,12 @@ const THEMES: { value: ThemePreference; label: string }[] = [
   { value: "dark", label: "Dark" },
 ];
 
+const TEXT_SIZES: { value: "small" | "medium" | "large"; label: string }[] = [
+  { value: "small", label: "Small" },
+  { value: "medium", label: "Medium" },
+  { value: "large", label: "Large" },
+];
+
 const isFirefox = typeof navigator !== "undefined" && /firefox/i.test(navigator.userAgent);
 
 const openTab = (url: string) => chrome.tabs.create({ url });
@@ -30,6 +36,7 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const theme = preferences.theme || "system";
+  const textSize = preferences.note_text_size || "medium";
   const newColor = isNoteColorName(preferences.new_note_color) ? preferences.new_note_color : DEFAULT_NOTE_COLOR;
 
   return (
@@ -104,6 +111,26 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
         <h2 className="settings__heading" id="settings-pages">
           Notes on pages
         </h2>
+        <div className="settings__row">
+          <span className="settings__label" id="text-size-label">
+            Text size
+          </span>
+          <div className="dm-tabs" role="radiogroup" aria-labelledby="text-size-label">
+            {TEXT_SIZES.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                className="dm-tab"
+                aria-checked={textSize === value}
+                aria-selected={textSize === value}
+                onClick={() => dispatch(setPreferences({ note_text_size: value }))}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="check">
           <input
             type="checkbox"

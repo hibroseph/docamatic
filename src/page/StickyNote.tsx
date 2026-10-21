@@ -17,11 +17,11 @@ import { TEST_IDS } from "../utils/testIds";
 import { resolveNoteColor } from "../model/colors";
 import type { Note, NoteAnchor, NoteRecord, State, Tag } from "../model/types";
 import { anchorAt, findAnchorElement, panelMode, placementFor } from "./anchor";
-import { onReveal } from "./reveal";
+import { registerNote } from "./noteRegistry";
 import { transformFor, useDragResize } from "./useDragResize";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
-import { GripIcon, HeartIcon, MoreIcon } from "../ui/icons";
+import { GripIcon, HeartIcon, MoreIcon, PinIcon } from "../ui/icons";
 
 // Room for the page's vertical scrollbar
 const SCROLLBAR_WIDTH = 17;
@@ -107,15 +107,16 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   const moreRef = useRef<HTMLButtonElement>(null);
   const articleRef = useRef<HTMLElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const pressedGrip = useRef(false);
+  const lastGripTap = useRef(0);
   useDismiss(menuOpen, () => setMenuOpen(false), menuRef, moreRef);
 
   // The saved position comes back from the background store a moment after
   // a drag ends, so without this the note would snap back to its old spot
-  // until then. The dropped
-  // position is used until the store has caught up with it (or it's been a
-  // while, so a move made in another tab still comes through). Same idea as
-  // useStoreSyncedText for typing.
-  const [dropped, setDropped] = useState<{ x: number; y: number; at: number } | null>(null);
+  // until then. The dropped position is used until the store has caught up
+  // with it (or it's been a while, so a move made in another tab still comes
+  // through). Same idea as useStoreSyncedText for typing.
+  const [dropped, setDropped] = useState<{ x: number; y: number; fixed: boolean; at: number } | null>(null);
   const [resized, setResized] = useState<{ width: number; at: number } | null>(null);
 
   useEffect(() => {
@@ -129,45 +130,73 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     if (note.size.width === resized.width || Date.now() - resized.at > PENDING_TIMEOUT_MS) setResized(null);
   }, [note.size.width]);
 
+  const pinned = Boolean(note.stickify);
   const followPanels = useFollowPanels();
-  const anchor = followPanels ? note.anchor : undefined;
+  // A note kept on screen doesn't follow anything else
+  const anchor = followPanels && !pinned ? note.anchor : undefined;
   const { placement: anchored, panel } = usePlacement(note, anchor);
-  // Just dropped: where it was dropped, on the page, until the store has it
-  const placement = dropped ? { fixed: false, x: dropped.x, y: dropped.y, away: false } : anchored;
-  const position = placement;
+  // Just dropped: where it was dropped, until the store has it
+  const placement = dropped ? { fixed: dropped.fixed, x: dropped.x, y: dropped.y, away: false } : anchored;
   const width = resized ? resized.width : note.size.width;
+  const collapsed = Boolean(note.collapsed);
 
   // Keep notes saved on a wider window from ending up off screen (notes on
   // the page only, as always; anchored ones go where their panel is)
-  const isOffScreen = !anchor && !dropped && position.x + width > windowWidth - SCROLLBAR_WIDTH;
-  const fixed = Boolean(note.stickify) || placement.fixed;
-  const shownAt = { x: isOffScreen ? windowWidth - width - SCROLLBAR_WIDTH : position.x, y: position.y };
+  const isOffScreen = !anchor && !dropped && placement.x + width > windowWidth - SCROLLBAR_WIDTH;
+  const fixed = pinned || placement.fixed;
+  const shownAt = { x: isOffScreen ? Math.max(0, windowWidth - width - SCROLLBAR_WIDTH) : placement.x, y: placement.y };
 
-  const { dragging, handle, resizeHandle, onGripKeyDown, drawnAt, drawnWidth } = useDragResize({
+  // Moves the note to a spot on screen. Kept on screen: all of it if it
+  // fits, otherwise its top. What's under it there decides what it moves
+  // with from then on (with the setting on).
+  const moveTo = (screenX: number, screenY: number) => {
+    const onScreen = (value: number, size: number, room: number) => Math.min(Math.max(0, value), Math.max(0, room - size));
+    const height = articleRef.current?.offsetHeight || 40;
+    const x = Math.round(onScreen(screenX, width, window.innerWidth - SCROLLBAR_WIDTH));
+    const y = Math.round(onScreen(screenY, Math.min(height, window.innerHeight), window.innerHeight));
+    if (pinned) {
+      // Kept on screen: its position is on screen
+      setDropped({ x, y, fixed: true, at: Date.now() });
+      actions.move(x, y);
+      return;
+    }
+    const pageX = Math.round(x + window.scrollX);
+    const pageY = Math.round(y + window.scrollY);
+    setDropped({ x: pageX, y: pageY, fixed: false, at: Date.now() });
+    // With the setting off, a moved note is on the page (its anchor, if any, is cleared)
+    actions.move(pageX, pageY, followPanels ? anchorAt(x, y, width, layerOf(articleRef.current)) : null);
+  };
+
+  const { dragging, handle, resizeHandle, cornerHandle, onGripKeyDown, drawnAt, drawnWidth, drawnHeight } = useDragResize({
     boxRef,
     position: shownAt,
     width,
+    height: collapsed ? undefined : note.size.height,
     fixed,
-    disabled: Boolean(note.stickify),
+    disabled: false,
     onStart: onBringToFront,
-    onDrop: (x, y) => {
-      // Where it is on screen now decides what it moves with from here on.
-      // Kept on screen: all of it if it fits, otherwise its top.
-      const onScreen = (value: number, size: number, room: number) => Math.min(Math.max(0, value), Math.max(0, room - size));
-      const height = articleRef.current?.offsetHeight || 40;
-      const screenX = onScreen(fixed ? x : x - window.scrollX, width, window.innerWidth - SCROLLBAR_WIDTH);
-      const screenY = onScreen(fixed ? y : y - window.scrollY, Math.min(height, window.innerHeight), window.innerHeight);
-      const pageX = Math.round(screenX + window.scrollX);
-      const pageY = Math.round(screenY + window.scrollY);
-      setDropped({ x: pageX, y: pageY, at: Date.now() });
-      // With the setting off, a moved note is on the page (its anchor, if any, is cleared)
-      const found = followPanels ? anchorAt(screenX, screenY, width, layerOf(articleRef.current)) : null;
-      actions.move(pageX, pageY, note.stickify ? undefined : found);
+    // Two quick taps on the grip collapse or expand the note. Counted here
+    // rather than with dblclick: presses are captured for dragging, which
+    // sends the browser's click events elsewhere.
+    onTap: () => {
+      if (!pressedGrip.current) return;
+      const now = Date.now();
+      if (now - lastGripTap.current < 400) {
+        lastGripTap.current = 0;
+        actions.setCollapsed(!collapsed);
+      } else {
+        lastGripTap.current = now;
+      }
     },
-    onResize: (newWidth) => {
-      setResized({ width: newWidth, at: Date.now() });
-      actions.resize(newWidth);
+    onDrop: (x, y) => moveTo(fixed ? x : x - window.scrollX, fixed ? y : y - window.scrollY),
+    onResize: (newWidth, newHeight) => {
+      if (newWidth !== width) {
+        setResized({ width: newWidth, at: Date.now() });
+        actions.resize(newWidth);
+      }
+      if (newHeight !== undefined) actions.setHeight(newHeight);
     },
+    onAutoHeight: () => actions.setHeight(null),
   });
 
   // A note in a panel whose corner has scrolled out of the panel goes away
@@ -177,7 +206,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   // A note just added over a scrolling panel or a fixed part of the page
   // moves with it from the start
   useEffect(() => {
-    if (!autoFocus || note.anchor || !followPanels) return;
+    if (!autoFocus || note.anchor || !followPanels || pinned) return;
     const frame = requestAnimationFrame(() => {
       const found = anchorAt(
         note.position.x - window.scrollX,
@@ -190,56 +219,94 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  // "Find on page" from the popup or side panel (page/reveal.ts)
   const [found, setFound] = useState(false);
+  const pointOut = () => {
+    setFound(true);
+    setTimeout(() => setFound(false), 2400);
+  };
+
+  // What the popup and side panel can ask of this note (page/noteRegistry.ts)
   useEffect(
     () =>
-      onReveal(note.id, () => {
-        onBringToFront();
-        const behavior: ScrollBehavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-        if (anchor?.kind === "element" && !panel) {
-          // Its panel isn't on the page any more: back onto the page, where it was dropped
-          actions.move(note.position.x, note.position.y, null);
-        }
-        if (anchor?.kind === "element" && panel) {
-          // Scroll the panel to the note, then the page to the panel
-          panel.scrollTo({ top: Math.max(0, anchor.y - 40), left: Math.max(0, anchor.x - 40), behavior });
-          panel.scrollIntoView({ block: "nearest", behavior });
-        } else if (anchor?.kind === "viewport") {
-          // Always on screen, unless the window got smaller since: bring it back in
-          const x = Math.min(Math.max(0, anchor.x), Math.max(0, window.innerWidth - width - SCROLLBAR_WIDTH));
-          const y = Math.min(Math.max(0, anchor.y), Math.max(0, window.innerHeight - 80));
-          if (x !== anchor.x || y !== anchor.y) actions.move(x + window.scrollX, y + window.scrollY, { kind: "viewport", x, y });
-        } else {
-          window.scrollTo({ top: Math.max(0, note.position.y - 120), behavior });
-        }
-        setFound(true);
-        setTimeout(() => setFound(false), 2400);
+      registerNote(note.id, {
+        // "Find on page": scroll to it and point it out
+        reveal: () => {
+          onBringToFront();
+          const behavior: ScrollBehavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+          if (anchor?.kind === "element" && !panel) {
+            // Its panel isn't on the page any more: back onto the page, where it was dropped
+            actions.move(note.position.x, note.position.y, null);
+          }
+          if (anchor?.kind === "element" && panel) {
+            // Scroll the panel to the note, then the page to the panel
+            panel.scrollTo({ top: Math.max(0, anchor.y - 40), left: Math.max(0, anchor.x - 40), behavior });
+            panel.scrollIntoView({ block: "nearest", behavior });
+          } else if (fixed) {
+            // Always on screen, unless the window got smaller since: bring it back in
+            const box = boxRef.current?.getBoundingClientRect();
+            if (box && (box.right < 40 || box.left > window.innerWidth - 40 || box.top > window.innerHeight - 40 || box.bottom < 40)) {
+              moveTo(box.left, box.top);
+            }
+          } else {
+            window.scrollTo({ top: Math.max(0, placement.y - 120), left: Math.max(0, placement.x - 40), behavior });
+          }
+          pointOut();
+        },
+        // "Bring here": to the top right of what's on screen, like a new note
+        bringHere: () => {
+          onBringToFront();
+          moveTo(window.innerWidth - SCROLLBAR_WIDTH - width - 24, 96);
+          pointOut();
+        },
+        place: () => {
+          if (placement.away) return "away";
+          const box = boxRef.current?.getBoundingClientRect();
+          if (!box) return "visible";
+          if (box.bottom < 24) return "above";
+          if (box.top > window.innerHeight - 24) return "below";
+          if (box.right < 24 || box.left > window.innerWidth - 24) return "aside";
+          return "visible";
+        },
       }),
-    [note.id, anchor, panel, note.position.x, note.position.y, width]
+    [note.id, anchor, panel, placement.x, placement.y, placement.away, width, fixed, pinned, followPanels]
   );
 
   const color = noteColorProps(resolveNoteColor(note.color));
+  const height = collapsed ? undefined : drawnHeight;
 
   return (
     <div
       ref={boxRef}
       className="note-box"
-      style={{
-        // Same positioning react-rnd used before 5.1 (top left of the notes'
-        // layer, then translated), so notes land exactly where they always have
-        position: fixed ? "fixed" : "absolute",
-        top: 0,
-        left: 0,
-        transform: transformFor(drawnAt.x, drawnAt.y),
-        width: drawnWidth,
-        zIndex,
-        visibility: away ? "hidden" : undefined,
-      }}
+      style={
+        {
+          // Same positioning react-rnd used before 5.1 (top left of the notes'
+          // layer, then translated), so notes land exactly where they always have
+          position: fixed ? "fixed" : "absolute",
+          top: 0,
+          left: 0,
+          transform: transformFor(drawnAt.x, drawnAt.y),
+          width: drawnWidth,
+          zIndex,
+          visibility: away ? "hidden" : undefined,
+          "--note-height": height ? `${height}px` : undefined,
+        } as React.CSSProperties
+      }
     >
       <article
         ref={articleRef}
-        className={`dm-note note note--page ${color.className} ${dragging ? "is-dragging" : ""} ${menuOpen ? "has-menu" : ""} ${found ? "is-found" : ""}`}
+        className={[
+          "dm-note note note--page",
+          color.className,
+          dragging && "is-dragging",
+          menuOpen && "has-menu",
+          found && "is-found",
+          collapsed && "note--collapsed",
+          height && "note--sized",
+          pinned && "note--pinned",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         style={color.style}
         data-testid={TEST_IDS.note}
         data-note-id={note.id}
@@ -250,11 +317,18 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
         onKeyPress={stop}
         onBeforeInput={stop}
       >
-        <div className="dm-note__head note__head note__drag" {...handle}>
+        <div
+          className="dm-note__head note__head note__drag"
+          {...handle}
+          onPointerDown={(event) => {
+            pressedGrip.current = Boolean((event.target as HTMLElement).closest(".dm-note__grip"));
+            handle.onPointerDown(event);
+          }}
+        >
           <span
             className="dm-note__grip"
             data-testid={TEST_IDS.noteDragHandle}
-            title="Drag to move, or use the arrow keys"
+            title="Drag to move (or use the arrow keys). Double-click to collapse."
             role="button"
             tabIndex={0}
             aria-label="Move note (arrow keys)"
@@ -264,6 +338,11 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
           </span>
           <TitleField note={note} actions={actions} className="dm-note__title" />
           <div className="dm-note__actions">
+            {pinned && (
+              <span className="note__pin" title="Kept on screen while the page scrolls">
+                <PinIcon size={13} />
+              </span>
+            )}
             <button
               type="button"
               className="dm-note__action"
@@ -296,11 +375,49 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
             </button>
           </div>
         )}
-        <BodyField note={note} actions={actions} className="dm-note__body" autoFocus={autoFocus} />
-        <TagEditor tags={tags} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
-        <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} />
+        {!collapsed && (
+          <>
+            <BodyField note={note} actions={actions} className="dm-note__body" autoFocus={autoFocus} />
+            <TagEditor tags={tags} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
+          </>
+        )}
+        <NoteMenu
+          ref={menuRef}
+          open={menuOpen}
+          record={record}
+          actions={actions}
+          onDone={() => setMenuOpen(false)}
+          onAddTag={() => {
+            if (collapsed) actions.setCollapsed(false);
+            setAddingTag(true);
+          }}
+          page={{
+            pinned,
+            collapsed,
+            onTogglePin: () => {
+              const box = boxRef.current?.getBoundingClientRect();
+              if (!box) return;
+              // Pinned notes keep their spot on screen; unpinned, on the page
+              actions.setPinned(
+                !pinned,
+                pinned
+                  ? { x: Math.round(box.left + window.scrollX), y: Math.round(box.top + window.scrollY) }
+                  : { x: Math.round(box.left), y: Math.round(box.top) }
+              );
+            },
+            onToggleCollapsed: () => actions.setCollapsed(!collapsed),
+          }}
+        />
       </article>
-      {!note.stickify && <div className="note__resize" aria-hidden="true" {...resizeHandle} />}
+      {!collapsed && <div className="note__resize" aria-hidden="true" {...resizeHandle} />}
+      {!collapsed && (
+        <div
+          className="note__corner"
+          aria-hidden="true"
+          title="Drag to resize. Double-click to fit the text again."
+          {...cornerHandle}
+        />
+      )}
     </div>
   );
 };

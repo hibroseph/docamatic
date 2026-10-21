@@ -8,7 +8,7 @@ import { CHROME_MESSAGES } from "../utils/constants";
 import { notifyUrlChange } from "../utils/urlChanges";
 import { mountNotes } from "../page/mountNotes";
 import { loadPageFonts } from "../page/pageFonts";
-import { revealNote } from "../page/reveal";
+import { bringNoteHere, notePlaces, revealNote } from "../page/noteRegistry";
 
 declare global {
   interface Window {
@@ -53,6 +53,10 @@ function start() {
     if (message?.action === CHROME_MESSAGES.URL_CHANGED) notifyUrlChange();
     // "Find on page"; answers whether the note is on this page
     if (message?.action === CHROME_MESSAGES.REVEAL_NOTE) sendResponse({ found: revealNote(String(message.noteId)) });
+    // "Bring here", for notes that are off screen or out of reach
+    if (message?.action === CHROME_MESSAGES.BRING_NOTE_HERE) sendResponse({ found: bringNoteHere(String(message.noteId)) });
+    // Where each note on this page is, so the popup can say "further down the page"
+    if (message?.action === CHROME_MESSAGES.NOTE_PLACES) sendResponse({ places: notePlaces() });
   });
 
   loadPageFonts();

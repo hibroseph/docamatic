@@ -8,6 +8,7 @@ import {
   DELETE_TAG,
   HEARTIFY,
   IMPORT_NOTES,
+  LAYOUT_NOTE,
   MOVE_NOTE,
   NUKE_NOTES,
   REMOVE_NOTE,
@@ -288,6 +289,29 @@ const notesApp = (state = GetInitialState(), action) => {
     case REPLACE_STATE:
       // Validated (and the current notes backed up) by the background first
       return action.state;
+
+    case LAYOUT_NOTE:
+      // Replaces the note (rather than merging) so fields can be removed
+      return updatePageNotes(state, action.url, (notes) =>
+        notes.map((note) => {
+          if (note.id !== action.id) return note;
+          let next = { ...note };
+          if (typeof action.pinned === "boolean" && finite(action.position?.x) && finite(action.position?.y)) {
+            // Pinned notes keep their position on screen, others on the page.
+            // Either way what it was anchored to no longer applies.
+            const { anchor, ...rest } = next;
+            next = { ...rest, stickify: action.pinned, position: { x: action.position.x, y: action.position.y } };
+          }
+          if (typeof action.collapsed === "boolean") next.collapsed = action.collapsed;
+          if (action.height === null) {
+            const { height, ...size } = next.size || {};
+            next.size = size;
+          } else if (finite(action.height)) {
+            next.size = { ...next.size, height: Math.max(60, Math.round(action.height)) };
+          }
+          return next;
+        })
+      );
 
     case HEARTIFY:
       return updateNote(state, action.url, action.id, (note) => ({ heart: !note.heart }));

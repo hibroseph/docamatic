@@ -21,7 +21,8 @@ export default defineConfig({
       description: "Want to add your own sticky notes to any webpage? Docamatic is your solution",
       // offscreen (Chrome only) reads notes saved by the 2019-2022 version;
       // the side panel permission is added by WXT for the sidepanel entrypoint
-      permissions: ["storage", "scripting", "unlimitedStorage", ...(isFirefox ? [] : ["offscreen"])],
+      // contextMenus: "Add a note here" when right-clicking a page (no install warning)
+      permissions: ["storage", "scripting", "unlimitedStorage", "contextMenus", ...(isFirefox ? [] : ["offscreen"])],
       host_permissions: ["<all_urls>"],
       icons: {
         16: "icons/docamatic-icon-16.png",

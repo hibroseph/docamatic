@@ -26,10 +26,17 @@ export const CHROME_MESSAGES = {
   FIND_NOTE: "find_note",
   // Background -> page: scroll to this note and point it out
   REVEAL_NOTE: "reveal_note",
+  // Popup / side panel -> page: move this note to what's on screen ("Bring here")
+  BRING_NOTE_HERE: "bring_note_here",
+  // Popup / side panel -> page: where is each note (on screen, further down, ...)
+  NOTE_PLACES: "note_places",
 };
 
 // Keyboard shortcut command (wxt.config.ts)
 export const CREATE_NOTE_COMMAND = "create-note";
+
+// The right-click menu item
+export const CONTEXT_MENU_ADD_NOTE = "add-note-here";
 
 // The notes UI bundle the background injects into pages that have notes
 // (built without a hash in its name so the background can reference it)

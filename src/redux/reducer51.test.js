@@ -110,3 +110,33 @@ test("Preferences are merged, and the saved format stays version 1", () => {
   expect(state.metadata.preferences).toEqual({ theme: "dark", new_note_color: "pink" });
   expect(state.metadata.schema_version).toBe(1);
 });
+
+import { layoutNote } from "./actions";
+
+test("Keep on screen: the position switches to the screen, and back to the page", () => {
+  let state = notesApp(stateWithNote(), { ...addNote("n", 0, URL), position: { x: 1, y: 2 } });
+  state = notesApp(state, { type: "MOVE_NOTE", id: "n", x: 1, y: 2, url: URL, anchor: { kind: "viewport", x: 1, y: 2 } });
+  state = notesApp(state, layoutNote("n", URL, { pinned: true, position: { x: 50, y: 60 } }));
+  let note = state.pages[URL].notes.find((n) => n.id === "n");
+  expect(note).toMatchObject({ stickify: true, position: { x: 50, y: 60 } });
+  expect("anchor" in note).toBe(false);
+  state = notesApp(state, layoutNote("n", URL, { pinned: false, position: { x: 50, y: 1060 } }));
+  note = state.pages[URL].notes.find((n) => n.id === "n");
+  expect(note).toMatchObject({ stickify: false, position: { x: 50, y: 1060 } });
+});
+
+test("Collapse, and a height that can be set and cleared", () => {
+  let state = notesApp(stateWithNote(), layoutNote("note-1", URL, { collapsed: true, height: 180 }));
+  expect(state.pages[URL].notes[0]).toMatchObject({ collapsed: true, size: { width: 225, height: 180 } });
+  state = notesApp(state, layoutNote("note-1", URL, { height: 10 }));
+  expect(state.pages[URL].notes[0].size.height).toBe(60);
+  state = notesApp(state, layoutNote("note-1", URL, { height: null }));
+  expect(state.pages[URL].notes[0].size).toEqual({ width: 225 });
+  // Bad values from a page change nothing
+  expect(notesApp(state, layoutNote("note-1", URL, { pinned: true, position: { x: NaN, y: 1 } })).pages[URL].notes[0].stickify).toBe(false);
+});
+
+test("A note can start with text (selected on the page), escaped, with its line breaks", () => {
+  const state = notesApp(GetInitialState(), addNote("n", 0, URL, undefined, { text: "Line <b>one</b>\nLine two & more" }));
+  expect(state.pages[URL].notes[0].body).toBe("Line &lt;b&gt;one&lt;/b&gt;<br>Line two &amp; more");
+});

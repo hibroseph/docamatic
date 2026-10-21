@@ -13,6 +13,11 @@ import { notesOnPage } from "../redux/pageNotes";
 import { NEW_NOTE_WIDTH, placeNewNote } from "../model/placement";
 import { DEFAULT_NOTE_COLOR, isNoteColorName } from "../model/colors";
 
+const fileAccessAllowed = () =>
+  chrome.extension?.isAllowedFileSchemeAccess
+    ? chrome.extension.isAllowedFileSchemeAccess().catch(() => true)
+    : Promise.resolve(true);
+
 // Used for side panel notes when the page can't tell us its size
 const FALLBACK_PAGE = { scrollPosition: 0, scrollLeft: 0, pageWidth: 1280, pageHeight: 800 };
 
@@ -55,7 +60,7 @@ const pageInformationFor = async (tab) => {
  * @param source "popup" | "sidepanel" | "shortcut", for analytics
  * @returns {{ ok: true, noteId, pageUrl } | { ok: false, reason }}
  */
-export const createNoteInTab = async (store, tab, { placement = "page", source = "popup" } = {}) => {
+export const createNoteInTab = async (store, tab, { placement = "page", source = "popup", atContextMenu = false, text } = {}) => {
   track("note_create_started", { source, placement });
 
   const fail = (stage, expected, error) => {
@@ -73,6 +78,9 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
   // chrome:// pages, the extension stores, ...: no extension can add to these
   if (!tab?.id || !canHaveNotes(tab.url)) return fail("page_not_supported", true);
 
+  // Files on the computer need "Allow access to file URLs" turned on for Docamatic
+  if (tab.url.startsWith("file:") && !(await fileAccessAllowed())) return fail("file_access_off", true);
+
   const { info, error } = await pageInformationFor(tab);
   // A side panel note doesn't need the page; it only uses its size, if it can
   if (error && placement !== "panel") return fail(error.stage, error.expected, error.error);
@@ -81,7 +89,11 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
   const pageUrl = noteUrlFor(href);
   const state = store.getState();
   const existing = notesOnPage(state, noteUrlsFor(href)).map(({ note }) => note.position).filter(Boolean);
-  const position = placeNewNote(info || FALLBACK_PAGE, existing);
+  // From the right-click menu: where the page was right-clicked
+  const position =
+    atContextMenu && info?.contextMenuAt
+      ? { x: Math.max(0, Math.round(info.contextMenuAt.x)), y: Math.max(0, Math.round(info.contextMenuAt.y)) }
+      : placeNewNote(info || FALLBACK_PAGE, existing);
   const preferred = state.metadata?.preferences?.new_note_color;
 
   const noteId = generateUUID();
@@ -94,6 +106,7 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
       color: isNoteColorName(preferred) ? preferred : DEFAULT_NOTE_COLOR,
       visible: placement !== "panel",
       pageTitle: tab.title,
+      text,
     })
   );
   return { ok: true, noteId, pageUrl };

@@ -10,18 +10,30 @@ import { pageLabel, tagsOfNote, domainOf } from "../model/notes";
 import { friendlyDate } from "../model/dates";
 import type { NoteRecord, State, Tag } from "../model/types";
 import { useNoteActions } from "../ui/useNoteActions";
-import { findOnPage } from "./hooks";
+import { findOnPage, type NotePlace } from "./hooks";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { EyeOffIcon, HeartIcon, MoreIcon } from "../ui/icons";
 
 const NO_TAGS: Tag[] = [];
 
+const PLACE_LABELS: Record<Exclude<NotePlace, "visible">, string> = {
+  below: "Further down the page",
+  above: "Higher up the page",
+  aside: "Off to the side",
+  away: "Scrolled out of view",
+};
+
 export const NoteCard = ({
   record,
   showPage = true,
   autoFocus = false,
+  place,
+  onBringHere,
 }: {
   record: NoteRecord;
+  /** For notes on the open page: where it is there */
+  place?: NotePlace;
+  onBringHere?: () => void;
   /** Show which page the note is on (not needed in "This page") */
   showPage?: boolean;
   autoFocus?: boolean;
@@ -93,13 +105,26 @@ export const NoteCard = ({
           </a>
         )}
         <span className="note-card__date">{friendlyDate(note.date_created)}</span>
+        {place && place !== "visible" && !hidden && (
+          <span className="note-card__place" data-testid={TEST_IDS.notePlace} data-place={place}>
+            {PLACE_LABELS[place]}
+            {onBringHere && (
+              <>
+                {" · "}
+                <button type="button" className="link-button" onClick={onBringHere}>
+                  Bring here
+                </button>
+              </>
+            )}
+          </span>
+        )}
         {hidden && (
           <span className="note-card__hidden" title="This note isn't shown on the page">
             <EyeOffIcon size={12} /> Not on page
           </span>
         )}
       </div>
-      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} onFind={() => findOnPage(record)} />
+      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} onFind={() => findOnPage(record)} onBringHere={onBringHere} />
     </article>
   );
 };

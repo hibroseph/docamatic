@@ -67,6 +67,17 @@ if (!window.__DOCAMATIC_LOADER__) {
   window.addEventListener("popstate", checkUrl);
   document.addEventListener("click", checkUrlAfterClick, true);
 
+  // Where the page was last right-clicked, for "Add a note here" in the
+  // right-click menu. Page coordinates, so scrolling since doesn't matter.
+  let lastContextMenu: { x: number; y: number } | null = null;
+  document.addEventListener(
+    "contextmenu",
+    (event) => {
+      lastContextMenu = { x: event.pageX, y: event.pageY };
+    },
+    true
+  );
+
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Where to place a new note on this page
     if (request.action === CHROME_MESSAGES.GET_PAGE_INFORMATION) {
@@ -76,6 +87,7 @@ if (!window.__DOCAMATIC_LOADER__) {
         page: window.location.href,
         pageWidth: document.documentElement.clientWidth,
         pageHeight: document.documentElement.clientHeight,
+        contextMenuAt: lastContextMenu,
       });
     }
   });

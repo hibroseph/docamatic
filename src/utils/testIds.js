@@ -33,6 +33,10 @@ export const TEST_IDS = {
   noteOpenPage: "note-open-page",
   // "Find on page" in a note's menu in the popup and side panel
   noteFind: "note-find",
+  // "Bring here" in a note's menu, for notes on the page that's open
+  noteBringHere: "note-bring-here",
+  // Where a note on the open page is, in the popup and side panel ("Further down the page", ...)
+  notePlace: "note-place",
   // One per color choice. Also has data-color="<hex>".
   noteColor: "note-color",
   // An existing tag on a note. Also has data-tag-text="<text>".

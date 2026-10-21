@@ -68,7 +68,9 @@ export const createNote = async (tab: Tab | null | undefined, placement: "page" 
 };
 
 export const createFailureMessage = (reason: string) =>
-  reason === "page_not_supported"
+  reason === "file_access_off"
+    ? "To add notes to files on your computer, turn on “Allow access to file URLs” in Docamatic's details on the extensions page."
+    : reason === "page_not_supported"
     ? "Notes can't go on this page. Browser pages and extension stores don't allow it."
     : reason === "safe_mode"
       ? "Docamatic is in safe mode, so it isn't changing notes right now."
@@ -92,6 +94,40 @@ export const useNewNoteShortcut = () => {
  */
 export const findOnPage = ({ note, pageUrl }: { note: { id: string }; pageUrl: string }) => {
   chrome.runtime.sendMessage({ type: CHROME_MESSAGES.FIND_NOTE, noteId: note.id, pageUrl }).catch(() => {});
+  if (document.body.classList.contains("surface-popup")) window.close();
+};
+
+export type NotePlace = "visible" | "below" | "above" | "aside" | "away";
+
+/**
+ * Where each note on the open page is (on screen, further down, ...), asked
+ * of the page now and then while the popup or side panel is open. Empty for
+ * pages without the notes UI.
+ */
+export const useNotePlaces = (tab: chrome.tabs.Tab | null | undefined) => {
+  const [places, setPlaces] = useState<Record<string, NotePlace>>({});
+  useEffect(() => {
+    if (!tab?.id) return;
+    let cancelled = false;
+    const ask = () =>
+      chrome.tabs
+        .sendMessage(tab.id!, { action: CHROME_MESSAGES.NOTE_PLACES })
+        .then((reply) => !cancelled && setPlaces(reply?.places || {}))
+        .catch(() => !cancelled && setPlaces({}));
+    ask();
+    const timer = setInterval(ask, 1500);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [tab?.id, tab?.url]);
+  return places;
+};
+
+/** Moves a note on the open page to what's on screen there ("Bring here") */
+export const bringNoteHere = (tab: chrome.tabs.Tab | null | undefined, noteId: string) => {
+  if (!tab?.id) return;
+  chrome.tabs.sendMessage(tab.id, { action: CHROME_MESSAGES.BRING_NOTE_HERE, noteId }).catch(() => {});
   if (document.body.classList.contains("surface-popup")) window.close();
 };
 

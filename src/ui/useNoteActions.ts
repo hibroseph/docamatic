@@ -9,6 +9,7 @@ import {
   addTitle,
   changeNoteColor,
   heartify,
+  layoutNote,
   removeNote,
   removeTag,
   restoreNote,
@@ -48,6 +49,11 @@ export const useNoteActions = ({ note, pageUrl }: NoteRecord) => {
       /** anchor: what it moves with (page/anchor.ts); null for the page, left out for unchanged */
       move: (x: number, y: number, anchor?: NoteAnchor | null) => dispatch(updateNotePosition(id, x, y, pageUrl, anchor)),
       resize: (width: number) => dispatch(updateNoteSize(id, width, pageUrl)),
+      setHeight: (height: number | null) => dispatch(layoutNote(id, pageUrl, { height })),
+      setCollapsed: (collapsed: boolean) => dispatch(layoutNote(id, pageUrl, { collapsed })),
+      /** position: on screen when pinning, on the page when unpinning */
+      setPinned: (pinned: boolean, position: { x: number; y: number }) =>
+        dispatch(layoutNote(id, pageUrl, { pinned, position })),
       remove: () => {
         // Keep what's needed to put it back exactly as it was
         const state = store.getState();

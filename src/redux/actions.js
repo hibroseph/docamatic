@@ -23,6 +23,7 @@ export const SET_PAGE_TITLE = "SET_PAGE_TITLE"
 export const UPDATE_TAG = "UPDATE_TAG"
 export const DELETE_TAG = "DELETE_TAG"
 export const SET_PREFERENCES = "SET_PREFERENCES"
+export const LAYOUT_NOTE = "LAYOUT_NOTE"
 
 /*
  * action creators
@@ -148,6 +149,7 @@ export function addText(id, text, url) {
 
 /**
  * @param url the url the note is saved under (noteUrlFor)
+ * (options.text: plain text the note starts with, e.g. what was selected)
  * @param createdOnUrl the full address it was created on, credentials
  *   removed (redactUrl); kept as a record, see utils/noteUrl.js
  * @param options since 5.1, all optional:
@@ -171,8 +173,19 @@ export function addNote(id, y_position, url, createdOnUrl, options = {}) {
     ...(options.color ? { color: options.color } : {}),
     ...(options.visible === false ? { visible: false } : {}),
     ...(options.pageTitle ? { page_title: options.pageTitle } : {}),
+    ...(options.text ? { highlightedText: textToNoteHtml(options.text) } : {}),
   };
 }
+
+// Plain text (text selected on a page) as note body HTML: escaped, with its
+// line breaks kept
+const textToNoteHtml = (text) =>
+  String(text)
+    .slice(0, 5000)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\r?\n/g, "<br>");
 
 /** Puts a deleted note back (Undo), with the tags it had */
 export function restoreNote(url, note, tags = []) {
@@ -208,6 +221,23 @@ export function deleteTag(tagId) {
   return {
     type: DELETE_TAG,
     tagId,
+  };
+}
+
+/**
+ * How a note sits on the page (since 5.1). Any of:
+ *   pinned + position  keep it on screen while the page scrolls (position on
+ *                      screen), or not (position on the page)
+ *   collapsed          show only its top bar
+ *   height             a fixed height (the text scrolls inside), or null for
+ *                      as tall as its text
+ */
+export function layoutNote(id, url, layout) {
+  return {
+    type: LAYOUT_NOTE,
+    id,
+    url,
+    ...layout,
   };
 }
 

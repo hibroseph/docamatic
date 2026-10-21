@@ -147,6 +147,33 @@ export const TargetIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const PinIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9.8 2.5 13.5 6.2 11.6 7.1 9.4 9.3 9 12 4 7l2.7-.4 2.2-2.2.9-1.9Z" />
+    <path d="M6.5 9.5 2.8 13.2" />
+  </Svg>
+);
+
+export const CollapseIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 6h10M4.5 10h7" />
+  </Svg>
+);
+
+export const ExpandIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3" width="10" height="10" rx="2" />
+    <path d="M3 6.5h10" />
+  </Svg>
+);
+
+export const BringHereIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="2.5" y="3" width="11" height="10" rx="2" />
+    <path d="M8 5.5v5M5.8 8.3 8 10.5l2.2-2.2" />
+  </Svg>
+);
+
 export const PageIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 2h5.5L12.5 5v9h-8.5V2Z" />

@@ -20,7 +20,19 @@ import {
 } from "../model/colors";
 import type { Note, NoteRecord, State, Tag } from "../model/types";
 import type { NoteActions } from "./useNoteActions";
-import { CloseIcon, ExternalIcon, EyeIcon, EyeOffIcon, TagIcon, TargetIcon, TrashIcon } from "./icons";
+import {
+  BringHereIcon,
+  CloseIcon,
+  CollapseIcon,
+  ExpandIcon,
+  ExternalIcon,
+  EyeIcon,
+  EyeOffIcon,
+  PinIcon,
+  TagIcon,
+  TargetIcon,
+  TrashIcon,
+} from "./icons";
 
 // --- Color --------------------------------------------------------------------
 
@@ -97,6 +109,9 @@ export const TitleField = ({
   // Kept locally while editing so a delayed update from the store can't
   // overwrite what's being typed (see useStoreSyncedText)
   const title = useStoreSyncedText(note.title);
+  // Spell check only while typing: red underlines all over notes that are
+  // just being read (in another language, say) are noise
+  const [focused, setFocused] = useState(false);
   return (
     <input
       className={`note-title ${className}`}
@@ -110,8 +125,15 @@ export const TitleField = ({
         title.onEdit(event.target.value);
         actions.setTitle(event.target.value);
       }}
-      onFocus={title.onFocus}
-      onBlur={title.onBlur}
+      spellCheck={focused}
+      onFocus={() => {
+        title.onFocus();
+        setFocused(true);
+      }}
+      onBlur={() => {
+        title.onBlur();
+        setFocused(false);
+      }}
     />
   );
 };
@@ -138,6 +160,8 @@ export const BodyField = ({
   autoFocus?: boolean;
 }) => {
   const body = useStoreSyncedText(note.body, sanitize);
+  // Spell check only while typing (see TitleField)
+  const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -160,13 +184,18 @@ export const BodyField = ({
       role="textbox"
       aria-multiline="true"
       onChange={(event) => change(event.target.value)}
-      onFocus={body.onFocus}
+      spellCheck={focused}
+      onFocus={() => {
+        body.onFocus();
+        setFocused(true);
+      }}
       onBlur={(event) => {
         // Passing onBlur replaces the editor's own "save on blur", so
         // do it here: catch any change that didn't fire an input event
         const html = (event.currentTarget as HTMLElement).innerHTML;
         if (html !== body.text) change(html);
         body.onBlur();
+        setFocused(false);
       }}
     />
   );
@@ -358,8 +387,12 @@ export const NoteMenu = React.forwardRef<
     onAddTag: () => void;
     /** In lists: go to the note on its page */
     onFind?: () => void;
+    /** In lists of the page that's open: move the note to what's on screen there */
+    onBringHere?: () => void;
+    /** On the page itself: keep on screen, collapse */
+    page?: { pinned: boolean; collapsed: boolean; onTogglePin: () => void; onToggleCollapsed: () => void };
   }
->(({ open, record, actions, inList = false, onDone, onAddTag, onFind }, ref) => {
+>(({ open, record, actions, inList = false, onDone, onAddTag, onFind, onBringHere, page }, ref) => {
   const { note, pageUrl } = record;
   const visible = note.visible !== false;
   const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
@@ -399,6 +432,49 @@ export const NoteMenu = React.forwardRef<
         {visible ? <EyeOffIcon /> : <EyeIcon />}
         {visible ? "Hide from page" : "Show on page"}
       </button>
+      {page && (
+        <>
+          <button
+            type="button"
+            role="menuitem"
+            className="menu__item"
+            onClick={() => {
+              onDone();
+              page.onToggleCollapsed();
+            }}
+          >
+            {page.collapsed ? <ExpandIcon /> : <CollapseIcon />}
+            {page.collapsed ? "Expand" : "Collapse"}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="menu__item"
+            onClick={() => {
+              onDone();
+              page.onTogglePin();
+            }}
+          >
+            <PinIcon />
+            {page.pinned ? "Scroll with the page" : "Keep on screen"}
+          </button>
+        </>
+      )}
+      {inList && visible && onBringHere && (
+        <button
+          type="button"
+          role="menuitem"
+          className="menu__item"
+          data-testid={TEST_IDS.noteBringHere}
+          onClick={() => {
+            onDone();
+            onBringHere();
+          }}
+        >
+          <BringHereIcon />
+          Bring here
+        </button>
+      )}
       {inList && visible && onFind && (
         <button
           type="button"

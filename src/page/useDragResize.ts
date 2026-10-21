@@ -16,6 +16,7 @@ import React, { useRef, useState } from "react";
 // Movement below this is a click on the handle, not a drag
 const DRAG_THRESHOLD = 3;
 export const MIN_NOTE_WIDTH = 120;
+export const MIN_NOTE_HEIGHT = 60;
 const KEY_STEP = 8;
 const KEY_STEP_LARGE = 40;
 
@@ -28,12 +29,19 @@ interface Options {
   /** Where the note is drawn now: on screen if `fixed`, otherwise on the page */
   position: { x: number; y: number };
   width: number;
+  /** A set height, or undefined for as tall as its text */
+  height: number | undefined;
   fixed: boolean;
   disabled: boolean;
   onStart: () => void;
+  /** A press on the handle that ended without moving */
+  onTap?: () => void;
   /** In the same coordinates as `position` */
   onDrop: (x: number, y: number) => void;
-  onResize: (width: number) => void;
+  /** height only when the corner was dragged */
+  onResize: (width: number, height?: number) => void;
+  /** Double-click on the corner: back to as tall as its text */
+  onAutoHeight: () => void;
 }
 
 interface Gesture {
@@ -47,10 +55,10 @@ interface Gesture {
 
 export const transformFor = (x: number, y: number) => `translate(${x}px,${y}px)`;
 
-export const useDragResize = ({ boxRef, position, width, fixed, disabled, onStart, onDrop, onResize }: Options) => {
+export const useDragResize = ({ boxRef, position, width, height, fixed, disabled, onStart, onTap, onDrop, onResize, onAutoHeight }: Options) => {
   const [dragging, setDragging] = useState(false);
   const drag = useRef<(Gesture & { x: number; y: number; x0: number; y0: number }) | null>(null);
-  const resize = useRef<(Gesture & { width0: number; width: number }) | null>(null);
+  const resize = useRef<(Gesture & { width0: number; width: number; height0: number; height: number; corner: boolean }) | null>(null);
 
   // How far the pointer has gone, plus how far the page scrolled meanwhile
   // (a note on the page moves with the page; one fixed on screen doesn't)
@@ -95,7 +103,10 @@ export const useDragResize = ({ boxRef, position, width, fixed, disabled, onStar
       const current = drag.current;
       if (!current || event.pointerId !== current.pointerId) return;
       drag.current = null;
-      if (!current.moved) return;
+      if (!current.moved) {
+        onTap?.();
+        return;
+      }
       setDragging(false);
       onDrop(Math.round(current.x), Math.round(current.y));
     },
@@ -123,11 +134,13 @@ export const useDragResize = ({ boxRef, position, width, fixed, disabled, onStar
     onDrop(position.x + move[0], position.y + move[1]);
   };
 
-  const resizeHandle = {
+  // The right edge sets the width; the bottom right corner the height too
+  const resizer = (corner: boolean) => ({
     onPointerDown: (event: React.PointerEvent) => {
       if (event.button !== 0) return;
       event.stopPropagation();
-      resize.current = { ...begin(event), width0: width, width };
+      const startHeight = height ?? boxRef.current?.offsetHeight ?? MIN_NOTE_HEIGHT;
+      resize.current = { ...begin(event), width0: width, width, height0: startHeight, height: startHeight, corner };
     },
     onPointerMove: (event: React.PointerEvent) => {
       const current = resize.current;
@@ -135,23 +148,32 @@ export const useDragResize = ({ boxRef, position, width, fixed, disabled, onStar
       current.moved = true;
       current.width = Math.max(MIN_NOTE_WIDTH, current.width0 + event.clientX - current.startX);
       if (boxRef.current) boxRef.current.style.width = `${current.width}px`;
+      if (current.corner) {
+        current.height = Math.max(MIN_NOTE_HEIGHT, current.height0 + event.clientY - current.startY);
+        boxRef.current?.style.setProperty("--note-height", `${current.height}px`);
+      }
     },
     onPointerUp: (event: React.PointerEvent) => {
       const current = resize.current;
       if (!current || event.pointerId !== current.pointerId) return;
       resize.current = null;
-      if (current.moved && Math.round(current.width) !== width) onResize(Math.round(current.width));
+      if (!current.moved) return;
+      if (current.corner) onResize(Math.round(current.width), Math.round(current.height));
+      else if (Math.round(current.width) !== width) onResize(Math.round(current.width));
     },
     onPointerCancel: () => {
       if (resize.current && boxRef.current) boxRef.current.style.width = `${width}px`;
       resize.current = null;
     },
-  };
+  });
+  const resizeHandle = resizer(false);
+  const cornerHandle = { ...resizer(true), onDoubleClick: onAutoHeight };
 
   // While dragging, a re-render (another note changed, a panel scrolled)
   // must not snap the note back: draw it where the drag has it
   const drawnAt = drag.current?.moved ? { x: drag.current.x, y: drag.current.y } : position;
   const drawnWidth = resize.current?.moved ? resize.current.width : width;
+  const drawnHeight = resize.current?.moved && resize.current.corner ? resize.current.height : height;
 
-  return { dragging, handle, resizeHandle, onGripKeyDown, drawnAt, drawnWidth };
+  return { dragging, handle, resizeHandle, cornerHandle, onGripKeyDown, drawnAt, drawnWidth, drawnHeight };
 };

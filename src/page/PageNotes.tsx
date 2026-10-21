@@ -110,6 +110,7 @@ export const PageNotes = ({ disconnected = false, saveTitles = true }: { disconn
   const windowWidth = useWindowWidth();
   const records = usePageNotes(url);
   const tags = useSelector((state: State) => state.tags) || NO_TAGS;
+  const textSize = useSelector((state: State) => state.metadata?.preferences?.note_text_size) || "medium";
   const [onTop, setOnTop] = useState<string | null>(null);
   // Notes already on the page when it loaded (or when they were first seen)
   // don't take the cursor; only ones added just now do
@@ -124,7 +125,7 @@ export const PageNotes = ({ disconnected = false, saveTitles = true }: { disconn
   }, [records]);
 
   return (
-    <div className="page-notes">
+    <div className="page-notes" data-text-size={textSize}>
       {records
         .filter(({ note }) => note.visible !== false)
         .map((record) => {

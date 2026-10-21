@@ -6,6 +6,7 @@ import { domainOf, groupByPage, pageLabel } from "../model/notes";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
 import { NoRenderErrorBoundary } from "../ui/NoRenderErrorBoundary";
 import { NoteCard } from "./NoteCard";
+import type { NotePlace } from "./hooks";
 
 // Rendering every note at once gets slow for people with hundreds of them
 const PAGE_SIZE = 30;
@@ -14,10 +15,15 @@ export const NoteList = ({
   records,
   showPage = true,
   focusNoteId,
+  places,
+  onBringHere,
 }: {
   records: NoteRecord[];
   showPage?: boolean;
   focusNoteId?: string | null;
+  /** For notes on the open page: where each is there */
+  places?: Record<string, NotePlace>;
+  onBringHere?: (record: NoteRecord) => void;
 }) => {
   const [shown, setShown] = useState(PAGE_SIZE);
   return (
@@ -26,7 +32,13 @@ export const NoteList = ({
         {records.slice(0, shown).map((record) => (
           <li key={record.note.id}>
             <NoRenderErrorBoundary>
-              <NoteCard record={record} showPage={showPage} autoFocus={record.note.id === focusNoteId} />
+              <NoteCard
+                record={record}
+                showPage={showPage}
+                autoFocus={record.note.id === focusNoteId}
+                place={places?.[record.note.id]}
+                onBringHere={onBringHere ? () => onBringHere(record) : undefined}
+              />
             </NoRenderErrorBoundary>
           </li>
         ))}

@@ -14,6 +14,11 @@
 
 .note--page { cursor: default; }
 
+/* Text size from Settings */
+.page-notes[data-text-size="small"] .note-body { font-size: 13px; line-height: 18px; }
+.page-notes[data-text-size="large"] .note-body { font-size: 16px; line-height: 24px; }
+.page-notes[data-text-size="large"] .note-title { font-size: 17px; line-height: 22px; }
+
 /* The note's outer box: moved by its top edge, resized from its right edge
    (page/useDragResize.ts) */
 .note-box { box-sizing: border-box; }
@@ -47,6 +52,32 @@
 .dm-note.note.is-found {
   box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 0 0 3px var(--focus), var(--note-lift-hover);
 }
+
+/* Collapsed: only the top bar */
+.dm-note.note--collapsed { gap: 0; }
+
+/* A set height: the text scrolls inside */
+.dm-note.note--sized { height: var(--note-height); grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.dm-note.note--sized .dm-note__body { overflow-y: auto; }
+
+.note__pin { display: grid; place-items: center; width: 20px; color: var(--note-ink-muted); }
+
+/* The bottom right corner: resizes width and height */
+.note__corner { position: absolute; right: -4px; bottom: -4px; width: 16px; height: 16px; z-index: 3; cursor: nwse-resize; touch-action: none; }
+.note__corner::after {
+  content: "";
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--note-ink-muted);
+  border-bottom: 2px solid var(--note-ink-muted);
+  border-radius: 0 0 3px 0;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.note-box:hover > .note__corner::after { opacity: .6; }
 
 .note__sync-error {
   display: grid;

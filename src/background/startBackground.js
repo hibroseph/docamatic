@@ -9,7 +9,7 @@ import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../redux/actions";
 import { createNoteInTab } from "./createNote";
 import { findNote } from "./findNote";
 import { noteUrlsFor } from "../utils/noteUrl";
-import { CHROME_MESSAGES, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
+import { CHROME_MESSAGES, CONTEXT_MENU_ADD_NOTE, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
 import { initSentry, captureException, captureMessage, reportReducerErrors } from "../utils/sentry";
 import { hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../utils/expectedFailures";
@@ -451,6 +451,33 @@ export function startBackground() {
         sendResponse({ ok: false });
       });
     return true; // responding asynchronously
+  });
+
+  // "Add a note here" in the right-click menu: where the page was clicked,
+  // starting with the selected text if there is any. Menu items persist, so
+  // they're (re)created when the extension is installed or updated.
+  chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus?.removeAll(() => {
+      chrome.contextMenus.create({
+        id: CONTEXT_MENU_ADD_NOTE,
+        title: "Add a note here",
+        contexts: ["page", "selection", "link", "image"],
+      });
+    });
+  });
+  chrome.contextMenus?.onClicked.addListener((info, tab) => {
+    if (info.menuItemId !== CONTEXT_MENU_ADD_NOTE || !tab) return;
+    storeReady
+      .then(async (store) => {
+        if (safeMode) return;
+        await createNoteInTab(store, tab, {
+          placement: "page",
+          source: "context_menu",
+          atContextMenu: true,
+          text: info.selectionText,
+        });
+      })
+      .catch((err) => captureException(err, { during: "creating a note from the right-click menu" }));
   });
 
   // The "Add a note to this page" shortcut (Alt+Shift+N by default)

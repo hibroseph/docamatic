@@ -35,6 +35,28 @@ and the extension is built with WXT so it can ship to Firefox too.
   you're on, following tab switches. Notes added there stay in the panel
   (saved with `visible: false`) until put on the page from their menu.
 - Keyboard shortcut for a new note: Alt+Shift+N (changeable in the browser).
+- Infinite scroll and notes out of reach: the popup and side panel ask the
+  open page where each of its notes is (`page/noteRegistry.ts`,
+  `note_places` message) and show "Further down the page", "Higher up the
+  page", "Off to the side" or "Scrolled out of view" on its card, with
+  "Bring here" (also in the note's menu, for notes on the open page), which
+  moves the note to the top right of what's on screen. New test ids
+  `note-bring-here`, `note-place`.
+- "Add a note here" in the right-click menu (`contextMenus` permission, no
+  install warning): the note goes where the page was right-clicked, and
+  starts with the selected text, if any (escaped, line breaks kept).
+- Note layout (`layoutNote` action, `LAYOUT_NOTE`): "Keep on screen" (the
+  long-unused `stickify` flag; position is then on screen), "Collapse" to the
+  top bar (`note.collapsed`; also two quick clicks on the grip), and a height
+  set by dragging the bottom right corner (`size.height`; the text scrolls
+  inside; double-click the corner to fit the text again).
+- Settings: text size of notes on pages (`preferences.note_text_size`).
+- The popup and side panel always show something: "Opening your notes…",
+  then "Try again" and "Restart Docamatic" if the background doesn't answer
+  within 4 seconds, and a message instead of a blank page if rendering
+  fails (16 uninstall reasons were a white popup).
+- Files on the computer: when "Allow access to file URLs" is off, adding a
+  note says how to turn it on instead of failing.
 - "Find on page" in a note's menu in the popup and side panel
   (`background/findNote.js`, `page/reveal.ts`): switches to a tab with the
   note's page (or opens it), scrolls to the note, brings it to the front and
@@ -135,6 +157,11 @@ and the extension is built with WXT so it can ship to Firefox too.
   amount. All notes are kept on screen when dropped instead of during the
   drag (react-rnd also shifted the next drag by however far one overshot an
   edge).
+- Amazon product pages: notes are saved under the product id (`/dp/ASIN`),
+  so one product is one page however it's reached (with the product name in
+  the address, tracking, `/gp/product/`). Notes saved by 5.0.0 under the full
+  address are still found (`noteUrlsFor` includes the 5.0.0 rule).
+- Spell check in notes only while typing in them.
 - Tags are matched ignoring case and surrounding spaces. A note shows no tag
   field until it has tags: "Add tag" in its menu opens one
   (`note-add-tag` is now that menu item).

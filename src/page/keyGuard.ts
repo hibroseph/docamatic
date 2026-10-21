@@ -23,7 +23,8 @@ export const NOTES_ELEMENT = "docamatic-notes";
 
 const KEY_EVENTS = ["keydown", "keyup", "keypress"] as const;
 
-type Deliver = (event: KeyboardEvent) => void;
+/** Returns false if the key isn't headed into this layer (another copy of the notes, a demo) */
+type Deliver = (event: KeyboardEvent) => boolean;
 
 declare global {
   interface Window {
@@ -39,9 +40,8 @@ export const installKeyGuard = () => {
   window.__DOCAMATIC_KEY_GUARD__ = true;
   const guard = (event: Event) => {
     const target = event.target as Element | null;
-    if (target?.localName !== NOTES_ELEMENT || !window.__DOCAMATIC_DELIVER_KEY__) return;
-    event.stopImmediatePropagation();
-    window.__DOCAMATIC_DELIVER_KEY__(event as KeyboardEvent);
+    if (target?.localName !== NOTES_ELEMENT) return;
+    if (window.__DOCAMATIC_DELIVER_KEY__?.(event as KeyboardEvent)) event.stopImmediatePropagation();
   };
   for (const type of KEY_EVENTS) window.addEventListener(type, guard, true);
 };
@@ -49,6 +49,9 @@ export const installKeyGuard = () => {
 /** In the notes UI: delivers guarded keys inside the shadow root */
 export const deliverKeysTo = (shadow: ShadowRoot) => {
   window.__DOCAMATIC_DELIVER_KEY__ = (original) => {
+    // The website's demo notes are <docamatic-notes> too, with their own
+    // key handling; only keys for these notes are taken
+    if (original.target !== shadow.host) return false;
     const target = shadow.activeElement || shadow.host;
     const copy = new KeyboardEvent(original.type, {
       key: original.key,
@@ -66,5 +69,6 @@ export const deliverKeysTo = (shadow: ShadowRoot) => {
     });
     target.dispatchEvent(copy);
     if (copy.defaultPrevented) original.preventDefault();
+    return true;
   };
 };

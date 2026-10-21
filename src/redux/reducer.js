@@ -317,7 +317,8 @@ const notesApp = (state = GetInitialState(), action) => {
       return updateNote(state, action.url, action.id, (note) => ({ heart: !note.heart }));
 
     case RESIZE_NOTE:
-      return updateNote(state, action.url, action.id, () => ({ size: { width: action.x } }));
+      // Keeps a set height (size.height): only the width changes here
+      return updateNote(state, action.url, action.id, (note) => ({ size: { ...note.size, width: action.x } }));
 
     case CHANGE_COLOR:
       return updateNote(state, action.url, action.id, (note) => {

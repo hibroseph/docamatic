@@ -111,7 +111,7 @@ test("Preferences are merged, and the saved format stays version 1", () => {
   expect(state.metadata.schema_version).toBe(1);
 });
 
-import { layoutNote } from "./actions";
+import { layoutNote, updateNoteSize } from "./actions";
 
 test("Keep on screen: the position switches to the screen, and back to the page", () => {
   let state = notesApp(stateWithNote(), { ...addNote("n", 0, URL), position: { x: 1, y: 2 } });
@@ -139,4 +139,10 @@ test("Collapse, and a height that can be set and cleared", () => {
 test("A note can start with text (selected on the page), escaped, with its line breaks", () => {
   const state = notesApp(GetInitialState(), addNote("n", 0, URL, undefined, { text: "Line <b>one</b>\nLine two & more" }));
   expect(state.pages[URL].notes[0].body).toBe("Line &lt;b&gt;one&lt;/b&gt;<br>Line two &amp; more");
+});
+
+test("Changing a note's width keeps the height it was given", () => {
+  let state = notesApp(stateWithNote(), layoutNote("note-1", URL, { height: 180 }));
+  state = notesApp(state, updateNoteSize("note-1", 300, URL));
+  expect(state.pages[URL].notes[0].size).toEqual({ width: 300, height: 180 });
 });

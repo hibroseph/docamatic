@@ -125,6 +125,15 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     if (caughtUp || Date.now() - dropped.at > PENDING_TIMEOUT_MS) setDropped(null);
   }, [note.position.x, note.position.y]);
 
+  // A note dropped where it already was never sees its position change, so
+  // the effect above wouldn't run; without this it would keep its dropped
+  // spot for good (not following its panel, ignoring moves from other tabs)
+  useEffect(() => {
+    if (!dropped) return;
+    const timer = setTimeout(() => setDropped(null), PENDING_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [dropped]);
+
   useEffect(() => {
     if (!resized) return;
     if (note.size.width === resized.width || Date.now() - resized.at > PENDING_TIMEOUT_MS) setResized(null);

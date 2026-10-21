@@ -473,7 +473,10 @@ export function startBackground() {
         await createNoteInTab(store, tab, {
           placement: "page",
           source: "context_menu",
-          atContextMenu: true,
+          // Only the page itself records where it was right-clicked; in a
+          // frame inside it (an embedded video, comments) that would be an
+          // older right-click, so the note goes where new notes go
+          atContextMenu: info.frameId === 0 || info.frameId === undefined,
           text: info.selectionText,
         });
       })

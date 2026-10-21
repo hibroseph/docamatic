@@ -218,7 +218,16 @@ and the extension is built with WXT so it can ship to Firefox too.
   before anything else: the loader now runs at `document_start` and registers
   the page's first window listener for keys; keys headed into a note stop
   there and a copy is delivered inside the note's shadow root
-  (`page/keyGuard.ts`). Keys typed anywhere else go to the site as before.
+  (`page/keyGuard.ts`). Keys typed anywhere else go to the site as before,
+  and so do keys for other `<docamatic-notes>` elements (the website's demo).
+- Changing a note's width (right edge) no longer drops the height set with
+  its corner: `RESIZE_NOTE` keeps the rest of `size`.
+- A note dragged and dropped back where it was no longer stays stuck at its
+  dropped spot (not following its panel, ignoring moves from other tabs)
+  until the page reloads.
+- "Add a note here" on a right-click inside a frame (an embedded video,
+  comments) puts the note where new notes go, instead of at an older
+  right-click on the page.
 - Website change log: removed a stray `</script>` tag from the page's head.
 - Publish workflow: an expired or revoked Chrome Web Store refresh token now
   fails at the token step with Google's error, instead of passing an access

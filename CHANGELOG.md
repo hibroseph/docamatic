@@ -216,6 +216,15 @@ and the extension is built with WXT so it can ship to Firefox too.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).
 
+- Website: visits are counted with PostHog instead of Google Analytics
+  (`site/analytics.ts`, posthog-js 1.435.5 pinned, slim "no-external"
+  build, same project as the extension, events marked `surface: website`).
+  Nothing stored on the device (memory persistence, no cookies), no
+  autocapture or session recording; besides page views and page leaves,
+  only `website_add_to_chrome_clicked` (`placement`) and
+  `website_demo_note_added` (`method`: button, right_click). Off on
+  localhost and when opened from disk. Privacy policy updated.
+
 ### Fixed
 - The toolbar icon was still the 2020 logo (a darker blue D on a tan
   square), unlike the current logo on the website and in

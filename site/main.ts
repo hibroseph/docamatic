@@ -5,8 +5,11 @@ import "../src/styles/tokens.css";
 import "../design-system/components/bundle.css";
 import "../src/styles/practice-menu.css";
 import "./site.css";
+import { startAnalytics, trackWebsite } from "./analytics";
 import { startDemo, type DemoNote } from "../src/page/demo";
 import { attachPracticeMenu } from "../src/page/practiceMenu";
+
+startAnalytics();
 
 const art = document.getElementById("hero-art");
 const tryButton = document.getElementById("try-note");
@@ -71,8 +74,15 @@ if (art && tryButton) {
   }
 
   const demo = startDemo(seed);
-  tryButton.addEventListener("click", () => demo.addNote());
+  tryButton.addEventListener("click", () => {
+    demo.addNote();
+    trackWebsite("website_demo_note_added", { method: "button" });
+  });
   // Right-click practice, the other way to add a note
   // (favicon.png is published next to every page)
-  attachPracticeMenu({ area: art, iconUrl: "favicon.png", addNoteAt: (x, y) => demo.addNote({ x, y }) });
+  attachPracticeMenu({ area: art, iconUrl: "favicon.png", addNoteAt: (x, y) => {
+      demo.addNote({ x, y });
+      trackWebsite("website_demo_note_added", { method: "right_click" });
+    },
+  });
 }

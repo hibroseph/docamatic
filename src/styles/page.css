@@ -13,13 +13,20 @@
 }
 
 .note--page { cursor: default; }
+
+/* The note's outer box: moved by its top edge, resized from its right edge
+   (page/useDragResize.ts) */
+.note-box { box-sizing: border-box; }
+.note__drag { touch-action: none; user-select: none; -webkit-user-select: none; }
+.note__drag .note-title { user-select: text; -webkit-user-select: text; }
+.dm-note__grip:focus-visible { opacity: 1; outline: none; border-radius: var(--radius-sm); box-shadow: 0 0 0 2px var(--note-ink); }
 .note__head { cursor: grab; }
 .note__head:active { cursor: grabbing; }
 .note__head .note-title { cursor: text; }
 .dm-note__action { flex: none; }
 
 /* The resize handle on the right edge: a short bar that shows on hover */
-.note__resize { z-index: 2; }
+.note__resize { position: absolute; top: 0; right: -5px; bottom: 0; width: 10px; z-index: 2; cursor: ew-resize; touch-action: none; }
 .note__resize::after {
   content: "";
   position: absolute;
@@ -33,7 +40,7 @@
   transform: translateY(-50%);
   transition: opacity 120ms ease;
 }
-.note--page:hover + .note__resize::after,
+.note-box:hover > .note__resize::after,
 .note__resize:hover::after { opacity: .5; }
 
 /* "Find on page": outlined for a moment so it's easy to spot */

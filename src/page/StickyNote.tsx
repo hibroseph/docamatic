@@ -12,13 +12,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useSelector } from "react-redux";
-import { Rnd } from "react-rnd";
 import { PENDING_TIMEOUT_MS } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { resolveNoteColor } from "../model/colors";
 import type { Note, NoteAnchor, NoteRecord, State, Tag } from "../model/types";
 import { anchorAt, findAnchorElement, panelMode, placementFor } from "./anchor";
 import { onReveal } from "./reveal";
+import { transformFor, useDragResize } from "./useDragResize";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { GripIcon, HeartIcon, MoreIcon } from "../ui/icons";
@@ -43,13 +43,14 @@ export const useFollowPanels = () => useSelector((state: State) => state.metadat
  * draws it the way its panel moves). Other notes never change here.
  */
 const usePlacement = (note: Note, anchor: NoteAnchor | undefined) => {
-  const selector = anchor?.kind === "element" ? anchor.selector : "";
-  const width = anchor?.kind === "element" ? anchor.w : undefined;
-  const [panel, setPanel] = useState<Element | null>(() => (selector ? findAnchorElement(selector, width) : null));
+  const elementAnchor = anchor?.kind === "element" ? anchor : undefined;
+  // Identifies the anchor; the effect below starts over when it changes
+  const key = elementAnchor ? JSON.stringify(elementAnchor) : "";
+  const [panel, setPanel] = useState<Element | null>(() => (elementAnchor ? findAnchorElement(elementAnchor) : null));
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (!selector) return;
+    if (!elementAnchor) return;
     const redraw = () => flushSync(() => setTick((n) => n + 1));
     let current: Element | null = null;
     // A sticky panel moves differently from the page while it scrolls, so
@@ -62,13 +63,14 @@ const usePlacement = (note: Note, anchor: NoteAnchor | undefined) => {
       if (current && panelMode(current) === "sticky") window.addEventListener("scroll", redraw, { passive: true });
       setPanel(current);
     };
-    attach(findAnchorElement(selector, width));
+    attach(findAnchorElement(elementAnchor));
     window.addEventListener("resize", redraw);
     // Single page apps render panels late, or replace them; look again now
     // and then, and redraw only when something actually changed
     let last = placementFor(note.position, anchor, current);
     const check = setInterval(() => {
-      const found = findAnchorElement(selector, width);
+      // The same element if it's still there; looked up again only when it's gone
+      const found = current?.isConnected ? current : findAnchorElement(elementAnchor);
       if (found !== current) attach(found);
       const now = placementFor(note.position, anchor, current);
       if (now.fixed !== last.fixed || Math.abs(now.x - last.x) > 0.5 || Math.abs(now.y - last.y) > 0.5 || now.away !== last.away) {
@@ -81,9 +83,9 @@ const usePlacement = (note: Note, anchor: NoteAnchor | undefined) => {
       window.removeEventListener("resize", redraw);
       clearInterval(check);
     };
-  }, [selector, width]);
+  }, [key]);
 
-  return { placement: placementFor(note.position, anchor, selector ? panel : undefined), panel };
+  return { placement: placementFor(note.position, anchor, elementAnchor ? panel : undefined), panel };
 };
 
 interface Props {
@@ -101,15 +103,15 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   const actions = useNoteActions(record);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addingTag, setAddingTag] = useState(false);
-  const [dragging, setDragging] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const articleRef = useRef<HTMLElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
   useDismiss(menuOpen, () => setMenuOpen(false), menuRef, moreRef);
 
-  // Rnd only shows the position/size it is given. The saved position comes
-  // back from the background store a moment after a drag ends, so without
-  // this the note would snap back to its old spot until then. The dropped
+  // The saved position comes back from the background store a moment after
+  // a drag ends, so without this the note would snap back to its old spot
+  // until then. The dropped
   // position is used until the store has caught up with it (or it's been a
   // while, so a move made in another tab still comes through). Same idea as
   // useStoreSyncedText for typing.
@@ -139,6 +141,35 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   // the page only, as always; anchored ones go where their panel is)
   const isOffScreen = !anchor && !dropped && position.x + width > windowWidth - SCROLLBAR_WIDTH;
   const fixed = Boolean(note.stickify) || placement.fixed;
+  const shownAt = { x: isOffScreen ? windowWidth - width - SCROLLBAR_WIDTH : position.x, y: position.y };
+
+  const { dragging, handle, resizeHandle, onGripKeyDown, drawnAt, drawnWidth } = useDragResize({
+    boxRef,
+    position: shownAt,
+    width,
+    fixed,
+    disabled: Boolean(note.stickify),
+    onStart: onBringToFront,
+    onDrop: (x, y) => {
+      // Where it is on screen now decides what it moves with from here on.
+      // Kept on screen: all of it if it fits, otherwise its top.
+      const onScreen = (value: number, size: number, room: number) => Math.min(Math.max(0, value), Math.max(0, room - size));
+      const height = articleRef.current?.offsetHeight || 40;
+      const screenX = onScreen(fixed ? x : x - window.scrollX, width, window.innerWidth - SCROLLBAR_WIDTH);
+      const screenY = onScreen(fixed ? y : y - window.scrollY, Math.min(height, window.innerHeight), window.innerHeight);
+      const pageX = Math.round(screenX + window.scrollX);
+      const pageY = Math.round(screenY + window.scrollY);
+      setDropped({ x: pageX, y: pageY, at: Date.now() });
+      // With the setting off, a moved note is on the page (its anchor, if any, is cleared)
+      const found = followPanels ? anchorAt(screenX, screenY, width, layerOf(articleRef.current)) : null;
+      actions.move(pageX, pageY, note.stickify ? undefined : found);
+    },
+    onResize: (newWidth) => {
+      setResized({ width: newWidth, at: Date.now() });
+      actions.resize(newWidth);
+    },
+  });
+
   // A note in a panel whose corner has scrolled out of the panel goes away
   // whole, rather than showing half of it over whatever is next to the panel
   const away = Boolean(placement.away) && !menuOpen && !dragging;
@@ -191,49 +222,19 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   const color = noteColorProps(resolveNoteColor(note.color));
 
   return (
-    <Rnd
-      position={{ x: isOffScreen ? windowWidth - width - SCROLLBAR_WIDTH : position.x, y: position.y }}
-      size={{ width, height: "auto" }}
-      bounds="window"
-      dragHandleClassName="note__drag"
-      cancel="input, button, a, [contenteditable], .menu"
-      enableResizing={{
-        top: false,
-        left: false,
-        right: true,
-        bottom: false,
-        topRight: false,
-        topLeft: false,
-        bottomRight: false,
-        bottomLeft: false,
-      }}
-      resizeHandleClasses={{ right: "note__resize" }}
-      minWidth={120}
-      disableDragging={Boolean(note.stickify)}
-      style={{ position: fixed ? "fixed" : "absolute", zIndex, visibility: away ? "hidden" : undefined }}
-      onDragStart={() => {
-        onBringToFront();
-        setDragging(true);
-      }}
-      onDragStop={(_event, d) => {
-        setDragging(false);
-        // A click on the drag handle without moving: nothing to save
-        if (d.x === position.x && d.y === position.y) return;
-        // Where it is on screen now decides what it moves with from here on
-        const screenX = fixed ? d.x : d.x - window.scrollX;
-        const screenY = fixed ? d.y : d.y - window.scrollY;
-        const pageX = Math.round(screenX + window.scrollX);
-        const pageY = Math.round(screenY + window.scrollY);
-        setDropped({ x: pageX, y: pageY, at: Date.now() });
-        // With the setting off, a moved note is on the page (its anchor, if any, is cleared)
-        const found = followPanels ? anchorAt(screenX, screenY, width, layerOf(articleRef.current)) : null;
-        actions.move(pageX, pageY, note.stickify ? undefined : found);
-      }}
-      onResizeStop={(_event, _direction, _ref, delta) => {
-        if (delta.width === 0) return;
-        const newWidth = width + delta.width;
-        setResized({ width: newWidth, at: Date.now() });
-        actions.resize(newWidth);
+    <div
+      ref={boxRef}
+      className="note-box"
+      style={{
+        // Same positioning react-rnd used before 5.1 (top left of the notes'
+        // layer, then translated), so notes land exactly where they always have
+        position: fixed ? "fixed" : "absolute",
+        top: 0,
+        left: 0,
+        transform: transformFor(drawnAt.x, drawnAt.y),
+        width: drawnWidth,
+        zIndex,
+        visibility: away ? "hidden" : undefined,
       }}
     >
       <article
@@ -249,18 +250,16 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
         onKeyPress={stop}
         onBeforeInput={stop}
       >
-        <div
-          className="dm-note__head note__head note__drag"
-          onPointerDown={(event) => {
-            // Keep every pointer move coming to the note while dragging, even
-            // when a fast move puts the pointer over an iframe or a part of
-            // the site that swallows the events (react-draggable follows the
-            // mouse events, which follow the captured pointer)
-            if ((event.target as HTMLElement).closest("input, button, a, [contenteditable]")) return;
-            event.currentTarget.setPointerCapture?.(event.pointerId);
-          }}
-        >
-          <span className="dm-note__grip" data-testid={TEST_IDS.noteDragHandle} title="Drag to move">
+        <div className="dm-note__head note__head note__drag" {...handle}>
+          <span
+            className="dm-note__grip"
+            data-testid={TEST_IDS.noteDragHandle}
+            title="Drag to move, or use the arrow keys"
+            role="button"
+            tabIndex={0}
+            aria-label="Move note (arrow keys)"
+            onKeyDown={onGripKeyDown}
+          >
             <GripIcon />
           </span>
           <TitleField note={note} actions={actions} className="dm-note__title" />
@@ -301,6 +300,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
         <TagEditor tags={tags} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
         <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} />
       </article>
-    </Rnd>
+      {!note.stickify && <div className="note__resize" aria-hidden="true" {...resizeHandle} />}
+    </div>
   );
 };

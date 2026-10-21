@@ -18,13 +18,18 @@ test("Panels are found again by id, or by their path from the nearest id", () =>
   const list = document.querySelector(".list")!;
   const selector = selectorFor(list);
   expect(selector).toBe("#app > main > section:nth-of-type(2) > div");
-  expect(findAnchorElement(selector)).toBe(list);
+  expect(findAnchorElement({ kind: "element", selector, x: 0, y: 0 })).toBe(list);
   // Ids that aren't unique aren't trusted
   expect(selectorFor(document.querySelectorAll("#dup")[1]!)).toBe("body > div:nth-of-type(3)");
 });
 
 test("A selector that doesn't work finds nothing instead of throwing", () => {
-  expect(findAnchorElement("div[")).toBeNull();
+  expect(findAnchorElement({ kind: "element", selector: "div[", x: 0, y: 0 })).toBeNull();
+});
+
+test("Ids a site makes up on each load aren't used", () => {
+  document.body.innerHTML = `<div id="mount_0_0_CN"><main><div class="list"></div></main></div>`;
+  expect(selectorFor(document.querySelector(".list")!)).toBe("body > div > main > div");
 });
 
 test("Notes are drawn on the page unless anchored", () => {

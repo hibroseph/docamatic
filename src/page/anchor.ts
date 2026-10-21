@@ -36,6 +36,10 @@ const isScrollPanel = (el: Element) => {
 // class names. Checked in this order at each step up from the element.
 const STABLE_ATTRIBUTES = ["data-testid", "data-pagelet", "aria-label", "role", "name"];
 
+// Ids made up per page load or per build (Facebook's "mount_0_0_CN", React's
+// ":r3:", hashes) won't be there next time, so they're not used
+const isGeneratedId = (id: string) => /\d|:/.test(id) || id.length > 32;
+
 const isUnique = (selector: string) => {
   try {
     return document.querySelectorAll(selector).length === 1;
@@ -56,7 +60,7 @@ export const selectorFor = (el: Element): string => {
   let node: Element | null = el;
   while (node && node !== document.documentElement) {
     const tag = node.tagName.toLowerCase();
-    if (node.id && isUnique(`#${CSS.escape(node.id)}`)) {
+    if (node.id && !isGeneratedId(node.id) && isUnique(`#${CSS.escape(node.id)}`)) {
       steps.unshift(`#${CSS.escape(node.id)}`);
       break;
     }
@@ -80,21 +84,39 @@ export const selectorFor = (el: Element): string => {
   return steps.join(" > ");
 };
 
+const widthMatches = (el: Element, width?: number) =>
+  !width || Math.abs(el.clientWidth - width) <= Math.max(40, width * 0.3);
+
 /**
- * The anchor's element, if it's on the page. Sites that re-render can leave
- * a path pointing at a different element; one that's a very different width
- * from when the note was dropped isn't trusted (the note then goes back to
- * where it was dropped on the page instead of somewhere odd).
+ * The anchor's element, if it's on the page. Found by its selector first.
+ * Sites that re-render can leave a selector pointing at a different element,
+ * so one that's a very different width from when the note was dropped isn't
+ * trusted. Sites that generate their markup fresh on every load (Facebook)
+ * can leave no usable selector at all; then the panel is looked for where it
+ * was: the scrolling (or sticky) element of the same width at the point
+ * saved in the anchor. If neither works, the note goes back to where it was
+ * dropped on the page, rather than somewhere odd.
  */
-export const findAnchorElement = (selector: string, width?: number): Element | null => {
+export const findAnchorElement = (anchor: Extract<NoteAnchor, { kind: "element" }>): Element | null => {
   let el: Element | null = null;
   try {
-    el = document.querySelector(selector);
+    el = document.querySelector(anchor.selector);
   } catch {
-    return null;
+    el = null;
   }
-  if (el && width && Math.abs(el.clientWidth - width) > Math.max(40, width * 0.3)) return null;
-  return el;
+  if (el && widthMatches(el, anchor.w)) return el;
+  return anchor.hint ? elementAtHint(anchor.hint, anchor.w) : null;
+};
+
+const elementAtHint = (hint: NonNullable<Extract<NoteAnchor, { kind: "element" }>["hint"]>, width?: number) => {
+  const x = hint.screen ? hint.x : hint.x - window.scrollX;
+  const y = hint.screen ? hint.y : hint.y - window.scrollY;
+  if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) return null;
+  const top = document.elementsFromPoint(x, y).find((el) => el.tagName.toLowerCase() !== "docamatic-notes");
+  for (let el: Element | null = top || null; el && el !== document.documentElement; el = el.parentElement) {
+    if ((isScrollPanel(el) || getComputedStyle(el).position === "sticky") && widthMatches(el, width)) return el;
+  }
+  return null;
 };
 
 /** The panel's visible area on screen (inside its borders and scrollbars) */
@@ -133,6 +155,12 @@ export const panelMode = (el: Element): PanelMode => {
 
 const elementAnchor = (el: Element, viewportX: number, viewportY: number): NoteAnchor => {
   const box = el.getBoundingClientRect();
+  // A point in the middle of it, to find it again by position (on screen if
+  // it doesn't move with the page, on the page otherwise)
+  const area = visibleArea(el);
+  const screen = panelMode(el) !== "flow";
+  const cx = Math.round((area.left + area.right) / 2);
+  const cy = Math.round((area.top + area.bottom) / 2);
   return {
     kind: "element",
     selector: selectorFor(el),
@@ -140,6 +168,7 @@ const elementAnchor = (el: Element, viewportX: number, viewportY: number): NoteA
     x: Math.round(viewportX - box.left - el.clientLeft + el.scrollLeft),
     y: Math.round(viewportY - box.top - el.clientTop + el.scrollTop),
     w: el.clientWidth,
+    hint: screen ? { x: cx, y: cy, screen } : { x: cx + Math.round(window.scrollX), y: cy + Math.round(window.scrollY), screen },
   };
 };
 
@@ -187,7 +216,7 @@ export interface Placement {
 export const placementFor = (position: { x: number; y: number }, anchor: NoteAnchor | undefined, panel?: Element | null): Placement => {
   if (anchor?.kind === "viewport") return { fixed: true, x: anchor.x, y: anchor.y };
   if (anchor?.kind === "element") {
-    const el = panel !== undefined ? panel : findAnchorElement(anchor.selector, anchor.w);
+    const el = panel !== undefined ? panel : findAnchorElement(anchor);
     if (el) {
       const area = visibleArea(el);
       const x = area.left + anchor.x - el.scrollLeft;

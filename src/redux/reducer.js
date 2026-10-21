@@ -101,7 +101,15 @@ const validAnchor = (anchor) => {
   if (!anchor || typeof anchor !== "object" || !finite(anchor.x) || !finite(anchor.y)) return null;
   if (anchor.kind === "viewport") return { kind: "viewport", x: anchor.x, y: anchor.y };
   if (anchor.kind === "element" && typeof anchor.selector === "string" && anchor.selector && anchor.selector.length <= 500) {
-    return { kind: "element", selector: anchor.selector, x: anchor.x, y: anchor.y, ...(finite(anchor.w) ? { w: anchor.w } : {}) };
+    const hint = anchor.hint;
+    return {
+      kind: "element",
+      selector: anchor.selector,
+      x: anchor.x,
+      y: anchor.y,
+      ...(finite(anchor.w) ? { w: anchor.w } : {}),
+      ...(hint && finite(hint.x) && finite(hint.y) ? { hint: { x: hint.x, y: hint.y, screen: hint.screen === true } } : {}),
+    };
   }
   return null;
 };

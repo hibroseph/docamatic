@@ -58,8 +58,13 @@ and the extension is built with WXT so it can ship to Firefox too.
   Marketplace's) it moves with that part. A note only anchors to a panel it
   fits across, so one dropped half over a panel stays fully visible. Panels
   are found again by a stable attribute where there is one (`aria-label`,
-  `role`, `data-testid`, `data-pagelet`), and one that's a very different
-  width from when the note was dropped isn't trusted (`anchor.w`). Notes in a panel are drawn the way the panel moves (fixed if the
+  `role`, `data-testid`, `data-pagelet`); ids that look generated per load
+  (digits, colons, like Facebook's `mount_0_0_CN`) aren't used. One that's a
+  very different width from when the note was dropped isn't trusted
+  (`anchor.w`). When the saved path doesn't work any more (Facebook builds
+  its markup fresh on every load), the panel is found by position: the
+  scrolling or sticky element of the same width at a point saved in the
+  anchor (`anchor.hint`). Notes in a panel are drawn the way the panel moves (fixed if the
   panel is inside something fixed, on the page otherwise), so page scrolling
   needs no correction, and they're redrawn from the panel's own scroll
   events in the same frame. With the setting off, saved anchors are kept
@@ -113,9 +118,23 @@ and the extension is built with WXT so it can ship to Firefox too.
   (Facebook's chat windows and popups): the notes' layer is kept the last
   element in `<body>`. It waits while a note is being typed in or dragged,
   and backs off from scripts that fight for the same spot.
-- Dragging a note captures the pointer, so the note keeps up with fast
-  moves, including over iframes and parts of sites that swallow mouse
-  events.
+- Notes are moved and resized by Docamatic's own code
+  (`page/useDragResize.ts`) instead of react-rnd (removed). react-draggable
+  kept the note's position in React state; under React 18 that state lags
+  behind fast pointer moves, so a quick flick (or a busy page like Facebook)
+  left the note behind the pointer. Now the position goes straight onto the
+  element on every move and is saved on release, with the pointer captured
+  for the whole drag (iframes and sites that swallow events can't interrupt
+  it). Same positioning as before (`translate(x, y)` from the layer's top
+  left), so existing notes land exactly where they were.
+- A note can be moved from the keyboard: focus its grip, then use the arrow
+  keys (Shift for bigger steps).
+- Notes fixed on screen (on a fixed sidebar, or anchored to the screen) can
+  be dragged anywhere after the page has scrolled; react-rnd's window limits
+  assumed they scrolled with the page and pushed them off by the scroll
+  amount. All notes are kept on screen when dropped instead of during the
+  drag (react-rnd also shifted the next drag by however far one overshot an
+  edge).
 - Tags are matched ignoring case and surrounding spaces. A note shows no tag
   field until it has tags: "Add tag" in its menu opens one
   (`note-add-tag` is now that menu item).

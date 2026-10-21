@@ -27,9 +27,18 @@ export interface NoteColor {
 export type NoteAnchor =
   /**
    * Inside a scrolling panel or on a sticky part of the page; x/y within its
-   * (scrolled) content; w its width then, to check it's the same element later
+   * (scrolled) content; w its width then, to check it's the same element later;
+   * hint a point in it (on screen, or on the page), to find it by position
+   * when the selector doesn't work any more
    */
-  | { kind: "element"; selector: string; x: number; y: number; w?: number }
+  | {
+      kind: "element";
+      selector: string;
+      x: number;
+      y: number;
+      w?: number;
+      hint?: { x: number; y: number; screen: boolean };
+    }
   /** Over something fixed; x/y on screen */
   | { kind: "viewport"; x: number; y: number };
 

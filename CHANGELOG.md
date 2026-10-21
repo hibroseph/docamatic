@@ -208,6 +208,11 @@ and the extension is built with WXT so it can ship to Firefox too.
   updates, and the 2020 version's known issues, labeled as such).
 
 ### Fixed
+- The toolbar icon was still the 2020 logo (a darker blue D on a tan
+  square), unlike the current logo on the website and in
+  `images/docamatic-logo.png` (a yellow sticky note with a bright blue D).
+  `src/public/icons/` are now made from the current logo; the store images
+  were rendered again with it.
 - Typing fast in a new, empty note: the first character could end up after
   the rest ("elloH"). Showing the placeholder changed the text field's class,
   and react-contenteditable rewrites the field (moving the cursor) when its

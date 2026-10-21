@@ -197,10 +197,28 @@ and the extension is built with WXT so it can ship to Firefox too.
   The built pages load their stylesheet and script as plain tags, so they
   also work opened from disk (`file://`), not only from a server.
 - Welcome page rewritten with a practice note instead of GIFs of the old UI.
+  It shows both ways to add a note: a big arrow up to the toolbar ("Docamatic
+  lives up here", with the puzzle piece and pin drawn), and a practice area
+  where right-clicking opens a look-alike browser menu whose "Add a note
+  here" puts a practice note where you clicked (`page/practiceMenu.ts`,
+  `styles/practice-menu.css`; the real menu can't act on extension pages).
+  The website's demo area takes a right-click the same way.
+  `startDemo().addNote` takes optional page coordinates.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).
 
 ### Fixed
+- Typing fast in a new, empty note: the first character could end up after
+  the rest ("elloH"). Showing the placeholder changed the text field's class,
+  and react-contenteditable rewrites the field (moving the cursor) when its
+  props change; the placeholder class is now on a wrapper, and spell check is
+  switched on the element directly.
+- Typing in a note no longer sets off the site's keyboard shortcuts (PostHog's
+  "e", YouTube's space bar, GitHub's letters), even on sites that listen
+  before anything else: the loader now runs at `document_start` and registers
+  the page's first window listener for keys; keys headed into a note stop
+  there and a copy is delivered inside the note's shadow root
+  (`page/keyGuard.ts`). Keys typed anywhere else go to the site as before.
 - Website change log: removed a stray `</script>` tag from the page's head.
 - Publish workflow: an expired or revoked Chrome Web Store refresh token now
   fails at the token step with Google's error, instead of passing an access

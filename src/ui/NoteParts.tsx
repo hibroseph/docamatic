@@ -164,8 +164,6 @@ export const BodyField = ({
   autoFocus?: boolean;
 }) => {
   const body = useStoreSyncedText(note.body, sanitize);
-  // Spell check only while typing (see TitleField)
-  const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -177,31 +175,39 @@ export const BodyField = ({
     actions.setBody(html);
   };
 
+  // The editor's own props must not change while typing: any change makes
+  // react-contenteditable re-render and rewrite its HTML, which puts the
+  // cursor back at the start (typing "Hello" saved "elloH"). So "empty" is a
+  // class on a wrapper, and spell check is set on the element directly.
   return (
-    <ContentEditable
-      innerRef={ref as React.RefObject<HTMLElement>}
-      html={body.text}
-      className={`note-body ${className} ${isEmpty(body.text) ? "is-empty" : ""}`}
-      data-testid={TEST_IDS.noteBody}
-      data-placeholder={placeholder}
-      aria-label="Note text"
-      role="textbox"
-      aria-multiline="true"
-      onChange={(event) => change(event.target.value)}
-      spellCheck={focused}
-      onFocus={() => {
-        body.onFocus();
-        setFocused(true);
-      }}
-      onBlur={(event) => {
-        // Passing onBlur replaces the editor's own "save on blur", so
-        // do it here: catch any change that didn't fire an input event
-        const html = (event.currentTarget as HTMLElement).innerHTML;
-        if (html !== body.text) change(html);
-        body.onBlur();
-        setFocused(false);
-      }}
-    />
+    <div className={`note-body-field ${isEmpty(body.text) ? "is-empty" : ""}`}>
+      <ContentEditable
+        innerRef={ref as React.RefObject<HTMLElement>}
+        html={body.text}
+        className={`note-body ${className}`}
+        data-testid={TEST_IDS.noteBody}
+        data-placeholder={placeholder}
+        aria-label="Note text"
+        role="textbox"
+        aria-multiline="true"
+        spellCheck={false}
+        onChange={(event) => change(event.target.value)}
+        onFocus={(event) => {
+          body.onFocus();
+          // Spell check only while typing (see TitleField)
+          (event.currentTarget as HTMLElement).spellcheck = true;
+        }}
+        onBlur={(event) => {
+          // Passing onBlur replaces the editor's own "save on blur", so
+          // do it here: catch any change that didn't fire an input event
+          const element = event.currentTarget as HTMLElement;
+          const html = element.innerHTML;
+          if (html !== body.text) change(html);
+          body.onBlur();
+          element.spellcheck = false;
+        }}
+      />
+    </div>
   );
 };
 

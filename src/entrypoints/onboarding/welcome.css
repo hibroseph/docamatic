@@ -22,3 +22,39 @@
 .step:nth-child(2) .step__number { background: var(--hl-pink); }
 .step:nth-child(3) .step__number { background: var(--hl-blue); }
 .welcome__foot { color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+
+/* Two ways to add a note, side by side */
+.try__ways { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--space-6); align-items: center; }
+.try__button p { margin-bottom: var(--space-3); }
+@media (max-width: 640px) { .try__ways { grid-template-columns: 1fr; } }
+
+/* The arrow up to the toolbar. The extension buttons are at the top right of
+   the window, just above the page, so the tip sits in the page's top right
+   corner and the arrow points up out of the page. It scrolls away with the
+   page rather than covering practice notes. */
+.toolbar-tip { position: absolute; top: 0; right: 48px; z-index: 1; display: grid; justify-items: end; width: 280px; }
+.toolbar-tip[hidden] { display: none; }
+.toolbar-tip__arrow { width: 150px; height: 138px; margin-right: -28px; overflow: visible; }
+.toolbar-tip__arrow path { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.toolbar-tip__card {
+  margin-top: -26px;
+  padding: var(--space-4);
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--hl-yellow);
+  color: var(--on-primary);
+  box-shadow: var(--sticker-sm);
+  transform: rotate(1.5deg);
+}
+.toolbar-tip__card p { margin: 0 0 var(--space-3); font-size: 13px; line-height: 18px; }
+.toolbar-tip__card .toolbar-tip__title { margin-bottom: var(--space-1); font-family: var(--font-display); font-size: 18px; line-height: 24px; font-weight: 700; }
+.toolbar-tip__mock { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); font-size: 13px; line-height: 18px; }
+.toolbar-tip__puzzle { width: 22px; height: 22px; padding: 4px; border-radius: 50%; background: #fff; fill: #3c4043; }
+.toolbar-tip__row { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; background: #fff; color: #1f1f1f; }
+.toolbar-tip__pin { width: 16px; height: 16px; margin-left: 4px; fill: #2f5bea; }
+.toolbar-tip__card .dm-btn { background: var(--paper); }
+/* Narrow windows: no room beside the column, so it goes above the title */
+@media (max-width: 1180px) {
+  .toolbar-tip { position: static; width: auto; max-width: 720px; margin: 0 auto; padding: 0 var(--space-4); }
+  .toolbar-tip__card { max-width: 320px; transform: none; }
+}

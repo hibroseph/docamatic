@@ -3,8 +3,10 @@
 import "../src/styles/fonts.css";
 import "../src/styles/tokens.css";
 import "../design-system/components/bundle.css";
+import "../src/styles/practice-menu.css";
 import "./site.css";
 import { startDemo, type DemoNote } from "../src/page/demo";
+import { attachPracticeMenu } from "../src/page/practiceMenu";
 
 const art = document.getElementById("hero-art");
 const tryButton = document.getElementById("try-note");
@@ -70,4 +72,7 @@ if (art && tryButton) {
 
   const demo = startDemo(seed);
   tryButton.addEventListener("click", () => demo.addNote());
+  // Right-click practice, the other way to add a note
+  // (favicon.png is published next to every page)
+  attachPracticeMenu({ area: art, iconUrl: "favicon.png", addNoteAt: (x, y) => demo.addNote({ x, y }) });
 }

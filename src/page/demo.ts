@@ -70,5 +70,6 @@ export const startDemo = (seed: DemoNote[] = []) => {
   seed.forEach((note) => add(note, { seeded: true }));
 
   mountNotes({ store, id: "docamatic-demo", mode: "open", saveTitles: false });
-  return { addNote: () => add() };
+  /** A new practice note, beside what's on screen or at page coordinates */
+  return { addNote: (at?: { x: number; y: number }) => add(at) };
 };

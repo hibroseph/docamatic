@@ -34,6 +34,9 @@ a:focus-visible, button:focus-visible { outline: none; box-shadow: var(--focus-r
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .hero__cta { min-height: 44px; padding: 0 var(--space-6); font-size: 16px; }
 .hero__actions .dm-btn { min-height: 44px; }
+.hero__hint { margin: var(--space-4) 0 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+.hero__art { cursor: context-menu; }
+.hero__art:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .hero__fine { margin: var(--space-4) 0 0; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
 /* Empty: the demo's notes are placed over this space */
 .hero__art { min-height: 440px; border-radius: var(--radius-lg); background-image: radial-gradient(var(--hairline) 1px, transparent 1.2px); background-size: 20px 20px; }

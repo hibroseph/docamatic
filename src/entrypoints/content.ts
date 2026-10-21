@@ -5,6 +5,7 @@
 // only then has it inject the UI (apps/script/notes-ui.js).
 import { defineContentScript } from "wxt/utils/define-content-script";
 import { CHROME_MESSAGES } from "../utils/constants";
+import { installKeyGuard } from "../page/keyGuard";
 
 declare global {
   interface Window {
@@ -15,7 +16,11 @@ declare global {
 
 export default defineContentScript({
   matches: ["<all_urls>"],
+  // Before the page's own scripts, so the key guard's listener is first
+  // (page/keyGuard.ts). Everything else waits for the page below.
+  runAt: "document_start",
   main() {
+    installKeyGuard();
     startLoader();
   },
 });
@@ -93,8 +98,10 @@ if (!window.__DOCAMATIC_LOADER__) {
   });
 
   // document.body is missing on non-HTML documents such as raw XML or SVG
-  if (document.body) {
-    checkUrl();
-  }
+  const start = () => {
+    if (document.body) checkUrl();
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+  else start();
 }
 }

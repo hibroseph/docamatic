@@ -54,11 +54,12 @@
   cursor: text;
 }
 /* An empty note keeps room to click into */
-/* is-empty is set from the text (BodyField): a CSS check like
+/* is-empty is set from the text, on BodyField's wrapper: a CSS check like
    :has(> br:only-child) can't see text, so it also matched notes with one
    line break, showing the placeholder over their text */
-.note-body.is-empty { min-height: 40px; }
-.note-body.is-empty::before {
+.note-body-field { min-width: 0; }
+.note-body-field.is-empty > .note-body { min-height: 40px; }
+.note-body-field.is-empty > .note-body::before {
   content: attr(data-placeholder);
   color: var(--note-ink-muted);
   pointer-events: none;

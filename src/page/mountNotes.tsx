@@ -12,6 +12,7 @@ import uiCss from "../styles/ui.css?inline";
 import pageCss from "../styles/page.css?inline";
 import { UndoProvider } from "../ui/undo";
 import { PageNotes } from "./PageNotes";
+import { deliverKeysTo } from "./keyGuard";
 
 const STYLES = [tokensCss, componentsCss, uiCss, pageCss].join("\n");
 
@@ -140,6 +141,8 @@ export const mountNotes = ({ store, id, mode = "closed", onDisconnectReady, save
   // (Hotjar, FullStory, ...) would record what people write in their notes.
   const shadow = rootNode.attachShadow({ mode });
   addStyles(shadow);
+  // Keys typed in a note reach the note, never the site's shortcuts
+  deliverKeysTo(shadow);
 
   // Notes are paper on every site, whatever the system theme
   const container = document.createElement("div");

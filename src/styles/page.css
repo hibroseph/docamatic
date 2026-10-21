@@ -58,7 +58,7 @@
 
 /* A set height: the text scrolls inside */
 .dm-note.note--sized { height: var(--note-height); grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
-.dm-note.note--sized .dm-note__body { overflow-y: auto; }
+.dm-note.note--sized .note-body-field { min-height: 0; overflow-y: auto; }
 
 .note__pin { display: grid; place-items: center; width: 20px; color: var(--note-ink-muted); }
 

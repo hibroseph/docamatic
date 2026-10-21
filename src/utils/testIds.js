@@ -14,6 +14,9 @@ export const TEST_IDS = {
   popupCreateNote: "popup-create-note",
   // Opens the board page (board.html)
   popupOpenBoard: "popup-open-board",
+  // On the board page: its search box and the "Edit notes" switch
+  boardSearch: "board-search",
+  boardEditSwitch: "board-edit-switch",
 
   searchInput: "search-input",
   searchAvailableTag: "search-available-tag",

@@ -61,3 +61,81 @@
 .tag-section + .tag-section { margin-top: var(--space-8); }
 .tag-section__title { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); font-size: 15px; line-height: 22px; }
 .tag-section__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-3); align-items: start; }
+
+/* Search in the top bar; on the canvas, notes that don't match fade */
+.board-search { width: 260px; margin-left: var(--space-2); }
+.board-search .dm-input { padding-right: 32px; }
+.board-search input::-webkit-search-cancel-button { display: none; }
+.board-search__clear {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.board-search__clear svg { position: static; transform: none; }
+.board-search__clear:hover { color: var(--ink); background: var(--paper-2); }
+.board-search__clear:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.board-card.is-dimmed, .board-group.is-dimmed { opacity: .25; transition: opacity .15s; }
+
+/* The "Edit notes" switch */
+.board-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.board-switch:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.board-switch__track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  transition: background .15s;
+}
+.board-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: transform .15s;
+}
+.board-switch[aria-checked="true"] .board-switch__track { background: var(--primary); }
+.board-switch[aria-checked="true"] .board-switch__thumb { background: var(--on-primary); transform: translateX(14px); }
+
+/* Editing on the canvas: the title and text take the clicks, the rest drags */
+.is-editing .dm-note.board-card { user-select: auto; }
+.board-card .note-title { min-width: 0; cursor: text; }
+.board-card__edit { flex: 1; min-height: 0; overflow: auto; cursor: text; }
+.board-card__edit .dm-note__body { min-height: 100%; }
+
+/* By tag, read only: the canvas card, sized by the grid */
+.dm-note.board-card.board-card--grid { position: relative; height: auto; min-height: 120px; cursor: default; user-select: auto; }
+
+@media (max-width: 900px) {
+  .board-bar { flex-wrap: wrap; }
+  .board-search { order: 10; width: 100%; margin: 0; }
+}

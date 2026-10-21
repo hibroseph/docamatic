@@ -27,8 +27,18 @@ and the extension is built with WXT so it can ship to Firefox too.
   unit tested). Notes can be dragged anywhere and the background dragged to
   pan; positions are kept in storage.local under `board` (not part of the
   notes' state or backups), and "Arrange by tag" clears them. "By tag" shows
-  a section per tag with the popup's editable note cards. Analytics:
-  `board_opened`, `board_view_changed`.
+  a section per tag. Analytics: `board_opened`, `board_view_changed`.
+- Board: search (top bar, "/" to focus, Escape clears; the popup's fuzzy
+  search). On the canvas notes that don't match fade and the first match is
+  scrolled into view; in By tag only matches are shown. An "Edit notes"
+  switch (remembered, off at first): off, cards are read only so arranging
+  can't change a note; on, the canvas cards' title and text are editable
+  (cards still drag by their edges) and By tag uses the popup's full cards.
+  Test ids `board-search`, `board-edit-switch`. Analytics, counts and on/off
+  only (never the search text): `board_searched` (result and word counts,
+  once typing stops), `board_edit_mode_changed`, `board_note_edited` (first
+  edit per visit), `board_note_moved`, `board_arranged`,
+  `board_find_on_page`; every board event carries the current `view`.
 - New look for notes on pages, the popup, Backup & restore, the welcome
   page and the website, from the design system (tokens, `dm-` components,
   Bricolage Grotesque and Figtree bundled; nothing loads from the internet).

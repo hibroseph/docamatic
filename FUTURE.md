@@ -6,7 +6,10 @@ Status (October 2026): a first, simple version is in 5.1 as a preview: `board.ht
 popup's board button.
 - Board: a canvas with notes grouped by their tags (notes with several tags next to their main tag's
   group, untagged last), drag notes anywhere, drag the background to pan, "Arrange by tag" to reset.
-- By tag: a section per tag with editable note cards.
+- By tag: a section per tag.
+- Search in both views (non-matches fade on the canvas), and an "Edit notes" switch: off, the page is
+  read only; on, notes can be edited on the canvas and in By tag.
+- Usage analytics (board_* events) to see which views and features get used.
 
-Ideas for next steps: zoom, search and filter on the board, grouping by website, positions saved with
-the notes (so they're in backups and sync), drawing connections between notes, editing on the canvas.
+Ideas for next steps: zoom, filter by tag on the board, grouping by website, positions saved with
+the notes (so they're in backups and sync), drawing connections between notes, tags and colors editable on the canvas cards.

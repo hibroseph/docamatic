@@ -197,13 +197,17 @@ and the extension is built with WXT so it can ship to Firefox too.
   The built pages load their stylesheet and script as plain tags, so they
   also work opened from disk (`file://`), not only from a server.
 - Welcome page rewritten with a practice note instead of GIFs of the old UI.
-  It shows both ways to add a note: a big arrow up to the toolbar ("Docamatic
-  lives up here", with the puzzle piece and pin drawn), and a practice area
+  It shows both ways to add a note: an arrow up into a bracket over the
+  right end of the toolbar ("Docamatic is up in your toolbar", with a drawn
+  toolbar; it brackets the area rather than one spot because the buttons'
+  order differs between browsers and setups), and a practice area
   where right-clicking opens a look-alike browser menu whose "Add a note
   here" puts a practice note where you clicked (`page/practiceMenu.ts`,
   `styles/practice-menu.css`; the real menu can't act on extension pages).
   The website's demo area takes a right-click the same way.
-  `startDemo().addNote` takes optional page coordinates.
+  `startDemo().addNote` takes optional page coordinates. Wherever the steps
+  say to click Docamatic, the puzzle piece or the pin, a small picture of
+  that button is shown inline.
 - Website change log: added the history of versions before 5.0.0 (2019–2020
   updates, and the 2020 version's known issues, labeled as such).
 

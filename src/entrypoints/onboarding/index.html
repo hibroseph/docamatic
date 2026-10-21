@@ -8,21 +8,27 @@
 </head>
 
 <body class="dm-root">
-    <!-- Points at the browser toolbar, just above the top right of the page -->
+    <!-- Points up at the browser toolbar. Where the extension buttons are
+         differs (pinned extensions, the profile picture, other browsers), so
+         it brackets the whole right end of the toolbar rather than one spot. -->
     <aside id="toolbar-tip" class="toolbar-tip" aria-labelledby="toolbar-tip-title">
-        <svg class="toolbar-tip__arrow" viewBox="0 0 120 110" aria-hidden="true">
-            <path d="M8 104 C 30 96, 70 80, 84 46 S 98 14, 104 6" />
-            <path d="M86 12 L 105 4 L 108 25" />
+        <svg class="toolbar-tip__arrow" viewBox="0 0 300 120" aria-hidden="true">
+            <path class="bracket" d="M6 26 Q 8 10, 24 10 L 276 10 Q 292 10, 294 26" />
+            <path d="M150 116 C 140 90, 160 62, 150 22" />
+            <path d="M136 36 L 150 18 L 164 36" />
         </svg>
         <div class="toolbar-tip__card">
-            <p id="toolbar-tip-title" class="toolbar-tip__title">Docamatic lives up here</p>
-            <p>Click the puzzle piece in the toolbar, then the pin next to Docamatic, so it's always one click away.</p>
-            <div class="toolbar-tip__mock" aria-hidden="true">
-                <svg class="toolbar-tip__puzzle" viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg>
-                <span class="toolbar-tip__arrow-small">&rarr;</span>
-                <span class="toolbar-tip__row"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16">Docamatic
-                    <svg class="toolbar-tip__pin" viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span>
+            <p id="toolbar-tip-title" class="toolbar-tip__title">Docamatic is up in your toolbar</p>
+            <p>At the right end, next to the address bar. Look for <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>. Don't see it? Click the puzzle
+                piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span> next to Docamatic.</p>
+            <div class="toolbar-mock" aria-hidden="true">
+                <span class="toolbar-mock__url"></span>
+                <span class="toolbar-mock__btn is-docamatic"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>
+                <span class="toolbar-mock__btn"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>
+                <span class="toolbar-mock__avatar"></span>
+                <span class="toolbar-mock__more"><i></i><i></i><i></i></span>
             </div>
+            <p class="toolbar-tip__note">The order may be different in your browser.</p>
             <button id="toolbar-tip-close" type="button" class="dm-btn dm-btn--sm">Got it</button>
         </div>
     </aside>
@@ -50,7 +56,7 @@
                     </span>
                 </div>
                 <div class="try__button">
-                    <p>Or the way you would from the toolbar: click Docamatic, then <strong>New note on this
+                    <p>Or the way you would from the toolbar: click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> Docamatic, then <strong>New note on this
                             page</strong><span id="shortcut-hint"></span>.</p>
                     <button id="try-note" type="button" class="dm-btn dm-btn--primary">New note on this page</button>
                 </div>
@@ -62,15 +68,15 @@
                 <span class="step__number" aria-hidden="true">1</span>
                 <div>
                     <h2>Keep it handy</h2>
-                    <p>Click the puzzle piece in the toolbar, then the pin next to Docamatic, so it's one click
-                        away.</p>
+                    <p>Click the puzzle piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span> at the right end of the toolbar, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span>
+                        next to Docamatic. Now <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> is always one click away.</p>
                 </div>
             </li>
             <li class="step">
                 <span class="step__number" aria-hidden="true">2</span>
                 <div>
                     <h2>Add a note</h2>
-                    <p>On any website, click Docamatic, then <strong>New note on this page</strong><span
+                    <p>On any website, click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> in the toolbar, then <strong>New note on this page</strong><span
                             class="shortcut-hint"></span>. Or right-click where you want it and choose <strong>Add a
                             note here</strong>; any text you selected goes in the note.</p>
                 </div>
@@ -79,7 +85,7 @@
                 <span class="step__number" aria-hidden="true">3</span>
                 <div>
                     <h2>Find it again</h2>
-                    <p>Docamatic lists the notes on the page you're on, and searches all the others. Notes you
+                    <p>Click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> to see the notes on the page you're on, and search all the others. Notes you
                         made with earlier versions are all still here, in the same spots.</p>
                 </div>
             </li>

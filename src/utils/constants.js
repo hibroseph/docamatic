@@ -41,3 +41,8 @@ export const CONTEXT_MENU_ADD_NOTE = "add-note-here";
 // The notes UI bundle the background injects into pages that have notes
 // (built without a hash in its name so the background can reference it)
 export const NOTES_UI_FILE = "notes-ui.js";
+
+// Docamatic's website, and its Chrome Web Store listing id. Used to tell
+// whether an install came through the website (background/installSource.js).
+export const WEBSITE_URL = "https://hibroseph.github.io/docamatic/";
+export const CHROME_WEB_STORE_ID = "mbpkbeacgamdiajpgbblpcgpkidaobob";

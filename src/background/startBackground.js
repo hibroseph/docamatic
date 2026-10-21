@@ -8,6 +8,7 @@ import { authorizeSender } from "../redux/authorizeSender";
 import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../redux/actions";
 import { createNoteInTab } from "./createNote";
 import { findNote } from "./findNote";
+import { installSource } from "./installSource";
 import { noteUrlsFor } from "../utils/noteUrl";
 import { CHROME_MESSAGES, CONTEXT_MENU_ADD_NOTE, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
@@ -44,8 +45,9 @@ export function startBackground() {
   chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     // Only show onboarding on a fresh install, not on every worker restart
     if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
+      // Where it came from is read before the welcome page opens a tab
+      installSource().then((source) => track("extension_installed", source));
       chrome.tabs.create({ url: "/onboarding.html" });
-      track("extension_installed");
     } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
       track("extension_updated", { previous_version: previousVersion });
     }

@@ -224,6 +224,15 @@ and the extension is built with WXT so it can ship to Firefox too.
   only `website_add_to_chrome_clicked` (`placement`) and
   `website_demo_note_added` (`method`: button, right_click). Off on
   localhost and when opened from disk. Privacy policy updated.
+- Where installs come from: `extension_installed` now has
+  `came_from_website` (a tab with the website is open when it's installed)
+  and, when the Chrome Web Store listing tab is open, `store_tab_open` and
+  its `store_utm_source` / `store_utm_medium` / `store_utm_campaign`
+  (label-like values only; never tab addresses). `background/installSource.js`,
+  unit tested. The website's "Add to Chrome" links carry
+  `utm_source=docamatic_website&utm_medium=header|hero` (also shown per
+  source on the store dashboard's Impressions tab) and open the store in a
+  new tab, so the site stays open. Privacy policy updated.
 
 ### Fixed
 - The toolbar icon was still the 2020 logo (a darker blue D on a tan

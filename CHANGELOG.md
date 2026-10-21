@@ -47,7 +47,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   starts with the selected text, if any (escaped, line breaks kept).
 - Note layout (`layoutNote` action, `LAYOUT_NOTE`): "Keep on screen" (the
   long-unused `stickify` flag; position is then on screen), "Collapse" to the
-  top bar (`note.collapsed`; also two quick clicks on the grip), and a height
+  top bar (`note.collapsed`; also the ^ button in the top bar, shown on
+  hover and always on collapsed notes, test id `note-collapse`; and two quick
+  clicks on the grip), and a height
   set by dragging the bottom right corner (`size.height`; the text scrolls
   inside; double-click the corner to fit the text again).
 - Settings: text size of notes on pages (`preferences.note_text_size`).

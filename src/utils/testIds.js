@@ -30,6 +30,8 @@ export const TEST_IDS = {
   noteDelete: "note-delete",
   noteVisibility: "note-visibility",
   noteDragHandle: "note-drag-handle",
+  // The collapse/expand button in a note's top bar on a page
+  noteCollapse: "note-collapse",
   noteOpenPage: "note-open-page",
   // "Find on page" in a note's menu in the popup and side panel
   noteFind: "note-find",

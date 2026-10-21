@@ -21,7 +21,7 @@ import { registerNote } from "./noteRegistry";
 import { transformFor, useDragResize } from "./useDragResize";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
-import { GripIcon, HeartIcon, MoreIcon, PinIcon } from "../ui/icons";
+import { ChevronIcon, GripIcon, HeartIcon, MoreIcon, PinIcon } from "../ui/icons";
 
 // Room for the page's vertical scrollbar
 const SCROLLBAR_WIDTH = 17;
@@ -337,7 +337,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
           <span
             className="dm-note__grip"
             data-testid={TEST_IDS.noteDragHandle}
-            title="Drag to move (or use the arrow keys). Double-click to collapse."
+            title="Drag to move (or use the arrow keys)"
             role="button"
             tabIndex={0}
             aria-label="Move note (arrow keys)"
@@ -352,6 +352,20 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
                 <PinIcon size={13} />
               </span>
             )}
+            {/* One click to fold the note down to this bar and back. Shown
+                when the pointer is over the note, so notes stay plain, and
+                always on a collapsed note so it's clear how to open it */}
+            <button
+              type="button"
+              className="dm-note__action note__collapse"
+              aria-label={collapsed ? "Expand note" : "Collapse note"}
+              aria-expanded={!collapsed}
+              title={collapsed ? "Expand" : "Collapse"}
+              data-testid={TEST_IDS.noteCollapse}
+              onClick={() => actions.setCollapsed(!collapsed)}
+            >
+              <ChevronIcon up={!collapsed} />
+            </button>
             <button
               type="button"
               className="dm-note__action"

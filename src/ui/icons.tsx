@@ -167,6 +167,13 @@ export const ExpandIcon = (p: IconProps) => (
   </Svg>
 );
 
+/** Points up to fold a note away, down to open it again */
+export const ChevronIcon = ({ up, ...p }: IconProps & { up: boolean }) => (
+  <Svg {...p}>
+    <path d={up ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"} />
+  </Svg>
+);
+
 export const BringHereIcon = (p: IconProps) => (
   <Svg {...p}>
     <rect x="2.5" y="3" width="11" height="10" rx="2" />

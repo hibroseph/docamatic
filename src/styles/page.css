@@ -92,3 +92,13 @@
 
 /* On a page the undo message sits bottom left, away from the page's own UI */
 .toast-region--page { left: var(--space-4); transform: none; }
+
+/* The collapse button: only while the pointer is over the note (or a
+   control in it has focus), always on collapsed notes, and always on touch
+   screens, where there's no hovering */
+.note--page .note__collapse { opacity: 0; transition: opacity .12s; }
+.note--page:hover .note__collapse,
+.note--page:focus-within .note__collapse,
+.note--page.note--collapsed .note__collapse { opacity: 1; }
+@media (hover: none) { .note--page .note__collapse { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .note--page .note__collapse { transition: none; } }

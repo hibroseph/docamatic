@@ -76,6 +76,8 @@ export type ThemePreference = "system" | "light" | "dark";
 export interface Preferences {
   theme?: ThemePreference;
   new_note_color?: NoteColorName;
+  /** Notes move with scrolling panels and fixed parts of pages (page/anchor.ts). Off unless turned on. */
+  follow_panels?: boolean;
 }
 
 export interface Metadata {

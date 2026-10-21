@@ -3,18 +3,23 @@
 // Most notes sit on the page and scroll with it (no anchor, how every note
 // before 5.1 works). Web apps often scroll a panel instead of the page
 // (Gmail's message list, a docs sidebar, a chat), or have parts that never
-// scroll (fixed headers and sidebars). A note dropped over one of those moves
-// the way that part does:
-//   element:  inside a scrolling panel; scrolls with the panel's content and
-//             is cut off at the panel's edges
+// scroll (fixed headers and sidebars). With the "Move notes with scrolling
+// panels" setting on, a note dropped over one of those moves the way that
+// part does:
+//   element:  inside a scrolling panel; scrolls with the panel's content, and
+//             hides once its corner has scrolled out of the panel
 //   viewport: over something fixed; stays put on screen
 // Decided when a note is dropped (or added), from what's under its top left
 // corner. note.position always keeps the page coordinates too, as a fallback
-// when the panel can't be found and for versions that don't know anchors.
+// when the panel can't be found, when the setting is off, and for versions
+// that don't know anchors.
 import type { NoteAnchor } from "../model/types";
 
 /** The point checked under a note: a little inside its top left corner, where it's held */
 export const ANCHOR_POINT_OFFSET = 16;
+
+// A note this far over a panel's side edges still counts as inside it
+const EDGE_TOLERANCE = 8;
 
 const SCROLLS = /^(auto|scroll|overlay)$/;
 
@@ -61,17 +66,48 @@ export const findAnchorElement = (selector: string): Element | null => {
   }
 };
 
+/** The panel's visible area on screen (inside its borders and scrollbars) */
+const visibleArea = (el: Element) => {
+  const box = el.getBoundingClientRect();
+  const left = box.left + el.clientLeft;
+  const top = box.top + el.clientTop;
+  return { left, top, right: left + el.clientWidth, bottom: top + el.clientHeight };
+};
+
+// Whether an element is inside something fixed, so it doesn't move when the
+// page scrolls. Remembered per element: it's asked on every scroll.
+const inFixedCache = new WeakMap<Element, boolean>();
+const isInFixed = (el: Element) => {
+  let cached = inFixedCache.get(el);
+  if (cached === undefined) {
+    cached = false;
+    for (let node: Element | null = el; node && node !== document.documentElement; node = node.parentElement) {
+      if (getComputedStyle(node).position === "fixed") {
+        cached = true;
+        break;
+      }
+    }
+    inFixedCache.set(el, cached);
+  }
+  return cached;
+};
+
 /**
  * What a note whose top left corner is at (viewportX, viewportY) should move
  * with. `ignore` is the notes' own layer, which is on top of everything.
+ * A panel only counts when the note fits across it; a note half over a panel
+ * and half over something next to it stays on the page.
  */
-export const anchorAt = (viewportX: number, viewportY: number, ignore: Element | null): NoteAnchor | null => {
+export const anchorAt = (viewportX: number, viewportY: number, width: number, ignore: Element | null): NoteAnchor | null => {
   const x = viewportX + ANCHOR_POINT_OFFSET;
   const y = viewportY + ANCHOR_POINT_OFFSET;
   const top = document.elementsFromPoint(x, y).find((el) => el !== ignore && !ignore?.contains(el));
 
   for (let el: Element | null = top || null; el && el !== document.documentElement; el = el.parentElement) {
     if (isScrollPanel(el)) {
+      const area = visibleArea(el);
+      const fits = viewportX >= area.left - EDGE_TOLERANCE && viewportX + width <= area.right + EDGE_TOLERANCE;
+      if (!fits) continue;
       const box = el.getBoundingClientRect();
       return {
         kind: "element",
@@ -89,49 +125,36 @@ export const anchorAt = (viewportX: number, viewportY: number, ignore: Element |
 };
 
 export interface Placement {
-  /** How the note is positioned: page coordinates, or fixed to the screen */
+  /** Drawn fixed on screen (x/y on screen) rather than on the page (x/y on the page) */
   fixed: boolean;
   x: number;
   y: number;
-  /** For notes in a panel: the panel's visible area on screen, to cut the note off at */
-  clip?: { left: number; top: number; right: number; bottom: number };
+  /** A note in a panel whose corner has scrolled out of the panel's visible area */
+  away?: boolean;
 }
 
-/** Where to draw a note right now */
-export const placementFor = (position: { x: number; y: number }, anchor: NoteAnchor | undefined): Placement => {
+/**
+ * Where to draw a note right now. A note in a panel is drawn the way its
+ * panel moves: fixed on screen if the panel is inside something fixed, on
+ * the page otherwise. Then scrolling the page never needs correcting; only
+ * the panel's own scrolling does.
+ */
+export const placementFor = (position: { x: number; y: number }, anchor: NoteAnchor | undefined, panel?: Element | null): Placement => {
   if (anchor?.kind === "viewport") return { fixed: true, x: anchor.x, y: anchor.y };
   if (anchor?.kind === "element") {
-    const el = findAnchorElement(anchor.selector);
+    const el = panel !== undefined ? panel : findAnchorElement(anchor.selector);
     if (el) {
-      const box = el.getBoundingClientRect();
-      const left = box.left + el.clientLeft;
-      const top = box.top + el.clientTop;
-      return {
-        fixed: false,
-        x: left + window.scrollX + anchor.x - el.scrollLeft,
-        y: top + window.scrollY + anchor.y - el.scrollTop,
-        clip: { left, top, right: left + el.clientWidth, bottom: top + el.clientHeight },
-      };
+      const area = visibleArea(el);
+      const x = area.left + anchor.x - el.scrollLeft;
+      const y = area.top + anchor.y - el.scrollTop;
+      const cornerX = x + ANCHOR_POINT_OFFSET;
+      const cornerY = y + ANCHOR_POINT_OFFSET;
+      const away = cornerX < area.left || cornerX > area.right || cornerY < area.top || cornerY > area.bottom;
+      return isInFixed(el)
+        ? { fixed: true, x, y, away }
+        : { fixed: false, x: x + window.scrollX, y: y + window.scrollY, away };
     }
   }
   // No anchor, or its panel isn't on the page (yet): where it was dropped
   return { fixed: false, x: position.x, y: position.y };
-};
-
-/**
- * clip-path for a note in a panel, so the parts outside the panel's visible
- * area are hidden (and can't be clicked), like the panel's own content.
- */
-export const clipPathFor = (placement: Placement, width: number, height: number): string | undefined => {
-  if (!placement.clip) return undefined;
-  const left = placement.x - window.scrollX;
-  const top = placement.y - window.scrollY;
-  const inset = {
-    top: Math.max(0, placement.clip.top - top),
-    right: Math.max(0, left + width - placement.clip.right),
-    bottom: Math.max(0, top + height - placement.clip.bottom),
-    left: Math.max(0, placement.clip.left - left),
-  };
-  if (!inset.top && !inset.right && !inset.bottom && !inset.left) return undefined;
-  return `inset(${inset.top}px ${inset.right}px ${inset.bottom}px ${inset.left}px)`;
 };

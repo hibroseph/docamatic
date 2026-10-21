@@ -100,6 +100,25 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
         </div>
       </section>
 
+      <section className="settings__group" aria-labelledby="settings-pages">
+        <h2 className="settings__heading" id="settings-pages">
+          Notes on pages
+        </h2>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={preferences.follow_panels === true}
+            onChange={(event) => dispatch(setPreferences({ follow_panels: event.target.checked }))}
+          />
+          <span>
+            <strong>Move notes with scrolling panels</strong> <span className="dm-tag dm-tag--blue preview-tag">Preview</span>
+            <br />
+            In web apps that scroll part of the screen, like an inbox or a chat, a note you drop there scrolls with it.
+            One on a part that doesn't scroll stays put.
+          </span>
+        </label>
+      </section>
+
       <section className="settings__group" aria-labelledby="settings-notes">
         <h2 className="settings__heading" id="settings-notes">
           Your notes

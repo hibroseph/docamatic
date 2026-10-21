@@ -40,10 +40,18 @@ and the extension is built with WXT so it can ship to Firefox too.
 - Settings: default color for new notes, theme (System, Light, Dark).
 - Page titles are saved with notes (when a note is added, and when a page
   with notes is visited), so lists show titles instead of urls.
-- Notes move with what they're on (`page/anchor.ts`). A note dropped (or
-  added) over a scrolling panel, like a web app's message list, scrolls with
-  that panel and is cut off at its edges; over a fixed part of the page
-  (header, sidebar) it stays put on screen. Saved as an optional
+- Setting "Move notes with scrolling panels" (Preview, off by default;
+  `metadata.preferences.follow_panels`). With it on, notes move with what
+  they're on (`page/anchor.ts`). A note dropped (or added) over a scrolling
+  panel, like a web app's message list, scrolls with that panel, and is
+  hidden whole once its corner scrolls out of the panel; over a fixed part
+  of the page (header, sidebar) it stays put on screen. A note only anchors
+  to a panel it fits across, so one dropped half over a panel stays fully
+  visible. Notes in a panel are drawn the way the panel moves (fixed if the
+  panel is inside something fixed, on the page otherwise), so page scrolling
+  needs no correction, and they're redrawn from the panel's own scroll
+  events in the same frame. With the setting off, saved anchors are kept
+  but ignored, and moving a note clears its anchor. Saved as an optional
   `note.anchor` (`element`: a CSS path to the panel plus the offset in its
   content; `viewport`: screen position); `position` keeps the page
   coordinates as a fallback and for older versions. Notes are only anchored

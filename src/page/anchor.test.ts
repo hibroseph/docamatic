@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { clipPathFor, findAnchorElement, placementFor, selectorFor } from "./anchor";
+import { findAnchorElement, placementFor, selectorFor } from "./anchor";
 import notesApp from "../redux/reducer";
 import { addNote, updateNotePosition } from "../redux/actions";
 import { GetInitialState } from "../utils/GetInitialState";
@@ -33,13 +33,6 @@ test("Notes are drawn on the page unless anchored", () => {
   expect(placementFor(position, { kind: "viewport", x: 5, y: 6 })).toEqual({ fixed: true, x: 5, y: 6 });
   // Its panel isn't on the page: where it was dropped
   expect(placementFor(position, { kind: "element", selector: "#missing", x: 1, y: 2 })).toEqual({ fixed: false, x: 40, y: 170 });
-});
-
-test("Notes in a panel are cut off at the panel's edges", () => {
-  const clip = { left: 100, top: 100, right: 400, bottom: 300 };
-  expect(clipPathFor({ fixed: false, x: 150, y: 120, clip }, 200, 100)).toBeUndefined();
-  expect(clipPathFor({ fixed: false, x: 150, y: 250, clip }, 200, 100)).toBe("inset(0px 0px 50px 0px)");
-  expect(clipPathFor({ fixed: false, x: 50, y: 60, clip }, 200, 100)).toBe("inset(40px 0px 0px 50px)");
 });
 
 test("Moving a note sets, keeps or removes its anchor; bad anchors are dropped", () => {

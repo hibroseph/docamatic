@@ -24,7 +24,8 @@ export interface DemoNote {
 }
 
 export const startDemo = (seed: DemoNote[] = []) => {
-  const store = createStore(notesApp, { pages: {}, tags: [], metadata: {} } as never);
+  // The demo shows everything, including notes that move with scrolling panels
+  const store = createStore(notesApp, { pages: {}, tags: [], metadata: { preferences: { follow_panels: true } } } as never);
   const pageUrl = noteUrlFor(window.location.href);
 
   const add = (note: Partial<DemoNote> = {}, { seeded = false } = {}) => {

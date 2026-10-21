@@ -5,16 +5,19 @@
 // top left of <body>), at its saved width. Only how the note looks changed in
 // 5.1, so notes people placed years ago land on the same spot.
 //
-// Since 5.1 a note dropped over a scrolling panel or a fixed part of the page
-// moves with it instead (page/anchor.ts). Notes that were never moved since
-// keep the old behavior.
+// Since 5.1, with the "Move notes with scrolling panels" setting on, a note
+// dropped over a scrolling panel or a fixed part of the page moves with it
+// instead (page/anchor.ts). Notes that were never moved since keep the old
+// behavior, and with the setting off every note is on the page.
 import React, { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { useSelector } from "react-redux";
 import { Rnd } from "react-rnd";
 import { PENDING_TIMEOUT_MS } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { resolveNoteColor } from "../model/colors";
-import type { Note, NoteRecord, Tag } from "../model/types";
-import { anchorAt, clipPathFor, placementFor } from "./anchor";
+import type { Note, NoteAnchor, NoteRecord, State, Tag } from "../model/types";
+import { anchorAt, findAnchorElement, placementFor } from "./anchor";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { GripIcon, HeartIcon, MoreIcon } from "../ui/icons";
@@ -29,36 +32,54 @@ const stop = (event: React.SyntheticEvent) => event.stopPropagation();
 /** The notes' layer on the page (the shadow root's host), left out when checking what's under a note */
 const layerOf = (el: Element | null) => ((el?.getRootNode() as ShadowRoot | undefined)?.host as Element) || null;
 
+/** The "Move notes with scrolling panels" setting (off unless turned on) */
+export const useFollowPanels = () => useSelector((state: State) => state.metadata?.preferences?.follow_panels === true);
+
 /**
- * Where a note is drawn, kept up to date while panels scroll. Notes without
- * an anchor never change here, so they cost nothing.
+ * Where a note is drawn. A note in a panel is redrawn from the panel's own
+ * scroll events, synchronously, so it moves in the same frame as the panel's
+ * content instead of trailing it. Page scrolling needs nothing (placementFor
+ * draws it the way its panel moves). Other notes never change here.
  */
-const usePlacement = (note: Note) => {
+const usePlacement = (note: Note, anchor: NoteAnchor | undefined) => {
+  const [panel, setPanel] = useState<Element | null>(() =>
+    anchor?.kind === "element" ? findAnchorElement(anchor.selector) : null
+  );
   const [, setTick] = useState(0);
-  const anchor = note.anchor;
+  const selector = anchor?.kind === "element" ? anchor.selector : "";
+
   useEffect(() => {
-    if (!anchor) return;
-    let frame = 0;
-    const update = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
+    if (!selector) return;
+    let current = findAnchorElement(selector);
+    setPanel(current);
+    const redraw = () => flushSync(() => setTick((n) => n + 1));
+    current?.addEventListener("scroll", redraw, { passive: true });
+    window.addEventListener("resize", redraw);
+    // Single page apps render panels late, or replace them; look again now
+    // and then, and redraw only when something actually changed
+    let last = placementFor(note.position, anchor, current);
+    const check = setInterval(() => {
+      const found = findAnchorElement(selector);
+      if (found !== current) {
+        current?.removeEventListener("scroll", redraw);
+        current = found;
+        current?.addEventListener("scroll", redraw, { passive: true });
+        setPanel(current);
+      }
+      const now = placementFor(note.position, anchor, current);
+      if (Math.abs(now.x - last.x) > 0.5 || Math.abs(now.y - last.y) > 0.5 || now.away !== last.away) {
+        last = now;
         setTick((n) => n + 1);
-      });
-    };
-    // Scroll events don't bubble, but they can be caught on the way down
-    document.addEventListener("scroll", update, { capture: true, passive: true });
-    window.addEventListener("resize", update);
-    // A panel that isn't there yet (single page apps render late) is looked for again
-    const retry = setInterval(update, 1000);
+      }
+    }, 500);
     return () => {
-      document.removeEventListener("scroll", update, { capture: true });
-      window.removeEventListener("resize", update);
-      clearInterval(retry);
-      cancelAnimationFrame(frame);
+      current?.removeEventListener("scroll", redraw);
+      window.removeEventListener("resize", redraw);
+      clearInterval(check);
     };
-  }, [anchor?.kind, anchor && "selector" in anchor ? anchor.selector : ""]);
-  return placementFor(note.position, anchor);
+  }, [selector]);
+
+  return placementFor(note.position, anchor, anchor?.kind === "element" ? panel : undefined);
 };
 
 interface Props {
@@ -102,25 +123,34 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     if (note.size.width === resized.width || Date.now() - resized.at > PENDING_TIMEOUT_MS) setResized(null);
   }, [note.size.width]);
 
-  const anchored = usePlacement(note);
+  const followPanels = useFollowPanels();
+  const anchor = followPanels ? note.anchor : undefined;
+  const anchored = usePlacement(note, anchor);
   // Just dropped: where it was dropped, on the page, until the store has it
-  const placement = dropped ? { fixed: false, x: dropped.x, y: dropped.y } : anchored;
+  const placement = dropped ? { fixed: false, x: dropped.x, y: dropped.y, away: false } : anchored;
   const position = placement;
   const width = resized ? resized.width : note.size.width;
 
   // Keep notes saved on a wider window from ending up off screen (notes on
   // the page only, as always; anchored ones go where their panel is)
-  const isOffScreen = !note.anchor && !dropped && position.x + width > windowWidth - SCROLLBAR_WIDTH;
+  const isOffScreen = !anchor && !dropped && position.x + width > windowWidth - SCROLLBAR_WIDTH;
   const fixed = Boolean(note.stickify) || placement.fixed;
-  const clipPath = menuOpen || dragging ? undefined : clipPathFor(placement, width, articleRef.current?.offsetHeight || 0);
+  // A note in a panel whose corner has scrolled out of the panel goes away
+  // whole, rather than showing half of it over whatever is next to the panel
+  const away = Boolean(placement.away) && !menuOpen && !dragging;
 
   // A note just added over a scrolling panel or a fixed part of the page
   // moves with it from the start
   useEffect(() => {
-    if (!autoFocus || note.anchor) return;
+    if (!autoFocus || note.anchor || !followPanels) return;
     const frame = requestAnimationFrame(() => {
-      const anchor = anchorAt(note.position.x - window.scrollX, note.position.y - window.scrollY, layerOf(articleRef.current));
-      if (anchor) actions.move(note.position.x, note.position.y, anchor);
+      const found = anchorAt(
+        note.position.x - window.scrollX,
+        note.position.y - window.scrollY,
+        note.size.width,
+        layerOf(articleRef.current)
+      );
+      if (found) actions.move(note.position.x, note.position.y, found);
     });
     return () => cancelAnimationFrame(frame);
   }, []);
@@ -147,7 +177,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
       resizeHandleClasses={{ right: "note__resize" }}
       minWidth={120}
       disableDragging={Boolean(note.stickify)}
-      style={{ position: fixed ? "fixed" : "absolute", zIndex, clipPath }}
+      style={{ position: fixed ? "fixed" : "absolute", zIndex, visibility: away ? "hidden" : undefined }}
       onDragStart={() => {
         onBringToFront();
         setDragging(true);
@@ -162,7 +192,9 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
         const pageX = Math.round(screenX + window.scrollX);
         const pageY = Math.round(screenY + window.scrollY);
         setDropped({ x: pageX, y: pageY, at: Date.now() });
-        actions.move(pageX, pageY, note.stickify ? undefined : anchorAt(screenX, screenY, layerOf(articleRef.current)));
+        // With the setting off, a moved note is on the page (its anchor, if any, is cleared)
+        const found = followPanels ? anchorAt(screenX, screenY, width, layerOf(articleRef.current)) : null;
+        actions.move(pageX, pageY, note.stickify ? undefined : found);
       }}
       onResizeStop={(_event, _direction, _ref, delta) => {
         if (delta.width === 0) return;

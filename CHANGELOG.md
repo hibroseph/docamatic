@@ -109,6 +109,10 @@ and the extension is built with WXT so it can ship to Firefox too.
   in the color menu. Also optional: `page.title`, `note.updated_at`,
   `metadata.preferences`. Positions and sizes of existing notes are untouched
   and render at the same place.
+- Notes stay on top of site elements added later with the same top z-index
+  (Facebook's chat windows and popups): the notes' layer is kept the last
+  element in `<body>`. It waits while a note is being typed in or dragged,
+  and backs off from scripts that fight for the same spot.
 - Dragging a note captures the pointer, so the note keeps up with fast
   moves, including over iframes and parts of sites that swallow mouse
   events.

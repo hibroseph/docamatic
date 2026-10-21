@@ -20,6 +20,11 @@ const STYLES = [tokensCss, componentsCss, uiCss, pageCss].join("\n");
 // root element with it. Put it back whenever that happens: moving the element
 // keeps its shadow root and the React tree inside it intact. Only direct
 // children of <html> and <body> are watched, so this costs next to nothing.
+//
+// It's also kept the *last* element in <body>. Notes use the highest z-index
+// there is, and when a site's own element has it too (Facebook's chat
+// windows and popups do), whichever comes later in the page is on top. Sites
+// keep adding those to the end of <body>, which would cover the notes.
 const keepAttached = (rootNode: HTMLElement) => {
   const observer = new MutationObserver(() => reattach());
 
@@ -29,9 +34,35 @@ const keepAttached = (rootNode: HTMLElement) => {
     if (document.body) observer.observe(document.body, { childList: true });
   };
 
+  // Moving the layer would take the cursor out of a note being typed in, or
+  // drop a note being dragged, so it waits for those to finish
+  let pointerDown = false;
+  rootNode.addEventListener("pointerdown", () => (pointerDown = true));
+  window.addEventListener("pointerup", () => {
+    pointerDown = false;
+    reattach();
+  });
+  window.addEventListener("pointercancel", () => (pointerDown = false));
+  rootNode.addEventListener("focusout", () => setTimeout(reattach));
+  const busy = () => pointerDown || document.activeElement === rootNode;
+
+  // Another script (or extension) doing the same would make the two take
+  // turns forever; after many moves in a short time, stop for a while
+  let moves: number[] = [];
+  let pausedUntil = 0;
+
   const reattach = () => {
-    if (!rootNode.isConnected && document.body) {
-      document.body.appendChild(rootNode);
+    const body = document.body;
+    if (body) {
+      if (!rootNode.isConnected) {
+        body.appendChild(rootNode);
+      } else if (body.lastElementChild !== rootNode && rootNode.parentNode === body && !busy() && Date.now() > pausedUntil) {
+        const now = Date.now();
+        moves = moves.filter((at) => now - at < 10_000);
+        moves.push(now);
+        if (moves.length > 20) pausedUntil = now + 60_000;
+        else body.appendChild(rootNode);
+      }
     }
     // The body may be a new element now, so watch that one
     watch();

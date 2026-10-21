@@ -63,8 +63,32 @@ export const searchNotes = (state: Pick<State, "pages" | "tags">, query: SearchQ
     selectedTags.every((tag: Tag) => tagsOfNote([tag], record.note).length > 0);
 
   const matches = text
-    ? fuse.search(text).map((result) => result.item.record)
+    ? matchEveryWord(fuse, text)
     : docs.map((doc) => doc.record).sort((a, b) => Number(b.note.date_created) - Number(a.note.date_created));
 
   return matches.filter(hasTags);
+};
+
+/**
+ * Each word is looked for on its own (with typos allowed), and a note
+ * matches when every word is found somewhere in it: its title, text, tags or
+ * page. Searched as one phrase, "sourdugh starter" found nothing when
+ * "starter" was in the note and "sourdough" in its page's title.
+ * Best matches first (lowest total Fuse score).
+ */
+const matchEveryWord = (fuse: Fuse<SearchDoc>, text: string): NoteRecord[] => {
+  const words = text.toLowerCase().split(/\s+/).filter((word) => word.length >= 2);
+  if (words.length <= 1) return fuse.search(text).map((result) => result.item.record);
+
+  // Total score per note, kept only for notes every word so far was found in
+  let scores = new Map<NoteRecord, number>();
+  words.forEach((word, i) => {
+    const next = new Map<NoteRecord, number>();
+    for (const result of fuse.search(word)) {
+      const record = result.item.record;
+      if (i === 0 || scores.has(record)) next.set(record, (scores.get(record) ?? 0) + (result.score ?? 0));
+    }
+    scores = next;
+  });
+  return [...scores].sort((a, b) => a[1] - b[1]).map(([record]) => record);
 };

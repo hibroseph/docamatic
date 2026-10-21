@@ -79,7 +79,7 @@ kbd {
 .dm-input.sort__select { width: auto; min-height: 32px; padding-right: var(--space-2); font-size: 13px; cursor: pointer; }
 .back { margin-left: calc(var(--space-2) * -1); }
 
-.note-list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.note-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .show-more { width: 100%; margin-top: var(--space-3); }
 .page-group + .page-group { margin-top: var(--space-6); }
 .dm-row.page-row { margin: 0 calc(var(--space-3) * -1) var(--space-3); border-radius: var(--radius-md); border-bottom: 0; }

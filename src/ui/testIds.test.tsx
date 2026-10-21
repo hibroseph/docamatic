@@ -76,3 +76,13 @@ test("The popup keeps one navigation id per section", () => {
   }
   expect(html).toContain(`data-testid="${TEST_IDS.searchInput}"`);
 });
+
+import { isEmpty } from "./NoteParts";
+
+test("Only a note without text shows the placeholder (one with a line break isn't empty)", () => {
+  expect(isEmpty("")).toBe(true);
+  expect(isEmpty("<br>")).toBe(true);
+  expect(isEmpty("<div><br></div>")).toBe(true);
+  expect(isEmpty("9 pm the night before.<br>Ready when it has doubled.")).toBe(false);
+  expect(isEmpty('<img src="x.png">')).toBe(false);
+});

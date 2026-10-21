@@ -98,6 +98,11 @@ and the extension is built with WXT so it can ship to Firefox too.
   website demos it in an example inbox.
 - Firefox build (`npm run build:firefox`, `dist/app-firefox.zip`), untested.
 - Typecheck (`npm run typecheck`) in CI.
+- New Chrome Web Store images (`images/store/`): small and marquee promo
+  tiles and five screenshots, from real captures of the extension, with the
+  scripts to make them again.
+- `docs/feedback-review.md`: every theme from 877 uninstall survey
+  responses, and where it stands.
 - Tests for the model (colors, search, sorting, placement, dates), the new
   reducer cases, and that a pre-5.1 note renders at its saved position and
   width in its own color.
@@ -162,6 +167,14 @@ and the extension is built with WXT so it can ship to Firefox too.
   the address, tracking, `/gp/product/`). Notes saved by 5.0.0 under the full
   address are still found (`noteUrlsFor` includes the 5.0.0 rule).
 - Spell check in notes only while typing in them.
+- Fuzzy search with several words: each word is matched on its own (typos
+  allowed) and a note matches when every word is found somewhere in it or
+  its page ("sourdugh starter" found nothing before).
+- A note whose text has one line break showed the "Write something…"
+  placeholder over its text and lost the line break (the CSS emptiness check
+  couldn't see text); emptiness now comes from the text itself.
+- Note cards in "All notes" were widened past the popup by long page titles
+  (the ⋯ button was cut off); long text is now cut off with an ellipsis.
 - Tags are matched ignoring case and surrounding spaces. A note shows no tag
   field until it has tags: "Add tag" in its menu opens one
   (`note-add-tag` is now that menu item).

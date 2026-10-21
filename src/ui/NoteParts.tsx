@@ -19,6 +19,7 @@ import {
   type ResolvedNoteColor,
 } from "../model/colors";
 import type { Note, NoteRecord, State, Tag } from "../model/types";
+import { plainText } from "../model/notes";
 import type { NoteActions } from "./useNoteActions";
 import {
   BringHereIcon,
@@ -146,6 +147,9 @@ export const TitleField = ({
 // could change the markup and make the editor reset the caret.
 const sanitize = (html: string) => (html ? DOMPurify.sanitize(html) : "");
 
+// No text and nothing else (images, lists): the placeholder shows
+export const isEmpty = (html: string) => !plainText(html) && !/<(img|li|hr|input)[\s>/]/i.test(html || "");
+
 export const BodyField = ({
   note,
   actions,
@@ -177,7 +181,7 @@ export const BodyField = ({
     <ContentEditable
       innerRef={ref as React.RefObject<HTMLElement>}
       html={body.text}
-      className={`note-body ${className}`}
+      className={`note-body ${className} ${isEmpty(body.text) ? "is-empty" : ""}`}
       data-testid={TEST_IDS.noteBody}
       data-placeholder={placeholder}
       aria-label="Note text"

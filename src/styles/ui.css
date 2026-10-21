@@ -10,6 +10,9 @@
 .dm-note.note {
   width: 100%;
   min-width: 0;
+  /* One column that can shrink: long unbroken text (a page title in a list,
+     a long link) is cut off with an ellipsis instead of widening the note */
+  grid-template-columns: minmax(0, 1fr);
   text-align: left;
   letter-spacing: normal;
   word-wrap: break-word;
@@ -51,15 +54,15 @@
   cursor: text;
 }
 /* An empty note keeps room to click into */
-.note-body:empty,
-.note-body:has(> br:only-child) { min-height: 40px; }
-.note-body:empty::before,
-.note-body:has(> br:only-child)::before {
+/* is-empty is set from the text (BodyField): a CSS check like
+   :has(> br:only-child) can't see text, so it also matched notes with one
+   line break, showing the placeholder over their text */
+.note-body.is-empty { min-height: 40px; }
+.note-body.is-empty::before {
   content: attr(data-placeholder);
   color: var(--note-ink-muted);
   pointer-events: none;
 }
-.note-body:has(> br:only-child) > br { display: none; }
 .note-body a { color: var(--note-ink); text-decoration: underline; }
 .note-body img { max-width: 100%; }
 .note-body ul, .note-body ol { margin: 4px 0; padding-left: 20px; }

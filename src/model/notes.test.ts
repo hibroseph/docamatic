@@ -82,6 +82,10 @@ test("Fuzzy search finds typos, tags and pages, and filters by tag", () => {
   expect(ids("wikipedia")).toContain("a");
   expect(ids("", ["t1"])).toEqual(["a", "b"]);
   expect(ids("chunking", ["t2"])).toEqual([]);
+  // Several words, each anywhere in the note or its page, typos allowed
+  expect(ids("review wikipdia")).toEqual(["a"]);
+  expect(ids("pasta salt")).toEqual(["c"]);
+  expect(ids("pasta wikipedia")).toEqual([]);
 });
 
 test("New notes go near the top right of what's on screen, stepping down past others", () => {

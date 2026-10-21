@@ -33,7 +33,11 @@ export default defineConfig({
       action: { default_title: "Docamatic" },
       commands: {
         "create-note": {
-          suggested_key: { default: "Alt+Shift+N" },
+          // Not Alt+Shift+N (5.1 before release): Chrome uses it for split
+          // view and won't give it to extensions. A suggested key that the
+          // browser or another extension already uses is simply left unset,
+          // so check new choices with chrome.commands.getAll() after installing.
+          suggested_key: { default: "Alt+Shift+D" },
           description: "Add a note to this page",
         },
       },

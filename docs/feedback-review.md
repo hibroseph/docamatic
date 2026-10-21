@@ -11,7 +11,7 @@ blank.
 |---|---|---|
 | "Note didn't show up on webpage" | 210 | **Fixed.** The January 2020 version hid new notes on pages by default, and notes couldn't be added to tabs opened before installing. Since 5.0 the extension injects into open tabs; since 5.1 a new note appears on the page, beside what you're reading, with the cursor in it. |
 | "Didn't work as expected" / "Create note does nothing" / "can't add a note to this page", even on google.com | ~170 | **Fixed** (5.0 rewrite: content script added to tabs open since before install, Manifest V3). Pages no extension can touch (browser pages, extension stores) say so clearly. |
-| "I didn't know how to work the extension" | 95 | **Much better.** Welcome page with a practice note on install; one obvious "New note on this page" button; keyboard shortcut (Alt+Shift+N); right-click "Add a note here"; empty states that say what to do. 5.1's welcome page points an arrow at the toolbar and lets you practice the right-click menu. |
+| "I didn't know how to work the extension" | 95 | **Much better.** Welcome page with a practice note on install; one obvious "New note on this page" button; keyboard shortcut (Alt+Shift+D); right-click "Add a note here"; empty states that say what to do. 5.1's welcome page points an arrow at the toolbar and lets you practice the right-click menu. |
 | "Was buggy" | 41 | Mostly the problems in this table. |
 | Popup window was white/blank | 20 | **Fixed in 5.1.** The popup always shows something: "Opening your notes…", then Try again / Restart Docamatic if the background doesn't answer, and a message instead of a blank page if something breaks. |
 | Couldn't move, resize or remove a note; note too bulky | 39 | **Fixed in 5.1.** New drag (keeps up with fast moves, works over iframes, arrow keys), right edge sets width, bottom right corner sets height (long notes scroll), collapse to the title bar, smaller design, delete with Undo. |
@@ -26,7 +26,7 @@ blank.
 | Keep a note on screen while scrolling | **Fixed in 5.1** ("Keep on screen"). |
 | Notes in web apps that scroll a panel (Gmail, Facebook) | **5.1, preview setting** ("Move notes with scrolling panels"). |
 | Right-click menu to add a note | **Fixed in 5.1.** |
-| Hotkey to add a note | **Fixed in 5.1** (Alt+Shift+N, changeable). |
+| Hotkey to add a note | **Fixed in 5.1** (Alt+Shift+D, changeable). |
 | Collapse a note to a small icon / out of the way | **5.1:** collapse to the title bar. A floating icon is not done. |
 | Font size | **Fixed in 5.1** (Settings, text size). |
 | Red spell-check underlines everywhere | **Fixed in 5.1** (only while typing). |

@@ -26,11 +26,22 @@ chrome.commands
   ?.getAll()
   .then((commands) => {
     const shortcut = commands.find((command) => command.name === CREATE_NOTE_COMMAND)?.shortcut;
-    if (!shortcut) return;
+    if (!shortcut) {
+      // The browser left it unset (another extension or the browser itself
+      // uses it, or it was removed): offer to set one
+      document.getElementById("shortcut-missing")!.hidden = false;
+      return;
+    }
     document.getElementById("shortcut-hint")!.textContent = ` (or press ${shortcut} on any website)`;
     document.querySelectorAll(".shortcut-hint").forEach((hint) => (hint.textContent = `, or press ${shortcut}`));
   })
   .catch(() => {});
+
+// Firefox has no shortcuts page of its own; it's in the add-ons manager
+const isFirefox = /firefox/i.test(navigator.userAgent);
+document.getElementById("set-shortcut")!.addEventListener("click", () =>
+  chrome.tabs.create({ url: isFirefox ? "about:addons" : "chrome://extensions/shortcuts" })
+);
 
 // Practice notes: the real notes, kept only in this tab
 const demo = startDemo();

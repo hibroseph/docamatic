@@ -34,7 +34,10 @@ and the extension is built with WXT so it can ship to Firefox too.
 - Side panel (preview; Chrome 116+, Firefox sidebar): notes for the page
   you're on, following tab switches. Notes added there stay in the panel
   (saved with `visible: false`) until put on the page from their menu.
-- Keyboard shortcut for a new note: Alt+Shift+N (changeable in the browser).
+- Keyboard shortcut for a new note: Alt+Shift+D (changeable in the browser).
+  Not Alt+Shift+N, the first choice: Chrome now uses it for split view and
+  leaves it unassigned for extensions. When no shortcut is set, Settings and
+  the welcome page link to the browser's shortcuts page.
 - Infinite scroll and notes out of reach: the popup and side panel ask the
   open page where each of its notes is (`page/noteRegistry.ts`,
   `note_places` message) and show "Further down the page", "Higher up the

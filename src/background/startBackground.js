@@ -483,7 +483,7 @@ export function startBackground() {
       .catch((err) => captureException(err, { during: "creating a note from the right-click menu" }));
   });
 
-  // The "Add a note to this page" shortcut (Alt+Shift+N by default)
+  // The "Add a note to this page" shortcut (Alt+Shift+D by default)
   chrome.commands?.onCommand.addListener((command, tab) => {
     if (command !== CREATE_NOTE_COMMAND) return;
     storeReady

@@ -87,3 +87,5 @@
   .toolbar-tip { position: static; width: auto; max-width: 720px; margin: 0 auto; padding: 0 var(--space-4); justify-items: end; }
   .toolbar-tip__card { transform: none; }
 }
+.step .step__extra { margin-top: var(--space-2); }
+.link-button { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }

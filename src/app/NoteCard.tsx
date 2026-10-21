@@ -10,6 +10,7 @@ import { pageLabel, tagsOfNote, domainOf } from "../model/notes";
 import { friendlyDate } from "../model/dates";
 import type { NoteRecord, State, Tag } from "../model/types";
 import { useNoteActions } from "../ui/useNoteActions";
+import { findOnPage } from "./hooks";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { EyeOffIcon, HeartIcon, MoreIcon } from "../ui/icons";
 
@@ -98,7 +99,7 @@ export const NoteCard = ({
           </span>
         )}
       </div>
-      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} />
+      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} onFind={() => findOnPage(record)} />
     </article>
   );
 };

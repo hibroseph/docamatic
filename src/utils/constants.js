@@ -22,6 +22,10 @@ export const CHROME_MESSAGES = {
   // background does it so the popup, side panel and keyboard shortcut share
   // one path)
   CREATE_NOTE: "create_note",
+  // Popup / side panel -> background: go to a note on its page ("Find on page")
+  FIND_NOTE: "find_note",
+  // Background -> page: scroll to this note and point it out
+  REVEAL_NOTE: "reveal_note",
 };
 
 // Keyboard shortcut command (wxt.config.ts)

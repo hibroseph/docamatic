@@ -36,6 +36,11 @@
 .note--page:hover + .note__resize::after,
 .note__resize:hover::after { opacity: .5; }
 
+/* "Find on page": outlined for a moment so it's easy to spot */
+.dm-note.note.is-found {
+  box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 0 0 3px var(--focus), var(--note-lift-hover);
+}
+
 .note__sync-error {
   display: grid;
   justify-items: start;

@@ -35,6 +35,12 @@ and the extension is built with WXT so it can ship to Firefox too.
   you're on, following tab switches. Notes added there stay in the panel
   (saved with `visible: false`) until put on the page from their menu.
 - Keyboard shortcut for a new note: Alt+Shift+N (changeable in the browser).
+- "Find on page" in a note's menu in the popup and side panel
+  (`background/findNote.js`, `page/reveal.ts`): switches to a tab with the
+  note's page (or opens it), scrolls to the note, brings it to the front and
+  outlines it for a moment. A note in a panel that's no longer on the page
+  is moved back onto the page; a side-panel-only note is put on the page.
+  New test id `note-find`; analytics event `note_found_on_page`.
 - Undo after deleting a note, on pages and in lists; undo after hiding one
   from a page.
 - New notes are placed near the top right of what's on screen (beside the
@@ -47,9 +53,13 @@ and the extension is built with WXT so it can ship to Firefox too.
   they're on (`page/anchor.ts`). A note dropped (or added) over a scrolling
   panel, like a web app's message list, scrolls with that panel, and is
   hidden whole once its corner scrolls out of the panel; over a fixed part
-  of the page (header, sidebar) it stays put on screen. A note only anchors
-  to a panel it fits across, so one dropped half over a panel stays fully
-  visible. Notes in a panel are drawn the way the panel moves (fixed if the
+  of the page (header, sidebar) it stays put on screen, and on a sticky part
+  (a sidebar that sticks while the page scrolls, like Facebook
+  Marketplace's) it moves with that part. A note only anchors to a panel it
+  fits across, so one dropped half over a panel stays fully visible. Panels
+  are found again by a stable attribute where there is one (`aria-label`,
+  `role`, `data-testid`, `data-pagelet`), and one that's a very different
+  width from when the note was dropped isn't trusted (`anchor.w`). Notes in a panel are drawn the way the panel moves (fixed if the
   panel is inside something fixed, on the page otherwise), so page scrolling
   needs no correction, and they're redrawn from the panel's own scroll
   events in the same frame. With the setting off, saved anchors are kept
@@ -99,6 +109,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   in the color menu. Also optional: `page.title`, `note.updated_at`,
   `metadata.preferences`. Positions and sizes of existing notes are untouched
   and render at the same place.
+- Dragging a note captures the pointer, so the note keeps up with fast
+  moves, including over iframes and parts of sites that swallow mouse
+  events.
 - Tags are matched ignoring case and surrounding spaces. A note shows no tag
   field until it has tags: "Add tag" in its menu opens one
   (`note-add-tag` is now that menu item).

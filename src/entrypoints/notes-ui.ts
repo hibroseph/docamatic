@@ -8,6 +8,7 @@ import { CHROME_MESSAGES } from "../utils/constants";
 import { notifyUrlChange } from "../utils/urlChanges";
 import { mountNotes } from "../page/mountNotes";
 import { loadPageFonts } from "../page/pageFonts";
+import { revealNote } from "../page/reveal";
 
 declare global {
   interface Window {
@@ -48,8 +49,10 @@ function start() {
   document.addEventListener("resume", () => store.resync());
 
   // The background tells us when a single page app changes the url
-  chrome.runtime.onMessage.addListener((message) => {
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.action === CHROME_MESSAGES.URL_CHANGED) notifyUrlChange();
+    // "Find on page"; answers whether the note is on this page
+    if (message?.action === CHROME_MESSAGES.REVEAL_NOTE) sendResponse({ found: revealNote(String(message.noteId)) });
   });
 
   loadPageFonts();

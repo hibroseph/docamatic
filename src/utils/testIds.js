@@ -31,6 +31,8 @@ export const TEST_IDS = {
   noteVisibility: "note-visibility",
   noteDragHandle: "note-drag-handle",
   noteOpenPage: "note-open-page",
+  // "Find on page" in a note's menu in the popup and side panel
+  noteFind: "note-find",
   // One per color choice. Also has data-color="<hex>".
   noteColor: "note-color",
   // An existing tag on a note. Also has data-tag-text="<text>".

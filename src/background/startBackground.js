@@ -7,6 +7,7 @@ import { GetInitialState } from "../utils/GetInitialState";
 import { authorizeSender } from "../redux/authorizeSender";
 import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../redux/actions";
 import { createNoteInTab } from "./createNote";
+import { findNote } from "./findNote";
 import { noteUrlsFor } from "../utils/noteUrl";
 import { CHROME_MESSAGES, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
@@ -434,6 +435,20 @@ export function startBackground() {
       .then(sendResponse, (err) => {
         captureException(err, { during: "creating a note" });
         sendResponse({ ok: false, reason: "error" });
+      });
+    return true; // responding asynchronously
+  });
+
+  // "Find on page" from the popup or side panel
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.FIND_NOTE) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+
+    storeReady
+      .then((store) => findNote(store, message.pageUrl, message.noteId))
+      .then(sendResponse, (err) => {
+        captureException(err, { during: "finding a note" });
+        sendResponse({ ok: false });
       });
     return true; // responding asynchronously
   });

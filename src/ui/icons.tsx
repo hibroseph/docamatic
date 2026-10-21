@@ -139,6 +139,14 @@ export const PencilIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const TargetIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="8" cy="8" r="5.2" />
+    <circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none" />
+    <path d="M8 1.2v2M8 12.8v2M1.2 8h2M12.8 8h2" />
+  </Svg>
+);
+
 export const PageIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 2h5.5L12.5 5v9h-8.5V2Z" />

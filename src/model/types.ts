@@ -25,8 +25,11 @@ export interface NoteColor {
  * Absent: the page, as every older note. `position` is kept either way.
  */
 export type NoteAnchor =
-  /** Inside a scrolling panel; x/y within the panel's scrolled content */
-  | { kind: "element"; selector: string; x: number; y: number }
+  /**
+   * Inside a scrolling panel or on a sticky part of the page; x/y within its
+   * (scrolled) content; w its width then, to check it's the same element later
+   */
+  | { kind: "element"; selector: string; x: number; y: number; w?: number }
   /** Over something fixed; x/y on screen */
   | { kind: "viewport"; x: number; y: number };
 

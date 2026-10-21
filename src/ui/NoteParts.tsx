@@ -20,7 +20,7 @@ import {
 } from "../model/colors";
 import type { Note, NoteRecord, State, Tag } from "../model/types";
 import type { NoteActions } from "./useNoteActions";
-import { CloseIcon, ExternalIcon, EyeIcon, EyeOffIcon, TagIcon, TrashIcon } from "./icons";
+import { CloseIcon, ExternalIcon, EyeIcon, EyeOffIcon, TagIcon, TargetIcon, TrashIcon } from "./icons";
 
 // --- Color --------------------------------------------------------------------
 
@@ -349,8 +349,17 @@ export const useDismiss = (open: boolean, close: () => void, ...refs: React.RefO
  */
 export const NoteMenu = React.forwardRef<
   HTMLDivElement,
-  { open: boolean; record: NoteRecord; actions: NoteActions; inList?: boolean; onDone: () => void; onAddTag: () => void }
->(({ open, record, actions, inList = false, onDone, onAddTag }, ref) => {
+  {
+    open: boolean;
+    record: NoteRecord;
+    actions: NoteActions;
+    inList?: boolean;
+    onDone: () => void;
+    onAddTag: () => void;
+    /** In lists: go to the note on its page */
+    onFind?: () => void;
+  }
+>(({ open, record, actions, inList = false, onDone, onAddTag, onFind }, ref) => {
   const { note, pageUrl } = record;
   const visible = note.visible !== false;
   const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
@@ -390,6 +399,21 @@ export const NoteMenu = React.forwardRef<
         {visible ? <EyeOffIcon /> : <EyeIcon />}
         {visible ? "Hide from page" : "Show on page"}
       </button>
+      {inList && visible && onFind && (
+        <button
+          type="button"
+          role="menuitem"
+          className="menu__item"
+          data-testid={TEST_IDS.noteFind}
+          onClick={() => {
+            onDone();
+            onFind();
+          }}
+        >
+          <TargetIcon />
+          Find on page
+        </button>
+      )}
       {inList && href && (
         <a role="menuitem" className="menu__item" href={href} data-testid={TEST_IDS.noteOpenPage} {...EXTERNAL_LINK_PROPS}>
           <ExternalIcon />

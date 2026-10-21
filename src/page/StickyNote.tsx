@@ -17,7 +17,8 @@ import { PENDING_TIMEOUT_MS } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { resolveNoteColor } from "../model/colors";
 import type { Note, NoteAnchor, NoteRecord, State, Tag } from "../model/types";
-import { anchorAt, findAnchorElement, placementFor } from "./anchor";
+import { anchorAt, findAnchorElement, panelMode, placementFor } from "./anchor";
+import { onReveal } from "./reveal";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { GripIcon, HeartIcon, MoreIcon } from "../ui/icons";
@@ -42,44 +43,47 @@ export const useFollowPanels = () => useSelector((state: State) => state.metadat
  * draws it the way its panel moves). Other notes never change here.
  */
 const usePlacement = (note: Note, anchor: NoteAnchor | undefined) => {
-  const [panel, setPanel] = useState<Element | null>(() =>
-    anchor?.kind === "element" ? findAnchorElement(anchor.selector) : null
-  );
-  const [, setTick] = useState(0);
   const selector = anchor?.kind === "element" ? anchor.selector : "";
+  const width = anchor?.kind === "element" ? anchor.w : undefined;
+  const [panel, setPanel] = useState<Element | null>(() => (selector ? findAnchorElement(selector, width) : null));
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     if (!selector) return;
-    let current = findAnchorElement(selector);
-    setPanel(current);
     const redraw = () => flushSync(() => setTick((n) => n + 1));
-    current?.addEventListener("scroll", redraw, { passive: true });
+    let current: Element | null = null;
+    // A sticky panel moves differently from the page while it scrolls, so
+    // page scrolling needs a redraw too; fixed and in-page panels don't
+    const attach = (el: Element | null) => {
+      current?.removeEventListener("scroll", redraw);
+      window.removeEventListener("scroll", redraw);
+      current = el;
+      current?.addEventListener("scroll", redraw, { passive: true });
+      if (current && panelMode(current) === "sticky") window.addEventListener("scroll", redraw, { passive: true });
+      setPanel(current);
+    };
+    attach(findAnchorElement(selector, width));
     window.addEventListener("resize", redraw);
     // Single page apps render panels late, or replace them; look again now
     // and then, and redraw only when something actually changed
     let last = placementFor(note.position, anchor, current);
     const check = setInterval(() => {
-      const found = findAnchorElement(selector);
-      if (found !== current) {
-        current?.removeEventListener("scroll", redraw);
-        current = found;
-        current?.addEventListener("scroll", redraw, { passive: true });
-        setPanel(current);
-      }
+      const found = findAnchorElement(selector, width);
+      if (found !== current) attach(found);
       const now = placementFor(note.position, anchor, current);
-      if (Math.abs(now.x - last.x) > 0.5 || Math.abs(now.y - last.y) > 0.5 || now.away !== last.away) {
+      if (now.fixed !== last.fixed || Math.abs(now.x - last.x) > 0.5 || Math.abs(now.y - last.y) > 0.5 || now.away !== last.away) {
         last = now;
         setTick((n) => n + 1);
       }
     }, 500);
     return () => {
-      current?.removeEventListener("scroll", redraw);
+      attach(null);
       window.removeEventListener("resize", redraw);
       clearInterval(check);
     };
-  }, [selector]);
+  }, [selector, width]);
 
-  return placementFor(note.position, anchor, anchor?.kind === "element" ? panel : undefined);
+  return { placement: placementFor(note.position, anchor, selector ? panel : undefined), panel };
 };
 
 interface Props {
@@ -125,7 +129,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
 
   const followPanels = useFollowPanels();
   const anchor = followPanels ? note.anchor : undefined;
-  const anchored = usePlacement(note, anchor);
+  const { placement: anchored, panel } = usePlacement(note, anchor);
   // Just dropped: where it was dropped, on the page, until the store has it
   const placement = dropped ? { fixed: false, x: dropped.x, y: dropped.y, away: false } : anchored;
   const position = placement;
@@ -154,6 +158,35 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     });
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  // "Find on page" from the popup or side panel (page/reveal.ts)
+  const [found, setFound] = useState(false);
+  useEffect(
+    () =>
+      onReveal(note.id, () => {
+        onBringToFront();
+        const behavior: ScrollBehavior = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+        if (anchor?.kind === "element" && !panel) {
+          // Its panel isn't on the page any more: back onto the page, where it was dropped
+          actions.move(note.position.x, note.position.y, null);
+        }
+        if (anchor?.kind === "element" && panel) {
+          // Scroll the panel to the note, then the page to the panel
+          panel.scrollTo({ top: Math.max(0, anchor.y - 40), left: Math.max(0, anchor.x - 40), behavior });
+          panel.scrollIntoView({ block: "nearest", behavior });
+        } else if (anchor?.kind === "viewport") {
+          // Always on screen, unless the window got smaller since: bring it back in
+          const x = Math.min(Math.max(0, anchor.x), Math.max(0, window.innerWidth - width - SCROLLBAR_WIDTH));
+          const y = Math.min(Math.max(0, anchor.y), Math.max(0, window.innerHeight - 80));
+          if (x !== anchor.x || y !== anchor.y) actions.move(x + window.scrollX, y + window.scrollY, { kind: "viewport", x, y });
+        } else {
+          window.scrollTo({ top: Math.max(0, note.position.y - 120), behavior });
+        }
+        setFound(true);
+        setTimeout(() => setFound(false), 2400);
+      }),
+    [note.id, anchor, panel, note.position.x, note.position.y, width]
+  );
 
   const color = noteColorProps(resolveNoteColor(note.color));
 
@@ -205,7 +238,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
     >
       <article
         ref={articleRef}
-        className={`dm-note note note--page ${color.className} ${dragging ? "is-dragging" : ""} ${menuOpen ? "has-menu" : ""}`}
+        className={`dm-note note note--page ${color.className} ${dragging ? "is-dragging" : ""} ${menuOpen ? "has-menu" : ""} ${found ? "is-found" : ""}`}
         style={color.style}
         data-testid={TEST_IDS.note}
         data-note-id={note.id}
@@ -216,7 +249,17 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
         onKeyPress={stop}
         onBeforeInput={stop}
       >
-        <div className="dm-note__head note__head note__drag">
+        <div
+          className="dm-note__head note__head note__drag"
+          onPointerDown={(event) => {
+            // Keep every pointer move coming to the note while dragging, even
+            // when a fast move puts the pointer over an iframe or a part of
+            // the site that swallows the events (react-draggable follows the
+            // mouse events, which follow the captured pointer)
+            if ((event.target as HTMLElement).closest("input, button, a, [contenteditable]")) return;
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+          }}
+        >
           <span className="dm-note__grip" data-testid={TEST_IDS.noteDragHandle} title="Drag to move">
             <GripIcon />
           </span>

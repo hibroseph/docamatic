@@ -86,6 +86,15 @@ export const useNewNoteShortcut = () => {
   return shortcut;
 };
 
+/**
+ * Goes to a note on its page ("Find on page"). The popup closes so the page
+ * can be seen; the side panel stays open beside it.
+ */
+export const findOnPage = ({ note, pageUrl }: { note: { id: string }; pageUrl: string }) => {
+  chrome.runtime.sendMessage({ type: CHROME_MESSAGES.FIND_NOTE, noteId: note.id, pageUrl }).catch(() => {});
+  if (document.body.classList.contains("surface-popup")) window.close();
+};
+
 // --- Side panel ------------------------------------------------------------------
 
 declare const browser: { sidebarAction?: { open: () => Promise<void> } } | undefined;

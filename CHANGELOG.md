@@ -6,13 +6,15 @@ All notable changes to Docamatic, for developers. Add every change under
 1. Rename **Unreleased** to the new version and date, and start a new empty
    **Unreleased** section above it.
 2. Copy the user-facing changes, reworded for users, into the website's change
-   log (`src/apps/homepage/changelog.html`).
+   log (`site/changelog.html`).
 3. If the saved data format changed, check that a migration and a fixture of
    the previous release's data were added (see `src/redux/migrations.js`).
 
 The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
+
+## 5.1.0 (not released yet; set the date when it's published)
 
 The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.

@@ -33,6 +33,11 @@ kbd {
 .new-note { flex: 1; }
 .new-note__kbd { margin-left: auto; }
 .error { margin: var(--space-2) var(--space-4) 0; color: var(--danger); font-size: 13px; line-height: 18px; }
+/* A new note couldn't go on the page: why, and what to try */
+.create-failure { margin: var(--space-2) var(--space-4) 0; }
+.create-failure .error { margin: 0; }
+.create-failure__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.create-failure__hint { margin: var(--space-2) 0 0; color: var(--ink-muted); font-size: 12px; line-height: 16px; }
 
 /* ---------- Search ---------- */
 .search-area { padding: var(--space-3) var(--space-4) 0; }

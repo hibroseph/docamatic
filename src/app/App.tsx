@@ -15,8 +15,11 @@ import { TagPill } from "../ui/NoteParts";
 import { BoardIcon, CloseIcon, GearIcon, PanelIcon, PlusIcon, SearchIcon } from "../ui/icons";
 import { UndoProvider } from "../ui/undo";
 import {
+  canKeepInstead,
+  canRetryAfterReload,
   createFailureMessage,
   createNote,
+  reloadTab,
   openSidePanel,
   sidePanelSupported,
   useActiveTab,
@@ -54,7 +57,8 @@ export const App = ({ surface }: { surface: Surface }) => {
   const [openTag, setOpenTag] = useState<Tag | null>(null);
   const [query, setQuery] = useState<SearchQuery>({ text: "", tagIds: [] });
   const [searchFocused, setSearchFocused] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Why the last new note couldn't go on the page, and where it was meant to go
+  const [failure, setFailure] = useState<{ reason: string; placement: "page" | "panel" } | null>(null);
   const [focusNoteId, setFocusNoteId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -83,22 +87,47 @@ export const App = ({ surface }: { surface: Surface }) => {
   }, []);
 
   const newNote = async (placement: "page" | "panel") => {
-    setError(null);
+    setFailure(null);
     setBusy(true);
     const result = await createNote(activeTab, placement, surface);
     setBusy(false);
     if (!result.ok) {
-      setError(createFailureMessage(result.reason));
-      return;
+      setFailure({ reason: result.reason, placement });
+      return false;
     }
-    if (surface === "popup") {
+    showNewNote(result.noteId, placement);
+    return true;
+  };
+
+  // When a note can't go on the page, people can still get somewhere: reload
+  // the page and try again (fixes a page whose connection to Docamatic
+  // broke), or keep the note in Docamatic, saved with the page, and write it
+  // right here. `note_create_recovery` says which, and whether it worked.
+  const retryAfterReload = async () => {
+    if (!failure || !activeTab?.id) return;
+    const { reason, placement } = failure;
+    setBusy(true);
+    await reloadTab(activeTab.id);
+    const ok = await newNote(placement);
+    dispatch(trackEvent("note_create_recovery", { action: "reload", reason, ok, surface }));
+  };
+
+  const keepInstead = async () => {
+    if (!failure) return;
+    const { reason } = failure;
+    const ok = await newNote("panel");
+    dispatch(trackEvent("note_create_recovery", { action: "keep_in_docamatic", reason, ok, surface }));
+  };
+
+  const showNewNote = (noteId: string, placement: "page" | "panel") => {
+    if (surface === "popup" && placement === "page") {
       // The note is on the page with the cursor in it; get out of the way
       window.close();
     } else {
       setQuery({ text: "", tagIds: [] });
       setSettingsOpen(false);
       setTab("current");
-      setFocusNoteId(result.noteId);
+      setFocusNoteId(noteId);
     }
   };
 
@@ -205,10 +234,27 @@ export const App = ({ surface }: { surface: Surface }) => {
                 </button>
               )}
             </div>
-            {error && (
-              <p className="error" role="alert">
-                {error}
-              </p>
+            {failure && (
+              <div className="create-failure" role="alert" data-testid={TEST_IDS.popupCreateFailure}>
+                <p className="error">{createFailureMessage(failure.reason)}</p>
+                {(canRetryAfterReload(failure.reason) || canKeepInstead(failure.reason, activeTab)) && (
+                  <div className="create-failure__actions">
+                    {canRetryAfterReload(failure.reason) && (
+                      <button type="button" className="dm-btn dm-btn--sm" disabled={busy} data-testid={TEST_IDS.popupRetryAfterReload} onClick={retryAfterReload}>
+                        Reload the page and try again
+                      </button>
+                    )}
+                    {canKeepInstead(failure.reason, activeTab) && failure.placement === "page" && (
+                      <button type="button" className="dm-btn dm-btn--sm" disabled={busy} data-testid={TEST_IDS.popupKeepNoteInstead} onClick={keepInstead}>
+                        Keep a note here instead
+                      </button>
+                    )}
+                  </div>
+                )}
+                {canKeepInstead(failure.reason, activeTab) && failure.placement === "page" && (
+                  <p className="create-failure__hint">A note kept here is saved with this page: it's under <strong>This page</strong> whenever you're on it.</p>
+                )}
+              </div>
             )}
 
             <div className="search-area">

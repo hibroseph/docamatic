@@ -1,7 +1,7 @@
 // A note in a list (popup and side panel). The same parts as the note on the
 // page (ui/NoteParts.tsx), editable in place, laid out for a list: no drag
 // handle, and where the note is and when it was written underneath.
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { TEST_IDS } from "../utils/testIds";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
@@ -47,6 +47,14 @@ export const NoteCard = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const bodyWrap = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
+
+  // A note just added from here gets the cursor. autoFocus only acts when
+  // the field first appears, and the new note can arrive from the store
+  // before the app knows its id, so focus it when it becomes the one.
+  useEffect(() => {
+    if (autoFocus) cardRef.current?.querySelector<HTMLInputElement>(".note-title")?.focus();
+  }, [autoFocus]);
   const [long, setLong] = useState(false);
   useDismiss(menuOpen, () => setMenuOpen(false), menuRef, moreRef);
 
@@ -62,6 +70,7 @@ export const NoteCard = ({
 
   return (
     <article
+      ref={cardRef}
       className={`dm-note note note--card ${color.className} ${menuOpen ? "has-menu" : ""}`}
       style={color.style}
       data-testid={TEST_IDS.note}

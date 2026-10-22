@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { useStoreSyncedText } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
+import { canHaveNotes } from "../utils/expectedFailures";
 import {
   COLOR_LABELS,
   NOTE_COLOR_NAMES,
@@ -429,19 +430,22 @@ export const NoteMenu = React.forwardRef<
         <TagIcon />
         Add tag
       </button>
-      <button
-        type="button"
-        role="menuitem"
-        className="menu__item"
-        data-testid={TEST_IDS.noteVisibility}
-        onClick={() => {
-          actions.setVisible(!visible, { undoable: !inList });
-          onDone();
-        }}
-      >
-        {visible ? <EyeOffIcon /> : <EyeIcon />}
-        {visible ? "Hide from page" : "Show on page"}
-      </button>
+      {/* Not for notes kept for a page notes can't go on (an extension store) */}
+      {canHaveNotes(pageUrl) && (
+        <button
+          type="button"
+          role="menuitem"
+          className="menu__item"
+          data-testid={TEST_IDS.noteVisibility}
+          onClick={() => {
+            actions.setVisible(!visible, { undoable: !inList });
+            onDone();
+          }}
+        >
+          {visible ? <EyeOffIcon /> : <EyeIcon />}
+          {visible ? "Hide from page" : "Show on page"}
+        </button>
+      )}
       {page && (
         <>
           <button

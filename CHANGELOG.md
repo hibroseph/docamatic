@@ -26,6 +26,17 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- When a new note can't go on the page, the popup and side panel say so and
+  offer what can still work: **Reload the page and try again** (reloads the
+  tab, waits for it, and adds the note; not offered where it can't help:
+  browser pages, extension stores, file access off, safe mode) and **Keep a
+  note here instead** (a note kept in Docamatic, saved with the page, opened
+  in the list with the cursor in it; for any page whose address is known,
+  including extension stores). "This page" lists notes kept for a store
+  page, and their menu has no "Show on page". Analytics:
+  `note_create_recovery` (`action`: reload, keep_in_docamatic; `reason`;
+  `ok`). Test ids `popup-create-failure`, `popup-retry-after-reload`,
+  `popup-keep-note-instead`.
 - Board (preview): `board.html`, opened from a new button in the popup's top
   bar (test id `popup-open-board`). "Board" shows every note on a canvas,
   grouped by its set of tags; groups of notes with several tags sit right
@@ -245,6 +256,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   new tab, so the site stays open. Privacy policy updated.
 
 ### Fixed
+- A note just added from the side panel (or kept in Docamatic) always gets
+  the cursor: the card focuses its title when it becomes the new note, not
+  only if it wasn't on screen yet.
 - The toolbar icon was still the 2020 logo (a darker blue D on a tan
   square), unlike the current logo on the website and in
   `images/docamatic-logo.png` (a yellow sticky note with a bright blue D).

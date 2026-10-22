@@ -74,7 +74,30 @@ export const createFailureMessage = (reason: string) =>
     ? "Notes can't go on this page. Browser pages and extension stores don't allow it."
     : reason === "safe_mode"
       ? "Docamatic is in safe mode, so it isn't changing notes right now."
-      : "Couldn't add a note here. Try reloading the page, then add it again.";
+      : "Couldn't put a note on this page.";
+
+// What can be tried when a note couldn't go on the page. Reloading fixes a
+// page whose connection to Docamatic broke (an update, a page that replaced
+// itself); it can't help pages the browser doesn't allow or safe mode.
+// Keeping the note in Docamatic works for any page whose address is known.
+export const canRetryAfterReload = (reason: string) => !["page_not_supported", "file_access_off", "safe_mode"].includes(reason);
+export const canKeepInstead = (reason: string, tab: Tab | null | undefined) => reason !== "safe_mode" && Boolean(tab?.url);
+
+/** Reloads a tab and resolves once it has loaded again (or after `ms`) */
+export const reloadTab = (tabId: number, ms = 15000) =>
+  new Promise<void>((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      chrome.tabs.onUpdated.removeListener(onUpdated);
+      resolve();
+    };
+    const onUpdated = (id: number, change: { status?: string }) => {
+      if (id === tabId && change.status === "complete") done();
+    };
+    const timer = setTimeout(done, ms);
+    chrome.tabs.onUpdated.addListener(onUpdated);
+    chrome.tabs.reload(tabId).catch(done);
+  });
 
 /** The keyboard shortcut for a new note, as set in the browser (it can be changed or removed) */
 export const useNewNoteShortcut = () => {

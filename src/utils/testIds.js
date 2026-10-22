@@ -12,6 +12,10 @@ export const TEST_IDS = {
   // Popup navigation, one per section: new, current, search, sort, hearted, settings
   popupNav: (name) => `popup-nav-${name}`,
   popupCreateNote: "popup-create-note",
+  // When a new note couldn't go on the page: the message, and what to try
+  popupCreateFailure: "popup-create-failure",
+  popupRetryAfterReload: "popup-retry-after-reload",
+  popupKeepNoteInstead: "popup-keep-note-instead",
   // Opens the board page (board.html)
   popupOpenBoard: "popup-open-board",
   // On the board page: its search box and the "Edit notes" switch

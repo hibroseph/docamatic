@@ -75,13 +75,21 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
     return { ok: false, reason: stage };
   };
 
+  // A note kept in Docamatic (the side panel's, or "Keep a note here
+  // instead" when a page can't take one) never goes on the page, so it can
+  // be kept for any page whose address is known, even ones extensions can't
+  // touch (the extension stores). Browser pages (chrome://) have no address
+  // here: without the "tabs" permission the browser doesn't share it.
+  const kept = placement === "panel";
+  const scriptable = Boolean(tab?.url) && canHaveNotes(tab.url);
+
   // chrome:// pages, the extension stores, ...: no extension can add to these
-  if (!tab?.id || !canHaveNotes(tab.url)) return fail("page_not_supported", true);
+  if (!tab?.id || !tab.url || (!scriptable && !kept)) return fail("page_not_supported", true);
 
   // Files on the computer need "Allow access to file URLs" turned on for Docamatic
-  if (tab.url.startsWith("file:") && !(await fileAccessAllowed())) return fail("file_access_off", true);
+  if (!kept && tab.url.startsWith("file:") && !(await fileAccessAllowed())) return fail("file_access_off", true);
 
-  const { info, error } = await pageInformationFor(tab);
+  const { info, error } = scriptable ? await pageInformationFor(tab) : {};
   // A side panel note doesn't need the page; it only uses its size, if it can
   if (error && placement !== "panel") return fail(error.stage, error.expected, error.error);
 

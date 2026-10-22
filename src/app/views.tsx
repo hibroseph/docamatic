@@ -44,11 +44,18 @@ export const ThisPageView = ({
 
   if (tab === undefined) return null;
 
-  if (!url || !canHaveNotes(url)) {
+  // Browser pages (no address here) and extension stores can't have notes on
+  // them. Notes kept in Docamatic for a store page ("Keep a note here
+  // instead") are still listed below.
+  if (!url || (!canHaveNotes(url) && records.length === 0)) {
     return (
       <EmptyState
         before="Notes can't go on this page"
-        text="Browser pages and extension stores don't allow it. Open any website to add a note, or look through your notes in the other tabs."
+        text={
+          url
+            ? "Extension stores don't allow it. You can still keep a note about this page in Docamatic: click New note on this page."
+            : "Browser pages don't allow it. Open any website to add a note, or look through your notes in the other tabs."
+        }
       />
     );
   }

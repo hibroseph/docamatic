@@ -16,10 +16,11 @@ export const TEST_IDS = {
   popupCreateFailure: "popup-create-failure",
   popupRetryAfterReload: "popup-retry-after-reload",
   popupKeepNoteInstead: "popup-keep-note-instead",
-  // Feedback: the popup's one-time prompt, the form, and Settings' link
-  feedbackPrompt: "feedback-prompt",
-  feedbackOpen: "feedback-open",
-  feedbackDismiss: "feedback-dismiss",
+  // A survey from PostHog in the popup: the card, its Next/Send and No thanks
+  survey: "survey",
+  surveyNext: "survey-next",
+  surveyDismiss: "survey-dismiss",
+  // Feedback from Settings: the form and the link to it
   feedbackMessage: "feedback-message",
   feedbackEmail: "feedback-email",
   feedbackSend: "feedback-send",

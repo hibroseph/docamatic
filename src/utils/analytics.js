@@ -154,9 +154,20 @@ export const sendFeedback = async (properties) => {
   }
 };
 
+// Told about each event that's sent (surveys can wait for one; see
+// background/surveys.js)
+let eventListener = null;
+export const onEventTracked = (listener) => {
+  eventListener = listener;
+};
+
+/** Whether usage statistics can be sent: set up, and not turned off in Settings */
+export const analyticsAllowed = async () => isConfigured() && (await isEnabled());
+
 export const track = async (event, properties = {}) => {
   try {
     if (!isConfigured() || !(await isEnabled())) return;
+    eventListener?.(event);
     await send(event, properties);
   } catch (err) {
     // Analytics must never break the extension (offline, blocked by an ad
@@ -231,13 +242,17 @@ export const trackDailyActive = async (state) => {
 
   await chrome.storage.local.set({ [STORAGE_KEY]: { ...analytics, lastDailyActive: today() } });
 
-  const pages = Object.values(state.pages || {}).filter((page) => page.notes?.length > 0);
-  const notes = pages.flatMap((page) => page.notes);
+  await track("daily_active", usageCounts(state));
+};
 
-  await track("daily_active", {
+/** How much someone has: counts only, never what's in the notes */
+export const usageCounts = (state) => {
+  const pages = Object.values(state?.pages || {}).filter((page) => page.notes?.length > 0);
+  const notes = pages.flatMap((page) => page.notes);
+  return {
     note_count: notes.length,
     page_count: pages.length,
-    tag_count: state.tags?.length || 0,
+    tag_count: state?.tags?.length || 0,
     favorite_count: notes.filter((note) => note.heart).length,
-  });
+  };
 };

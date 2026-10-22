@@ -26,20 +26,33 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
-- Feedback from people who use Docamatic (not just the uninstall survey).
-  The popup asks once, "What would make it better for you?", people who have
-  3+ notes and opened the popup on 3+ different days: "Tell us" opens a short
-  form (message, optional email), "No thanks" ends it; shown on at most 3
-  days. "Send feedback" in Settings, Help, any time. Sent through the
-  background (`SEND_FEEDBACK`, only from the extension's pages; message
-  trimmed and capped at 2000 characters, email only if it looks like one) as
-  the PostHog event `feedback_submitted` (`message`, `email`, `prompted`,
-  `surface`, `note_count`); sent even with usage statistics off, because the
-  person pressed Send. `feedback_prompt_shown` / `feedback_prompt_dismissed`
-  follow the usage statistics setting. State in storage.local `feedback`
-  (`model/feedback.ts`, unit tested). Privacy policy: "Feedback you send".
-  Test ids `feedback-*`, `settings-feedback`. PostHog: filter events by
-  `feedback_submitted` to read them.
+- Asking people who use Docamatic how to make it better, set up in PostHog
+  rather than in the extension: surveys written in PostHog (Surveys, API or
+  popover type) are shown in the popup by Docamatic's own code, one question
+  at a time (open text, rating, single and multiple choice with an open
+  choice, link). Only the survey definitions are fetched (`/api/surveys`,
+  cached 3 hours), never code, so it's within the Web Store's rules.
+  PostHog's targeting decides who sees what: the background asks `/flags`
+  with counts as person properties (`note_count`, `page_count`, `tag_count`,
+  `favorite_count`, `days_used`, `extension_version`, `browser`, `internal`;
+  never note contents) plus the answered/dismissed marks PostHog uses.
+  Supported conditions: person properties, linked flag (and variant), event
+  triggers (event names that have happened on the install), wait period;
+  surveys with URL, selector, action or event-property conditions, or other
+  question types, aren't shown. Limits in the code whatever PostHog says:
+  only with usage statistics on; one at a time; never again once answered or
+  dismissed; shown on at most 3 days; no other survey for 3 days after one.
+  Answers go back as PostHog's `survey shown` / `survey dismissed` /
+  `survey sent` events (`$survey_response_<question id>`, ...), so its
+  results pages work. `model/surveys.ts` (unit tested),
+  `background/surveys.js`, `app/Survey.tsx`; how to write them:
+  `docs/surveys.md`. Test ids `survey`, `survey-next`, `survey-dismiss`.
+- "Send feedback" in Settings, Help, any time: a message and optional email,
+  sent through the background (`SEND_FEEDBACK`, only from the extension's
+  pages; trimmed, capped at 2000 characters, email only if it looks like
+  one) as the PostHog event `feedback_submitted`, even with usage statistics
+  off, because the person pressed Send. Test ids `feedback-*`,
+  `settings-feedback`. Privacy policy: "Questions and feedback".
 - Board: organize by website. The canvas can group by tag or by website
   ("Group by", remembered; busiest sites first, each page's notes together),
   each with its own arrangement (`board` in storage.local keeps

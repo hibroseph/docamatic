@@ -195,3 +195,6 @@ export const useRemembered = <T extends string>(key: string, initial: T): [T, (v
   };
   return [value, set];
 };
+
+/** Opens a page in a new tab */
+export const openTab = (url: string) => chrome.tabs.create({ url });

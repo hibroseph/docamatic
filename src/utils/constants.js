@@ -24,6 +24,10 @@ export const CHROME_MESSAGES = {
   CREATE_NOTE: "create_note",
   // Popup -> background: feedback the person wrote and chose to send
   SEND_FEEDBACK: "send_feedback",
+  // Popup -> background: the survey to show (from PostHog), and what
+  // happened with it (shown, dismissed, sent)
+  GET_SURVEY: "get_survey",
+  SURVEY_EVENT: "survey_event",
   // Popup / side panel -> background: go to a note on its page ("Find on page")
   FIND_NOTE: "find_note",
   // Background -> page: scroll to this note and point it out

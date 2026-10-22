@@ -36,7 +36,8 @@ import {
 } from "../redux/statePipeline";
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../redux/backups";
 import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
-import { sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
+import { onEventTracked, sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
+import { recordSurvey, rememberEvent, surveyForPopup } from "./surveys";
 import { cleanFeedback } from "../model/feedback";
 
 export function startBackground() {
@@ -652,6 +653,25 @@ export function startBackground() {
         })
       )
       .then((ok) => sendResponse({ ok }), () => sendResponse({ ok: false }));
+    return true; // answered asynchronously
+  });
+
+  // Surveys written in PostHog, shown in the popup (background/surveys.js)
+  onEventTracked((name) => rememberEvent(name).catch(() => {}));
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.GET_SURVEY && message?.type !== CHROME_MESSAGES.SURVEY_EVENT) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    storeReady
+      .then((store) => {
+        if (safeMode) return message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false };
+        return message.type === CHROME_MESSAGES.GET_SURVEY
+          ? surveyForPopup(store.getState(), message.surface === "sidepanel" ? "sidepanel" : "popup").then((survey) => ({ survey }))
+          : recordSurvey(message);
+      })
+      .then(sendResponse, (err) => {
+        captureException(err, { during: "surveys" });
+        sendResponse(message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false });
+      });
     return true; // answered asynchronously
   });
 

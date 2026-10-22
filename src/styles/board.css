@@ -168,3 +168,8 @@
 .site-page + .site-page { margin-top: var(--space-4); }
 .site-page__title { margin: 0 0 var(--space-2); overflow: hidden; color: var(--ink-muted); font-size: 14px; line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .site-page__title a { color: inherit; }
+
+/* A survey from PostHog: a card in the bottom right corner, over the canvas */
+.board-survey { position: fixed; right: var(--space-6); bottom: var(--space-6); z-index: 5; width: min(340px, calc(100vw - 48px)); }
+.board-survey:empty { display: none; }
+.board-survey .survey { margin: 0; box-shadow: var(--sticker); }

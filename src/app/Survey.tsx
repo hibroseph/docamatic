@@ -1,11 +1,18 @@
-// A survey written in PostHog, in the popup (model/surveys.ts, and the
-// background's background/surveys.js decide which and when). One question at
-// a time, drawn with Docamatic's own components; everything in it is text.
+// A survey written in PostHog (model/surveys.ts, and the background's
+// background/surveys.js decide which and when), on Docamatic's own pages: the
+// popup, the side panel, the board and the welcome page. Never on websites.
+// One question at a time, drawn with Docamatic's own components; everything
+// in it is text.
 import React, { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "../styles/survey.css";
 import type { Survey as SurveyDefinition, SurveyQuestion } from "../model/surveys";
 import { CHROME_MESSAGES } from "../utils/constants";
 import { TEST_IDS } from "../utils/testIds";
-import { openTab, type Surface } from "./hooks";
+import { openTab } from "./hooks";
+
+/** Where a survey is shown; sent to PostHog as `surface`, to target one */
+export type SurveySurface = "popup" | "sidepanel" | "board" | "welcome";
 
 type Answer = string | string[] | number | undefined;
 
@@ -147,7 +154,7 @@ const Question = ({
 const answered = (q: SurveyQuestion, value: Answer) =>
   Array.isArray(value) ? value.length > 0 : typeof value === "number" ? true : typeof value === "string" ? value.trim().length > 0 : false;
 
-export const SurveyPrompt = ({ surface }: { surface: Surface }) => {
+export const SurveyPrompt = ({ surface }: { surface: SurveySurface }) => {
   const [survey, setSurvey] = useState<SurveyDefinition | null>(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
@@ -229,3 +236,6 @@ export const SurveyPrompt = ({ surface }: { surface: Surface }) => {
     </form>
   );
 };
+
+/** For pages that aren't React apps (the welcome page) */
+export const mountSurvey = (element: HTMLElement, surface: SurveySurface) => createRoot(element).render(<SurveyPrompt surface={surface} />);

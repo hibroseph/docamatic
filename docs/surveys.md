@@ -1,7 +1,9 @@
 # Asking Docamatic's users questions (PostHog Surveys)
 
-Questions Docamatic asks in its popup are surveys written in PostHog. What to
-ask, who sees it and when are all set there; no extension update is needed.
+Questions Docamatic asks are surveys written in PostHog, shown on Docamatic's
+own pages: the popup, the side panel, the board and the welcome page (never on
+websites). What to ask, who sees it, where and when are all set there; no
+extension update is needed.
 (Since 5.1. The code: `src/model/surveys.ts`, `src/background/surveys.js`,
 `src/app/Survey.tsx`.)
 
@@ -27,11 +29,15 @@ In PostHog: **Surveys → New survey**.
      | Property | What it is |
      |---|---|
      | `note_count`, `page_count`, `tag_count`, `favorite_count` | How much they have |
-     | `days_used` | Days the popup was opened on |
+     | `days_used` | Days Docamatic was opened on (popup, side panel, board, welcome page) |
+     | `surface` | Where it would show: `popup`, `sidepanel`, `board`, `welcome` |
      | `extension_version`, `browser` | e.g. `5.1.0`, `Chrome` |
      | `internal` | `true` on your own installs |
 
      For example the old built-in prompt was `note_count ≥ 3` and `days_used ≥ 3`.
+     A question about the board: `surface = board`. How people heard about
+     Docamatic, right after installing: `surface = welcome`. With no `surface`
+     condition, it shows wherever they open Docamatic first.
    - **When a user sends an event:** the survey waits until that event has
      happened on the install, e.g. `board_opened` or `note_created` (event
      property filters aren't supported).
@@ -40,7 +46,7 @@ In PostHog: **Surveys → New survey**.
    - Not supported, and such surveys aren't shown: URL, CSS selector, and
      action conditions (they're about websites).
 5. **Launch.** Docamatic picks it up within about 3 hours (definitions are
-   cached), the next time someone opens the popup.
+   cached), the next time someone opens Docamatic.
 
 To try one first, target `internal = true`: your own installs (unpacked ones,
 or one marked with `docamaticMarkInternal()`) see it.
@@ -48,7 +54,7 @@ or one marked with `docamaticMarkInternal()`) see it.
 ## What Docamatic adds, whatever is set up
 
 - Only when usage statistics are on (Settings).
-- One survey at a time, in the popup. "No thanks" or Send: that survey is never
+- One survey at a time. "No thanks" or Send, on any page: that survey is never
   shown again on that install. Left alone, it's shown on at most 3 days.
 - After a survey is answered or dismissed, no other survey for 3 days.
 - Repeating surveys: each new iteration counts as a new survey.

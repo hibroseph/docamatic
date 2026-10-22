@@ -346,7 +346,7 @@ export const App = ({ surface }: { surface: Surface }) => {
               </nav>
             )}
 
-            {surface === "popup" && !searching && <SurveyPrompt surface={surface} />}
+            {!searching && <SurveyPrompt surface={surface} />}
             <main className="content" role={searching ? "region" : "tabpanel"} aria-label={searching ? "Search results" : undefined}>
               {searching ? (
                 <SearchResultsView query={query} />

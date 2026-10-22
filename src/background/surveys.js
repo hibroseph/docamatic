@@ -1,4 +1,4 @@
-// Surveys from PostHog, for the popup (model/surveys.ts says which and when).
+// Surveys from PostHog, for Docamatic's pages (model/surveys.ts says which and when).
 //
 // Fetches the survey definitions (data, never code) and asks PostHog's
 // feature flags which of them this install is targeted by, sending counts
@@ -90,10 +90,11 @@ const evaluateFlags = async (keys, properties) => {
 };
 
 /**
- * The survey the popup should show, if any. Also counts today as a day
- * Docamatic was used (the `days_used` surveys can target).
+ * The survey to show on one of Docamatic's pages (`surface`: popup, side
+ * panel, board, welcome page), if any. Also counts today as a day Docamatic
+ * was opened (the `days_used` surveys can target).
  */
-export const surveyForPopup = async (state, surface) => {
+export const surveyToAsk = async (state, surface) => {
   const memory = await updateMemory((m) => withDayUsed(m, today()));
   if (!(await analyticsAllowed())) return null;
 

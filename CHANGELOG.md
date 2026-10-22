@@ -48,13 +48,16 @@ and the extension is built with WXT so it can ship to Firefox too.
   that way. `migrations.js` explains when to use this instead of a migration.
 - Asking people who use Docamatic how to make it better, set up in PostHog
   rather than in the extension: surveys written in PostHog (Surveys, API or
-  popover type) are shown in the popup by Docamatic's own code, one question
+  popover type) are shown on Docamatic's own pages (popup, side panel, board
+  in its bottom right corner, welcome page; never on websites; `surface` is
+  sent so PostHog can target one) by Docamatic's own code, one question
   at a time (open text, rating, single and multiple choice with an open
   choice, link). Only the survey definitions are fetched (`/api/surveys`,
   cached 3 hours), never code, so it's within the Web Store's rules.
   PostHog's targeting decides who sees what: the background asks `/flags`
   with counts as person properties (`note_count`, `page_count`, `tag_count`,
-  `favorite_count`, `days_used`, `extension_version`, `browser`, `internal`;
+  `favorite_count`, `days_used` (days any of those pages was opened),
+  `surface`, `extension_version`, `browser`, `internal`;
   never note contents) plus the answered/dismissed marks PostHog uses.
   Supported conditions: person properties, linked flag (and variant), event
   triggers (event names that have happened on the install), wait period;

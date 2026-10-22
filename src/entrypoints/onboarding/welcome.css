@@ -89,3 +89,4 @@
 }
 .step .step__extra { margin-top: var(--space-2); }
 .link-button { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.welcome-survey .survey { margin: 0 0 var(--space-6); }

@@ -24,6 +24,7 @@ import { useNoteActions } from "../ui/useNoteActions";
 import { CloseIcon, OpenIcon, SearchIcon, TargetIcon } from "../ui/icons";
 import { UndoProvider } from "../ui/undo";
 import { NoteCard } from "../app/NoteCard";
+import { SurveyPrompt } from "../app/Survey";
 import { findOnPage, useRemembered, useTheme } from "../app/hooks";
 import { trackEvent } from "../redux/actions";
 import { TEST_IDS } from "../utils/testIds";
@@ -728,6 +729,10 @@ export const Board = () => {
           }}
         />
       )}
+      {/* A survey from PostHog, if there's one for this install */}
+      <div className="board-survey">
+        <SurveyPrompt surface="board" />
+      </div>
      </OpenNote.Provider>
     </UndoProvider>
   );

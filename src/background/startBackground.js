@@ -37,7 +37,7 @@ import {
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../redux/backups";
 import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
 import { onEventTracked, sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
-import { recordSurvey, rememberEvent, surveyForPopup } from "./surveys";
+import { recordSurvey, rememberEvent, surveyToAsk } from "./surveys";
 import { cleanFeedback } from "../model/feedback";
 
 export function startBackground() {
@@ -670,7 +670,8 @@ export function startBackground() {
     return true; // answered asynchronously
   });
 
-  // Surveys written in PostHog, shown in the popup (background/surveys.js)
+  // Surveys written in PostHog, shown on Docamatic's pages (background/surveys.js)
+  const SURVEY_SURFACES = ["popup", "sidepanel", "board", "welcome"];
   onEventTracked((name) => rememberEvent(name).catch(() => {}));
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message?.type !== CHROME_MESSAGES.GET_SURVEY && message?.type !== CHROME_MESSAGES.SURVEY_EVENT) return;
@@ -679,7 +680,7 @@ export function startBackground() {
       .then((store) => {
         if (safeMode) return message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false };
         return message.type === CHROME_MESSAGES.GET_SURVEY
-          ? surveyForPopup(store.getState(), message.surface === "sidepanel" ? "sidepanel" : "popup").then((survey) => ({ survey }))
+          ? surveyToAsk(store.getState(), SURVEY_SURFACES.includes(message.surface) ? message.surface : "popup").then((survey) => ({ survey }))
           : recordSurvey(message);
       })
       .then(sendResponse, (err) => {

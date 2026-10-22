@@ -12,6 +12,7 @@ import { userOnboarded } from "../../redux/actions";
 import { CREATE_NOTE_COMMAND } from "../../utils/constants";
 import { startDemo } from "../../page/demo";
 import { attachPracticeMenu } from "../../page/practiceMenu";
+import { mountSurvey } from "../../app/Survey";
 
 initSentry("onboarding");
 
@@ -55,3 +56,8 @@ attachPracticeMenu({
 // The arrow to the toolbar: "Got it" puts it away for this visit
 const toolbarTip = document.getElementById("toolbar-tip")!;
 document.getElementById("toolbar-tip-close")!.addEventListener("click", () => (toolbarTip.hidden = true));
+
+// A survey from PostHog, if there's one for this install (say, how they
+// heard about Docamatic)
+const surveySlot = document.getElementById("survey");
+if (surveySlot) mountSurvey(surveySlot, "welcome");

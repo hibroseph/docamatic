@@ -32,6 +32,7 @@ import { AllNotesView, FavoritesView, SearchResultsView, TagNotesView, TagsView,
 import { Settings } from "./Settings";
 import { SurveyPrompt } from "./Survey";
 import { SiteAccess } from "./SiteAccess";
+import { downloadDiagnosticReport } from "./diagnostics";
 
 type Tab = "current" | "all" | "hearted" | "tags";
 
@@ -145,12 +146,22 @@ export const App = ({ surface }: { surface: Surface }) => {
             still saved on this computer.
           </p>
           <p>
-            Please download a backup and email it to <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a>{" "}
-            so we can help.
+            To help us fix it, download a diagnostic report (it has none of your notes or websites in it) and email it
+            to <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a>.
           </p>
-          <button type="button" className="dm-btn dm-btn--primary" onClick={() => chrome.runtime.openOptionsPage()}>
-            Backup &amp; restore
-          </button>
+          <div className="safe-mode__buttons">
+            <button
+              type="button"
+              className="dm-btn dm-btn--primary"
+              data-testid={TEST_IDS.diagnosticsDownload}
+              onClick={() => downloadDiagnosticReport()}
+            >
+              Download diagnostic report
+            </button>
+            <button type="button" className="dm-btn" onClick={() => chrome.runtime.openOptionsPage()}>
+              Backup &amp; restore
+            </button>
+          </div>
         </div>
       </div>
     );

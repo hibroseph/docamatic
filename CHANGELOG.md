@@ -26,6 +26,19 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- "Download diagnostic report" (Settings, Help; and the safe mode screen,
+  which now asks for it instead of a backup of all the notes): a JSON file
+  people can attach when they write in. Version, browser, install history,
+  the install id (to match Sentry and PostHog), state (safe mode and why,
+  load step, schema version, settings), counts and shapes of the notes
+  (`model/diagnostics.ts`, unit tested: duplicate ids, notes off the page,
+  broken tag links, sizes, ...), the storage description error reports
+  already use, backups, permissions, and the last 25 errors. Never note text,
+  titles, tag names or page addresses. Errors are kept for it locally as they
+  happen (`recentErrors` in storage.local, from `captureException` /
+  `captureMessage`, web addresses removed). `background/diagnostics.js`,
+  `app/diagnostics.ts`. Test id `diagnostics-download`. Privacy policy:
+  "Diagnostic reports".
 - Website: a contact form on the contact page (topic, message, optional
   email), so people can write without opening an email app. Messages go
   straight to PostHog's capture endpoint as `contact_form_submitted`

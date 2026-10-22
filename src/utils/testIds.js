@@ -28,6 +28,8 @@ export const TEST_IDS = {
   feedbackEmail: "feedback-email",
   feedbackSend: "feedback-send",
   settingsFeedback: "settings-feedback",
+  // "Download diagnostic report" (Settings, and the safe mode screen)
+  diagnosticsDownload: "diagnostics-download",
   // Opens the board page (board.html)
   popupOpenBoard: "popup-open-board",
   // On the board page: its search box and the "Edit notes" switch

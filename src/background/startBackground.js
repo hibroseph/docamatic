@@ -38,6 +38,7 @@ import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } fro
 import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
 import { onEventTracked, sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
 import { recordSurvey, rememberEvent, surveyToAsk } from "./surveys";
+import { buildDiagnosticReport } from "./diagnostics";
 import { cleanFeedback } from "../model/feedback";
 
 export function startBackground() {
@@ -687,6 +688,17 @@ export function startBackground() {
         captureException(err, { during: "surveys" });
         sendResponse(message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false });
       });
+    return true; // answered asynchronously
+  });
+
+  // The diagnostic report (Settings > Download diagnostic report). Extension
+  // pages only. Works in safe mode too: that's when it's needed most.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.GET_DIAGNOSTICS) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    Promise.race([storeReady, new Promise((resolve) => setTimeout(() => resolve(null), 3000))])
+      .then((store) => buildDiagnosticReport({ state: store?.getState(), safeMode, loadStep }))
+      .then((report) => sendResponse({ report }), (err) => sendResponse({ error: messageWithoutUrls(err) }));
     return true; // answered asynchronously
   });
 

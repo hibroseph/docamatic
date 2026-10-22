@@ -28,6 +28,8 @@ export const CHROME_MESSAGES = {
   // happened with it (shown, dismissed, sent)
   GET_SURVEY: "get_survey",
   SURVEY_EVENT: "survey_event",
+  // Settings -> background: the diagnostic report to download
+  GET_DIAGNOSTICS: "get_diagnostics",
   // Popup / side panel -> background: go to a note on its page ("Find on page")
   FIND_NOTE: "find_note",
   // Background -> page: scroll to this note and point it out

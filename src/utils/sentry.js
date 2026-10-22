@@ -44,6 +44,7 @@ let hub = null;
  *   issues can be filtered in Sentry.
  */
 export const initSentry = (context) => {
+  errorContext = context;
   // Never let error reporting stop the extension itself from starting
   try {
     const options = {
@@ -123,7 +124,38 @@ export const IMPACT = {
  * @param options  level ("fatal", "error", ...), tags (searchable in Sentry),
  *                 contexts ({ name: flat object }, each shown as its own section)
  */
+// The last errors on this install, kept locally for the diagnostic report
+// people can download from Settings (background/diagnostics.js). Only when it
+// happened, where (`during`), what kind and the message with any web
+// addresses taken out.
+export const RECENT_ERRORS_KEY = "recentErrors";
+const MAX_RECENT_ERRORS = 25;
+let errorContext = "unknown";
+
+const rememberError = (kind, message, extra) => {
+  try {
+    if (!globalThis.chrome?.storage?.local) return;
+    const entry = {
+      at: new Date().toISOString(),
+      context: errorContext,
+      kind,
+      during: typeof extra?.during === "string" ? extra.during.slice(0, 100) : undefined,
+      message: String(message || "").replace(/\b[a-z][a-z0-9+.-]*:\/\/\S+/gi, "[url]").slice(0, 300),
+    };
+    chrome.storage.local
+      .get(RECENT_ERRORS_KEY)
+      .then((stored) => {
+        const list = Array.isArray(stored[RECENT_ERRORS_KEY]) ? stored[RECENT_ERRORS_KEY] : [];
+        return chrome.storage.local.set({ [RECENT_ERRORS_KEY]: [...list, entry].slice(-MAX_RECENT_ERRORS) });
+      })
+      .catch(() => {});
+  } catch {
+    // Remembering an error must never cause one
+  }
+};
+
 export const captureException = (error, extra, { level, tags, contexts } = {}) => {
+  rememberError(level || "error", error?.message || error, extra);
   if (!hub) return;
   hub.withScope((scope) => {
     if (extra) scope.setExtras(extra);
@@ -154,6 +186,7 @@ export const setReportInstallId = (installId) => {
 };
 
 export const captureMessage = (message, extra) => {
+  rememberError("warning", [message, extra?.stage, extra?.error].filter(Boolean).join(": "), extra);
   if (!hub) return;
   hub.withScope((scope) => {
     if (extra) scope.setExtras(extra);

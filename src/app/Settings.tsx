@@ -9,6 +9,7 @@ import { countNotes } from "../redux/statePipeline";
 import { BackIcon } from "../ui/icons";
 import { useNewNoteShortcut, type Surface } from "./hooks";
 import { FeedbackForm } from "./Feedback";
+import { downloadDiagnosticReport } from "./diagnostics";
 
 const SITE = "https://hibroseph.github.io/docamatic";
 
@@ -36,6 +37,7 @@ export const Settings = ({ onBack, surface = "popup" }: { onBack: () => void; su
   const shortcut = useNewNoteShortcut();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [feedback, setFeedback] = useState<"closed" | "open" | "sent">("closed");
+  const [diagnostics, setDiagnostics] = useState<"downloaded" | "failed" | null>(null);
 
   const theme = preferences.theme || "system";
   const textSize = preferences.note_text_size || "medium";
@@ -243,7 +245,22 @@ export const Settings = ({ onBack, surface = "popup" }: { onBack: () => void; su
           <a href={`${SITE}/contactus.html`} target="_blank" rel="noopener noreferrer">
             Contact us
           </a>
+          <button
+            type="button"
+            className="link-button"
+            data-testid={TEST_IDS.diagnosticsDownload}
+            onClick={async () => setDiagnostics((await downloadDiagnosticReport()) ? "downloaded" : "failed")}
+          >
+            Download diagnostic report
+          </button>
         </div>
+        {diagnostics && (
+          <p className="settings__help" role="status">
+            {diagnostics === "downloaded"
+              ? "Downloaded. It describes how Docamatic is set up and doing, with none of your notes or websites in it. Attach it when you write to us."
+              : "Couldn't make the report. Try again in a moment."}
+          </p>
+        )}
         {feedback === "open" ? (
           <FeedbackForm surface={surface} prompted={false} onSent={() => setFeedback("sent")} onCancel={() => setFeedback("closed")} />
         ) : feedback === "sent" ? (

@@ -18,6 +18,7 @@ import {
   makeFetchTransport,
 } from "@sentry/browser";
 import config from "../../config.json";
+import { LIFECYCLE_STORAGE_KEY, lifecycleTags } from "./lifecycle";
 
 const DSN = "https://56a60e709a48484db373a4ca2f4cf026@sentry.io/1368219";
 
@@ -73,17 +74,83 @@ export const initSentry = (context) => {
     }
 
     hub.setTag("context", context);
+    tagReportsFromStorage();
   } catch (err) {
     console.error("Docamatic: unable to start error reporting", err);
   }
 };
 
-export const captureException = (error, extra) => {
+/**
+ * Tags this part of the extension's reports with what storage knows about the
+ * install: its random id, which version it was updated from and whether it is
+ * the developer's own (filter with internal:false). Read from storage so the
+ * popup and the notes UI on web pages get them too. Never creates the install
+ * id; the background does that the first time it sends an analytics event and
+ * then calls this again.
+ */
+export const tagReportsFromStorage = async () => {
+  try {
+    const stored = await chrome.storage.local.get(["analytics", "metadata", LIFECYCLE_STORAGE_KEY]);
+    const installType = (await chrome.management?.getSelf?.().catch(() => null))?.installType;
+    setReportTags({
+      ...lifecycleTags(stored[LIFECYCLE_STORAGE_KEY]),
+      internal: installType === "development" || stored.analytics?.internal === true,
+      ...(installType ? { install_type: installType } : {}),
+    });
+    // metadata can be malformed here (that's what safe mode is for), so only
+    // an explicit opt-out counts
+    if (stored.metadata?.analytics_enabled !== false) setReportInstallId(stored.analytics?.installId);
+  } catch (err) {
+    console.debug("Docamatic: couldn't tag error reports", err);
+  }
+};
+
+/**
+ * What an error means for the user, as the `impact` tag, so the reports that
+ * matter most can be found (and alerted on) in Sentry: `impact:unusable`.
+ */
+export const IMPACT = {
+  // Docamatic doesn't work at all (e.g. safe mode: no notes shown, nothing saved)
+  UNUSABLE: "unusable",
+  // Changes may not be saved
+  NOTES_NOT_SAVED: "notes_not_saved",
+  // Notes from the Manifest V2 version weren't brought over
+  OLD_NOTES_MISSING: "old_notes_missing",
+};
+
+/**
+ * @param extra    small values shown under "Additional Data"
+ * @param options  level ("fatal", "error", ...), tags (searchable in Sentry),
+ *                 contexts ({ name: flat object }, each shown as its own section)
+ */
+export const captureException = (error, extra, { level, tags, contexts } = {}) => {
   if (!hub) return;
   hub.withScope((scope) => {
     if (extra) scope.setExtras(extra);
+    if (level) scope.setLevel(level);
+    if (tags) scope.setTags(tags);
+    Object.entries(contexts || {}).forEach(([name, context]) => scope.setContext(name, context));
     hub.captureException(error);
   });
+};
+
+/**
+ * Tags added to every report from now on, e.g. which version this install
+ * was updated from. Values must be short strings.
+ */
+export const setReportTags = (tags) => {
+  if (!hub) return;
+  Object.entries(tags).forEach(([key, value]) => hub.setTag(key, String(value)));
+};
+
+/**
+ * Links reports to this install's random id (the one PostHog events use), so
+ * Sentry can count affected installs and an install's errors can be looked
+ * up in PostHog. Not set when the user turned usage statistics off.
+ */
+export const setReportInstallId = (installId) => {
+  if (!hub || !installId) return;
+  hub.setUser({ id: installId });
 };
 
 export const captureMessage = (message, extra) => {

@@ -56,6 +56,13 @@ export const pagesFromLegacy = (legacy) => {
   return pages;
 };
 
+// Some installs from before this repository have `pages: []` saved (with
+// metadata { docamatic_version, migrated_data_to_storage_local }): an array
+// instead of the url-keyed object, and always empty. That means no notes, so
+// it becomes {}. An array with anything in it is left alone, so validation
+// still refuses it and nothing is thrown away.
+const emptyArrayAsObject = (pages) => (Array.isArray(pages) && pages.length === 0 ? {} : pages);
+
 /**
  * Brings whatever is in storage.local up to the current state shape. Loading
  * format 2 as-is is what caused "Cannot read properties of undefined
@@ -64,7 +71,7 @@ export const pagesFromLegacy = (legacy) => {
 export const normalizeState = (storage, onError = () => {}) => {
   if (storage.pages) {
     return {
-      pages: storage.pages,
+      pages: emptyArrayAsObject(storage.pages),
       tags: Array.isArray(storage.tags) ? storage.tags : [],
       metadata: storage.metadata || { onboarded: true },
     };

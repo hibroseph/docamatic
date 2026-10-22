@@ -130,19 +130,6 @@ and the extension is built with WXT so it can ship to Firefox too.
 - Tests for the model (colors, search, sorting, placement, dates), the new
   reducer cases, and that a pre-5.1 note renders at its saved position and
   width in its own color.
-- Analytics events have an `internal` property, `true` for the developer's own
-  installs, so they can be left out of PostHog numbers (PostHog: "Filter out
-  internal and test users": `internal` is not `true`). Unpacked installs are
-  always internal; any other install can be marked by running
-  `docamaticMarkInternal()` in the service worker's DevTools console
-  (`docamaticMarkInternal(false)` undoes it).
-- README section on renewing the Chrome Web Store credentials used by the
-  publish workflow.
-- `design-system/`: the new design system ("Approved direction v1"): brand
-  book, tokens for light and dark themes, `dm-` CSS components, and the
-  Bricolage Grotesque and Figtree fonts. Not used by the extension yet; it's
-  the basis for the UI redesign. The browsable version is the design system
-  artifact linked in `design-system/ABOUT.md`.
 
 ### Changed
 - Build: webpack, Babel and Jest replaced by WXT (Vite) and Vitest. Output is
@@ -232,8 +219,6 @@ and the extension is built with WXT so it can ship to Firefox too.
   `startDemo().addNote` takes optional page coordinates. Wherever the steps
   say to click Docamatic, the puzzle piece or the pin, a small picture of
   that button is shown inline.
-- Website change log: added the history of versions before 5.0.0 (2019–2020
-  updates, and the 2020 version's known issues, labeled as such).
 
 - Website: visits are counted with PostHog instead of Google Analytics
   (`site/analytics.ts`, posthog-js 1.435.5 pinned, slim "no-external"
@@ -279,6 +264,67 @@ and the extension is built with WXT so it can ship to Firefox too.
 - "Add a note here" on a right-click inside a frame (an embedded video,
   comments) puts the note where new notes go, instead of at an older
   right-click on the page.
+
+## 5.0.2 (2026-10-22)
+
+### Fixed
+- Installs that had `pages: []` saved (an empty array instead of the
+  url-keyed object, from builds older than this repository, with metadata
+  `{ docamatic_version, migrated_data_to_storage_local }`) went into safe mode
+  on 5.0.1 ("pages is not an object (found array)"). An empty array holds no
+  notes, so it's now read as `{}` and saved in the right shape. A `pages`
+  array with anything in it is still refused, so nothing can be thrown away.
+- Publish workflow: a rejected Web Store upload (e.g. `ITEM_NOT_UPDATABLE`
+  while a review is pending) now fails the workflow with the Web Store's
+  error. The API answers HTTP 200 either way, so it passed before.
+
+## 5.0.1 (2026-10-20)
+
+### Added
+- Analytics events have an `internal` property, `true` for the developer's own
+  installs, so they can be left out of PostHog numbers (PostHog: "Filter out
+  internal and test users": `internal` is not `true`). Unpacked installs are
+  always internal; any other install can be marked by running
+  `docamaticMarkInternal()` in the service worker's DevTools console
+  (`docamaticMarkInternal(false)` undoes it).
+- README section on renewing the Chrome Web Store credentials used by the
+  publish workflow.
+- `design-system/`: the new design system ("Approved direction v1"): brand
+  book, tokens for light and dark themes, `dm-` CSS components, and the
+  Bricolage Grotesque and Figtree fonts. Not used by the extension yet; it's
+  the basis for the UI redesign. The browsable version is the design system
+  artifact linked in `design-system/ABOUT.md`.
+- Error reports for problems that make Docamatic unusable carry everything
+  needed to fix them, sent the moment they happen:
+  - Safe mode: a description of the stored data (types, sizes and counts of
+    `pages`, `tags`, `metadata` and the legacy keys, schema version, storage
+    key names, how many notes exist anywhere; never urls or note text, see
+    `src/redux/storageShape.js`), storage size, which loading step failed,
+    and the install's update history. Level `fatal`.
+  - Failed saves and failed imports of the MV2 notes get the same kind of
+    description, and the import reports which stage failed.
+  - Every report is tagged `impact` (`unusable`, `notes_not_saved`,
+    `old_notes_missing`) so these can be found and alerted on in Sentry.
+- Every Sentry report, from any part of the extension, is tagged with
+  `previous_version`, `install_reason`, `internal` and `install_type`, and
+  linked to the PostHog install id (unless usage statistics are off).
+- Updates and installs are remembered in storage (`lifecycle`, last 5), since
+  Chrome only reports the previous version once.
+- `safe_mode_entered` events include the load step, the type of `pages` and
+  the schema version.
+- Breadcrumbs for each startup step when loading notes.
+- Privacy policy: says what the new error report details are.
+
+### Changed
+- Invalid saved data errors say what was found (e.g. "pages is not an object
+  (found string)") and no longer include page urls in the message, which
+  went to Sentry and the Backup & restore page.
+- A failed save while importing the MV2 notes is reported as part of the
+  import (it was reported as "startup backups").
+- Website change log: added the history of versions before 5.0.0 (2019–2020
+  updates, and the 2020 version's known issues, labeled as such).
+
+### Fixed
 - Website change log: removed a stray `</script>` tag from the page's head.
 - Publish workflow: an expired or revoked Chrome Web Store refresh token now
   fails at the token step with Google's error, instead of passing an access

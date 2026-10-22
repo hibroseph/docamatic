@@ -41,21 +41,30 @@ export const noteIdsIn = (value) => {
 export const countNotes = (state) =>
   Object.values(state?.pages || {}).reduce((count, page) => count + (page?.notes?.length || 0), 0);
 
-/** Throws a StateError if state isn't in the shape the extension renders */
+/** typeof, but telling null and arrays apart from objects */
+export const typeOf = (value) => (value === null ? "null" : Array.isArray(value) ? "array" : typeof value);
+
+/**
+ * Throws a StateError if state isn't in the shape the extension renders.
+ * Messages say what was found instead, since they become the error report's
+ * title. They never include page urls: a bad page is identified by position.
+ */
 export const validateState = (state) => {
   const fail = (message) => {
     throw new StateError("invalid_state", message);
   };
-  if (!state || typeof state !== "object") fail("State is not an object");
-  if (!state.pages || typeof state.pages !== "object" || Array.isArray(state.pages)) fail("pages is not an object");
-  for (const [url, page] of Object.entries(state.pages)) {
-    if (!page || !Array.isArray(page.notes)) fail(`Page ${url} has no notes array`);
-    for (const note of page.notes) {
-      if (!note || note.id === undefined || note.id === null) fail(`A note on ${url} has no id`);
+  if (typeOf(state) !== "object") fail(`State is not an object (found ${typeOf(state)})`);
+  if (typeOf(state.pages) !== "object") fail(`pages is not an object (found ${typeOf(state.pages)})`);
+  Object.values(state.pages).forEach((page, index) => {
+    if (!Array.isArray(page?.notes)) {
+      fail(`Page ${index + 1} of ${Object.keys(state.pages).length} has no notes array (found ${typeOf(page?.notes)})`);
     }
-  }
-  if (!Array.isArray(state.tags)) fail("tags is not an array");
-  if (!state.metadata || typeof state.metadata !== "object") fail("metadata is not an object");
+    if (page.notes.some((note) => note?.id === undefined || note?.id === null)) {
+      fail(`A note on page ${index + 1} of ${Object.keys(state.pages).length} has no id`);
+    }
+  });
+  if (!Array.isArray(state.tags)) fail(`tags is not an array (found ${typeOf(state.tags)})`);
+  if (typeOf(state.metadata) !== "object") fail(`metadata is not an object (found ${typeOf(state.metadata)})`);
 };
 
 /** Throws a StateError unless every note id in `before` is still in `after` */
@@ -109,7 +118,8 @@ export const prepareStoredState = (storage, { migrate = migrateState } = {}) => 
   assertNoNotesLost(raw, state);
 
   const legacyKeys = LEGACY_STORAGE_KEYS.filter((key) => key in storage);
-  const changed = legacyKeys.length > 0 || !raw.pages || schemaVersionOf(raw) !== schemaVersionOf(state);
+  const changed =
+    legacyKeys.length > 0 || typeOf(raw.pages) !== "object" || schemaVersionOf(raw) !== schemaVersionOf(state);
 
   return { state, changed, legacyKeys };
 };

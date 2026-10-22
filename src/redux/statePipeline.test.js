@@ -70,9 +70,22 @@ test("Refuses corrupt older data instead of starting with no notes", () => {
 })
 
 test("Refuses data that isn't in a usable shape", () => {
-    expect(reasonOf(() => prepareStoredState({ pages: [], tags: [], metadata: {} }))).toBe("invalid_state");
+    expect(reasonOf(() => prepareStoredState({ pages: [{ notes: [{ id: "a" }] }], tags: [], metadata: {} }))).toBe("invalid_state");
     const noteWithoutId = { pages: { "https://a.com/": { notes: [{ title: "no id" }] } }, tags: [], metadata: {} };
     expect(reasonOf(() => validateState(noteWithoutId))).toBe("invalid_state");
+})
+
+test("An empty pages array (saved by builds from before this repository) is no notes, not broken data", () => {
+    // What storage held on an install that went into safe mode on 5.0.1
+    const storage = {
+        analytics: { installId: "x" },
+        metadata: { docamatic_version: "4.0.0", migrated_data_to_storage_local: true },
+        pages: [],
+    };
+    const { state, changed } = prepareStoredState(storage);
+    expect(state.pages).toEqual({});
+    expect(state.tags).toEqual([]);
+    expect(changed).toBe(true); // saved in the right shape from then on
 })
 
 test("Knows a fresh install from existing data", () => {
@@ -81,3 +94,19 @@ test("Knows a fresh install from existing data", () => {
     expect(isEmptyStorage({ pages: {} })).toBe(false);
     expect(isEmptyStorage({ notes: "{}" })).toBe(false);
 })
+
+test("Invalid state errors say what was found, without page urls", () => {
+    const messageOf = (state) => {
+        try {
+            validateState(state);
+        } catch (err) {
+            return err.message;
+        }
+    };
+    const valid = { pages: { "https://secret.example.com/": { notes: [{ id: 1 }] } }, tags: [], metadata: {} };
+    expect(messageOf({ ...valid, pages: "{}" })).toBe("pages is not an object (found string)");
+    expect(messageOf({ ...valid, pages: [] })).toBe("pages is not an object (found array)");
+    expect(messageOf({ ...valid, tags: {} })).toBe("tags is not an array (found object)");
+    expect(messageOf({ ...valid, pages: { "https://secret.example.com/": { notes: "x" } } })).toBe("Page 1 of 1 has no notes array (found string)");
+    expect(messageOf({ ...valid, pages: { "https://secret.example.com/": { notes: [{}] } } })).toBe("A note on page 1 of 1 has no id");
+});

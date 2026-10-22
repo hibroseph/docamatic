@@ -14,6 +14,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+### Fixed
+- Edge's "Blocked" (it won't let extensions script a tab, seen reconnecting a
+  YouTube tab after the 5.0.3 update) is an expected scripting error, so it
+  isn't reported to Sentry. Only that exact message. (Also on master, for
+  the next 5.0.x.)
+
 ## 5.1.0 (not released yet; set the date when it's published)
 
 The redesign: the design system in `design-system/` is now used everywhere,
@@ -265,7 +271,7 @@ and the extension is built with WXT so it can ship to Firefox too.
   comments) puts the note where new notes go, instead of at an older
   right-click on the page.
 
-## 5.0.3 (not released yet)
+## 5.0.3 (2026-10-22)
 
 ### Changed
 - New welcome page (`src/apps/tabpage`), in the design system's look (tokens,

@@ -14,6 +14,10 @@ test("Chrome's harmless scripting errors are expected, others aren't", () => {
     expect(isExpectedScriptingError(new Error('Cannot access contents of url "https://x.com/". Extension manifest must request permission'))).toBe(true);
     expect(isExpectedScriptingError(new Error("Frame with ID 0 was removed."))).toBe(true);
     expect(isExpectedScriptingError(new Error("Could not establish connection. Receiving end does not exist."))).toBe(true);
+    // Edge, reconnecting a YouTube tab after an update (Sentry, 5.0.3)
+    expect(isExpectedScriptingError(new Error("Blocked"))).toBe(true);
+    // Only that whole message: an error that mentions blocking is still reported
+    expect(isExpectedScriptingError(new Error("Blocked a frame with origin from accessing a cross-origin frame."))).toBe(false);
     expect(isExpectedScriptingError(new Error("Cannot read properties of undefined (reading 'notes')"))).toBe(false);
 })
 

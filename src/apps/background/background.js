@@ -63,6 +63,7 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     track("extension_installed");
   } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
     track("extension_updated", { previous_version: previousVersion });
+    reconnectOpenTabs().catch((err) => captureException(err, { during: "reconnecting open tabs after an update" }));
   }
 
   if (reason !== chrome.runtime.OnInstalledReason.INSTALL && reason !== chrome.runtime.OnInstalledReason.UPDATE) {
@@ -74,6 +75,27 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     .catch((err) => captureException(err, { during: "recording install event" }))
     .finally(resolveInstallEventSeen);
 });
+
+// After an update, tabs that were already open still run the previous
+// version's page scripts, which can't reach this version: their notes stop
+// saving and show "Sync Error" until the page is reloaded (Chrome updates
+// extensions silently, so that's every open tab). Give each open web page the
+// new loader; on pages with notes it brings in the new notes UI, which hides
+// the old one (apps/script/notes-ui.js). Tabs Chrome has unloaded to save
+// memory are skipped: they load everything fresh when reopened.
+const reconnectOpenTabs = async () => {
+  const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*", "file:///*"] });
+  const files = chrome.runtime.getManifest().content_scripts[0].js;
+  await Promise.all(
+    tabs
+      .filter((tab) => !tab.discarded && tab.id !== undefined)
+      .map((tab) =>
+        chrome.scripting
+          .executeScript({ target: { tabId: tab.id }, files })
+          .catch((err) => reportShowNotesFailure(err, tab.url, "reconnect_after_update"))
+      )
+  );
+};
 
 // Resolves with the redux store once the state has been loaded from storage
 let resolveStoreReady;

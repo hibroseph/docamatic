@@ -57,7 +57,7 @@ describe("Everything else", () => {
             "https://example.com/",
         ]) {
             expect(noteUrlFor(href)).toBe(legacyNoteUrl(href));
-            expect(noteUrlsFor(href)).toHaveLength(1);
+            expect(noteUrlsFor(href)[0]).toBe(legacyNoteUrl(href));
         }
     })
 
@@ -80,7 +80,23 @@ describe("Looking up notes for a page", () => {
         expect(noteUrlsFor("https://www.youtube.com/watch?v=abc")).toEqual([
             "https://www.youtube.com/watch?v=abc",
             "https://www.youtube.com/watch",
+            "https://www.youtube.com/watch/?v=abc",
+            "https://www.youtube.com/watch/",
         ]);
+    })
+
+    test("A page's notes show with or without a slash at the end of its path", () => {
+        expect(noteUrlsFor("https://a.com/blog/post")).toEqual(["https://a.com/blog/post", "https://a.com/blog/post/"]);
+        expect(noteUrlsFor("https://a.com/blog/post/")).toEqual(["https://a.com/blog/post/", "https://a.com/blog/post"]);
+        expect(noteUrlsFor("https://a.com/item?id=4")).toContain("https://a.com/item/?id=4");
+        expect(noteUrlsFor("https://mail.a.com/app#/inbox")).toContain("https://mail.a.com/app/#/inbox");
+        // New notes are still saved under the address as it is
+        expect(noteUrlsFor("https://a.com/blog/post/")[0]).toBe(noteUrlFor("https://a.com/blog/post/"));
+    })
+
+    test("The site root and non-web addresses get no slash twin", () => {
+        expect(noteUrlsFor("https://a.com/")).toEqual(["https://a.com/"]);
+        expect(noteUrlsFor("about:blank")).toEqual(["about:blank"]);
     })
 
     test("Nothing for a missing url", () => {

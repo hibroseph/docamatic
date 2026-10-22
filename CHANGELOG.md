@@ -26,6 +26,26 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Firefox, and Chromium browsers besides Chrome, reviewed and tested
+  (`docs/browsers.md`). The Firefox build was run in Firefox 158: install,
+  welcome page, popup, a note on a page, the board, site access.
+- Site access: when Docamatic isn't allowed on the open site (Chrome's site
+  access "On click" / "On specific sites", Firefox's "Access your data for
+  all websites" off), the popup says so with **Allow on <site>**
+  (`permissions.request` for that site only). Once allowed, from there or
+  the browser's settings, the open tabs on it show their notes without a
+  reload (`permissions.onAdded` in the background). New `activeTab`
+  permission (no install warning): clicking Docamatic gives it the current
+  tab even in "On click" mode. Analytics: `site_access_missing`,
+  `site_access_requested`, `site_access_answered` (`granted`). Test ids
+  `site-access`, `site-access-allow`.
+- Older notes get details they never saved once they're known, instead of a
+  migration guessing them: `fillNoteDetails` / `FILL_NOTE_DETAILS` fills in
+  only fields listed in `FILLABLE_NOTE_DETAILS` (reducer.js), only when
+  missing, never overwriting. First use: `created_on_url`, filled in when the
+  note's page is open and the note is saved under exactly that address
+  (credentials removed; same site only). Page titles were already filled in
+  that way. `migrations.js` explains when to use this instead of a migration.
 - Asking people who use Docamatic how to make it better, set up in PostHog
   rather than in the extension: surveys written in PostHog (Surveys, API or
   popover type) are shown in the popup by Docamatic's own code, one question
@@ -298,6 +318,27 @@ and the extension is built with WXT so it can ship to Firefox too.
   new tab, so the site stays open. Privacy policy updated.
 
 ### Fixed
+- Escape didn't close a note's menu on web pages (notes stop keys at their
+  edge so sites don't see them, so the menu's listener never heard it); it
+  listens in the capture phase now. Chrome and Firefox.
+- Firefox: keys typed in a note reached the site's shortcuts again, and the
+  guard looped ("too much recursion"): Firefox makes key events created by an
+  extension "composed", so the copy handed to the note left the shadow root.
+  There the copy is now a plain event with the key's details; the guard only
+  takes real (trusted) key presses, and doesn't send copies to the notes'
+  outer element when nothing inside is focused.
+- Firefox: files on the computer said to turn on "Allow access to file URLs",
+  which Firefox doesn't have (extensions can't run on files there): it now
+  says Firefox doesn't allow it, and offers to keep the note in Docamatic.
+- Firefox: error reports no longer call `storage.local.getBytesInUse`, which
+  Firefox doesn't have (it threw); usage statistics name Firefox instead of
+  "unknown". Firefox's minimum is 128 (ESR): before 127 it didn't grant host
+  permissions at install, so notes wouldn't show anywhere.
+- Mozilla's own sites (addons.mozilla.org, accounts, support) and the Opera
+  add-on store are pages notes can't go on, like the Chrome and Edge stores;
+  Firefox's "Missing host permission" is an expected refusal.
+- "This page" on a page notes can't go on said it was an extension store
+  even when it wasn't: it now says the page doesn't allow extensions.
 - A note's menu opens where it fits: upward when there's no room below
   (the last notes in the popup's list), scrolled into view if it fits
   neither way. Pressing a scrollbar no longer closes the menu (it did, so the

@@ -22,7 +22,9 @@ export default defineConfig({
       // offscreen (Chrome only) reads notes saved by the 2019-2022 version;
       // the side panel permission is added by WXT for the sidepanel entrypoint
       // contextMenus: "Add a note here" when right-clicking a page (no install warning)
-      permissions: ["storage", "scripting", "unlimitedStorage", "contextMenus", ...(isFirefox ? [] : ["offscreen"])],
+      // activeTab: clicking Docamatic gives it the current tab even where the
+      // person limited its site access (Chrome's "On click"); no install warning
+      permissions: ["storage", "scripting", "unlimitedStorage", "contextMenus", "activeTab", ...(isFirefox ? [] : ["offscreen"])],
       host_permissions: ["<all_urls>"],
       icons: {
         16: "icons/docamatic-icon-16.png",
@@ -45,8 +47,10 @@ export default defineConfig({
         ? {
             browser_specific_settings: {
               // Chosen once and never changed: Firefox ties installs and
-              // their storage to this id
-              gecko: { id: "docamatic@hibroseph.github.io", strict_min_version: "115.0" },
+              // their storage to this id. 128 (the ESR): before 127, Firefox
+              // didn't grant host permissions at install, so notes wouldn't
+              // show anywhere until allowed by hand.
+              gecko: { id: "docamatic@hibroseph.github.io", strict_min_version: "128.0" },
             },
           }
         : {

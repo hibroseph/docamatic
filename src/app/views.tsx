@@ -53,7 +53,7 @@ export const ThisPageView = ({
         before="Notes can't go on this page"
         text={
           url
-            ? "Extension stores don't allow it. You can still keep a note about this page in Docamatic: click New note on this page."
+            ? "This page doesn't allow extensions. You can still keep a note about it in Docamatic: click New note on this page."
             : "Browser pages don't allow it. Open any website to add a note, or look through your notes in the other tabs."
         }
       />

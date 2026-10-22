@@ -1,5 +1,6 @@
 // Reducer cases added in 5.1 (the earlier ones are in reducer.test.js)
 import notesApp from "./reducer";
+import { fillNoteDetails } from "./actions";
 import {
   addNote,
   addTag,
@@ -145,4 +146,22 @@ test("Changing a note's width keeps the height it was given", () => {
   let state = notesApp(stateWithNote(), layoutNote("note-1", URL, { height: 180 }));
   state = notesApp(state, updateNoteSize("note-1", 300, URL));
   expect(state.pages[URL].notes[0].size).toEqual({ width: 300, height: 180 });
+});
+
+describe("Details older notes didn't save are filled in when known", () => {
+  const url = "https://a.com/post";
+  const base = { pages: { [url]: { notes: [{ id: "n1", title: "Old" }, { id: "n2", created_on_url: "https://a.com/post?x=1" }] } }, tags: [], metadata: {} };
+
+  test("A missing detail is filled in", () => {
+    const next = notesApp(base, fillNoteDetails(url, "n1", { created_on_url: "https://a.com/post?utm=1" }));
+    expect(next.pages[url].notes[0]).toEqual({ id: "n1", title: "Old", created_on_url: "https://a.com/post?utm=1" });
+  });
+
+  test("Never a detail the note already has, nor an unknown field or a bad value", () => {
+    expect(notesApp(base, fillNoteDetails(url, "n2", { created_on_url: "https://a.com/other" }))).toBe(base);
+    expect(notesApp(base, fillNoteDetails(url, "n1", { title: "Changed" }))).toBe(base);
+    expect(notesApp(base, fillNoteDetails(url, "n1", { created_on_url: "javascript:alert(1)" }))).toBe(base);
+    expect(notesApp(base, fillNoteDetails(url, "n1", { created_on_url: "https://evil.com/post" }))).toBe(base);
+    expect(notesApp(base, fillNoteDetails(url, "missing", { created_on_url: "https://a.com/post" }))).toBe(base);
+  });
 });

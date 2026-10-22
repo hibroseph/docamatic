@@ -174,3 +174,8 @@ kbd {
 .feedback-form__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .feedback-form__fine { margin: 0; color: var(--ink-muted); font-size: 11px; line-height: 15px; }
 .feedback-form .error { margin: 0; }
+
+/* Docamatic isn't allowed on the open site */
+.site-access { display: grid; gap: var(--space-2); margin: var(--space-2) var(--space-4) 0; padding: var(--space-3); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-md); background: var(--paper-2); font-size: 13px; line-height: 18px; }
+.site-access p { margin: 0; }
+.site-access .dm-btn { justify-self: start; }

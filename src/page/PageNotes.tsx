@@ -5,7 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { onUrlChange } from "../utils/urlChanges";
 import { notesForPage, tagsOfNote } from "../model/notes";
 import type { NoteRecord, State, Tag } from "../model/types";
-import { setPageTitle } from "../redux/actions";
+import { fillNoteDetails, setPageTitle } from "../redux/actions";
+import { noteUrlFor, redactUrl } from "../utils/noteUrl";
 import { NoRenderErrorBoundary } from "../ui/NoRenderErrorBoundary";
 import { StickyNote } from "./StickyNote";
 import { reportNewlyShownNotes } from "./reportShown";
@@ -105,6 +106,24 @@ const useSavePageTitle = (records: NoteRecord[], url: string, enabled: boolean) 
   }, [pageUrls, url]);
 };
 
+/**
+ * Gives notes saved by older versions the details they're missing, now that
+ * the page is open (see FILLABLE_NOTE_DETAILS in redux/reducer.js). Only
+ * notes saved under exactly this page's address: one shown here under an
+ * older, broader address may have been written on a different page.
+ */
+const useFillMissingDetails = (records: NoteRecord[], url: string, enabled: boolean) => {
+  const dispatch = useDispatch();
+  const missing = records.filter(({ note, pageUrl }) => !note.created_on_url && pageUrl === noteUrlFor(url));
+  const key = missing.map(({ note }) => note.id).join(" ");
+  useEffect(() => {
+    if (!enabled || !key) return;
+    const createdOn = redactUrl(url);
+    if (!createdOn) return;
+    missing.forEach(({ note, pageUrl }) => dispatch(fillNoteDetails(pageUrl, note.id, { created_on_url: createdOn })));
+  }, [key, url]);
+};
+
 export const PageNotes = ({ disconnected = false, saveTitles = true }: { disconnected?: boolean; saveTitles?: boolean }) => {
   const url = useCurrentUrl();
   const windowWidth = useWindowWidth();
@@ -117,6 +136,7 @@ export const PageNotes = ({ disconnected = false, saveTitles = true }: { disconn
   const seen = useRef(new Set<string>());
 
   useSavePageTitle(records, url, saveTitles);
+  useFillMissingDetails(records, url, saveTitles);
 
   // After rendering, so "shown" means actually on the page
   useEffect(() => {

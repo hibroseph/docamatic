@@ -20,6 +20,7 @@ export const REPLACE_STATE = "REPLACE_STATE"
 // Since 5.1
 export const RESTORE_NOTE = "RESTORE_NOTE"
 export const SET_PAGE_TITLE = "SET_PAGE_TITLE"
+export const FILL_NOTE_DETAILS = "FILL_NOTE_DETAILS"
 export const UPDATE_TAG = "UPDATE_TAG"
 export const DELETE_TAG = "DELETE_TAG"
 export const SET_PREFERENCES = "SET_PREFERENCES"
@@ -203,6 +204,20 @@ export function setPageTitle(url, title) {
     type: SET_PAGE_TITLE,
     url,
     title,
+  };
+}
+
+/**
+ * Fills in details a note doesn't have yet, now that they're known (it was
+ * saved by an older version). Never changes a detail the note already has.
+ * Only the fields the reducer lists (FILLABLE_NOTE_DETAILS) are taken.
+ */
+export function fillNoteDetails(url, id, details) {
+  return {
+    type: FILL_NOTE_DETAILS,
+    url,
+    id,
+    details,
   };
 }
 

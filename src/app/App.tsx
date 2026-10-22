@@ -31,6 +31,7 @@ import {
 import { AllNotesView, FavoritesView, SearchResultsView, TagNotesView, TagsView, ThisPageView } from "./views";
 import { Settings } from "./Settings";
 import { SurveyPrompt } from "./Survey";
+import { SiteAccess } from "./SiteAccess";
 
 type Tab = "current" | "all" | "hearted" | "tags";
 
@@ -235,6 +236,7 @@ export const App = ({ surface }: { surface: Surface }) => {
                 </button>
               )}
             </div>
+            <SiteAccess tab={activeTab} surface={surface} />
             {failure && (
               <div className="create-failure" role="alert" data-testid={TEST_IDS.popupCreateFailure}>
                 <p className="error">{createFailureMessage(failure.reason)}</p>

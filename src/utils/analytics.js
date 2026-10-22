@@ -32,9 +32,12 @@ const STORAGE_KEY = "analytics";
 // Which Chromium browser this is (Chrome, Edge, Brave, Opera, ...), from the
 // browser's own client hints, for spotting browser-specific problems.
 // Brands include generic entries ("Chromium", "Not A(Brand") to skip.
-export const browserName = (brands = globalThis.navigator?.userAgentData?.brands) => {
+export const browserName = (brands = globalThis.navigator?.userAgentData?.brands, userAgent = globalThis.navigator?.userAgent || "") => {
   const specific = (brands || []).map((b) => b.brand).filter((name) => !/chromium|not.?a.?brand/i.test(name));
-  return specific[0] || (brands?.length ? "Chromium" : "unknown");
+  if (specific[0]) return specific[0];
+  if (brands?.length) return "Chromium";
+  // Firefox has no client hints
+  return /\bFirefox\//.test(userAgent) ? "Firefox" : "unknown";
 };
 
 const isConfigured = () => Boolean(config.posthog_api_key && config.posthog_host);

@@ -15,6 +15,12 @@
 //      upgrades cleanly.
 // Never edit a migration that has shipped: users may be anywhere in history.
 //
+// A new *optional* detail that older notes can't have yet (it's only known
+// once their page is open, say) isn't a migration: add it to
+// FILLABLE_NOTE_DETAILS in reducer.js and dispatch fillNoteDetails where it
+// becomes known. Old notes work without it and get it on their next visit
+// (page titles and created_on_url are filled in that way).
+//
 // Version history:
 //   0: Saved before versioning existed (2022-2023 builds). Same shape as 1.
 //      Older formats (the MV2 localStorage data and the 2022 JSON string in

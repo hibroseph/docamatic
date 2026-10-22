@@ -1,3 +1,4 @@
+import { sameSite } from "./authorizeSender";
 import { INITIAL_NOTE_WIDTH } from "../utils/constants";
 import {
   ADD_NOTE,
@@ -18,6 +19,7 @@ import {
   RESTORE_NOTE,
   SET_ANALYTICS_ENABLED,
   SET_PAGE_TITLE,
+  FILL_NOTE_DETAILS,
   SET_PREFERENCES,
   TOGGLE_VISIBILITY,
   UPDATE_TAG,
@@ -66,6 +68,16 @@ const updatePageNotes = (state, url, update) => {
 // Merges the result of `update(note)` into the note with the given id
 const updateNote = (state, url, id, update) =>
   updatePageNotes(state, url, (notes) => notes.map((note) => (note.id === id ? { ...note, ...update(note) } : note)));
+
+// Details older notes may lack, which FILL_NOTE_DETAILS can fill in once
+// they're known, with what each must look like. To give older notes a new
+// detail as it becomes known (instead of guessing it in a migration), add it
+// here and dispatch fillNoteDetails where the detail is available.
+const FILLABLE_NOTE_DETAILS = {
+  // The full address the note is on (credentials removed: redactUrl), added
+  // in 5.0; filled in on a visit to the exact page it's saved under
+  created_on_url: (value, url) => typeof value === "string" && value.length <= 4096 && /^(https?|file):\/\//.test(value) && sameSite(value, url),
+};
 
 // Content edits record when they happened (actions carry `at`)
 const edited = (action) => (action.at ? { updated_at: action.at } : {});
@@ -368,6 +380,19 @@ const notesApp = (state = GetInitialState(), action) => {
           },
         },
       };
+    }
+
+    case FILL_NOTE_DETAILS: {
+      // Details older notes didn't save, filled in when they become known
+      // (see fillNoteDetails). Only missing ones, only these fields.
+      const fill = Object.fromEntries(
+        Object.entries(action.details || {}).filter(([key, value]) => FILLABLE_NOTE_DETAILS[key]?.(value, action.url))
+      );
+      const note = state.pages?.[action.url]?.notes?.find((n) => n.id === action.id);
+      if (!note) return state;
+      const missing = Object.fromEntries(Object.entries(fill).filter(([key]) => note[key] === undefined || note[key] === null));
+      if (Object.keys(missing).length === 0) return state;
+      return updateNote(state, action.url, action.id, () => missing);
     }
 
     case SET_PAGE_TITLE: {

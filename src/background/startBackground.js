@@ -90,8 +90,8 @@ export function startBackground() {
   // pages with notes it brings in the new notes UI, which hides the old one
   // (page/mountNotes.tsx). Tabs Chrome has unloaded to save memory are
   // skipped: they load everything fresh when reopened.
-  const reconnectOpenTabs = async () => {
-    const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*", "file:///*"] });
+  const reconnectOpenTabs = async (patterns = ["http://*/*", "https://*/*", "file:///*"], stage = "reconnect_after_update") => {
+    const tabs = await chrome.tabs.query({ url: patterns });
     const files = chrome.runtime.getManifest().content_scripts?.[0]?.js || [];
     await Promise.all(
       tabs
@@ -99,10 +99,19 @@ export function startBackground() {
         .map((tab) =>
           chrome.scripting
             .executeScript({ target: { tabId: tab.id }, files })
-            .catch((err) => reportShowNotesFailure(err, tab.url, "reconnect_after_update"))
+            .catch((err) => reportShowNotesFailure(err, tab.url, stage))
         )
     );
   };
+
+  // Docamatic was just allowed on more sites ("Allow on this site" in the
+  // popup, or the browser's own site access settings): show notes in the tabs
+  // already open there, without a reload. Done here because Firefox closes
+  // the popup while its permission prompt is up.
+  chrome.permissions?.onAdded?.addListener(({ origins }) => {
+    if (!origins?.length) return;
+    reconnectOpenTabs(origins, "site_access_granted").catch((err) => captureException(err, { during: "showing notes after site access was allowed" }));
+  });
 
   // Resolves with the redux store once the state has been loaded from storage
   let resolveStoreReady;
@@ -267,6 +276,11 @@ export function startBackground() {
   // to do. A failure must never lead to starting with empty notes and saving
   // that over the user's data.
 
+  // How much storage is used, for error reports. Firefox has no
+  // getBytesInUse for storage.local (calling it would throw, not reject).
+  const bytesInUse = () =>
+    chrome.storage.local.getBytesInUse ? chrome.storage.local.getBytesInUse(null).catch(() => "unknown") : Promise.resolve("unknown");
+
   // Set when stored notes couldn't be loaded safely: { reason, message }
   let safeMode = null;
 
@@ -294,7 +308,7 @@ export function startBackground() {
     try {
       const storage = await chrome.storage.local.get(null);
       shape = describeStorage(storage);
-      sizes = { ...storageSizes(storage), bytes_in_use: await chrome.storage.local.getBytesInUse(null).catch(() => "unknown") };
+      sizes = { ...storageSizes(storage), bytes_in_use: await bytesInUse() };
       await track("safe_mode_entered", {
         reason,
         step,
@@ -340,14 +354,14 @@ export function startBackground() {
   // A failed save means changes made since the last good save will be lost
   // when the worker stops
   const reportSaveFailure = async (err, state) => {
-    const bytesInUse = await chrome.storage.local.getBytesInUse(null).catch(() => "unknown");
+    const bytes = await bytesInUse();
     captureException(
       err,
       { during: "saving state" },
       {
         level: "error",
         tags: { impact: IMPACT.NOTES_NOT_SAVED },
-        contexts: { unsaved_state: describeStorage(state), storage_size: { ...storageSizes(state), bytes_in_use: bytesInUse } },
+        contexts: { unsaved_state: describeStorage(state), storage_size: { ...storageSizes(state), bytes_in_use: bytes } },
       }
     );
   };

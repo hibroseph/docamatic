@@ -13,6 +13,10 @@ import { notesOnPage } from "../redux/pageNotes";
 import { NEW_NOTE_WIDTH, placeNewNote } from "../model/placement";
 import { DEFAULT_NOTE_COLOR, isNoteColorName } from "../model/colors";
 
+// Chrome and other Chromium browsers have an "Allow access to file URLs"
+// switch for each extension, off by default. Firefox has no such switch:
+// extensions can't run on files there at all.
+const isFirefox = () => chrome.runtime.getURL("").startsWith("moz-extension:");
 const fileAccessAllowed = () =>
   chrome.extension?.isAllowedFileSchemeAccess
     ? chrome.extension.isAllowedFileSchemeAccess().catch(() => true)
@@ -86,7 +90,9 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
   // chrome:// pages, the extension stores, ...: no extension can add to these
   if (!tab?.id || !tab.url || (!scriptable && !kept)) return fail("page_not_supported", true);
 
-  // Files on the computer need "Allow access to file URLs" turned on for Docamatic
+  // Files on the computer: Firefox doesn't let extensions on them at all;
+  // Chromium browsers need "Allow access to file URLs" turned on for Docamatic
+  if (!kept && tab.url.startsWith("file:") && isFirefox()) return fail("files_not_supported", true);
   if (!kept && tab.url.startsWith("file:") && !(await fileAccessAllowed())) return fail("file_access_off", true);
 
   const { info, error } = scriptable ? await pageInformationFor(tab) : {};

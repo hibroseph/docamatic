@@ -39,11 +39,33 @@ export const installKeyGuard = () => {
   if (window.__DOCAMATIC_KEY_GUARD__) return;
   window.__DOCAMATIC_KEY_GUARD__ = true;
   const guard = (event: Event) => {
+    // Only real key presses: the copies handed to the note are untrusted, and
+    // in Firefox they can pass by here again (they'd loop forever)
+    if (!event.isTrusted) return;
     const target = event.target as Element | null;
     if (target?.localName !== NOTES_ELEMENT) return;
     if (window.__DOCAMATIC_DELIVER_KEY__?.(event as KeyboardEvent)) event.stopImmediatePropagation();
   };
   for (const type of KEY_EVENTS) window.addEventListener(type, guard, true);
+};
+
+const KEY_FIELDS = ["key", "code", "location", "repeat", "isComposing", "altKey", "ctrlKey", "metaKey", "shiftKey", "keyCode", "charCode", "which"] as const;
+
+// Firefox makes keyboard events created by an extension "composed" whatever
+// they're told, so a KeyboardEvent copy would leave the shadow root and reach
+// the page after all. There the copy is a plain Event of the same type with
+// the key's details on it: it stays inside, and the note's handlers (React)
+// read the same fields.
+let keyboardEventsStayInside: boolean | undefined;
+const keyCopy = (original: KeyboardEvent): Event => {
+  const fields = Object.fromEntries(KEY_FIELDS.map((name) => [name, original[name]]));
+  const init = { bubbles: true, cancelable: true, composed: false };
+  if (keyboardEventsStayInside === undefined) keyboardEventsStayInside = !new KeyboardEvent("keydown", init).composed;
+  if (keyboardEventsStayInside) return new KeyboardEvent(original.type, { ...fields, ...init });
+  const copy = new Event(original.type, init);
+  for (const [name, value] of Object.entries(fields)) Object.defineProperty(copy, name, { value, enumerable: true });
+  Object.defineProperty(copy, "getModifierState", { value: (key: string) => original.getModifierState(key) });
+  return copy;
 };
 
 /** In the notes UI: delivers guarded keys inside the shadow root */
@@ -52,21 +74,11 @@ export const deliverKeysTo = (shadow: ShadowRoot) => {
     // The website's demo notes are <docamatic-notes> too, with their own
     // key handling; only keys for these notes are taken
     if (original.target !== shadow.host) return false;
-    const target = shadow.activeElement || shadow.host;
-    const copy = new KeyboardEvent(original.type, {
-      key: original.key,
-      code: original.code,
-      location: original.location,
-      repeat: original.repeat,
-      isComposing: original.isComposing,
-      altKey: original.altKey,
-      ctrlKey: original.ctrlKey,
-      metaKey: original.metaKey,
-      shiftKey: original.shiftKey,
-      bubbles: true,
-      cancelable: true,
-      composed: false,
-    });
+    // Nothing focused inside: the key is stopped, but there's nobody to hand
+    // it to (a copy sent to the host would go straight back out to the page)
+    const target = shadow.activeElement;
+    if (!target) return true;
+    const copy = keyCopy(original);
     target.dispatchEvent(copy);
     if (copy.defaultPrevented) original.preventDefault();
     return true;

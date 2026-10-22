@@ -70,6 +70,8 @@ export const createNote = async (tab: Tab | null | undefined, placement: "page" 
 export const createFailureMessage = (reason: string) =>
   reason === "file_access_off"
     ? "To add notes to files on your computer, turn on “Allow access to file URLs” in Docamatic's details on the extensions page."
+    : reason === "files_not_supported"
+    ? "Firefox doesn't let extensions put notes on files from your computer."
     : reason === "page_not_supported"
     ? "Notes can't go on this page. Browser pages and extension stores don't allow it."
     : reason === "safe_mode"
@@ -80,7 +82,7 @@ export const createFailureMessage = (reason: string) =>
 // page whose connection to Docamatic broke (an update, a page that replaced
 // itself); it can't help pages the browser doesn't allow or safe mode.
 // Keeping the note in Docamatic works for any page whose address is known.
-export const canRetryAfterReload = (reason: string) => !["page_not_supported", "file_access_off", "safe_mode"].includes(reason);
+export const canRetryAfterReload = (reason: string) => !["page_not_supported", "files_not_supported", "file_access_off", "safe_mode"].includes(reason);
 export const canKeepInstead = (reason: string, tab: Tab | null | undefined) => reason !== "safe_mode" && Boolean(tab?.url);
 
 /** Reloads a tab and resolves once it has loaded again (or after `ms`) */

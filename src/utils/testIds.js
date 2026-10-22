@@ -16,6 +16,9 @@ export const TEST_IDS = {
   popupCreateFailure: "popup-create-failure",
   popupRetryAfterReload: "popup-retry-after-reload",
   popupKeepNoteInstead: "popup-keep-note-instead",
+  // Docamatic isn't allowed on the open site: the notice and its Allow button
+  siteAccess: "site-access",
+  siteAccessAllow: "site-access-allow",
   // A survey from PostHog in the popup: the card, its Next/Send and No thanks
   survey: "survey",
   surveyNext: "survey-next",

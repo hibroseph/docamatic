@@ -422,13 +422,15 @@ export const useDismiss = (open: boolean, close: () => void, ...refs: React.RefO
     };
     root.addEventListener("pointerdown", markInside);
     document.addEventListener("pointerdown", onPointer);
-    root.addEventListener("keydown", onKey);
-    if (root !== document) document.addEventListener("keydown", onKey);
+    // Capture: a note on a page stops keys at its edge (so they can't reach
+    // the site), which would keep Escape from ever getting here on the way up
+    root.addEventListener("keydown", onKey, true);
+    if (root !== document) document.addEventListener("keydown", onKey, true);
     return () => {
       root.removeEventListener("pointerdown", markInside);
       document.removeEventListener("pointerdown", onPointer);
-      root.removeEventListener("keydown", onKey);
-      document.removeEventListener("keydown", onKey);
+      root.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("keydown", onKey, true);
     };
   }, [open]);
 };

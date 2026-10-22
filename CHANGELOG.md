@@ -274,6 +274,15 @@ and the extension is built with WXT so it can ship to Firefox too.
   on 5.0.1 ("pages is not an object (found array)"). An empty array holds no
   notes, so it's now read as `{}` and saved in the right shape. A `pages`
   array with anything in it is still refused, so nothing can be thrown away.
+- Safe mode only when there's something to protect: saved data that can't be
+  used but has nothing in it that could be a note (nothing with an `id`,
+  `body` or `text` under `pages` or the old notes keys, JSON strings
+  included) is backed up ("Before an update" on Backup & restore) and
+  replaced with a clean start, keeping usable tags (emptied) and settings.
+  Reported to Sentry as a warning (tag `safe_mode_avoided`, with the stored
+  data's shape) and to analytics as `started_fresh`, so the format can be
+  handled properly later. Data from a newer version, or that may hold a
+  note, still goes to safe mode untouched (`mayHoldNotes`, unit tested).
 - Publish workflow: a rejected Web Store upload (e.g. `ITEM_NOT_UPDATABLE`
   while a review is pending) now fails the workflow with the Web Store's
   error. The API answers HTTP 200 either way, so it passed before.

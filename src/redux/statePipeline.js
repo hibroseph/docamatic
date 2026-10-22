@@ -118,7 +118,8 @@ export const prepareStoredState = (storage, { migrate = migrateState } = {}) => 
   assertNoNotesLost(raw, state);
 
   const legacyKeys = LEGACY_STORAGE_KEYS.filter((key) => key in storage);
-  const changed = legacyKeys.length > 0 || !raw.pages || schemaVersionOf(raw) !== schemaVersionOf(state);
+  const changed =
+    legacyKeys.length > 0 || typeOf(raw.pages) !== "object" || schemaVersionOf(raw) !== schemaVersionOf(state);
 
   return { state, changed, legacyKeys };
 };

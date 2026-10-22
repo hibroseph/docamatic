@@ -70,9 +70,22 @@ test("Refuses corrupt older data instead of starting with no notes", () => {
 })
 
 test("Refuses data that isn't in a usable shape", () => {
-    expect(reasonOf(() => prepareStoredState({ pages: [], tags: [], metadata: {} }))).toBe("invalid_state");
+    expect(reasonOf(() => prepareStoredState({ pages: [{ notes: [{ id: "a" }] }], tags: [], metadata: {} }))).toBe("invalid_state");
     const noteWithoutId = { pages: { "https://a.com/": { notes: [{ title: "no id" }] } }, tags: [], metadata: {} };
     expect(reasonOf(() => validateState(noteWithoutId))).toBe("invalid_state");
+})
+
+test("An empty pages array (saved by builds from before this repository) is no notes, not broken data", () => {
+    // What storage held on an install that went into safe mode on 5.0.1
+    const storage = {
+        analytics: { installId: "x" },
+        metadata: { docamatic_version: "4.0.0", migrated_data_to_storage_local: true },
+        pages: [],
+    };
+    const { state, changed } = prepareStoredState(storage);
+    expect(state.pages).toEqual({});
+    expect(state.tags).toEqual([]);
+    expect(changed).toBe(true); // saved in the right shape from then on
 })
 
 test("Knows a fresh install from existing data", () => {

@@ -14,7 +14,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+## 5.0.2 (2026-10-22)
+
 ### Fixed
+- Installs that had `pages: []` saved (an empty array instead of the
+  url-keyed object, from builds older than this repository, with metadata
+  `{ docamatic_version, migrated_data_to_storage_local }`) went into safe mode
+  on 5.0.1 ("pages is not an object (found array)"). An empty array holds no
+  notes, so it's now read as `{}` and saved in the right shape. A `pages`
+  array with anything in it is still refused, so nothing can be thrown away.
 - Publish workflow: a rejected Web Store upload (e.g. `ITEM_NOT_UPDATABLE`
   while a review is pending) now fails the workflow with the Web Store's
   error. The API answers HTTP 200 either way, so it passed before.

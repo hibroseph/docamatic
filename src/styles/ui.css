@@ -125,6 +125,8 @@
 }
 .menu[hidden] { display: none; }
 .note-menu { top: 44px; right: var(--space-2); }
+/* Opened upward, from the note's top bar, when there's no room below it */
+.note-menu.note-menu--up { top: auto; bottom: calc(100% - 40px); }
 .menu__label { padding: 2px var(--space-2); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .02em; }
 .menu__sep { height: 1px; margin: var(--space-1) 0; background: var(--hairline); }
 .menu__item {

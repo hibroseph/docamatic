@@ -2,7 +2,7 @@
 // tags, colors and the More menu. StickyNote (on pages) and NoteCard (in the
 // popup and side panel) arrange them differently, but they're the same
 // controls with the same behavior.
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ContentEditable from "react-contenteditable";
 import DOMPurify from "dompurify";
 import { useSelector } from "react-redux";
@@ -355,6 +355,54 @@ export const TagEditor = ({
  * popover for everything else. Both listen while the event bubbles, which
  * reaches the shadow root before the document.
  */
+/** Whether a press landed on its element's scrollbar rather than its content */
+const onScrollbar = (event: PointerEvent) => {
+  const el = event.target;
+  if (!(el instanceof Element)) return false;
+  const box = el.getBoundingClientRect();
+  const right = box.left + el.clientLeft + el.clientWidth;
+  const bottom = box.top + el.clientTop + el.clientHeight;
+  return (el.scrollHeight > el.clientHeight && event.clientX >= right) || (el.scrollWidth > el.clientWidth && event.clientY >= bottom);
+};
+
+/** The part of the screen a menu inside `el` can be seen in: its scrolling container, within the window */
+const visibleArea = (el: HTMLElement) => {
+  let top = 0;
+  let bottom = window.innerHeight;
+  for (let parent = el.parentElement; parent; parent = parent.parentElement) {
+    const overflow = getComputedStyle(parent).overflowY;
+    if ((overflow === "auto" || overflow === "scroll") && parent.scrollHeight > parent.clientHeight) {
+      const box = parent.getBoundingClientRect();
+      top = Math.max(top, box.top);
+      bottom = Math.min(bottom, box.bottom);
+      break;
+    }
+  }
+  return { top, bottom };
+};
+
+/**
+ * Opens a menu where it fits: below its button, or above when there's no room
+ * below (the last note in the popup's list). If it fits neither way, it's
+ * scrolled into view, so nobody has to scroll to find the rest of it.
+ */
+const useMenuPlacement = (open: boolean, menu: React.RefObject<HTMLDivElement>) => {
+  useLayoutEffect(() => {
+    const el = menu.current;
+    if (!open || !el) return;
+    el.classList.remove("note-menu--up");
+    const area = visibleArea(el);
+    const below = el.getBoundingClientRect();
+    if (below.bottom <= area.bottom) return;
+    el.classList.add("note-menu--up");
+    const above = el.getBoundingClientRect();
+    if (above.top >= area.top) return;
+    // Room neither way: below, scrolled into view
+    el.classList.remove("note-menu--up");
+    el.scrollIntoView({ block: "nearest" });
+  }, [open]);
+};
+
 export const useDismiss = (open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement>[]) => {
   useEffect(() => {
     if (!open) return;
@@ -365,7 +413,9 @@ export const useDismiss = (open: boolean, close: () => void, ...refs: React.RefO
       if (refs.some((ref) => ref.current && path.includes(ref.current))) inside.add(event);
     };
     const onPointer = (event: Event) => {
-      if (!inside.has(event)) close();
+      // Pressing a scrollbar (to see the rest of a menu, say) isn't a click
+      // outside: the menu stays open
+      if (!inside.has(event) && !onScrollbar(event as PointerEvent)) close();
     };
     const onKey = (event: Event) => {
       if ((event as KeyboardEvent).key === "Escape") close();
@@ -407,8 +457,16 @@ export const NoteMenu = React.forwardRef<
   const { note, pageUrl } = record;
   const visible = note.visible !== false;
   const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
+  // Its own handle on the element too, to place it, besides the caller's
+  const own = useRef<HTMLDivElement | null>(null);
+  const setRef = (el: HTMLDivElement | null) => {
+    own.current = el;
+    if (typeof ref === "function") ref(el);
+    else if (ref) ref.current = el;
+  };
+  useMenuPlacement(open, own);
   return (
-    <div className="menu note-menu" role="menu" aria-label="Note options" hidden={!open} ref={ref}>
+    <div className="menu note-menu" role="menu" aria-label="Note options" hidden={!open} ref={setRef}>
       <div className="menu__label">Color</div>
       <ColorPicker
         note={note}

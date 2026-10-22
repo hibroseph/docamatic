@@ -26,6 +26,12 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Board: open a note in full, with the Open button on each card or by
+  double-clicking it. Read only while "Edit notes" is off; with it on, the
+  popup's full card (title, text, tags, color). Closes with Escape, Close,
+  or a click beside it; "Find on page" from there too. Analytics:
+  `board_note_opened` (`editing`). Test ids `board-note-open`,
+  `board-note-dialog`.
 - When a new note can't go on the page, the popup and side panel say so and
   offer what can still work: **Reload the page and try again** (reloads the
   tab, waits for it, and adds the note; not offered where it can't help:
@@ -256,6 +262,11 @@ and the extension is built with WXT so it can ship to Firefox too.
   new tab, so the site stays open. Privacy policy updated.
 
 ### Fixed
+- A note's menu opens where it fits: upward when there's no room below
+  (the last notes in the popup's list), scrolled into view if it fits
+  neither way. Pressing a scrollbar no longer closes the menu (it did, so the
+  rest of a menu that ran past the popup couldn't be reached by its
+  scrollbar).
 - A note just added from the side panel (or kept in Docamatic) always gets
   the cursor: the card focuses its title when it becomes the new note, not
   only if it wasn't on screen yet.

@@ -196,3 +196,10 @@ export const PageIcon = (p: IconProps) => (
     <path d="M9.5 2v3h3" />
   </Svg>
 );
+
+// Two arrows pointing apart: open something bigger
+export const OpenIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9.5 3H13v3.5M13 3 8.5 7.5M6.5 13H3V9.5M3 13l4.5-4.5" />
+  </Svg>
+);

@@ -9,7 +9,8 @@
 // arrangement stays put), in the grid they're left out. The "Edit notes"
 // switch turns the cards into editable ones; off, the page is for looking
 // and arranging, and a stray click or drag can't change a note.
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import DOMPurify from "dompurify";
 import { useDispatch, useSelector } from "react-redux";
 import { allNotes, pageLabel, plainText, tagsOfNote } from "../model/notes";
 import { CARD_HEIGHT, CARD_WIDTH, layoutBoard, tagOrder } from "../model/board";
@@ -18,7 +19,7 @@ import { resolveNoteColor } from "../model/colors";
 import type { NoteRecord, State, Tag } from "../model/types";
 import { BodyField, noteColorProps, TagPill, TitleField } from "../ui/NoteParts";
 import { useNoteActions } from "../ui/useNoteActions";
-import { CloseIcon, SearchIcon, TargetIcon } from "../ui/icons";
+import { CloseIcon, OpenIcon, SearchIcon, TargetIcon } from "../ui/icons";
 import { UndoProvider } from "../ui/undo";
 import { NoteCard } from "../app/NoteCard";
 import { findOnPage, useRemembered, useTheme } from "../app/hooks";
@@ -56,11 +57,15 @@ const useSavedPositions = (): [Positions, (next: Positions) => void] => {
 
 // --- A note's card ----------------------------------------------------------------
 
+// Opens a note in full (cards on the board are small and cut the text off)
+const OpenNote = createContext<(noteId: string) => void>(() => {});
+
 /** What's inside a card on this page: read only, or editable title and text */
 const CardContent = ({ record, tags, editing, onFind }: { record: NoteRecord; tags: Tag[]; editing: boolean; onFind: () => void }) => {
   const { note, pageUrl } = record;
   const label = useSelector((state: State) => pageLabel(state, pageUrl));
   const actions = useNoteActions(record);
+  const openNote = useContext(OpenNote);
   const text = plainText(note.body);
   return (
     <>
@@ -71,6 +76,16 @@ const CardContent = ({ record, tags, editing, onFind }: { record: NoteRecord; ta
           <h3 className="dm-note__title board-card__title">{note.title || <span className="board-card__untitled">Untitled</span>}</h3>
         )}
         <div className="dm-note__actions">
+          <button
+            type="button"
+            className="dm-note__action"
+            aria-label="Open note"
+            title="Open (or double-click the note)"
+            data-testid={TEST_IDS.boardNoteOpen}
+            onClick={() => openNote(note.id)}
+          >
+            <OpenIcon />
+          </button>
           <button type="button" className="dm-note__action" aria-label="Find on page" title="Find on page" onClick={onFind}>
             <TargetIcon />
           </button>
@@ -117,6 +132,7 @@ const BoardCard = ({
   onFind: () => void;
 }) => {
   const { note } = record;
+  const openNote = useContext(OpenNote);
   const ref = useRef<HTMLElement>(null);
   const drag = useRef<{ id: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const color = noteColorProps(resolveNoteColor(note.color));
@@ -128,6 +144,9 @@ const BoardCard = ({
       style={{ ...color.style, transform: `translate(${at.x}px, ${at.y}px)`, width: CARD_WIDTH, height: CARD_HEIGHT }}
       data-note-id={note.id}
       aria-label={note.title ? `Note: ${note.title}` : "Note"}
+      onDoubleClick={(event) => {
+        if (!(event.target as HTMLElement).closest(NOT_A_DRAG)) openNote(note.id);
+      }}
       onPointerDown={(event) => {
         if (event.button !== 0 || (event.target as HTMLElement).closest(NOT_A_DRAG)) return;
         event.preventDefault();
@@ -161,15 +180,76 @@ const BoardCard = ({
 /** A read-only card in the By tag grid (with editing on, the popup's card is used) */
 const GridCard = ({ record, tags, onFind }: { record: NoteRecord; tags: Tag[]; onFind: () => void }) => {
   const color = noteColorProps(resolveNoteColor(record.note.color));
+  const openNote = useContext(OpenNote);
   return (
     <article
       className={`dm-note note board-card board-card--grid ${color.className}`}
       style={color.style}
       data-note-id={record.note.id}
       aria-label={record.note.title ? `Note: ${record.note.title}` : "Note"}
+      onDoubleClick={(event) => {
+        if (!(event.target as HTMLElement).closest(NOT_A_DRAG)) openNote(record.note.id);
+      }}
     >
       <CardContent record={record} tags={tags} editing={false} onFind={onFind} />
     </article>
+  );
+};
+
+// --- A note opened in full ----------------------------------------------------------
+
+/**
+ * The whole note, over the page. With "Edit notes" on it's the popup's full
+ * card (title, text, tags, color, ...); off, it's read only, like the cards.
+ * Closes with Escape, the Close button, or a click beside it.
+ */
+const NoteDialog = ({ record, tags, editing, onClose, onFind }: { record: NoteRecord; tags: Tag[]; editing: boolean; onClose: () => void; onFind: () => void }) => {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const { note, pageUrl } = record;
+  const label = useSelector((state: State) => pageLabel(state, pageUrl));
+  const color = noteColorProps(resolveNoteColor(note.color));
+  useEffect(() => {
+    dialog.current?.showModal();
+  }, []);
+  return (
+    <dialog
+      ref={dialog}
+      className="note-dialog"
+      aria-label={note.title ? `Note: ${note.title}` : "Note"}
+      data-testid={TEST_IDS.boardNoteDialog}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === dialog.current) dialog.current?.close();
+      }}
+    >
+      {editing ? (
+        <NoteCard record={record} autoFocus={false} />
+      ) : (
+        <article className={`dm-note note note-dialog__note ${color.className}`} style={color.style}>
+          <div className="dm-note__head">
+            <h2 className="dm-note__title">{note.title || <span className="board-card__untitled">Untitled</span>}</h2>
+          </div>
+          {/* Sanitized: notes can hold markup pasted in from web pages */}
+          <div className="dm-note__body note-dialog__body" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.body || "") }} />
+          {tags.length > 0 && (
+            <div className="dm-note__tags">
+              {tags.map((tag) => (
+                <TagPill key={tag.id} tag={tag} />
+              ))}
+            </div>
+          )}
+          <span className="board-card__page">{label}</span>
+        </article>
+      )}
+      <div className="note-dialog__actions">
+        <button type="button" className="dm-btn dm-btn--sm" onClick={onFind}>
+          <TargetIcon /> Find on page
+        </button>
+        <button type="button" className="dm-btn dm-btn--sm" onClick={() => dialog.current?.close()}>
+          Close
+        </button>
+      </div>
+    </dialog>
   );
 };
 
@@ -389,6 +469,13 @@ export const Board = () => {
   const [editMode, setEditMode] = useRemembered<"on" | "off">("board:editing", "off");
   const editing = editMode === "on";
   const [query, setQuery] = useState("");
+  // The note opened in full, if any; looked up live so edits show
+  const [openId, setOpenId] = useState<string | null>(null);
+  const opened = openId ? records.find(({ note }) => note.id === openId) : undefined;
+  const openNote = (noteId: string) => {
+    setOpenId(noteId);
+    track("board_note_opened", { editing });
+  };
   const searchInput = useRef<HTMLInputElement>(null);
   const editedOnce = useRef(false);
 
@@ -427,6 +514,7 @@ export const Board = () => {
 
   return (
     <UndoProvider>
+     <OpenNote.Provider value={openNote}>
       <div
         className={`board-page ${editing ? "is-editing" : ""}`}
         // The first edit made on this page, so it's known that people edit here
@@ -511,6 +599,19 @@ export const Board = () => {
           <TagsView records={records} tags={tags} editing={editing} matches={matches} track={track} />
         )}
       </div>
+      {opened && (
+        <NoteDialog
+          record={opened}
+          tags={tagsOfNote(tags, opened.note)}
+          editing={editing}
+          onClose={() => setOpenId(null)}
+          onFind={() => {
+            track("board_find_on_page", { from: "opened_note" });
+            findOnPage(opened);
+          }}
+        />
+      )}
+     </OpenNote.Provider>
     </UndoProvider>
   );
 };

@@ -21,6 +21,9 @@ export const TEST_IDS = {
   // On the board page: its search box and the "Edit notes" switch
   boardSearch: "board-search",
   boardEditSwitch: "board-edit-switch",
+  // A board card's Open button, and the note opened in full
+  boardNoteOpen: "board-note-open",
+  boardNoteDialog: "board-note-dialog",
 
   searchInput: "search-input",
   searchAvailableTag: "search-available-tag",

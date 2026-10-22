@@ -139,3 +139,21 @@
   .board-bar { flex-wrap: wrap; }
   .board-search { order: 10; width: 100%; margin: 0; }
 }
+
+/* A note opened in full (Open, or double-click a card) */
+.note-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+.note-dialog::backdrop { background: color-mix(in srgb, var(--ink) 35%, transparent); }
+.note-dialog > .dm-note { width: 100%; max-height: calc(100vh - 140px); overflow: auto; box-sizing: border-box; }
+.note-dialog .note-card__body { max-height: none; }
+.note-dialog .note-card__body.is-long { -webkit-mask-image: none; mask-image: none; }
+.note-dialog__body { white-space: normal; }
+.note-dialog__body p { margin: 0 0 var(--space-2); }
+.note-dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-3); }
+.note-dialog__actions .dm-btn svg { margin-right: 4px; vertical-align: -3px; }

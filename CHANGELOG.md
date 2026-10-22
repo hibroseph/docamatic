@@ -16,7 +16,36 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## 5.0.3 (not released yet)
 
+### Changed
+- New welcome page (`src/apps/tabpage`), in the design system's look (tokens,
+  fonts and `dm-` components, as 5.1's; `src/styles/tokens.css` and
+  `fonts.css` copied from the redesign). Many installs never open the
+  popup, so its main action is **Open a page with my first note**: it opens
+  Wikipedia's Post-it note article and puts a first note on it that says how
+  to add more (the popup's own flow: `GET_PAGE_INFORMATION`, then `addNote`).
+  Also a toolbar tip pointing up at the extension buttons (with the puzzle
+  piece and pin), a practice area where notes can be tried without being
+  saved, and three steps with pictures of the buttons to click. Analytics:
+  `onboarding_first_note_clicked`, `onboarding_first_note_added`,
+  `onboarding_first_note_failed` (`stage`), `onboarding_practice_note_added`.
+  The old animated GIFs are no longer used.
+- Website redesigned the same way (layout from 5.1's `site/`, with only what
+  5.0 does): hero with a live demo note, how it works, finding notes again,
+  and the plain pages (change log from 5.1's site, without 5.1). Google
+  Analytics replaced by PostHog, set up as on 5.1's site (memory persistence,
+  no autocapture, `website_add_to_chrome_clicked`, `website_demo_note_added`;
+  posthog-js 1.435.5 pinned). "Add to Chrome" links carry UTM labels.
+  `refresh-paths.js` copies the site's CSS and fonts and points the plain
+  pages at the hashed bundle; `build.sh` now ships `*.css` and `css/` too.
+- Privacy policy: the website section describes PostHog; lists the welcome
+  page's events.
+
 ### Fixed
+- Spell check underlines notes only while typing in them, not all over notes
+  that are just being read.
+- Keys typed in a note no longer reach the page as `keypress` either (only
+  `keydown`/`keyup` were stopped), so sites' shortcuts on that event don't
+  go off while typing.
 - Tabs open during an update kept the previous version's notes, which can't
   save any more: typing in them was silently lost until the page was
   reloaded (Chrome updates extensions on its own, so this hit every open

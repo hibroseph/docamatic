@@ -1,0 +1,15 @@
+/* The design system's fonts for the welcome page and the website
+   (SIL Open Font License; bundled, nothing loads from the internet). Notes
+   on web pages keep their own look until 5.1. */
+@font-face {
+  font-family: "Figtree";
+  src: url("../../design-system/fonts/Figtree-Variable.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../../design-system/fonts/BricolageGrotesque-Variable.woff2") format("woff2");
+  font-weight: 400 800;
+  font-display: swap;
+}

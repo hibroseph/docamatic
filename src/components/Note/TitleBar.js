@@ -32,10 +32,22 @@ export const TitleBar = props => {
                 value={title.text}
                 placeholder="Title"
                 onChange={titleChange}
-                onFocus={title.onFocus}
-                onBlur={title.onBlur}
+                // Spell check only while typing: red underlines all over notes
+                // that are just being read are noise
+                spellCheck={false}
+                onFocus={event => {
+                    event.currentTarget.spellcheck = true;
+                    title.onFocus(event);
+                }}
+                onBlur={event => {
+                    event.currentTarget.spellcheck = false;
+                    title.onBlur(event);
+                }}
+                // Keys typed here are the note's, not the page's: without this,
+                // sites' keyboard shortcuts (a letter, the space bar) go off
                 onKeyDown={event => event.stopPropagation()}
                 onKeyUp={event => event.stopPropagation()}
+                onKeyPress={event => event.stopPropagation()}
                 onBeforeInput={event => {
                     event.stopPropagation()
                 }}

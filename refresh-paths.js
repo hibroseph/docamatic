@@ -34,11 +34,16 @@ if (!fs.existsSync("./dist/site")){
 
 fs.copyFileSync("./dist/homepage.html", "./dist/site/index.html")
 fs.copyFileSync(`./dist/${assets["homepage.js"]}`, `./dist/site/${assets["homepage.js"]}`)
+// The site's styles (design system, fonts, site.css), built from index.js
+fs.copyFileSync(`./dist/${assets["homepage.css"]}`, "./dist/site/homepage.css")
+fs.cpSync("./dist/css", "./dist/site/css", { recursive: true })
 
-fs.copyFileSync("./src/apps/homepage/styles.css", "./dist/site/styles.css")
-fs.copyFileSync("./src/apps/homepage/changelog.html", "./dist/site/changelog.html")
-fs.copyFileSync("./src/apps/homepage/contactus.html", "./dist/site/contactus.html")
-fs.copyFileSync("./src/apps/homepage/privacy.html", "./dist/site/privacy.html")
+// The other pages aren't built by webpack: point their script tag at the
+// bundle's hashed name
+for (const page of ["changelog.html", "contactus.html", "privacy.html"]) {
+  const html = fs.readFileSync(`./src/apps/homepage/${page}`, "utf8");
+  fs.writeFileSync(`./dist/site/${page}`, html.replace('src="./homepage.js"', `src="./${assets["homepage.js"]}"`));
+}
 console.log("copying images")
 if (!fs.existsSync("./dist/site/images")) {
   fs.mkdirSync("./dist/site/images");

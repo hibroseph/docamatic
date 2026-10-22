@@ -111,10 +111,23 @@ const Layer = ({ onDisconnectReady, saveTitles }: Pick<MountOptions, "onDisconne
   );
 };
 
+/** Start of the id of the notes layer on web pages (then the version) */
+export const PAGE_MOUNT_POINT_PREFIX = "_DOCAMATIC_NOTES_MOUNT_POINT:";
+
 export const mountNotes = ({ store, id, mode = "closed", onDisconnectReady, saveTitles = true }: MountOptions) => {
-  // A mount point left by an earlier copy of this script (e.g. before the
-  // extension was reloaded) can't be reused: its shadow root is closed.
-  document.getElementById(id)?.remove();
+  // Notes left by an earlier copy of this script (the extension was updated
+  // or reloaded while the page was open) can't be reused: their shadow root
+  // is closed, and they can no longer save. Hide them rather than remove
+  // them: the old copy is still running and would put a removed one back.
+  // Any version's (the page's ids have the version in them).
+  if (id.startsWith(PAGE_MOUNT_POINT_PREFIX)) {
+    document.querySelectorAll<HTMLElement>(`docamatic-notes[id^="${PAGE_MOUNT_POINT_PREFIX}"]`).forEach((stale) => {
+      stale.id = `${stale.id}stale`;
+      stale.style.setProperty("display", "none", "important");
+    });
+  } else {
+    document.getElementById(id)?.remove();
+  }
 
   // A custom element rather than a <div>, so the page's generic rules
   // (div { ... }, body > div { display: none }, ...) don't match it. It sits

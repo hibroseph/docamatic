@@ -153,7 +153,11 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   // the page only, as always; anchored ones go where their panel is)
   const isOffScreen = !anchor && !dropped && placement.x + width > windowWidth - SCROLLBAR_WIDTH;
   const fixed = pinned || placement.fixed;
-  const shownAt = { x: isOffScreen ? Math.max(0, windowWidth - width - SCROLLBAR_WIDTH) : placement.x, y: placement.y };
+  // Never past the left or top edge either, where it couldn't be scrolled to
+  // (saved on a narrower window, or by an older version that let notes be
+  // dragged above the page). Only where it's drawn; the saved position stays.
+  const edge = (value: number) => (anchor ? value : Math.max(0, value));
+  const shownAt = { x: edge(isOffScreen ? windowWidth - width - SCROLLBAR_WIDTH : placement.x), y: edge(placement.y) };
 
   // Moves the note to a spot on screen. Kept on screen: all of it if it
   // fits, otherwise its top. What's under it there decides what it moves

@@ -265,6 +265,26 @@ and the extension is built with WXT so it can ship to Firefox too.
   comments) puts the note where new notes go, instead of at an older
   right-click on the page.
 
+## 5.0.3 (not released yet)
+
+### Fixed
+- Tabs open during an update kept the previous version's notes, which can't
+  save any more: typing in them was silently lost until the page was
+  reloaded (Chrome updates extensions on its own, so this hit every open
+  tab). On update the background now injects the new loader into open web
+  tabs (not ones Chrome has unloaded), which brings in the new notes UI
+  where there are notes; the new UI hides every older notes layer
+  (`docamatic-notes` with a `_DOCAMATIC_NOTES_MOUNT_POINT:` id, renamed
+  `...stale`) instead of removing it by its own version's id, since the
+  orphaned copy puts a removed layer back.
+- Notes saved left of or above the page (a window narrower than the note,
+  or dragged above the top) are drawn at the edge instead of where they
+  can't be scrolled to. Display only; the saved position is unchanged.
+- A page's notes show whether its address ends in a slash or not
+  (`/blog/post` and `/blog/post/`): `noteUrlsFor` also returns each key's
+  trailing-slash twin (not for the site root). New notes are still saved
+  under the address as it is.
+
 ## 5.0.2 (2026-10-22)
 
 ### Fixed

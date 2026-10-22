@@ -99,13 +99,30 @@ const noteUrlWithRules = (href, rules) => {
 };
 
 /**
+ * The same key with or without a "/" at the end of the path: sites link to
+ * /page and /page/ interchangeably (or redirect one to the other), and a
+ * note saved on one should show on the other. Not for the site root, which
+ * is always "/". Undefined when there's no path to change.
+ */
+const trailingSlashTwin = (key) => {
+  const split = key.search(/[?#]/);
+  const base = split === -1 ? key : key.slice(0, split);
+  const rest = split === -1 ? "" : key.slice(split);
+  const pathStart = base.indexOf("/", base.indexOf("//") + 2);
+  if (!base.includes("//") || pathStart === -1 || pathStart === base.length - 1) return undefined;
+  return (base.endsWith("/") ? base.slice(0, -1) : base + "/") + rest;
+};
+
+/**
  * Every url notes for this page may be saved under: the current key, the key
- * 5.0.0 used (before the Amazon rule), and the key notes saved before 5.0
- * used. Each once.
+ * 5.0.0 used (before the Amazon rule), the key notes saved before 5.0 used,
+ * and each of those with or without a trailing slash. Each once. New notes
+ * are saved under the first, noteUrlFor(href).
  */
 export const noteUrlsFor = (href) => {
   if (!href) return [];
-  return [...new Set([noteUrlFor(href), noteUrlWithRules(href, SITE_RULES_5_0), legacyNoteUrl(href)])];
+  const keys = [noteUrlFor(href), noteUrlWithRules(href, SITE_RULES_5_0), legacyNoteUrl(href)];
+  return [...new Set([...keys, ...keys.map(trailingSlashTwin).filter(Boolean)])];
 };
 
 // Parameter names that may hold credentials: tokens, OAuth codes, sessions,

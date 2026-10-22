@@ -6,7 +6,7 @@ import { initSentry } from "../utils/sentry";
 import { createProxyStore } from "../utils/createProxyStore";
 import { CHROME_MESSAGES } from "../utils/constants";
 import { notifyUrlChange } from "../utils/urlChanges";
-import { mountNotes } from "../page/mountNotes";
+import { PAGE_MOUNT_POINT_PREFIX, mountNotes } from "../page/mountNotes";
 import { loadPageFonts } from "../page/pageFonts";
 import { bringNoteHere, notePlaces, revealNote } from "../page/noteRegistry";
 
@@ -64,7 +64,7 @@ function start() {
   store.ready().then(() => {
     mountNotes({
       store,
-      id: "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_",
+      id: PAGE_MOUNT_POINT_PREFIX + config.version + "_",
       onDisconnectReady: (mark) => (markDisconnected = mark),
     });
   });

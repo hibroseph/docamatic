@@ -8,8 +8,12 @@ import "./site.css";
 import { startAnalytics, trackWebsite } from "./analytics";
 import { startDemo, type DemoNote } from "../src/page/demo";
 import { attachPracticeMenu } from "../src/page/practiceMenu";
+import { attachContactForm } from "./contact";
 
 startAnalytics();
+
+const contactForm = document.getElementById("contact-form");
+if (contactForm instanceof HTMLFormElement) attachContactForm(contactForm);
 
 const art = document.getElementById("hero-art");
 const tryButton = document.getElementById("try-note");

@@ -15,7 +15,7 @@
 import posthog from "posthog-js/dist/module.slim.no-external";
 import { posthog_api_key, posthog_host } from "../config.json";
 
-const isPublishedSite = () => location.protocol === "https:" && !/^(localhost|127\.|\[::1\])/.test(location.hostname);
+export const isPublishedSite = () => location.protocol === "https:" && !/^(localhost|127\.|\[::1\])/.test(location.hostname);
 
 let started = false;
 
@@ -57,3 +57,6 @@ export const startAnalytics = () => {
 export const trackWebsite = (event: string, properties: Record<string, string | number | boolean> = {}) => {
   if (started) posthog.capture(event, properties);
 };
+
+/** This visit's id in PostHog, once analytics has started (it's per page load) */
+export const websiteDistinctId = () => (started ? posthog.get_distinct_id() : null);

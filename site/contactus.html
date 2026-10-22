@@ -25,11 +25,38 @@
     <main id="main" class="doc">
         <div class="wrap narrow">
             <h1 class="doc__title">Say <span class="dm-swipe dm-swipe--pink">hello</span></h1>
-            <p class="doc__lede">Questions, ideas, something that isn't working? Send an email. A real person reads
-                every one.</p>
+            <p class="doc__lede">Questions, ideas, something that isn't working? Write to us here. A real person
+                reads every one.</p>
 
-            <div class="contact-card">
-                <span>Email</span>
+            <form id="contact-form" class="contact-form" novalidate>
+                <fieldset class="contact-form__topics">
+                    <legend>What's it about?</legend>
+                    <label><input type="radio" name="topic" value="question" checked> A question</label>
+                    <label><input type="radio" name="topic" value="idea"> An idea</label>
+                    <label><input type="radio" name="topic" value="problem"> Something isn't working</label>
+                    <label><input type="radio" name="topic" value="other"> Something else</label>
+                </fieldset>
+                <label class="contact-form__label" for="contact-message">Your message</label>
+                <textarea id="contact-message" name="message" class="dm-input contact-form__message" rows="6"
+                    maxlength="3000" required></textarea>
+                <label class="contact-form__label" for="contact-email">Your email, if you'd like a reply
+                    <span class="contact-form__optional">(optional)</span></label>
+                <input id="contact-email" name="email" type="email" class="dm-input" autocomplete="email" maxlength="200">
+                <!-- Left empty by people; bots fill it in -->
+                <div class="contact-form__trap" aria-hidden="true">
+                    <label for="contact-website">Website</label>
+                    <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
+                </div>
+                <div class="contact-form__send">
+                    <button type="submit" class="dm-btn dm-btn--primary">Send message</button>
+                    <p class="contact-form__status" data-status role="status" aria-live="polite"></p>
+                </div>
+                <p class="contact-form__fine">Your message goes to the Docamatic team through PostHog, the service we use for
+                    usage statistics. See the <a href="./privacy.html">privacy policy</a>.</p>
+            </form>
+
+            <div class="contact-card contact-card--small">
+                <span>Prefer email?</span>
                 <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a>
             </div>
 

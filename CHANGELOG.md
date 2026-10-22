@@ -26,6 +26,14 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Website: a contact form on the contact page (topic, message, optional
+  email), so people can write without opening an email app. Messages go
+  straight to PostHog's capture endpoint as `contact_form_submitted`
+  (`message`, `topic`, `email`; no person profile), so the page knows
+  whether they arrived; if not (offline, an ad blocker) it keeps the message
+  and points to the email address, which is still on the page. Bots: a
+  hidden field and a minimum of 3 seconds on the page. Off on local copies
+  of the site. `site/contact.ts`. Privacy policy updated.
 - Firefox, and Chromium browsers besides Chrome, reviewed and tested
   (`docs/browsers.md`). The Firefox build was run in Firefox 158: install,
   welcome page, popup, a note on a page, the board, site access.

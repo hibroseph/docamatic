@@ -14,7 +14,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
-## 5.0.3 (not released yet)
+### Fixed
+- Edge's "Blocked" (it won't let extensions script a tab, seen reconnecting a
+  YouTube tab after the 5.0.3 update) is an expected scripting error, so it
+  isn't reported to Sentry. Only that exact message.
+
+## 5.0.3 (2026-10-22)
 
 ### Changed
 - New welcome page (`src/apps/tabpage`), in the design system's look (tokens,

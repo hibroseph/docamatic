@@ -32,6 +32,7 @@ const EXPECTED_SCRIPTING_ERRORS = [
   /no frame with id/i,
   /could not establish connection/i, // page has no content script yet / was unloaded
   /receiving end does not exist/i,
+  /^blocked$/i, // Edge: the browser won't let extensions script this tab (a policy or setting)
 ];
 
 /** True for errors from chrome.scripting / chrome.tabs that aren't bugs */

@@ -113,32 +113,51 @@ export const setInternalInstall = async (internal) => {
   internalPromise = null;
 };
 
+// One event to PostHog's capture endpoint; resolves with the response
+const send = async (event, properties) => {
+  const installId = await getInstallId();
+  const internal = await isInternalInstall();
+  return fetch(`${config.posthog_host}/i/v0/e/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      api_key: config.posthog_api_key,
+      event,
+      distinct_id: installId,
+      timestamp: new Date().toISOString(),
+      properties: {
+        ...properties,
+        extension_version: config.version,
+        browser: browserName(),
+        internal,
+        environment: config.environment,
+        // No PostHog person profile is created for the install id
+        $process_person_profile: false,
+      },
+    }),
+  });
+};
+
+/**
+ * Feedback someone wrote and chose to send (the popup's "Tell us", or
+ * Settings). Unlike usage events it's sent even with usage statistics off:
+ * the person pressed Send. It's the only event with text they wrote in it;
+ * the privacy policy says so. Resolves true when PostHog accepted it.
+ */
+export const sendFeedback = async (properties) => {
+  if (!isConfigured()) return false;
+  try {
+    const response = await send("feedback_submitted", properties);
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 export const track = async (event, properties = {}) => {
   try {
     if (!isConfigured() || !(await isEnabled())) return;
-
-    const installId = await getInstallId();
-    const internal = await isInternalInstall();
-
-    await fetch(`${config.posthog_host}/i/v0/e/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: config.posthog_api_key,
-        event,
-        distinct_id: installId,
-        timestamp: new Date().toISOString(),
-        properties: {
-          ...properties,
-          extension_version: config.version,
-          browser: browserName(),
-          internal,
-          environment: config.environment,
-          // No PostHog person profile is created for the install id
-          $process_person_profile: false,
-        },
-      }),
-    });
+    await send(event, properties);
   } catch (err) {
     // Analytics must never break the extension (offline, blocked by an ad
     // blocker, ...)

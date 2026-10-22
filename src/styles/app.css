@@ -138,3 +138,24 @@ kbd {
 .startup { padding: var(--space-6) var(--space-4); }
 .startup p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
 .safe-mode p { margin: 0 0 var(--space-3); }
+
+/* Feedback: the popup's one-time prompt (drawn like a note) and the form */
+.feedback-prompt {
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3);
+  border: var(--stroke-hair) solid var(--note-edge, var(--hairline));
+  border-radius: var(--radius-md);
+  background: var(--note-yellow);
+  color: var(--note-ink);
+}
+.feedback-prompt__title { margin: 0 0 var(--space-2); font-size: 13px; line-height: 18px; font-weight: 600; }
+.feedback-prompt .dm-btn--ghost { color: var(--note-ink); }
+.feedback-form { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.feedback-prompt .feedback-form { margin-top: 0; }
+.feedback-form__label { font-size: 13px; line-height: 18px; font-weight: 600; }
+.feedback-form__label--small { font-weight: 500; }
+.feedback-form__message { min-height: 80px; resize: vertical; font: inherit; }
+.feedback-form__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.feedback-form__fine { margin: 0; color: var(--ink-muted); font-size: 11px; line-height: 15px; }
+.feedback-prompt .feedback-form__fine { color: var(--note-ink-muted, var(--note-ink)); }
+.feedback-form .error { margin: 0; }

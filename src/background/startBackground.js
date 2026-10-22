@@ -36,7 +36,8 @@ import {
 } from "../redux/statePipeline";
 import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../redux/backups";
 import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
-import { setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
+import { sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
+import { cleanFeedback } from "../model/feedback";
 
 export function startBackground() {
   // This runs as a Manifest V3 service worker. Chrome will shut it down when it
@@ -629,6 +630,29 @@ export function startBackground() {
         });
       })
       .catch((err) => captureException(err, { during: "creating a note from the right-click menu" }));
+  });
+
+  // Feedback from the popup (model/feedback.ts). Only from the extension's
+  // own pages; only the cleaned message and email, plus a few counts.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.SEND_FEEDBACK) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    const feedback = cleanFeedback(message);
+    if (!feedback) {
+      sendResponse({ ok: false });
+      return;
+    }
+    storeReady
+      .then((store) =>
+        sendFeedback({
+          ...feedback,
+          prompted: message.prompted === true,
+          surface: message.surface === "sidepanel" ? "sidepanel" : "popup",
+          note_count: countNotes(store.getState()),
+        })
+      )
+      .then((ok) => sendResponse({ ok }), () => sendResponse({ ok: false }));
+    return true; // answered asynchronously
   });
 
   // The "Add a note to this page" shortcut (Alt+Shift+D by default)

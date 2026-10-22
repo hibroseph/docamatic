@@ -16,6 +16,14 @@ export const TEST_IDS = {
   popupCreateFailure: "popup-create-failure",
   popupRetryAfterReload: "popup-retry-after-reload",
   popupKeepNoteInstead: "popup-keep-note-instead",
+  // Feedback: the popup's one-time prompt, the form, and Settings' link
+  feedbackPrompt: "feedback-prompt",
+  feedbackOpen: "feedback-open",
+  feedbackDismiss: "feedback-dismiss",
+  feedbackMessage: "feedback-message",
+  feedbackEmail: "feedback-email",
+  feedbackSend: "feedback-send",
+  settingsFeedback: "settings-feedback",
   // Opens the board page (board.html)
   popupOpenBoard: "popup-open-board",
   // On the board page: its search box and the "Edit notes" switch

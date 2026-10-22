@@ -22,6 +22,8 @@ export const CHROME_MESSAGES = {
   // background does it so the popup, side panel and keyboard shortcut share
   // one path)
   CREATE_NOTE: "create_note",
+  // Popup -> background: feedback the person wrote and chose to send
+  SEND_FEEDBACK: "send_feedback",
   // Popup / side panel -> background: go to a note on its page ("Find on page")
   FIND_NOTE: "find_note",
   // Background -> page: scroll to this note and point it out

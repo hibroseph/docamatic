@@ -30,6 +30,7 @@ import {
 } from "./hooks";
 import { AllNotesView, FavoritesView, SearchResultsView, TagNotesView, TagsView, ThisPageView } from "./views";
 import { Settings } from "./Settings";
+import { FeedbackPrompt } from "./Feedback";
 
 type Tab = "current" | "all" | "hearted" | "tags";
 
@@ -206,7 +207,7 @@ export const App = ({ surface }: { surface: Surface }) => {
 
         {settingsOpen ? (
           <main className="content">
-            <Settings onBack={() => setSettingsOpen(false)} />
+            <Settings onBack={() => setSettingsOpen(false)} surface={surface} />
           </main>
         ) : (
           <>
@@ -343,6 +344,7 @@ export const App = ({ surface }: { surface: Surface }) => {
               </nav>
             )}
 
+            {surface === "popup" && !searching && <FeedbackPrompt surface={surface} />}
             <main className="content" role={searching ? "region" : "tabpanel"} aria-label={searching ? "Search results" : undefined}>
               {searching ? (
                 <SearchResultsView query={query} />

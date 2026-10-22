@@ -7,7 +7,8 @@ import { COLOR_LABELS, DEFAULT_NOTE_COLOR, NOTE_COLOR_NAMES, NOTE_PAPER, isNoteC
 import type { State, ThemePreference } from "../model/types";
 import { countNotes } from "../redux/statePipeline";
 import { BackIcon } from "../ui/icons";
-import { useNewNoteShortcut } from "./hooks";
+import { useNewNoteShortcut, type Surface } from "./hooks";
+import { FeedbackForm } from "./Feedback";
 
 const SITE = "https://hibroseph.github.io/docamatic";
 
@@ -27,13 +28,14 @@ const isFirefox = typeof navigator !== "undefined" && /firefox/i.test(navigator.
 
 const openTab = (url: string) => chrome.tabs.create({ url });
 
-export const Settings = ({ onBack }: { onBack: () => void }) => {
+export const Settings = ({ onBack, surface = "popup" }: { onBack: () => void; surface?: Surface }) => {
   const dispatch = useDispatch();
   const preferences = useSelector((state: State) => state.metadata?.preferences) || {};
   const analyticsEnabled = useSelector((state: State) => state.metadata?.analytics_enabled !== false);
   const noteCount = useSelector((state: State) => countNotes(state));
   const shortcut = useNewNoteShortcut();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [feedback, setFeedback] = useState<"closed" | "open" | "sent">("closed");
 
   const theme = preferences.theme || "system";
   const textSize = preferences.note_text_size || "medium";
@@ -232,6 +234,9 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
           <button type="button" className="link-button" onClick={() => openTab(chrome.runtime.getURL("/onboarding.html"))}>
             Quick tour
           </button>
+          <button type="button" className="link-button" data-testid={TEST_IDS.settingsFeedback} onClick={() => setFeedback("open")}>
+            Send feedback
+          </button>
           <a href={`${SITE}/changelog.html`} target="_blank" rel="noopener noreferrer">
             What's new
           </a>
@@ -239,6 +244,11 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
             Contact us
           </a>
         </div>
+        {feedback === "open" ? (
+          <FeedbackForm surface={surface} prompted={false} onSent={() => setFeedback("sent")} onCancel={() => setFeedback("closed")} />
+        ) : feedback === "sent" ? (
+          <p className="settings__help" role="status">Thank you! Every message is read.</p>
+        ) : null}
         <p className="settings__version">Docamatic {config.version}</p>
       </section>
     </div>

@@ -13,3 +13,6 @@ popup's board button.
 
 Ideas for next steps: zoom, filter by tag on the board, grouping by website, positions saved with
 the notes (so they're in backups and sync), drawing connections between notes, tags and colors editable on the canvas cards.
+
+Not built yet, on purpose: notes that show on every page of a website (instead of the exact page). Wait for
+what people say through the new feedback prompt before adding a setting like that.

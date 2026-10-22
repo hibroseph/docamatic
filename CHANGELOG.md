@@ -26,6 +26,20 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Feedback from people who use Docamatic (not just the uninstall survey).
+  The popup asks once, "What would make it better for you?", people who have
+  3+ notes and opened the popup on 3+ different days: "Tell us" opens a short
+  form (message, optional email), "No thanks" ends it; shown on at most 3
+  days. "Send feedback" in Settings, Help, any time. Sent through the
+  background (`SEND_FEEDBACK`, only from the extension's pages; message
+  trimmed and capped at 2000 characters, email only if it looks like one) as
+  the PostHog event `feedback_submitted` (`message`, `email`, `prompted`,
+  `surface`, `note_count`); sent even with usage statistics off, because the
+  person pressed Send. `feedback_prompt_shown` / `feedback_prompt_dismissed`
+  follow the usage statistics setting. State in storage.local `feedback`
+  (`model/feedback.ts`, unit tested). Privacy policy: "Feedback you send".
+  Test ids `feedback-*`, `settings-feedback`. PostHog: filter events by
+  `feedback_submitted` to read them.
 - Board: organize by website. The canvas can group by tag or by website
   ("Group by", remembered; busiest sites first, each page's notes together),
   each with its own arrangement (`board` in storage.local keeps

@@ -1,0 +1,105 @@
+/* Docamatic — generated from design-system/tokens.json by scripts/build-tokens.mjs. Don't edit by hand. */
+:root,
+:host,
+[data-theme="light"] {
+  color-scheme: light;
+  --paper: #fdfcf8;
+  --paper-2: #f4f2eb;
+  --paper-3: #ebe8df;
+  --ink: #1e2433;
+  --ink-muted: #596072;
+  --hairline: #dedad0;
+  --focus: #2f5bea;
+  --link: #2449c7;
+  --danger: #b8322c;
+  --danger-fill: #ffa59c;
+  --sticker-shadow: #1e2433;
+  --hl-yellow: #ffd84d;
+  --hl-pink: #ff9ec4;
+  --hl-blue: #8fc8ff;
+  --hl-green: #9de5a0;
+  --hl-orange: #ffb066;
+  --hl-purple: #c7b3ff;
+  --primary: var(--hl-yellow);
+  --on-primary: #1e2433;
+  --swipe-yellow: var(--hl-yellow);
+  --swipe-blue: var(--hl-blue);
+  --swipe-pink: var(--hl-pink);
+  --swipe-green: var(--hl-green);
+  --note-yellow: #fff1a3;
+  --note-pink: #ffd9ea;
+  --note-blue: #d6ecff;
+  --note-green: #ddf6d8;
+  --note-orange: #ffe2c4;
+  --note-purple: #e9e0ff;
+  --note-ink: #1e2433;
+  --note-ink-muted: #4b5263;
+  --note-edge: #1e24331f;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --sticker: 3px 3px 0 #1e2433;
+  --sticker-sm: 2px 2px 0 #1e2433;
+  --note-lift: 0 2px 4px #1e24331f, 0 10px 20px -8px #1e243340;
+  --note-lift-hover: 0 4px 8px #1e243324, 0 18px 32px -10px #1e24334d;
+  --focus-ring: 0 0 0 2px #fdfcf8, 0 0 0 4px #2f5bea;
+  --stroke-bold: 2px;
+  --stroke-hair: 1px;
+  --font-display: "Bricolage Grotesque", Figtree, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: Figtree, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1b1d22;
+  --paper-2: #23262d;
+  --paper-3: #2c3038;
+  --ink: #f2efe6;
+  --ink-muted: #a9adb8;
+  --hairline: #3a3f49;
+  --focus: #8ab0ff;
+  --link: #9bbcff;
+  --danger: #ff8f84;
+  --sticker-shadow: #0b0c0f;
+  --swipe-yellow: #726432;
+  --swipe-blue: #475e76;
+  --swipe-pink: #724e60;
+  --swipe-green: #4c6952;
+  --sticker: 3px 3px 0 #0b0c0f;
+  --sticker-sm: 2px 2px 0 #0b0c0f;
+  --note-lift: 0 2px 6px #00000080, 0 12px 24px -6px #000000b3;
+  --note-lift-hover: 0 4px 10px #00000099, 0 20px 36px -8px #000000cc;
+  --focus-ring: 0 0 0 2px #1b1d22, 0 0 0 4px #8ab0ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #1b1d22;
+    --paper-2: #23262d;
+    --paper-3: #2c3038;
+    --ink: #f2efe6;
+    --ink-muted: #a9adb8;
+    --hairline: #3a3f49;
+    --focus: #8ab0ff;
+    --link: #9bbcff;
+    --danger: #ff8f84;
+    --sticker-shadow: #0b0c0f;
+    --swipe-yellow: #726432;
+    --swipe-blue: #475e76;
+    --swipe-pink: #724e60;
+    --swipe-green: #4c6952;
+    --sticker: 3px 3px 0 #0b0c0f;
+    --sticker-sm: 2px 2px 0 #0b0c0f;
+    --note-lift: 0 2px 6px #00000080, 0 12px 24px -6px #000000b3;
+    --note-lift-hover: 0 4px 10px #00000099, 0 20px 36px -8px #000000cc;
+    --focus-ring: 0 0 0 2px #1b1d22, 0 0 0 4px #8ab0ff;
+  }
+}

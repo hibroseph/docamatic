@@ -24,8 +24,15 @@ export const NoteBody = props => {
         html={body.text}
         data-testid={TEST_IDS.noteBody}
         onChange={bodyChange}
-        onFocus={body.onFocus}
+        // Spell check only while typing (set on the element: the editor
+        // doesn't re-render for a prop change like this)
+        spellCheck={false}
+        onFocus={event => {
+            event.currentTarget.spellcheck = true;
+            body.onFocus(event);
+        }}
         onBlur={event => {
+            event.currentTarget.spellcheck = false;
             // Passing onBlur replaces the editor's own "save on blur", so
             // do it here: catch any change that didn't fire an input event
             const html = event.currentTarget.innerHTML;
@@ -34,6 +41,7 @@ export const NoteBody = props => {
         }}
         onKeyDown={event => event.stopPropagation()}
         onKeyUp={event => event.stopPropagation()}
+        onKeyPress={event => event.stopPropagation()}
         onBeforeInput={event => event.stopPropagation()}>
     </StyledContentEditable>
 }

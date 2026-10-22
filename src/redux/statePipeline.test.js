@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { StateError, isEmptyStorage, noteIdsIn, prepareStoredState, validateState } from "./statePipeline";
+import { StateError, isEmptyStorage, mayHoldNotes, noteIdsIn, prepareStoredState, validateState } from "./statePipeline";
 import { CURRENT_SCHEMA_VERSION, migrateState } from "./migrations";
 
 const fixture = (file) => JSON.parse(fs.readFileSync(path.join(__dirname, "__fixtures__", file), "utf8"));
@@ -70,9 +70,53 @@ test("Refuses corrupt older data instead of starting with no notes", () => {
 })
 
 test("Refuses data that isn't in a usable shape", () => {
-    expect(reasonOf(() => prepareStoredState({ pages: [], tags: [], metadata: {} }))).toBe("invalid_state");
+    expect(reasonOf(() => prepareStoredState({ pages: [{ notes: [{ id: "a" }] }], tags: [], metadata: {} }))).toBe("invalid_state");
     const noteWithoutId = { pages: { "https://a.com/": { notes: [{ title: "no id" }] } }, tags: [], metadata: {} };
     expect(reasonOf(() => validateState(noteWithoutId))).toBe("invalid_state");
+})
+
+test("An empty pages array (saved by builds from before this repository) is no notes, not broken data", () => {
+    // What storage held on an install that went into safe mode on 5.0.1
+    const storage = {
+        analytics: { installId: "x" },
+        metadata: { docamatic_version: "4.0.0", migrated_data_to_storage_local: true },
+        pages: [],
+    };
+    const { state, changed } = prepareStoredState(storage);
+    expect(state.pages).toEqual({});
+    expect(state.tags).toEqual([]);
+    expect(changed).toBe(true); // saved in the right shape from then on
+})
+
+test("Unusable data with nothing that could be a note starts fresh instead of safe mode", () => {
+    const tags = [{ id: "t1", text: "work", color: "#fff", notes: ["gone"] }];
+    for (const pages of ["garbage", 42, { "https://a.com/": { notes: null } }, { "https://a.com/": {} }, [[]]]) {
+        const { state, changed, startedFresh } = prepareStoredState({ pages, tags, metadata: { analytics_enabled: false } });
+        expect(startedFresh?.reason).toBe("invalid_state");
+        expect(changed).toBe(true);
+        expect(state.pages).toEqual({});
+        // Tags and settings are kept; the tags no longer point at notes
+        expect(state.tags).toEqual([{ ...tags[0], notes: [] }]);
+        expect(state.metadata).toMatchObject({ analytics_enabled: false, onboarded: true });
+        expect(() => validateState(state)).not.toThrow();
+    }
+})
+
+test("Anything that may hold a note still goes to safe mode", () => {
+    const refused = [
+        { pages: [{ notes: [{ id: "a" }] }] }, // a note, in an unknown layout
+        { pages: { "https://a.com/": { notes: { a: { id: "a", body: "hi" } } } } }, // notes keyed by id
+        { pages: { "https://a.com/": { notes: [{ body: "no id" }] } } }, // a note without an id
+        { pages: "[{\"text\":\"hi\"}]" }, // JSON in a string
+        { notes: "{not json" }, // unreadable old notes
+    ];
+    refused.forEach((storage) => expect(reasonOf(() => prepareStoredState({ tags: [], metadata: {}, ...storage }))).toBeTruthy());
+    expect(mayHoldNotes({ pages: "garbage" })).toBe(false);
+    expect(mayHoldNotes({ notes: "{\"https://a.com/\":{\"notes\":[{\"id\":1}]}}" })).toBe(true);
+})
+
+test("Data from a newer version is never replaced, even with no notes", () => {
+    expect(reasonOf(() => prepareStoredState({ pages: "garbage", tags: [], metadata: { schema_version: 999 } }))).toBe("newer_version");
 })
 
 test("Knows a fresh install from existing data", () => {

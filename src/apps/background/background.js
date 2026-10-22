@@ -27,6 +27,7 @@ import {
   assertNoNotesLost,
   countNotes,
   isEmptyStorage,
+  StateError,
   prepareStoredState,
   validateState,
 } from "../../redux/statePipeline";
@@ -62,6 +63,7 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     track("extension_installed");
   } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
     track("extension_updated", { previous_version: previousVersion });
+    reconnectOpenTabs().catch((err) => captureException(err, { during: "reconnecting open tabs after an update" }));
   }
 
   if (reason !== chrome.runtime.OnInstalledReason.INSTALL && reason !== chrome.runtime.OnInstalledReason.UPDATE) {
@@ -73,6 +75,27 @@ chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     .catch((err) => captureException(err, { during: "recording install event" }))
     .finally(resolveInstallEventSeen);
 });
+
+// After an update, tabs that were already open still run the previous
+// version's page scripts, which can't reach this version: their notes stop
+// saving and show "Sync Error" until the page is reloaded (Chrome updates
+// extensions silently, so that's every open tab). Give each open web page the
+// new loader; on pages with notes it brings in the new notes UI, which hides
+// the old one (apps/script/notes-ui.js). Tabs Chrome has unloaded to save
+// memory are skipped: they load everything fresh when reopened.
+const reconnectOpenTabs = async () => {
+  const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*", "file:///*"] });
+  const files = chrome.runtime.getManifest().content_scripts[0].js;
+  await Promise.all(
+    tabs
+      .filter((tab) => !tab.discarded && tab.id !== undefined)
+      .map((tab) =>
+        chrome.scripting
+          .executeScript({ target: { tabId: tab.id }, files })
+          .catch((err) => reportShowNotesFailure(err, tab.url, "reconnect_after_update"))
+      )
+  );
+};
 
 // Resolves with the redux store once the state has been loaded from storage
 let resolveStoreReady;
@@ -294,6 +317,19 @@ const reportSafeMode = async (err, reason, step) => {
   );
 };
 
+// Saved data that couldn't be used but held no notes was replaced with a
+// clean start (the original is in the backups). Reported, as a warning, so
+// formats like it can be handled properly.
+const reportStartedFresh = (storage, { reason, message }) => {
+  const shape = describeStorage(storage);
+  track("started_fresh", { reason, pages_type: shape["pages.type"], storage_keys: shape["storage.keys"] });
+  captureException(
+    new StateError(reason, message),
+    { during: "loading notes", recovered: "started fresh, no notes to lose" },
+    { level: "warning", tags: { safe_mode_avoided: reason, load_step: "preparing" }, contexts: { stored_data: shape } }
+  );
+};
+
 // A failed save means changes made since the last good save will be lost
 // when the worker stops
 const reportSaveFailure = async (err, state) => {
@@ -345,7 +381,7 @@ const loadState = async () => {
   // Converts older layouts and runs migrations in memory, checking that
   // every note is still there. Throws instead of returning partial data.
   loadStep = "preparing";
-  const { state, changed, legacyKeys } = prepareStoredState(storage);
+  const { state, changed, legacyKeys, startedFresh } = prepareStoredState(storage);
   addBreadcrumb({ category: "startup", message: "Prepared saved notes", data: { changed, legacy_keys: legacyKeys.join(",") } });
 
   if (changed) {
@@ -362,6 +398,8 @@ const loadState = async () => {
     }
     addBreadcrumb({ category: "startup", message: "Saved converted notes" });
   }
+
+  if (startedFresh) reportStartedFresh(storage, startedFresh);
 
   loadStep = "loaded";
   return state;

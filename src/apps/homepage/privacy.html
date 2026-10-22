@@ -1,63 +1,35 @@
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Docamatic Privacy Policy</title>
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="icon" type="image/x-icon" href="./images/docamatic-logo.png">
-    <style>
-        .policy {
-            max-width: 760px;
-            margin: 0 25px 40px;
-            padding: 10px 40px 30px;
-            background-color: white;
-            border-radius: 20px;
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
-        }
-
-        .policy h2 {
-            color: #0072cc;
-            margin-top: 1.5em;
-        }
-
-        .policy a {
-            color: #0072cc;
-            text-decoration: underline;
-        }
-    </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXKG400VDN"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-FXKG400VDN');
-    </script>
+    <title>Docamatic privacy policy</title>
+    <link rel="icon" type="image/png" href="./images/docamatic-logo.png">
+    <!-- Built by webpack from index.js (site.css and the design system) -->
+    <link rel="stylesheet" href="./homepage.css">
 </head>
 
-<body class="background">
-    <nav class="nav-bar">
-        <a href="./index.html"><img src="./images/docamatic-logo.png"></a>
-        <a href="./index.html"><img class="docamatic-text-logo" src="./images/docamatic-text-logo.png"></a>
-        <ul class="nav-links">
-            <li><a class="page-link" href="./index.html">Home</a></li>
-            <li><a class="page-link" href="./changelog.html">Change Log</a></li>
-            <li><a class="page-link" href="./contactus.html">Contact Us</a></li>
-            <li><a class="page-link" href="./privacy.html">Privacy</a></li>
-        </ul>
-    </nav>
-    <div class="content">
-        <h1 class="docamatic-header">Privacy Policy</h1>
-        <div class="policy">
-            <p><strong>Last updated: October 19, 2026</strong></p>
+<body class="dm-root">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="wrap site-header__inner">
+            <a class="wordmark" href="./index.html">Docamatic</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html" aria-current="page">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+            <a class="dm-btn dm-btn--sm site-header__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob?utm_source=docamatic_website&amp;utm_medium=header" target="_blank" rel="noopener">Add to Chrome</a>
+        </div>
+    </header>
 
-            <p>Docamatic is a Chrome extension that lets you add sticky notes to webpages. This policy explains what
+    <main id="main" class="doc">
+        <div class="wrap narrow policy">
+            <h1 class="doc__title">Privacy <span class="dm-swipe dm-swipe--green">policy</span></h1>
+            <p class="doc__lede">Last updated: October 22, 2026</p>
+
+            <p>Docamatic is a browser extension that lets you add sticky notes to webpages. This policy explains what
                 the extension does with your information. In short: <strong>your notes stay on your computer.</strong>
                 We collect usage statistics and error reports to understand how the extension is used and keep it
                 working, and you can turn the usage statistics off.</p>
@@ -65,7 +37,7 @@
             <h2>Your notes</h2>
             <p>Everything you write in Docamatic (note text, titles, tags, colors and positions) and the address of
                 the page each note belongs to (including the full address it was created on, with any passwords,
-                tokens or other credentials removed) is stored only in your browser, using Chrome's extension storage on your
+                tokens or other credentials removed) is stored only in your browser, using the browser's extension storage on your
                 device. It is never sent to us or to anyone else.</p>
             <p>To show your notes, the extension checks the address of the page you are on and compares it with the
                 pages you have notes on. This happens entirely inside your browser.</p>
@@ -78,6 +50,7 @@
             <ul>
                 <li>When the extension is installed or updated, and the previous version</li>
                 <li>When the popup is opened and which section of it is used (for example search or settings)</li>
+                <li>On the welcome page shown after installing: whether the first note or a practice note was added</li>
                 <li>When a note is created, edited, deleted or tagged (the fact that it happened, not the content)</li>
                 <li>Once a day, counts of how many notes, pages, tags and favorites you have</li>
                 <li>The extension version</li>
@@ -125,13 +98,32 @@
                     privacy policy</a>.</p>
 
             <h2>This website</h2>
-            <p>This website (not the extension) uses Google Analytics to count visits.</p>
+            <p>This website counts visits with <a href="https://posthog.com/privacy" target="_blank"
+                    rel="noopener noreferrer">PostHog</a>: which page was opened, the page you came from, your
+                browser and screen size, and clicks on the "Add to Chrome" buttons and the demo. Nothing is stored
+                on your device (no cookies), each visit gets a new random id, and nothing you type into the demo
+                notes is sent. Like any website you visit, PostHog receives your IP address, which it uses to estimate
+                your country and city.</p>
 
             <h2>Changes and contact</h2>
             <p>If this policy changes, the date at the top of this page will be updated. Questions or requests? Email
                 <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a>.</p>
         </div>
-    </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap site-footer__inner">
+            <span class="wordmark wordmark--small">Docamatic</span>
+            <span class="site-footer__note">Sticky notes for the web, since 2019.</span>
+            <nav class="site-footer__nav" aria-label="More">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+        </div>
+    </footer>
+    <!-- refresh-paths.js points this at the built, hashed bundle -->
+    <script src="./homepage.js" defer></script>
 </body>
 
 </html>

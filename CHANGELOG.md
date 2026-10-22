@@ -14,7 +14,73 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+## 5.0.3 (not released yet)
+
+### Changed
+- New welcome page (`src/apps/tabpage`), in the design system's look (tokens,
+  fonts and `dm-` components, as 5.1's; `src/styles/tokens.css` and
+  `fonts.css` copied from the redesign). Many installs never open the
+  popup, so its main action is **Open a page with my first note**: it opens
+  Wikipedia's Post-it note article and puts a first note on it that says how
+  to add more (the popup's own flow: `GET_PAGE_INFORMATION`, then `addNote`).
+  Also a toolbar tip pointing up at the extension buttons (with the puzzle
+  piece and pin), a practice area where notes can be tried without being
+  saved, and three steps with pictures of the buttons to click. Analytics:
+  `onboarding_first_note_clicked`, `onboarding_first_note_added`,
+  `onboarding_first_note_failed` (`stage`), `onboarding_practice_note_added`.
+  The old animated GIFs are no longer used.
+- Website redesigned the same way (layout from 5.1's `site/`, with only what
+  5.0 does): hero with a live demo note, how it works, finding notes again,
+  and the plain pages (change log from 5.1's site, without 5.1). Google
+  Analytics replaced by PostHog, set up as on 5.1's site (memory persistence,
+  no autocapture, `website_add_to_chrome_clicked`, `website_demo_note_added`;
+  posthog-js 1.435.5 pinned). "Add to Chrome" links carry UTM labels.
+  `refresh-paths.js` copies the site's CSS and fonts and points the plain
+  pages at the hashed bundle; `build.sh` now ships `*.css` and `css/` too.
+- Privacy policy: the website section describes PostHog; lists the welcome
+  page's events.
+
 ### Fixed
+- Spell check underlines notes only while typing in them, not all over notes
+  that are just being read.
+- Keys typed in a note no longer reach the page as `keypress` either (only
+  `keydown`/`keyup` were stopped), so sites' shortcuts on that event don't
+  go off while typing.
+- Tabs open during an update kept the previous version's notes, which can't
+  save any more: typing in them was silently lost until the page was
+  reloaded (Chrome updates extensions on its own, so this hit every open
+  tab). On update the background now injects the new loader into open web
+  tabs (not ones Chrome has unloaded), which brings in the new notes UI
+  where there are notes; the new UI hides every older notes layer
+  (`docamatic-notes` with a `_DOCAMATIC_NOTES_MOUNT_POINT:` id, renamed
+  `...stale`) instead of removing it by its own version's id, since the
+  orphaned copy puts a removed layer back.
+- Notes saved left of or above the page (a window narrower than the note,
+  or dragged above the top) are drawn at the edge instead of where they
+  can't be scrolled to. Display only; the saved position is unchanged.
+- A page's notes show whether its address ends in a slash or not
+  (`/blog/post` and `/blog/post/`): `noteUrlsFor` also returns each key's
+  trailing-slash twin (not for the site root). New notes are still saved
+  under the address as it is.
+
+## 5.0.2 (2026-10-22)
+
+### Fixed
+- Installs that had `pages: []` saved (an empty array instead of the
+  url-keyed object, from builds older than this repository, with metadata
+  `{ docamatic_version, migrated_data_to_storage_local }`) went into safe mode
+  on 5.0.1 ("pages is not an object (found array)"). An empty array holds no
+  notes, so it's now read as `{}` and saved in the right shape. A `pages`
+  array with anything in it is still refused, so nothing can be thrown away.
+- Safe mode only when there's something to protect: saved data that can't be
+  used but has nothing in it that could be a note (nothing with an `id`,
+  `body` or `text` under `pages` or the old notes keys, JSON strings
+  included) is backed up ("Before an update" on Backup & restore) and
+  replaced with a clean start, keeping usable tags (emptied) and settings.
+  Reported to Sentry as a warning (tag `safe_mode_avoided`, with the stored
+  data's shape) and to analytics as `started_fresh`, so the format can be
+  handled properly later. Data from a newer version, or that may hold a
+  note, still goes to safe mode untouched (`mayHoldNotes`, unit tested).
 - Publish workflow: a rejected Web Store upload (e.g. `ITEM_NOT_UPDATABLE`
   while a review is pending) now fails the workflow with the Web Store's
   error. The API answers HTTP 200 either way, so it passed before.

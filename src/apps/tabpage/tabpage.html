@@ -1,23 +1,95 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
-    <style>
-        html,
-        body {
-            padding: 0px;
-            margin: 0px;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-    </style>
-    <title>Docamatic</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Docamatic</title>
 </head>
 
-<body>
-    <div id="__tabpage_mount_point__"></div>
+<body class="dm-root">
+    <!-- Practice notes are drawn here, over the page (onboarding.js) -->
+    <div id="practice-notes"></div>
+
+    <!-- Points up at the browser toolbar. Where the extension buttons are
+         differs (pinned extensions, the profile picture, other browsers), so
+         it brackets the whole right end of the toolbar rather than one spot. -->
+    <aside id="toolbar-tip" class="toolbar-tip" aria-labelledby="toolbar-tip-title">
+        <svg class="toolbar-tip__arrow" viewBox="0 0 300 120" aria-hidden="true">
+            <path class="bracket" d="M6 26 Q 8 10, 24 10 L 276 10 Q 292 10, 294 26" />
+            <path d="M150 116 C 140 90, 160 62, 150 22" />
+            <path d="M136 36 L 150 18 L 164 36" />
+        </svg>
+        <div class="toolbar-tip__card">
+            <p id="toolbar-tip-title" class="toolbar-tip__title">Docamatic is up in your toolbar</p>
+            <p>At the right end, next to the address bar. Look for <span class="ui-chip" aria-hidden="true"><img src="icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>. Don't see it? Click the puzzle
+                piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span> next to Docamatic.</p>
+            <div class="toolbar-mock" aria-hidden="true">
+                <span class="toolbar-mock__url"></span>
+                <span class="toolbar-mock__btn is-docamatic"><img src="icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>
+                <span class="toolbar-mock__btn"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>
+                <span class="toolbar-mock__avatar"></span>
+                <span class="toolbar-mock__more"><i></i><i></i><i></i></span>
+            </div>
+            <p class="toolbar-tip__note">The order may be different in your browser.</p>
+            <button id="toolbar-tip-close" type="button" class="dm-btn dm-btn--sm">Got it</button>
+        </div>
+    </aside>
+
+    <main class="page welcome">
+        <p class="page__brand">Docamatic</p>
+        <h1 class="page__title welcome__title">Sticky notes for <span class="dm-swipe">the web</span>.</h1>
+        <p class="page__lede">Put a note on any website. It stays exactly where you left it, and it's there again
+            every time you come back to that page.</p>
+
+        <section class="first" aria-labelledby="first-title">
+            <h2 id="first-title" class="first__title">Add your first note</h2>
+            <p>See it on a real page: we'll open Wikipedia's page about sticky notes and put your first note on it.
+                Drag it, write in it, then come back here.</p>
+            <button id="first-note" type="button" class="dm-btn dm-btn--primary first__button">Open a page with my first note</button>
+            <p id="first-status" class="first__status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel try" aria-labelledby="try-title">
+            <h2 id="try-title">Or try one right here</h2>
+            <p>This is a real note. Drag it by its colored top bar, click in it to write, and use <strong>⋮</strong>
+                to change its color. Practice notes disappear when you close this tab.</p>
+            <div id="practice-area" class="practice-area">
+                <button id="practice-note" type="button" class="dm-btn">Add a practice note</button>
+            </div>
+        </section>
+
+        <ol class="steps">
+            <li class="step">
+                <span class="step__number" aria-hidden="true">1</span>
+                <div>
+                    <h2>Keep it handy</h2>
+                    <p>Click the puzzle piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span> at the right end of the toolbar, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span>
+                        next to Docamatic. Now <span class="ui-chip" aria-hidden="true"><img src="icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> is always one click away.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">2</span>
+                <div>
+                    <h2>Add a note on any website</h2>
+                    <p>Go to the page, click <span class="ui-chip" aria-hidden="true"><img src="icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> in the toolbar, then the note button <span class="ui-chip ui-chip--note" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v10l-6 6H4z" /><path class="fold" d="M14 20v-6h6" /></svg></span> at the top of the
+                        popup (or <strong>Create New Note</strong>). Your note appears on the page.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">3</span>
+                <div>
+                    <h2>Find it again</h2>
+                    <p>Go back to the page and your note is waiting in the same spot. Click <span class="ui-chip" aria-hidden="true"><img src="icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> any time to search all
+                        your notes, see your favorites, or sort them by date or website.</p>
+                </div>
+            </li>
+        </ol>
+
+        <p class="welcome__foot">Your notes stay on this computer.
+            <a href="https://hibroseph.github.io/docamatic/privacy.html" target="_blank" rel="noopener noreferrer">Privacy
+                policy</a></p>
+    </main>
 </body>
 
 </html>

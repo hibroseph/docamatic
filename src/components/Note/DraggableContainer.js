@@ -75,9 +75,12 @@ export const DraggableContainer = (props) => {
   let isOffScreen = position.x + width > props.windowWidth - SCROLLBAR_WIDTH;
 
   return <Rnd
+    // Never past the left or top edge either, where it couldn't be scrolled
+    // to (a window narrower than the note, or a note dragged above the page).
+    // Only where it's drawn; the saved position is left as it is.
     position={{
-      x: isOffScreen ? (props.windowWidth - width - SCROLLBAR_WIDTH)  : position.x,
-      y: position.y
+      x: Math.max(0, isOffScreen ? (props.windowWidth - width - SCROLLBAR_WIDTH) : position.x),
+      y: Math.max(0, position.y)
     }}
     size={{
       width

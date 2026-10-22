@@ -72,13 +72,20 @@ const initPageScript = () => {
     if (message?.action === CHROME_MESSAGES.URL_CHANGED) notifyUrlChange();
   });
 
-  const PAGE_MOUNT_POINT = "_DOCAMATIC_NOTES_MOUNT_POINT:" + config.version + "_";
+  const MOUNT_POINT_PREFIX = "_DOCAMATIC_NOTES_MOUNT_POINT:";
+  const PAGE_MOUNT_POINT = MOUNT_POINT_PREFIX + config.version + "_";
   AttachRootNodeAndRender();
 
   function AttachRootNodeAndRender() {
-    // A mount point left by an earlier copy of this script (e.g. before the
-    // extension was reloaded) can't be reused: its shadow root is closed.
-    document.getElementById(PAGE_MOUNT_POINT)?.remove();
+    // Notes left by an earlier copy of this script (the extension was updated
+    // or reloaded while the page was open) can't be reused: their shadow root
+    // is closed, and they can no longer save. Hide them rather than remove
+    // them: the old copy is still running and would put a removed one back
+    // (keepAttached). Any version's: older ids have their version in them.
+    document.querySelectorAll(`docamatic-notes[id^="${MOUNT_POINT_PREFIX}"]`).forEach((stale) => {
+      stale.id = `${stale.id}stale`;
+      stale.style.setProperty("display", "none", "important");
+    });
 
     // A custom element rather than a <div>, so the page's generic rules
     // (div { ... }, body > div { display: none }, ...) don't match it. It sits

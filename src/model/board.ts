@@ -7,6 +7,10 @@
 // overlap whatever their sizes. Pure functions, so the layout is the same
 // every time for the same notes.
 import type { NoteRecord, Tag } from "./types";
+import { domainOf } from "./notes";
+
+/** What the canvas groups notes by */
+export type Grouping = "tag" | "site";
 
 export const CARD_WIDTH = 220;
 export const CARD_HEIGHT = 148;
@@ -16,9 +20,11 @@ const GROUP_LABEL = 36;
 const MAX_COLUMNS = 3;
 
 export interface BoardGroup {
-  /** Stable id: the tag ids joined, or "untagged" */
+  /** Stable id: the tag ids joined, "untagged", or "site:" and the website */
   key: string;
   tagIds: string[];
+  /** Grouped by website: which one */
+  site?: string;
   noteIds: string[];
   x: number;
   y: number;
@@ -71,8 +77,33 @@ export const groupNotes = (records: NoteRecord[], tags: Tag[]): Omit<BoardGroup,
   return ordered.map((key) => ({ key, ...byKey.get(key)! }));
 };
 
+/**
+ * Notes grouped by website, the sites with the most notes first (then by
+ * name). Within a site, a page's notes stay together, newest page first.
+ */
+export const groupBySite = (records: NoteRecord[]): Omit<BoardGroup, "x" | "y" | "width" | "height">[] => {
+  const bySite = new Map<string, NoteRecord[]>();
+  records.forEach((record) => {
+    const site = domainOf(record.pageUrl);
+    if (!bySite.has(site)) bySite.set(site, []);
+    bySite.get(site)!.push(record);
+  });
+  const newest = (list: NoteRecord[]) => Math.max(...list.map(({ note }) => Number(note.date_created) || 0));
+  return [...bySite.entries()]
+    .sort(([a, la], [b, lb]) => lb.length - la.length || a.localeCompare(b))
+    .map(([site, list]) => {
+      const byPage = new Map<string, NoteRecord[]>();
+      list.forEach((record) => {
+        if (!byPage.has(record.pageUrl)) byPage.set(record.pageUrl, []);
+        byPage.get(record.pageUrl)!.push(record);
+      });
+      const noteIds = [...byPage.values()].sort((a, b) => newest(b) - newest(a)).flatMap((page) => page.map(({ note }) => note.id));
+      return { key: `site:${site}`, tagIds: [], site, noteIds };
+    });
+};
+
 /** Where every group and note goes, flowing into rows no wider than `maxWidth` */
-export const layoutBoard = (records: NoteRecord[], tags: Tag[], maxWidth: number): BoardLayout => {
+export const layoutBoard = (records: NoteRecord[], tags: Tag[], maxWidth: number, grouping: Grouping = "tag"): BoardLayout => {
   const groups: BoardGroup[] = [];
   const positions: BoardLayout["positions"] = {};
   let x = GAP;
@@ -80,7 +111,7 @@ export const layoutBoard = (records: NoteRecord[], tags: Tag[], maxWidth: number
   let rowHeight = 0;
   let width = 0;
 
-  groupNotes(records, tags).forEach((group) => {
+  (grouping === "site" ? groupBySite(records) : groupNotes(records, tags)).forEach((group) => {
     const columns = Math.min(MAX_COLUMNS, Math.ceil(Math.sqrt(group.noteIds.length)));
     const rows = Math.ceil(group.noteIds.length / columns);
     const groupWidth = GROUP_PADDING * 2 + columns * CARD_WIDTH + (columns - 1) * GAP;

@@ -26,6 +26,15 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Board: organize by website. The canvas can group by tag or by website
+  ("Group by", remembered; busiest sites first, each page's notes together),
+  each with its own arrangement (`board` in storage.local keeps
+  `positions` for tags, as before, and `sitePositions`); "Arrange" follows
+  the grouping. A "By site" view lists each website and, under it, each
+  page (its title links to it) with its notes. `groupBySite` in
+  `model/board.ts`, unit tested. Analytics: `board_grouping_changed`,
+  `board_page_opened`; `board_arranged` has `grouping`. Test id
+  `board-group-by-<tag|site>`.
 - Board: open a note in full, with the Open button on each card or by
   double-clicking it. Read only while "Edit notes" is off; with it on, the
   popup's full card (title, text, tags, color). Closes with Escape, Close,

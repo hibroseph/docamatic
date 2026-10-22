@@ -1,8 +1,8 @@
-import { groupNotes, layoutBoard, CARD_WIDTH } from "./board";
+import { groupBySite, groupNotes, layoutBoard, CARD_WIDTH } from "./board";
 import type { NoteRecord, Tag } from "./types";
 
-const note = (id: string, tagIds: string[] = []) =>
-  ({ pageUrl: "https://x.com/", note: { id, tags: tagIds.map((t) => ({ id: t })) } }) as unknown as NoteRecord;
+const note = (id: string, tagIds: string[] = [], pageUrl = "https://x.com/", date_created = 0) =>
+  ({ pageUrl, note: { id, date_created, tags: tagIds.map((t) => ({ id: t })) } }) as unknown as NoteRecord;
 const tag = (id: string, text: string) => ({ id, text, color: "#fff", notes: [] }) as Tag;
 const TAGS = [tag("a", "alpha"), tag("b", "beta"), tag("c", "gamma")];
 
@@ -39,4 +39,24 @@ test("The layout puts every note somewhere, groups don't overlap, and rows wrap"
   // Three groups of 4 (2 columns each) don't fit in 1200px side by side
   expect(new Set(boxes.map((g) => g.y)).size).toBeGreaterThan(1);
   expect(layout.width).toBeLessThanOrEqual(1200 + CARD_WIDTH);
+});
+
+test("By website: the busiest sites first, each page's notes together, newest page first", () => {
+  const groups = groupBySite([
+    note("1", [], "https://www.youtube.com/watch?v=a", 1),
+    note("2", [], "https://github.com/a/b/pull/1", 5),
+    note("3", [], "https://youtube.com/watch?v=b", 9),
+    note("4", [], "https://www.youtube.com/watch?v=a", 2),
+  ]);
+  // www. and the bare domain are one site
+  expect(groups.map((g) => [g.site, g.noteIds])).toEqual([
+    ["youtube.com", ["3", "1", "4"]],
+    ["github.com", ["2"]],
+  ]);
+});
+
+test("The canvas can be laid out by website", () => {
+  const layout = layoutBoard([note("1", ["a"], "https://a.com/x"), note("2", ["a"], "https://b.com/y")], TAGS, 1200, "site");
+  expect(layout.groups.map((g) => g.key)).toEqual(["site:a.com", "site:b.com"]);
+  expect(Object.keys(layout.positions)).toHaveLength(2);
 });

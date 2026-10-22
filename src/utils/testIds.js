@@ -24,6 +24,8 @@ export const TEST_IDS = {
   // A board card's Open button, and the note opened in full
   boardNoteOpen: "board-note-open",
   boardNoteDialog: "board-note-dialog",
+  // The canvas's "Group by" choice: tag or site
+  boardGroupBy: (grouping) => `board-group-by-${grouping}`,
 
   searchInput: "search-input",
   searchAvailableTag: "search-available-tag",

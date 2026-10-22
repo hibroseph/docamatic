@@ -157,3 +157,14 @@
 .note-dialog__body p { margin: 0 0 var(--space-2); }
 .note-dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-3); }
 .note-dialog__actions .dm-btn svg { margin-right: 4px; vertical-align: -3px; }
+
+/* Group by: tag or website */
+.board-toolbar__label { color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600; }
+.board-grouping .dm-tab { font-size: 13px; }
+.board-group__site { font-family: var(--font-display); font-size: 14px; line-height: 20px; font-weight: 700; }
+
+/* By site: a section per website, each page's notes under its title */
+.site-section__name { font-family: var(--font-display); font-size: 18px; line-height: 24px; font-weight: 700; }
+.site-page + .site-page { margin-top: var(--space-4); }
+.site-page__title { margin: 0 0 var(--space-2); overflow: hidden; color: var(--ink-muted); font-size: 14px; line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.site-page__title a { color: inherit; }

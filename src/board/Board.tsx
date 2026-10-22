@@ -5,6 +5,8 @@
 //          "Arrange by tag" puts them all back in their groups.
 //   Tags:  a section per tag with its notes in a grid. A note with two tags
 //          shows in both sections.
+//   Sites: a section per website, and in it each page with its notes.
+// The canvas can group by tag or by website; each keeps its own arrangement.
 // Search works in both: on the canvas notes that don't match fade (so the
 // arrangement stays put), in the grid they're left out. The "Edit notes"
 // switch turns the cards into editable ones; off, the page is for looking
@@ -13,7 +15,7 @@ import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, 
 import DOMPurify from "dompurify";
 import { useDispatch, useSelector } from "react-redux";
 import { allNotes, pageLabel, plainText, tagsOfNote } from "../model/notes";
-import { CARD_HEIGHT, CARD_WIDTH, layoutBoard, tagOrder } from "../model/board";
+import { CARD_HEIGHT, CARD_WIDTH, groupBySite, layoutBoard, tagOrder, type Grouping } from "../model/board";
 import { searchNotes } from "../model/search";
 import { resolveNoteColor } from "../model/colors";
 import type { NoteRecord, State, Tag } from "../model/types";
@@ -25,8 +27,9 @@ import { NoteCard } from "../app/NoteCard";
 import { findOnPage, useRemembered, useTheme } from "../app/hooks";
 import { trackEvent } from "../redux/actions";
 import { TEST_IDS } from "../utils/testIds";
+import { EXTERNAL_LINK_PROPS, safeHref } from "../utils/SafeLink";
 
-type View = "board" | "tags";
+type View = "board" | "tags" | "sites";
 type Positions = Record<string, { x: number; y: number }>;
 type Track = (event: string, properties?: Record<string, unknown>) => void;
 
@@ -40,19 +43,25 @@ const SEARCH_SETTLE_MS = 1200;
 const NOT_A_DRAG = "button, a, input, textarea, [contenteditable], .note-body-field";
 
 /** Where notes were dragged on the board, kept in storage.local */
-const useSavedPositions = (): [Positions, (next: Positions) => void] => {
-  const [positions, setPositions] = useState<Positions>({});
+// Each grouping has its own arrangement: { positions } (by tag, the first
+// one) and { sitePositions } (by website)
+type SavedBoard = { positions?: Positions; sitePositions?: Positions };
+const SAVED_KEY: Record<Grouping, keyof SavedBoard> = { tag: "positions", site: "sitePositions" };
+
+const useSavedPositions = (grouping: Grouping): [Positions, (next: Positions) => void] => {
+  const [stored, setStored] = useState<SavedBoard>({});
   useEffect(() => {
     chrome.storage.local
       .get(STORAGE_KEY)
-      .then((stored) => setPositions((stored[STORAGE_KEY] as { positions?: Positions } | undefined)?.positions || {}))
+      .then((data) => setStored((data[STORAGE_KEY] as SavedBoard | undefined) || {}))
       .catch(() => {});
   }, []);
   const save = (next: Positions) => {
-    setPositions(next);
-    chrome.storage.local.set({ [STORAGE_KEY]: { positions: next } }).catch(() => {});
+    const all = { ...stored, [SAVED_KEY[grouping]]: next };
+    setStored(all);
+    chrome.storage.local.set({ [STORAGE_KEY]: all }).catch(() => {});
   };
-  return [positions, save];
+  return [stored[SAVED_KEY[grouping]] || {}, save];
 };
 
 // --- A note's card ----------------------------------------------------------------
@@ -270,7 +279,8 @@ const BoardView = ({
 }) => {
   const scroller = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1200);
-  const [saved, save] = useSavedPositions();
+  const [grouping, setGrouping] = useRemembered<Grouping>("board:grouping", "tag");
+  const [saved, save] = useSavedPositions(grouping);
 
   // Groups wrap to the window's width
   useLayoutEffect(() => {
@@ -280,7 +290,7 @@ const BoardView = ({
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const layout = useMemo(() => layoutBoard(records, tags, width), [records, tags, width]);
+  const layout = useMemo(() => layoutBoard(records, tags, width, grouping), [records, tags, width, grouping]);
   const tagById = useMemo(() => new Map(tags.map((tag) => [tag.id, tag])), [tags]);
   const at = (id: string) => saved[id] || layout.positions[id] || { x: 0, y: 0 };
   // Room for notes dragged past the groups
@@ -316,16 +326,35 @@ const BoardView = ({
             ? "Click a note's title or text to edit it. Drag it by its edges to move it."
             : "Drag notes anywhere. Drag the background to look around."}
         </p>
+        <span className="board-toolbar__label" id="group-by">Group by</span>
+        <div className="dm-tabs board-grouping" role="radiogroup" aria-labelledby="group-by">
+          {(["tag", "site"] as Grouping[]).map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="radio"
+              aria-checked={grouping === name}
+              className="dm-tab"
+              data-testid={TEST_IDS.boardGroupBy(name)}
+              onClick={() => {
+                setGrouping(name);
+                track("board_grouping_changed", { grouping: name });
+              }}
+            >
+              {name === "tag" ? "Tag" : "Website"}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           className="dm-btn dm-btn--sm"
           disabled={Object.keys(saved).length === 0}
           onClick={() => {
-            track("board_arranged", { moved_count: Object.keys(saved).length });
+            track("board_arranged", { moved_count: Object.keys(saved).length, grouping });
             save({});
           }}
         >
-          Arrange by tag
+          {grouping === "site" ? "Arrange by website" : "Arrange by tag"}
         </button>
       </div>
       <div
@@ -353,10 +382,12 @@ const BoardView = ({
                 matches && !group.noteIds.some((id) => matches.has(id)) ? "is-dimmed" : ""
               }`}
               style={{ transform: `translate(${group.x}px, ${group.y}px)`, width: group.width, height: group.height }}
-              aria-label={group.tagIds.length ? group.tagIds.map((id) => tagById.get(id)?.text).join(" and ") : "No tags"}
+              aria-label={group.site || (group.tagIds.length ? group.tagIds.map((id) => tagById.get(id)?.text).join(" and ") : "No tags")}
             >
               <div className="board-group__label">
-                {group.tagIds.length ? (
+                {group.site ? (
+                  <span className="board-group__site">{group.site}</span>
+                ) : group.tagIds.length ? (
                   group.tagIds.map((id) => {
                     const tag = tagById.get(id);
                     return tag ? <TagPill key={id} tag={tag} /> : null;
@@ -457,6 +488,90 @@ const TagsView = ({
   );
 };
 
+// --- Sites view -------------------------------------------------------------------
+
+/** A section per website (most notes first), and in it each page with its notes */
+const SitesView = ({
+  records,
+  tags,
+  editing,
+  matches,
+  track,
+}: {
+  records: NoteRecord[];
+  tags: Tag[];
+  editing: boolean;
+  matches: Set<string> | null;
+  track: Track;
+}) => {
+  const pages = useSelector((state: State) => state.pages);
+  const sites = useMemo(() => {
+    const shown = matches ? records.filter(({ note }) => matches.has(note.id)) : records;
+    const byId = new Map(shown.map((record) => [record.note.id, record]));
+    return groupBySite(shown).map((group) => {
+      const groupRecords = group.noteIds.map((id) => byId.get(id)!);
+      // Pages in the order groupBySite put their notes (newest page first)
+      const pageUrls = [...new Set(groupRecords.map(({ pageUrl }) => pageUrl))];
+      return { site: group.site!, count: groupRecords.length, pages: pageUrls.map((url) => ({ url, records: groupRecords.filter(({ pageUrl }) => pageUrl === url) })) };
+    });
+  }, [records, matches]);
+
+  if (sites.length === 0) {
+    return (
+      <div className="board-empty">
+        <p>No notes match your search.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tag-sections">
+      {sites.map((site) => (
+        <section key={site.site} className="tag-section site-section" aria-label={`Website ${site.site}`}>
+          <h2 className="tag-section__title">
+            <span className="site-section__name">{site.site}</span>
+            <span className="board-group__count">{site.count}</span>
+          </h2>
+          {site.pages.map((page) => {
+            const href = safeHref(page.url);
+            const label = pageLabel({ pages }, page.url);
+            return (
+              <div key={page.url} className="site-page">
+                <h3 className="site-page__title">
+                  {href ? (
+                    <a href={href} {...EXTERNAL_LINK_PROPS} onClick={() => track("board_page_opened", { view: "sites" })}>
+                      {label}
+                    </a>
+                  ) : (
+                    label
+                  )}
+                </h3>
+                <div className="tag-section__grid">
+                  {page.records.map((record) =>
+                    editing ? (
+                      <NoteCard key={record.note.id} record={record} showPage={false} />
+                    ) : (
+                      <GridCard
+                        key={record.note.id}
+                        record={record}
+                        tags={tagsOfNote(tags, record.note)}
+                        onFind={() => {
+                          track("board_find_on_page", { view: "sites" });
+                          findOnPage(record);
+                        }}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      ))}
+    </div>
+  );
+};
+
 // --- Page -------------------------------------------------------------------------
 
 export const Board = () => {
@@ -528,7 +643,7 @@ export const Board = () => {
           <span className="wordmark">Docamatic</span>
           <span className="dm-tag dm-tag--blue preview-tag">Preview</span>
           <div className="dm-tabs board-tabs" role="tablist" aria-label="View">
-            {(["board", "tags"] as View[]).map((name) => (
+            {(["board", "tags", "sites"] as View[]).map((name) => (
               <button
                 key={name}
                 type="button"
@@ -540,7 +655,7 @@ export const Board = () => {
                   dispatch(trackEvent("board_view_changed", { view: name }));
                 }}
               >
-                {name === "board" ? "Board" : "By tag"}
+                {name === "board" ? "Board" : name === "tags" ? "By tag" : "By site"}
               </button>
             ))}
           </div>
@@ -591,10 +706,12 @@ export const Board = () => {
         {records.length === 0 ? (
           <div className="board-empty">
             <h1 className="view-title">No notes yet</h1>
-            <p>Notes you add on any website show up here, grouped by their tags.</p>
+            <p>Notes you add on any website show up here, grouped by their tags or by website.</p>
           </div>
         ) : view === "board" ? (
           <BoardView records={records} tags={tags} editing={editing} matches={matches} track={track} />
+        ) : view === "sites" ? (
+          <SitesView records={records} tags={tags} editing={editing} matches={matches} track={track} />
         ) : (
           <TagsView records={records} tags={tags} editing={editing} matches={matches} track={track} />
         )}

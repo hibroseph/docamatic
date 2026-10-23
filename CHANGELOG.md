@@ -36,8 +36,9 @@ and the extension is built with WXT so it can ship to Firefox too.
   (`npm run e2e:chrome`): on Chrome 154, an extension that puppeteer
   reinstalls can't receive messages for about 30 seconds (any extension,
   even an empty one), which breaks every update test.
-  In CI, Chrome needs AppArmor's user namespace restriction lifted
-  (Ubuntu 24.04); the workflow does that and checks Chrome starts first.
+  Each suite's temp folder is under the system's temp folder: on Linux
+  Chrome puts a socket there, and in CI's deep folders the path passed the
+  108-character limit, so Chrome quit as it started.
 - Welcome page: **Add my first note** (from 5.0.3) in the redesign. It
   opens a Wikipedia page about sticky notes and puts a note on it through the
   same path as the popup's New note, titled "My first note", with what to do

@@ -15,9 +15,11 @@ npm run e2e -- board keys     # just these
 They also run in CI on every push (`.github/workflows/e2e.yml`), with
 Firefox and an update from the store version.
 
-On GitHub's Ubuntu 24.04 runners Chrome quits as it starts unless
-unprivileged user namespaces are allowed (AppArmor); the workflow allows
-them, and checks that Chrome starts before running the suites.
+Each suite's temp folder is under the system's temp folder, not
+`e2e/output`: on Linux, Chrome puts a socket there, and socket paths can't
+be longer than 108 characters. In CI's deep checkout folder they were, and
+Chrome quit as it started ("Target closed"). The workflow checks that Chrome
+starts before running the suites.
 
 ## What you get
 

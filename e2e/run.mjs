@@ -12,7 +12,8 @@
 // e2e/README.md.
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { CHROME, CHROME_BUILD, OUT, PAGES } from "./env.mjs";
@@ -55,8 +56,11 @@ const server = createServer((req, res) => {
 await new Promise((resolve) => server.listen(8765, resolve));
 
 // Each run of a suite gets its own temp folder (browser profiles, downloads),
-// deleted afterwards: hundreds of runs otherwise fill the disk
-const TEMP_ROOT = join(OUT, "tmp");
+// deleted afterwards: hundreds of runs otherwise fill the disk. Under the
+// system's temp folder, not e2e/output: Chrome on Linux puts a socket in the
+// temp folder, and socket paths can't be longer than 108 characters. In CI
+// (/home/runner/work/<repo>/<repo>/e2e/output/...) they were, and Chrome
+// quit as it started.
 const cleanUp = (dir) => {
   for (let i = 0; i < 5; i++) {
     try {
@@ -71,8 +75,7 @@ const cleanUp = (dir) => {
 
 const runOnce = (name) =>
   new Promise((resolve) => {
-    const temp = join(TEMP_ROOT, `${name}-${Date.now()}`);
-    mkdirSync(temp, { recursive: true });
+    const temp = mkdtempSync(join(tmpdir(), "dm-e2e-"));
     const env = { ...process.env, TEMP: temp, TMP: temp, TMPDIR: temp };
     const child = spawn(process.execPath, [join(SUITES, `${name}.mjs`)], { cwd: here, env });
     let output = "";

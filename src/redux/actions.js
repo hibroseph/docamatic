@@ -17,16 +17,28 @@ export const SET_ANALYTICS_ENABLED = "SET_ANALYTICS_ENABLED"
 export const TRACK = "TRACK"
 // Replaces all notes, tags and settings (restoring an automatic backup)
 export const REPLACE_STATE = "REPLACE_STATE"
+// Since 5.1
+export const RESTORE_NOTE = "RESTORE_NOTE"
+export const SET_PAGE_TITLE = "SET_PAGE_TITLE"
+export const FILL_NOTE_DETAILS = "FILL_NOTE_DETAILS"
+export const DISMISS_HINT = "DISMISS_HINT"
+export const UPDATE_TAG = "UPDATE_TAG"
+export const DELETE_TAG = "DELETE_TAG"
+export const SET_PREFERENCES = "SET_PREFERENCES"
+export const LAYOUT_NOTE = "LAYOUT_NOTE"
 
 /*
  * action creators
  */
+// Edits carry the time they were made (`at`), so the reducer stays a pure
+// function while still recording when a note last changed (updated_at)
 export const addTag = (noteId, url, text) => {
   return {
     type: ADD_TAG,
     noteId,
     text,
-    url
+    url,
+    at: Date.now(),
   }
 }
 
@@ -36,7 +48,8 @@ export const removeTag = (noteId, url, tagId) => {
     type: REMOVE_TAG,
     noteId,
     url,
-    tagId
+    tagId,
+    at: Date.now(),
   }
 }
 
@@ -89,22 +102,30 @@ export function updateNoteSize(id, x, url) {
   };
 }
 
+/** @param color a note color name ("yellow", ...) or, to go back to a note's original color, its hex */
 export function changeNoteColor(id, url, color) {
   return {
     type: CHANGE_COLOR,
     id,
     url,
     color,
+    at: Date.now(),
   };
 }
 
-export function updateNotePosition(id, x, y, url) {
+/**
+ * @param x, y page coordinates of the note's top left corner
+ * @param anchor since 5.1: what the note moves with when things scroll
+ *   (page/anchor.ts), or null for the page. Left out: unchanged.
+ */
+export function updateNotePosition(id, x, y, url, anchor) {
   return {
     type: MOVE_NOTE,
     id,
     x,
     y,
     url,
+    ...(anchor !== undefined ? { anchor } : {}),
   };
 }
 
@@ -114,6 +135,7 @@ export function addTitle(id, text, url) {
     id: id,
     title: text,
     url,
+    at: Date.now(),
   };
 }
 
@@ -123,15 +145,24 @@ export function addText(id, text, url) {
     id: id,
     body: text,
     url,
+    at: Date.now(),
   };
 }
 
 /**
  * @param url the url the note is saved under (noteUrlFor)
+ * (options.text: plain text the note starts with, e.g. what was selected)
  * @param createdOnUrl the full address it was created on, credentials
  *   removed (redactUrl); kept as a record, see utils/noteUrl.js
+ * @param options since 5.1, all optional:
+ *   position {x, y}  where to put it (model/placement.js); without it the
+ *                    note goes at y_position and a random x, as before
+ *   width            note width
+ *   color            note color name (model/colors.ts)
+ *   visible          false for a note that only shows in the side panel/popup
+ *   pageTitle        the page's title, shown in lists instead of the url
  */
-export function addNote(id, y_position, url, createdOnUrl) {
+export function addNote(id, y_position, url, createdOnUrl, options = {}) {
   return {
     type: ADD_NOTE,
     id: id,
@@ -139,6 +170,98 @@ export function addNote(id, y_position, url, createdOnUrl) {
     url,
     created_on_url: createdOnUrl,
     date_created: new Date().getTime(),
+    ...(options.position ? { position: options.position } : {}),
+    ...(options.width ? { width: options.width } : {}),
+    ...(options.color ? { color: options.color } : {}),
+    ...(options.visible === false ? { visible: false } : {}),
+    ...(options.pageTitle ? { page_title: options.pageTitle } : {}),
+    ...(options.text ? { highlightedText: textToNoteHtml(options.text) } : {}),
+  };
+}
+
+// Plain text (text selected on a page) as note body HTML: escaped, with its
+// line breaks kept
+const textToNoteHtml = (text) =>
+  String(text)
+    .slice(0, 5000)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\r?\n/g, "<br>");
+
+/** Puts a deleted note back (Undo), with the tags it had */
+export function restoreNote(url, note, tags = []) {
+  return {
+    type: RESTORE_NOTE,
+    url,
+    note,
+    tags,
+  };
+}
+
+/** Saves a page's title, shown in lists instead of its address */
+export function setPageTitle(url, title) {
+  return {
+    type: SET_PAGE_TITLE,
+    url,
+    title,
+  };
+}
+
+/**
+ * Fills in details a note doesn't have yet, now that they're known (it was
+ * saved by an older version). Never changes a detail the note already has.
+ * Only the fields the reducer lists (FILLABLE_NOTE_DETAILS) are taken.
+ */
+export function fillNoteDetails(url, id, details) {
+  return {
+    type: FILL_NOTE_DETAILS,
+    url,
+    id,
+    details,
+  };
+}
+
+/** Renames and/or recolors a tag everywhere it's used */
+export function updateTag(tagId, { text, color } = {}) {
+  return {
+    type: UPDATE_TAG,
+    tagId,
+    ...(text !== undefined ? { text } : {}),
+    ...(color !== undefined ? { color } : {}),
+  };
+}
+
+/** Removes a tag from every note (the notes stay) */
+export function deleteTag(tagId) {
+  return {
+    type: DELETE_TAG,
+    tagId,
+  };
+}
+
+/**
+ * How a note sits on the page (since 5.1). Any of:
+ *   pinned + position  keep it on screen while the page scrolls (position on
+ *                      screen), or not (position on the page)
+ *   collapsed          show only its top bar
+ *   height             a fixed height (the text scrolls inside), or null for
+ *                      as tall as its text
+ */
+export function layoutNote(id, url, layout) {
+  return {
+    type: LAYOUT_NOTE,
+    id,
+    url,
+    ...layout,
+  };
+}
+
+/** Merges into metadata.preferences (theme, new note color) */
+export function setPreferences(preferences) {
+  return {
+    type: SET_PREFERENCES,
+    preferences,
   };
 }
 
@@ -148,6 +271,18 @@ export function removeNote(id, url) {
     id,
     url,
   }; 
+}
+
+/**
+ * A first-time hint was seen and put away ("closed"), or what it points at
+ * was used ("used"): not shown again
+ */
+export function dismissHint(name, how = "closed") {
+  return {
+    type: DISMISS_HINT,
+    name,
+    how,
+  };
 }
 
 export function userOnboarded() {

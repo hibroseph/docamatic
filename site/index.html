@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docamatic: sticky notes for the web</title>
+    <meta name="description" content="Put a sticky note on any web page. It stays where you left it, and you can search everything you've written. Free, and your notes stay on your computer.">
+    <link rel="icon" type="image/png" href="./favicon.png">
+</head>
+
+<body class="dm-root">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="wrap site-header__inner">
+            <a class="wordmark" href="./index.html" aria-current="page">Docamatic</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+            <a class="dm-btn dm-btn--sm site-header__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob?utm_source=docamatic_website&amp;utm_medium=header" target="_blank" rel="noopener">Add to Chrome</a>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="hero">
+            <div class="wrap hero__inner">
+                <div class="hero__text">
+                    <h1 class="hero__title">Sticky notes for <span class="dm-swipe">the web</span>.</h1>
+                    <p class="hero__lede">Put a note on any page, right next to what you're reading. It's still there
+                        when you come back, and everything you've written is one search away.</p>
+                    <div class="hero__actions">
+                        <a class="dm-btn dm-btn--primary hero__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob?utm_source=docamatic_website&amp;utm_medium=hero" target="_blank" rel="noopener">Add to Chrome, free</a>
+                        <button id="try-note" type="button" class="dm-btn">Add a note to this page</button>
+                    </div>
+                    <p class="hero__hint">Or right-click the dotted area and choose <strong>Add a note here</strong>,
+                        like you will on any website.</p>
+                    <p class="hero__fine">No account. Your notes stay on your computer.</p>
+                </div>
+                <!-- The demo's notes start here (main.ts) -->
+                <div id="hero-art" class="hero__art" tabindex="0"
+                    aria-label="Example notes you can move and edit. Right-click, or press the menu key, to add one."></div>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="how">
+            <div class="wrap">
+                <h2 class="section__title" id="how">How it works</h2>
+                <ol class="steps">
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">1</span>
+                        <h3>Open any page</h3>
+                        <p>A recipe, a paper, a pull request, a video. If you can read it in Chrome, you can mark it
+                            up.</p>
+                    </li>
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">2</span>
+                        <h3>Add a note</h3>
+                        <p>Click Docamatic and <strong>New note</strong>, or press Alt+Shift+D. Drag it beside the
+                            part it's about.</p>
+                    </li>
+                    <li class="step">
+                        <span class="step__number" aria-hidden="true">3</span>
+                        <h3>Come back to it</h3>
+                        <p>Next time you open the page, your note is waiting in the same spot. On YouTube, it's on
+                            that one video.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="follow">
+            <div class="wrap split split--reverse">
+                <div class="split__text">
+                    <h2 class="section__title" id="follow">Stays with what it's about</h2>
+                    <p>Web apps often scroll one part of the screen, not the whole page: your inbox, a chat, a
+                        document's sidebar. A note you put there scrolls with it, and tucks out of sight with the
+                        content it's next to. Put one on a part that never moves, and it stays put.</p>
+                    <p class="hint">Scroll the message list to try it. In Docamatic it's a setting:
+                        <strong>Move notes with scrolling panels</strong>.</p>
+                </div>
+                <div class="appmock" aria-label="An example email app with a note on one message">
+                    <div class="appmock__bar">Example Mail</div>
+                    <div class="appmock__body">
+                        <div class="appmock__side" aria-hidden="true"><span>Inbox</span><span>Starred</span><span>Sent</span></div>
+                        <div class="appmock__list" id="demo-panel" tabindex="0" aria-label="Messages">
+                            <div class="appmock__row"><strong>Priya</strong><span>Trip itinerary, final version</span></div>
+                            <div class="appmock__row"><strong>Sam</strong><span>Notes from Tuesday's planning call</span></div>
+                            <div class="appmock__row"><strong>Bike shop</strong><span>Your repair is ready</span></div>
+                            <div class="appmock__row"><strong>Landlord</strong><span>Lease renewal for next year</span></div>
+                            <div class="appmock__row"><strong>Mom</strong><span>Recipe you asked about</span></div>
+                            <div class="appmock__row"><strong>Alex</strong><span>Draft of the grant proposal</span></div>
+                            <div class="appmock__row"><strong>Library</strong><span>3 books due Friday</span></div>
+                            <div class="appmock__row"><strong>Jordan</strong><span>Photos from the weekend</span></div>
+                            <div class="appmock__row"><strong>Bank</strong><span>Your October statement</span></div>
+                            <div class="appmock__row"><strong>Taylor</strong><span>Re: book club pick</span></div>
+                            <div class="appmock__row"><strong>Dentist</strong><span>Appointment reminder</span></div>
+                            <div class="appmock__row"><strong>Chris</strong><span>Moving boxes, anyone?</span></div>
+                            <div class="appmock__row"><strong>Newsletter</strong><span>Ten things worth reading</span></div>
+                            <div class="appmock__row"><strong>Priya</strong><span>Re: trip itinerary</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--tinted" aria-labelledby="find">
+            <div class="wrap split">
+                <div class="split__text">
+                    <h2 class="section__title" id="find">Find it again</h2>
+                    <p>Docamatic shows the notes for the page you're on, and keeps the rest close by.</p>
+                    <ul class="ticks">
+                        <li><strong>Search everything.</strong> Titles, text, tags and page names, even with a typo.</li>
+                        <li><strong>Tag notes</strong> to group them across sites: “recipes”, “to read”, “thesis”.
+                            Rename or recolor a tag once and it changes everywhere.</li>
+                        <li><strong>Favorites</strong> for the few you keep coming back to.</li>
+                        <li><strong>Sort</strong> by newest, recently edited, or website.</li>
+                    </ul>
+                </div>
+                <div class="mock" aria-hidden="true">
+                    <div class="mock__bar">
+                        <span class="mock__wordmark">Docamatic</span>
+                        <svg class="mock__gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                    </div>
+                    <span class="dm-btn dm-btn--primary mock__new">+ New note on this page</span>
+                    <div class="dm-search mock__search">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+                        <input class="dm-input" value="pasta" tabindex="-1" readonly>
+                    </div>
+                    <p class="mock__count">2 notes</p>
+                    <div class="mock__list">
+                        <div class="dm-note mock__note">
+                            <div class="dm-note__head"><h4 class="dm-note__title">Weeknight carbonara</h4></div>
+                            <p class="dm-note__body">Use half the salt. Pasta water, not cream.</p>
+                            <div class="dm-note__tags"><span class="dm-tag dm-tag--pink">recipes</span></div>
+                            <span class="dm-note__meta">seriouseats.com · 2 days ago</span>
+                        </div>
+                        <div class="dm-note dm-note--green mock__note">
+                            <div class="dm-note__head"><h4 class="dm-note__title">Shopping</h4></div>
+                            <p class="dm-note__body">Rigatoni, guanciale, pecorino.</p>
+                            <span class="dm-note__meta">notes.example.com · Oct 3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="small">
+            <div class="wrap narrow">
+                <h2 class="section__title" id="small">The small things</h2>
+                <dl class="details">
+                    <div><dt>Undo</dt><dd>Deleted a note by accident? Undo is right there.</dd></div>
+                    <div><dt>Shortcut</dt><dd>Alt+Shift+D adds a note without opening anything.</dd></div>
+                    <div><dt>Light or dark</dt><dd>Follows your computer, or pick one in Settings.</dd></div>
+                    <div><dt>Your colors</dt><dd>Six note colors. Notes from older versions keep theirs.</dd></div>
+                    <div><dt>Right-click</dt><dd>“Add a note here” puts it right where you clicked, with any text you selected.</dd></div>
+                    <div><dt>Out of the way</dt><dd>Collapse a note to its title, set its size, or keep it on screen while you scroll.</dd></div>
+                </dl>
+            </div>
+        </section>
+
+        <section class="section section--after" aria-labelledby="private">
+            <div class="wrap narrow">
+                <h2 class="section__title" id="private">Yours, and only yours</h2>
+                <p>Your notes are saved in your browser, on your computer. They aren't uploaded anywhere, and there's
+                    no account to make. Docamatic keeps automatic backups, and you can download one whenever you
+                    like from Settings.</p>
+                <p><a href="./privacy.html">Read the privacy policy</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap site-footer__inner">
+            <span class="wordmark wordmark--small">Docamatic</span>
+            <span class="site-footer__note">Sticky notes for the web, since 2019.</span>
+            <nav class="site-footer__nav" aria-label="More">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+        </div>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

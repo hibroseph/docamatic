@@ -10,4 +10,4 @@ https://claude.ai/artifact/UoXde7QMRDANokT7fe76Hx
 - `components/bundle.css`: the `dm-` CSS classes; `components/<Name>/`: each component's guidelines and preview.
 - `fonts/`: Bricolage Grotesque and Figtree (SIL Open Font License), bundled so nothing loads from the internet.
 
-The extension doesn't use these files yet. When the UI redesign starts, `tokens.json` becomes the source for a `tokens.css` and the extension adopts `components/bundle.css`, starting with the side panel. If the design system artifact is changed later, copy the changes back here (or the other way round) so the two don't drift.
+The extension and the website use these files directly: `tokens.json` generates `src/styles/tokens.css` (`npm run tokens`), and `components/bundle.css` and `fonts/` are imported as they are. If the design system artifact is changed later, copy the changes back here (or the other way round) so the two don't drift.

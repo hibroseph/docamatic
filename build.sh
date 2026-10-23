@@ -1,4 +1,10 @@
 #!/bin/bash
+# Release build, run by the "build extension" workflow. Produces:
+#   dist/app.zip          the Chrome extension (uploaded to the Web Store)
+#   dist/app-firefox.zip  the Firefox build (not published yet)
+#   dist/sentry/          bundles + source maps for Sentry (never shipped)
+#   dist/homepage/        the website
+set -euo pipefail
 
 if [ $# -ne 2 ]; then
         echo "You must pass a semver number of the build and the environment [production or uat]"
@@ -19,54 +25,39 @@ else
     exit 1;
 fi
 
-
-# replace version numbers in manifest and config.json
-jq '.version=$number' --arg number $1 manifest.json > tmp_manifest.json
-jq '.name="Docamatic - Add Sticky Notes to the Web"' tmp_manifest.json > manifest.json
-rm tmp_manifest.json
-
-# package.json too, so all three always report the same version
-jq '.version=$number' --arg number $1 package.json > tmp_package.json
+# The manifest version comes from package.json (WXT); config.json gives the
+# same version and the environment to Sentry and analytics
+jq '.version=$number' --arg number "$1" package.json > tmp_package.json
 mv tmp_package.json package.json
 
-jq '.version=$number' --arg number $1 config.json > tmp_config.json
-jq '.environment=$env' --arg env $2 tmp_config.json > config.json
+jq '.version=$number' --arg number "$1" config.json > tmp_config.json
+jq '.environment=$env' --arg env "$2" tmp_config.json > config.json
 rm tmp_config.json
 
-#start production build
-rm -rf app.zip
 rm -rf dist/
-rm -rf app/
-npx webpack --mode=production
+npx wxt build
+npx wxt build -b firefox
+npx vite build --config site/vite.config.ts
 
 # Give each bundle and its source map a matching debug id. Sentry uses it to
 # find the right source map for a stack trace, independent of the extension
 # id or file names. This must happen before the bundles are copied/zipped.
-npx sentry-cli sourcemaps inject ./dist
+npx sentry-cli sourcemaps inject ./dist/chrome-mv3
 
 cd dist
 
-mkdir app
-cp *.js app
-cp index.html app
-cp onboarding.html app
-cp offscreen.html app
-cp options.html app
-cp -r assets app
-# The welcome page's styles and the fonts they use
-cp *.css app
-cp -r css app
-cp manifest.json app
-cp -r icons app
-
 # Bundles + source maps for Sentry. The maps are not shipped in the extension.
-mkdir sentry
-cp *.js sentry
-cp *.map sentry
+cp -r chrome-mv3 sentry
+find sentry -type f ! -name '*.js' ! -name '*.map' -delete
+
+mkdir app
+cp -r chrome-mv3/. app/
+find app -name '*.map' -delete
+zip -r app.zip app/
+
+(cd firefox-mv3 && find . -name '*.map' -delete && zip -r ../app-firefox.zip .)
 
 mkdir homepage
 cp -r site/* homepage/
-
-zip -r app.zip app/
 
 echo "Done creating the $2 build with semver version" $1

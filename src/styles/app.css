@@ -1,0 +1,175 @@
+/* The popup and side panel (app/App.tsx). */
+
+html, body { margin: 0; background: var(--paper); }
+body { -webkit-font-smoothing: antialiased; }
+.surface-popup { width: 380px; height: 560px; overflow: hidden; }
+.surface-sidepanel { min-width: 300px; height: 100vh; overflow: hidden; }
+#root { height: 100%; }
+
+a { color: var(--link); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+kbd {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.shell { display: flex; flex-direction: column; height: 100%; }
+
+/* ---------- Top bar ---------- */
+.bar { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4); }
+.bar__spacer { flex: 1; }
+.wordmark { font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -.02em; }
+.preview-tag { margin-left: var(--space-2); }
+
+/* ---------- New note ---------- */
+.actions { display: flex; gap: var(--space-2); padding: var(--space-1) var(--space-4) 0; }
+.new-note { flex: 1; }
+.new-note__kbd { margin-left: auto; }
+.error { margin: var(--space-2) var(--space-4) 0; color: var(--danger); font-size: 13px; line-height: 18px; }
+/* A new note couldn't go on the page: why, and what to try */
+.create-failure { margin: var(--space-2) var(--space-4) 0; }
+.create-failure .error { margin: 0; }
+.create-failure__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.create-failure__hint { margin: var(--space-2) 0 0; color: var(--ink-muted); font-size: 12px; line-height: 16px; }
+
+/* ---------- Search ---------- */
+.search-area { padding: var(--space-3) var(--space-4) 0; }
+.search .dm-input { padding-right: 36px; }
+.search input::-webkit-search-cancel-button { display: none; }
+.search__clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.search__clear:hover { background: var(--paper-3); color: var(--ink); }
+.search__clear svg { position: static; transform: none; color: inherit; }
+.tag-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin-top: var(--space-2); }
+.tag-filters__label { margin-right: var(--space-1); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; }
+.tag-filter { padding: 0; border: 0; border-radius: var(--radius-pill); background: none; cursor: pointer; }
+.tag-filter .dm-tag { cursor: pointer; }
+.tag-filter:hover .dm-tag { box-shadow: var(--sticker-sm); }
+
+/* ---------- Tabs ---------- */
+.tabs-wrap { padding: var(--space-3) var(--space-4) 0; }
+.dm-tabs.tabs { display: flex; width: 100%; box-sizing: border-box; }
+.tabs .dm-tab { flex: 1; white-space: nowrap; }
+
+/* ---------- Lists ---------- */
+.content { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-4); scrollbar-gutter: stable; }
+.view-head { display: grid; gap: 2px; margin-bottom: var(--space-3); }
+.view-head__title { margin: 0; overflow: hidden; font-size: 15px; line-height: 22px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.view-head__meta { color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.view-title { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -.01em; }
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+.list-head__count { color: var(--ink-muted); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.list-hint { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.dm-input.sort__select { width: auto; min-height: 32px; padding-right: var(--space-2); font-size: 13px; cursor: pointer; }
+.back { margin-left: calc(var(--space-2) * -1); }
+
+.note-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.show-more { width: 100%; margin-top: var(--space-3); }
+.page-group + .page-group { margin-top: var(--space-6); }
+.dm-row.page-row { margin: 0 calc(var(--space-3) * -1) var(--space-3); border-radius: var(--radius-md); border-bottom: 0; }
+.empty { margin-top: var(--space-1); }
+
+/* A note in a list: the same paper, sitting on the panel rather than floating over a page */
+.dm-note.note--card { box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 1px 2px #1e24331f; }
+.dm-note.note--card:hover { transform: none; box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 2px 8px -2px #1e243333; }
+.dm-note.note--card:focus-within { transform: none; }
+.note-card__body { max-height: 140px; overflow: hidden; }
+.note-card__body .note-body { min-height: 20px; }
+.note-card__body:focus-within { max-height: none; }
+.note-card__body.is-long:not(:focus-within) { -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); }
+.note-card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--space-2); }
+.note-card__page { min-width: 0; max-width: 100%; overflow: hidden; color: inherit; text-decoration: none; white-space: nowrap; text-overflow: ellipsis; }
+.note-card__page:hover { color: var(--note-ink); text-decoration: underline; }
+.note-card__hidden { display: inline-flex; align-items: center; gap: 4px; }
+.note-card__place { font-weight: 600; color: var(--note-ink); }
+.note-card__place .link-button { color: var(--note-ink); font-weight: 600; }
+
+/* ---------- Tags ---------- */
+.tag-list { margin: 0; padding: 0; list-style: none; }
+.tag-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: var(--stroke-hair) solid var(--hairline); }
+.tag-row__open { display: flex; flex: 1; align-items: center; gap: var(--space-3); min-width: 0; padding: var(--space-1); margin-left: calc(var(--space-1) * -1); border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.tag-row__open:hover { background: var(--paper-2); }
+.tag-row__count { color: var(--ink-muted); font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.tag-row__rename { flex: 1; }
+.tag-row__menu-anchor { position: relative; }
+.tag-menu { top: 38px; right: 0; }
+
+/* ---------- Settings ---------- */
+.settings__group { padding: var(--space-4) 0; border-top: var(--stroke-hair) solid var(--hairline); }
+.settings__group:first-of-type { border-top: 0; padding-top: var(--space-2); }
+.settings__heading { margin: 0 0 var(--space-3); font-size: 15px; line-height: 22px; font-weight: 700; }
+.settings__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-3); }
+.settings__label { font-weight: 600; }
+.settings__value { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink-muted); }
+.settings__help { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.settings__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.settings__links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.settings__version { margin: var(--space-4) 0 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.swatches.swatches--settings { padding: 0; }
+.confirm { margin-top: var(--space-3); padding: var(--space-3); border: var(--stroke-bold) solid var(--ink); border-radius: var(--radius-md); background: var(--paper-2); }
+.confirm p { margin: 0 0 var(--space-3); }
+.check { display: flex; align-items: flex-start; gap: var(--space-2); font-size: 13px; line-height: 18px; }
+.check input { width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--ink); flex: none; }
+.link-button { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.dm-btn.danger-text { color: var(--danger); }
+
+.safe-mode { padding: var(--space-6) var(--space-4); }
+.startup { padding: var(--space-6) var(--space-4); }
+.startup p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
+.safe-mode p { margin: 0 0 var(--space-3); }
+.safe-mode__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* The feedback form (Settings) */
+.feedback-form { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.feedback-form__label { font-size: 13px; line-height: 18px; font-weight: 600; }
+.feedback-form__label--small { font-weight: 500; }
+.feedback-form__message { min-height: 80px; resize: vertical; font: inherit; }
+.feedback-form__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.feedback-form__fine { margin: 0; color: var(--ink-muted); font-size: 11px; line-height: 15px; }
+.feedback-form .error { margin: 0; }
+
+/* Docamatic isn't allowed on the open site */
+.site-access { display: grid; gap: var(--space-2); margin: var(--space-2) var(--space-4) 0; padding: var(--space-3); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-md); background: var(--paper-2); font-size: 13px; line-height: 18px; }
+.site-access p { margin: 0; }
+.site-access .dm-btn { justify-self: start; }
+
+/* The board button in the popup's header: an icon and a word, so it's found */
+.dm-btn.board-button { gap: 6px; padding: 0 var(--space-3); }
+.dm-btn.board-button svg { width: 16px; height: 16px; }
+
+/* The first-time pointer to the board (app/BoardHint.tsx), drawn like the survey card */
+.board-hint {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3);
+  border: var(--stroke-hair) solid var(--note-edge, var(--hairline));
+  border-radius: var(--radius-md);
+  background: var(--note-yellow);
+  color: var(--note-ink);
+}
+.board-hint p { display: grid; gap: 2px; margin: 0; font-size: 13px; line-height: 18px; }
+.board-hint__actions { display: flex; gap: var(--space-2); }
+.board-hint .board-hint__close { position: absolute; top: var(--space-2); right: var(--space-2); color: var(--note-ink); }

@@ -1,14 +1,18 @@
-# Steps to develop:
+# Steps to develop
 1. Clone using `git clone https://github.com/hibroseph/sticky-notes`
 2. Use Node 22 (see `.nvmrc`; with nvm: `nvm install 22` then `nvm use 22`)
-3. Install packages `npm ci`
-4. Start development `npm run watch` (rebuilds on save), or build once with `npm run build`. Run the tests with `npm test`
-5. Cross your fingers that webpack can successfully build and bundle the app
-6. Open chrome and enter `chrome://extensions` in the url
-7. Top right click on `Developer mode`
-8. Click `Load unpacked` on the top left bar
-9. Find where dist was built in your file directory
-10. Pray to the almighty that it worked and hopefully it should be visible in chrome as a normal extension
+3. Install packages: `npm ci`
+4. `npm run dev` opens Chrome with the extension loaded and reloads it as you edit (`npm run dev:firefox` for Firefox). Or build once with `npm run build` and load `dist/chrome-mv3` yourself: `chrome://extensions`, turn on **Developer mode**, **Load unpacked**.
+5. `npm test` runs the tests (Vitest), `npm run typecheck` checks types.
+6. The website: `npm run site` serves it locally at http://localhost:5173 (opening `site/index.html` directly shows it without styles: its styles and demo are built by Vite). `npm run site:build` builds it into `dist/site`, whose pages also work opened straight from disk.
+
+# How it's put together
+- Built with [WXT](https://wxt.dev) (Vite), which writes the manifest for Chrome and Firefox from `wxt.config.ts` and the entrypoints in `src/entrypoints/`: background, content script (a tiny loader), `notes-ui` (the notes on pages, injected only where there are notes), popup, side panel, options (Backup & restore), onboarding, offscreen (Chrome only, for importing 2019-2022 notes).
+- `src/model/`: the note model and everything that reads it (selectors, search, sorting, colors, placement of new notes). Views use these rather than reading the saved state directly.
+- `src/redux/`: the store in the background, its actions, migrations and the safety checks around saving.
+- `src/page/`: notes on web pages. `src/app/`: the popup and side panel (one app, two layouts). `src/ui/`: the note parts both use.
+- Look and feel come from the design system in `design-system/` (`tokens.json`, `components/bundle.css`). `npm run tokens` regenerates `src/styles/tokens.css` after `tokens.json` changes.
+- Firefox: `npm run build:firefox` builds it; it hasn't been tested or published yet. In Firefox, all-sites access is something the user grants after installing, which needs a prompt before notes can show.
 
 # Development practice
 1. Find an issue that you would like to work on (Preferably ones listed on the current milestone)
@@ -18,11 +22,9 @@
 5. We will give you a nice code review and either merge it with master or have you change it accordingly.
 
 # Steps to build for production
-1. Start production build with `npm run prod`
-2. This will produce an app.zip (which we actually upload to the chrome extension store)
-3. The directory build should be in the root, this will be the production build
+`./build.sh <version> <production|uat>` (what the "build extension" workflow runs) builds the extension for Chrome and Firefox and the website, and writes `dist/app.zip` (uploaded to the Chrome Web Store), `dist/app-firefox.zip`, `dist/sentry/` and `dist/homepage/`. It needs `jq` and `zip`.
 # Changing the saved data format
-Notes are saved in `chrome.storage.local` with a `metadata.schema_version`. Any change to what gets saved must be a new numbered migration in `src/redux/migrations.js` (the steps are at the top of that file), plus a fixture of the previous release's data in `src/redux/__fixtures__/`. The tests run every fixture through the migrations and fail if a note, tag or setting is lost.
+Notes are saved in `chrome.storage.local` with a `metadata.schema_version`. Any change that older versions can't read must be a new numbered migration in `src/redux/migrations.js` (the steps are at the top of that file), plus a fixture of the previous release's data in `src/redux/__fixtures__/`. The tests run every fixture through the migrations and fail if a note, tag or setting is lost. Adding an optional field that older versions ignore doesn't need a new version; note it in the version history at the top of `migrations.js`.
 
 # Test hooks
 UI elements that automated browser tests interact with have `data-testid` attributes, defined in `src/utils/testIds.js`. Never rename or remove a shipped id: the upgrade test drives the previously published version with them.

@@ -39,7 +39,7 @@ test("Unversioned data is treated as version 0 and upgraded", () => {
 })
 
 test("Data from a newer version is left untouched and reported", () => {
-    const onNewerVersion = jest.fn();
+    const onNewerVersion = vi.fn();
     const future = { pages: { "https://a.com/": { notes: [{ id: "x", shape: "unknown" }] } }, metadata: { schema_version: CURRENT_SCHEMA_VERSION + 1 } };
     expect(migrateState(future, { onNewerVersion })).toBe(future);
     expect(onNewerVersion).toHaveBeenCalledWith(CURRENT_SCHEMA_VERSION + 1);

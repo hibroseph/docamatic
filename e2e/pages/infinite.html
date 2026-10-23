@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Endless Feed</title>
+<style>body{margin:0;font-family:system-ui,sans-serif;background:#f3f3f3} header{position:sticky;top:0;background:#222;color:#fff;padding:14px 24px;font-weight:700;z-index:2} .item{margin:16px auto;max-width:640px;height:160px;background:#fff;border-radius:10px;padding:16px;box-sizing:border-box}</style>
+</head><body><header>Endless Feed</header><div id="feed"></div>
+<script>
+let n=0; const feed=document.getElementById('feed');
+const more=()=>{for(let i=0;i<5;i++){const d=document.createElement('div');d.className='item';d.textContent='Post '+(++n);feed.appendChild(d)}};
+more();
+addEventListener('scroll',()=>{ if(innerHeight+scrollY>document.body.offsetHeight-200) more(); });
+</script></body></html>

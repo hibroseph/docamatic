@@ -1,7 +1,7 @@
 import { Store, applyMiddleware } from "webext-redux";
 import deepPatch from "webext-redux/lib/strategies/deepDiff/patch";
 import { FETCH_STATE_TYPE } from "webext-redux/lib/constants";
-import { trackDispatches } from "./sentry";
+import { trackDispatches } from "./reporting";
 
 const CHANNEL_NAME = "NOTES_STORE";
 

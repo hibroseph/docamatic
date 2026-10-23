@@ -146,3 +146,21 @@ describe("The address a note was created on (redactUrl)", () => {
         expect(redactUrl("not a url")).toBeUndefined();
     })
 })
+
+describe("Amazon (since 5.1)", () => {
+    const id = "https://www.amazon.com/dp/B0ABC12345";
+    test("One product, however it's reached, is one page", () => {
+        expect(noteUrlFor("https://www.amazon.com/Some-Long-Product-Name/dp/B0ABC12345/ref=sr_1_3?crid=XYZ&keywords=desk")).toBe(id);
+        expect(noteUrlFor("https://www.amazon.com/dp/B0ABC12345?th=1&psc=1")).toBe(id);
+        expect(noteUrlFor("https://www.amazon.com/gp/product/B0ABC12345/ref=ox_sc_act_title_1")).toBe(id);
+        expect(noteUrlFor("https://www.amazon.co.uk/Name/dp/b0abc12345")).toBe("https://www.amazon.co.uk/dp/B0ABC12345");
+    });
+    test("Other Amazon pages use the generic rules", () => {
+        expect(noteUrlFor("https://www.amazon.com/gp/cart/view.html?ref_=nav_cart")).toBe("https://www.amazon.com/gp/cart/view.html");
+    });
+    test("Notes saved by 5.0.0 under the full address are still found", () => {
+        const href = "https://www.amazon.com/Some-Name/dp/B0ABC12345/ref=sr_1_3";
+        // (then the same two with a trailing slash)
+        expect(noteUrlsFor(href).slice(0, 2)).toEqual([id, "https://www.amazon.com/Some-Name/dp/B0ABC12345/ref=sr_1_3"]);
+    });
+});

@@ -1,0 +1,215 @@
+/* Overrides of dm- classes use compound selectors (.dm-note.note): the
+   design system's stylesheet can load before or after this one.
+
+   Shared pieces built on the design system (design-system/components/
+   bundle.css): the parts of a note, menus, color swatches and toasts. Used on
+   web pages (inside the notes' shadow root), in the popup and side panel, and
+   on the website. Only tokens, never raw values, except the few noted. */
+
+/* ---------- Note parts ---------- */
+.dm-note.note {
+  width: 100%;
+  min-width: 0;
+  /* One column that can shrink: long unbroken text (a page title in a list,
+     a long link) is cut off with an ellipsis instead of widening the note */
+  grid-template-columns: minmax(0, 1fr);
+  text-align: left;
+  letter-spacing: normal;
+  word-wrap: break-word;
+}
+/* Editing text on a tilted note looks off: while typing it only lifts */
+.dm-note.note:focus-within { transform: translateY(-2px); }
+.dm-note.note.has-menu { transform: none; }
+
+.note-title {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 650;
+  letter-spacing: -.005em;
+  outline: none;
+}
+.note-title::placeholder { color: var(--note-ink-muted); opacity: .75; font-weight: 600; }
+.note-title:focus-visible { box-shadow: 0 0 0 2px var(--note-ink); }
+
+.note-body {
+  min-height: 20px;
+  margin: 0;
+  outline: none;
+  color: var(--note-ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  cursor: text;
+}
+/* An empty note keeps room to click into */
+/* is-empty is set from the text, on BodyField's wrapper: a CSS check like
+   :has(> br:only-child) can't see text, so it also matched notes with one
+   line break, showing the placeholder over their text */
+.note-body-field { min-width: 0; }
+.note-body-field.is-empty > .note-body { min-height: 40px; }
+.note-body-field.is-empty > .note-body::before {
+  content: attr(data-placeholder);
+  color: var(--note-ink-muted);
+  pointer-events: none;
+}
+.note-body a { color: var(--note-ink); text-decoration: underline; }
+.note-body img { max-width: 100%; }
+.note-body ul, .note-body ol { margin: 4px 0; padding-left: 20px; }
+
+/* Notes from before 5.1 keep their color as a band across the top, like the
+   old title bar, over plain note paper. #f7f6f2 is the paper: like paper-2,
+   but it stays light in the dark theme, as every note does. */
+.dm-note.note--legacy { --dm-note-color: #f7f6f2; }
+.note--legacy .note__head {
+  margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--band);
+  color: var(--band-text);
+}
+.note--legacy .note__head .dm-note__grip,
+.note--legacy .note__head .dm-note__action,
+.note--legacy .note__head .note-title,
+.note--legacy .note__head .note-title::placeholder { color: var(--band-text); }
+.note--legacy .note__head .dm-note__action:hover { background: color-mix(in srgb, var(--band-text) 16%, transparent); }
+
+/* ---------- Tags on a note ---------- */
+.tag-editor { display: grid; gap: var(--space-1); }
+.tag-editor .dm-note__tags { align-items: center; }
+.dm-tag.tag-input {
+  min-width: 0;
+  max-width: 100%;
+  font-family: var(--font-body);
+  outline: none;
+  color: var(--note-ink);
+  border-color: var(--note-ink-muted);
+}
+.dm-tag.tag-input::placeholder { color: var(--note-ink-muted); opacity: 1; }
+.dm-tag.tag-input:focus { border-style: solid; border-color: var(--note-ink); background: #ffffff8c; }
+.dm-tag.tag-input:placeholder-shown:not(:focus) { cursor: pointer; }
+.tag-suggestions { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.tag-suggestions .dm-tag { cursor: pointer; opacity: .85; }
+.tag-suggestions .dm-tag:hover { opacity: 1; }
+.dm-tag:focus-visible, .dm-tag__remove:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus); }
+.dm-tag__remove svg { display: block; }
+
+/* ---------- Menus ---------- */
+.menu {
+  position: absolute;
+  z-index: 10;
+  display: grid;
+  gap: 2px;
+  min-width: 208px;
+  padding: var(--space-2);
+  box-sizing: border-box;
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--sticker);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+}
+.menu[hidden] { display: none; }
+.note-menu { top: 44px; right: var(--space-2); }
+/* Opened upward, from the note's top bar, when there's no room below it */
+.note-menu.note-menu--up { top: auto; bottom: calc(100% - 40px); }
+.menu__label { padding: 2px var(--space-2); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .02em; }
+.menu__sep { height: 1px; margin: var(--space-1) 0; background: var(--hairline); }
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 6px var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menu__item:hover { background: var(--paper-2); }
+.menu__item:active { background: var(--paper-3); }
+.menu__item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.menu__item svg { width: 16px; height: 16px; flex: none; color: var(--ink-muted); }
+.menu__item--danger, .menu__item--danger svg { color: var(--danger); }
+
+/* ---------- Color swatches ---------- */
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px var(--space-2) var(--space-1); }
+.swatch {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 0 0 1px var(--hairline);
+  cursor: pointer;
+}
+.swatch:hover { transform: translateY(-1px); }
+.swatch[aria-checked="true"] { box-shadow: inset 0 0 0 var(--stroke-hair) var(--note-edge), 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+.swatch:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus); }
+.swatch--original::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: #ffffffd9;
+}
+
+/* ---------- Toast (Undo) ---------- */
+.toast-region { position: fixed; left: 50%; bottom: var(--space-4); z-index: 20; transform: translateX(-50%); pointer-events: none; }
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: min(420px, calc(100vw - 32px));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  box-sizing: border-box;
+  border-radius: var(--radius-md);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 6px 20px -6px #1e243380;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  pointer-events: auto;
+  animation: toast-in 160ms cubic-bezier(.2, .8, .3, 1.2);
+}
+.toast > span { overflow: hidden; text-overflow: ellipsis; }
+.toast__action {
+  padding: 4px var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.toast__action:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--paper); }
+@keyframes toast-in { from { transform: translateY(8px); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-note.note:focus-within { transform: none; }
+  .toast { animation: none; }
+  .swatch:hover { transform: none; }
+}

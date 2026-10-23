@@ -3,7 +3,18 @@
 // unloads or closes tabs at any moment; reporting those would bury real bugs
 // in noise.
 
-const NOT_SCRIPTABLE_HOSTS = ["chromewebstore.google.com", "chrome.google.com", "microsoftedge.microsoft.com"];
+// Pages browsers don't let any extension touch: their add-on stores (Chrome,
+// Edge, Opera) and, in Firefox, Mozilla's own add-on, account and support
+// sites (Firefox's extensions.webextensions.restrictedDomains)
+const NOT_SCRIPTABLE_HOSTS = [
+  "chromewebstore.google.com",
+  "chrome.google.com",
+  "microsoftedge.microsoft.com",
+  "addons.opera.com",
+  "addons.mozilla.org",
+  "accounts.firefox.com",
+  "support.mozilla.org",
+];
 
 /**
  * Whether notes can be put on this page at all. Browser pages (chrome://,
@@ -32,6 +43,7 @@ const EXPECTED_SCRIPTING_ERRORS = [
   /no frame with id/i,
   /could not establish connection/i, // page has no content script yet / was unloaded
   /receiving end does not exist/i,
+  /missing host permission/i, // Firefox: a page it doesn't let extensions touch, or site access turned off
   /^blocked$/i, // Edge: the browser won't let extensions script this tab (a policy or setting)
 ];
 

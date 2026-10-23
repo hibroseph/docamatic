@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docamatic privacy policy</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+</head>
+
+<body class="dm-root">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="wrap site-header__inner">
+            <a class="wordmark" href="./index.html">Docamatic</a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html" aria-current="page">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+            <a class="dm-btn dm-btn--sm site-header__cta" href="https://chromewebstore.google.com/detail/mbpkbeacgamdiajpgbblpcgpkidaobob?utm_source=docamatic_website&amp;utm_medium=header" target="_blank" rel="noopener">Add to Chrome</a>
+        </div>
+    </header>
+
+    <main id="main" class="doc">
+        <div class="wrap narrow policy">
+            <h1 class="doc__title">Privacy <span class="dm-swipe dm-swipe--green">policy</span></h1>
+            <p class="doc__lede">Last updated: October 22, 2026</p>
+
+            <p>Docamatic is a browser extension that lets you add sticky notes to webpages. This policy explains what
+                the extension does with your information. In short: <strong>your notes stay on your computer.</strong>
+                We collect usage statistics and error reports to understand how the extension is used and keep it
+                working, and you can turn the usage statistics off.</p>
+
+            <h2>Your notes</h2>
+            <p>Everything you write in Docamatic (note text, titles, tags, colors and positions) and the address of
+                the page each note belongs to (including the full address it was created on, with any passwords,
+                tokens or other credentials removed) is stored only in your browser, using the browser's extension storage on your
+                device. It is never sent to us or to anyone else.</p>
+            <p>To show your notes, the extension checks the address of the page you are on and compares it with the
+                pages you have notes on. This happens entirely inside your browser.</p>
+            <p>Uninstalling the extension deletes your notes from your browser.</p>
+
+            <h2>Usage statistics</h2>
+            <p>To understand how many people use Docamatic and which features are used, the extension sends usage
+                events to <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">PostHog</a>,
+                an analytics service. These events include:</p>
+            <ul>
+                <li>When the extension is installed or updated, and the previous version</li>
+                <li>When the popup or side panel is opened and which section of it is used (for example search or settings)</li>
+                <li>On the board page: when it's opened, which view is used, and when notes are searched (how many
+                    results, not what was searched), moved, rearranged or edited</li>
+                <li>When a note is created, edited, deleted or tagged (the fact that it happened, not the content)</li>
+                <li>Once a day, counts of how many notes, pages, tags and favorites you have</li>
+                <li>The extension version</li>
+                <li>When Docamatic is installed: whether this website was open in another tab, and the campaign
+                    labels (such as <em>utm_source</em>) on the Chrome Web Store page you installed from, if it had
+                    any. Only those yes/no answers and labels are sent, never the addresses of your tabs.</li>
+            </ul>
+            <p>Each event is tied to a random ID created when the extension is installed. It is not linked to your
+                name, email or Google account. <strong>Usage events never include your note text, the addresses or
+                    names of websites you visit, or your browsing history.</strong></p>
+            <p><strong>Turning it off:</strong> open the Docamatic popup, go to Settings and uncheck "Share usage
+                statistics". No usage events are sent after that.</p>
+
+            <h2>Questions and feedback</h2>
+            <p>While usage statistics are on, Docamatic checks with PostHog now and then for a short question to
+                ask you on its own pages (the popup, side panel, board or welcome page; never on websites). To decide whether a question is meant for you, it sends PostHog the same
+                kind of counts as usage events (how many notes, pages, tags and favorites you have, on how many
+                days you've used Docamatic, which of its pages is open, its version and your browser), never your notes or the sites you
+                visit. If a question is shown, PostHog is told whether you answered or closed it, and your answers
+                if you press <strong>Send</strong>.</p>
+            <p>You can also send feedback from Settings at any time. If you press <strong>Send</strong>, what you
+                wrote, and your email if you added it, is sent to PostHog with the extension version, your browser,
+                how many notes you have and the same random ID as usage events, so we can read it and reply. It is
+                sent even if usage statistics are turned off, because you chose to send it.</p>
+
+            <h2>Error reports</h2>
+            <p>When something goes wrong in the extension, an error report is sent to
+                <a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer">Sentry</a>, an error
+                monitoring service, so the problem can be found and fixed. A report includes the error message and
+                where in the extension's code it happened, the extension version, your browser and operating system
+                version, and the names of recent actions inside the extension (such as "note added"). If the error
+                happened on a webpage, the report includes that website's domain name (for example
+                <em>example.com</em>), but never the full page address.</p>
+            <p>A report also includes which versions of the extension you have updated from, and, unless you turned
+                usage statistics off, the same random ID used for usage events. If your saved notes can't be loaded,
+                the report describes how they are stored (for example how many pages and notes there are and what
+                format they are in) so the problem can be fixed, but never their contents or the pages they are on.</p>
+            <p>Error reports never include your note text. They are sent even when usage statistics are turned off,
+                because they are needed to keep the extension working.</p>
+
+            <h2>Diagnostic reports</h2>
+            <p>Docamatic keeps a short list of its last errors on your computer (when, where in the extension, and
+                the error message with any web addresses taken out). If something isn't working, you can download a
+                diagnostic report from Settings: a file describing how Docamatic is set up and doing (its version, your
+                browser, settings, how many notes and pages there are, those recent errors, and the same random ID as
+                usage events). It contains none of your note text, titles, tag names or the websites you visit. It is
+                only made when you ask for it, and only shared if you send it to us.</p>
+
+            <h2>IP addresses</h2>
+            <p>Like any request over the internet, sending usage events and error reports reveals your IP address to
+                PostHog and Sentry, and both services store it with the event or report. It is used to estimate your
+                approximate location (such as country and city) and to tell apart problems affecting different users.
+                We don't use it to identify you or combine it with any other information about you.</p>
+
+            <h2>What we don't do</h2>
+            <ul>
+                <li>We don't sell or rent any data.</li>
+                <li>We don't use data for advertising, and we don't share it with anyone other than the services named
+                    above, which process it on our behalf.</li>
+                <li>We don't use data to determine creditworthiness or for any purpose unrelated to running and
+                    improving Docamatic.</li>
+            </ul>
+
+            <h2>When you uninstall</h2>
+            <p>After you uninstall Docamatic, Chrome opens a short, optional feedback form hosted on Google Forms.
+                Filling it in is entirely up to you; anything you submit is covered by
+                <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's
+                    privacy policy</a>.</p>
+
+            <h2>This website</h2>
+            <p>This website counts visits with <a href="https://posthog.com/privacy" target="_blank"
+                    rel="noopener noreferrer">PostHog</a>: which page was opened, the page you came from, your
+                browser and screen size, and clicks on the "Add to Chrome" buttons and the demo. Nothing is stored
+                on your device (no cookies), each visit gets a new random id, and nothing you type into the demo
+                notes is sent. Like any website you visit, PostHog receives your IP address, which it uses to estimate
+                your country and city.</p>
+            <p>If you send a message with the contact form, what you wrote, the topic you picked and your email
+                (if you added it) are sent to PostHog so we can read it and reply. Nothing is sent until you press
+                <strong>Send message</strong>.</p>
+
+            <h2>Changes and contact</h2>
+            <p>If this policy changes, the date at the top of this page will be updated. Questions or requests? Email
+                <a href="mailto:sticknoteapp@gmail.com">sticknoteapp@gmail.com</a>.</p>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap site-footer__inner">
+            <span class="wordmark wordmark--small">Docamatic</span>
+            <span class="site-footer__note">Sticky notes for the web, since 2019.</span>
+            <nav class="site-footer__nav" aria-label="More">
+                <a href="./changelog.html">What's new</a>
+                <a href="./privacy.html">Privacy</a>
+                <a href="./contactus.html">Contact</a>
+            </nav>
+        </div>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

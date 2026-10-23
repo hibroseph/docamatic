@@ -1,0 +1,56 @@
+/* The practice right-click area and menu (page/practiceMenu.ts). The menu is
+   drawn like a browser's own menu, plain and system-styled, so it reads as
+   "the menu you'll see", not as part of the page. */
+.practice-area {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  padding: var(--space-6);
+  border: var(--stroke-bold) dashed var(--hairline);
+  border-radius: var(--radius-lg);
+  background-image: radial-gradient(var(--hairline) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  color: var(--ink-muted);
+  text-align: center;
+  cursor: context-menu;
+  user-select: none;
+}
+.practice-area:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.practice-area__label { display: grid; justify-items: center; gap: var(--space-2); font-weight: 600; }
+.practice-area__label kbd { font: inherit; }
+.practice-area__mouse { width: 28px; height: 40px; }
+.practice-area__mouse .right { fill: var(--hl-pink); animation: practice-click 1.6s ease-in-out infinite; }
+.practice-area.is-done .practice-area__mouse .right { animation: none; }
+@keyframes practice-click { 0%, 55%, 100% { opacity: 1; } 70%, 85% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .practice-area__mouse .right { animation: none; } }
+
+.practice-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 220px;
+  padding: 4px 0;
+  border: 1px solid rgba(0, 0, 0, .14);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+  color: #1f1f1f;
+  font: 13px/20px system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.practice-menu hr { margin: 4px 0; border: 0; border-top: 1px solid rgba(0, 0, 0, .1); }
+.practice-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 16px 4px 42px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.practice-menu__item.is-muted { color: #8a8a8a; }
+.practice-menu__add { padding-left: 16px; font-weight: 600; cursor: pointer; }
+.practice-menu__add:hover, .practice-menu__add:focus-visible { outline: none; background: #e8eefc; }

@@ -12,8 +12,8 @@ beforeEach(() => {
     global.chrome = {
         runtime: {
             id: "test-extension",
-            onMessage: { addListener: jest.fn() },
-            sendMessage: jest.fn((message, options, callback) => {
+            onMessage: { addListener: vi.fn() },
+            sendMessage: vi.fn((message, options, callback) => {
                 if (typeof callback === "function") {
                     // Chrome always replies asynchronously
                     setTimeout(() => callback(reply(message)), 0);
@@ -37,7 +37,7 @@ test("Resync replaces outdated state with the background's and notifies the UI",
 
     // While the page was in the back/forward cache, a note was added elsewhere
     backgroundState = { ...backgroundState, pages: { "https://a.com/": { notes: [{ id: "1" }, { id: "2" }] } } };
-    const listener = jest.fn();
+    const listener = vi.fn();
     store.subscribe(listener);
 
     await store.resync();
@@ -49,6 +49,6 @@ test("Resync replaces outdated state with the background's and notifies the UI",
 test("Resync doesn't throw when the extension has gone away", async () => {
     const store = createProxyStore();
     await store.ready();
-    chrome.runtime.sendMessage = jest.fn(() => Promise.reject(new Error("Extension context invalidated.")));
+    chrome.runtime.sendMessage = vi.fn(() => Promise.reject(new Error("Extension context invalidated.")));
     await expect(store.resync()).resolves.toBeUndefined();
 })

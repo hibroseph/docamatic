@@ -12,6 +12,36 @@ export const TEST_IDS = {
   // Popup navigation, one per section: new, current, search, sort, hearted, settings
   popupNav: (name) => `popup-nav-${name}`,
   popupCreateNote: "popup-create-note",
+  // When a new note couldn't go on the page: the message, and what to try
+  popupCreateFailure: "popup-create-failure",
+  popupRetryAfterReload: "popup-retry-after-reload",
+  popupKeepNoteInstead: "popup-keep-note-instead",
+  // Docamatic isn't allowed on the open site: the notice and its Allow button
+  siteAccess: "site-access",
+  siteAccessAllow: "site-access-allow",
+  // A survey from PostHog in the popup: the card, its Next/Send and No thanks
+  survey: "survey",
+  surveyNext: "survey-next",
+  surveyDismiss: "survey-dismiss",
+  // Feedback from Settings: the form and the link to it
+  feedbackMessage: "feedback-message",
+  feedbackEmail: "feedback-email",
+  feedbackSend: "feedback-send",
+  settingsFeedback: "settings-feedback",
+  // "Download diagnostic report" (Settings, and the safe mode screen)
+  diagnosticsDownload: "diagnostics-download",
+  // Opens the board page (board.html)
+  popupOpenBoard: "popup-open-board",
+  // "See them all on the board" in All notes
+  allNotesOpenBoard: "all-notes-open-board",
+  // On the board page: its search box and the "Edit notes" switch
+  boardSearch: "board-search",
+  boardEditSwitch: "board-edit-switch",
+  // A board card's Open button, and the note opened in full
+  boardNoteOpen: "board-note-open",
+  boardNoteDialog: "board-note-dialog",
+  // The canvas's "Group by" choice: tag or site
+  boardGroupBy: (grouping) => `board-group-by-${grouping}`,
 
   searchInput: "search-input",
   searchAvailableTag: "search-available-tag",
@@ -30,13 +60,28 @@ export const TEST_IDS = {
   noteDelete: "note-delete",
   noteVisibility: "note-visibility",
   noteDragHandle: "note-drag-handle",
+  // The collapse/expand button in a note's top bar on a page
+  noteCollapse: "note-collapse",
   noteOpenPage: "note-open-page",
+  // "Find on page" in a note's menu in the popup and side panel
+  noteFind: "note-find",
+  // "Bring here" in a note's menu, for notes on the page that's open
+  noteBringHere: "note-bring-here",
+  // Where a note on the open page is, in the popup and side panel ("Further down the page", ...)
+  notePlace: "note-place",
   // One per color choice. Also has data-color="<hex>".
   noteColor: "note-color",
   // An existing tag on a note. Also has data-tag-text="<text>".
   noteTag: "note-tag",
   noteAddTag: "note-add-tag",
   noteSyncError: "note-sync-error",
+  // The first-time tip inside a new note on a page, and its "Got it" button
+  noteHint: "note-hint",
+  noteHintDismiss: "note-hint-dismiss",
+  // The popup's first-time pointer to the board, and its buttons
+  boardHint: "board-hint",
+  boardHintOpen: "board-hint-open",
+  boardHintDismiss: "board-hint-dismiss",
 
   settingsBackupRestore: "settings-backup-restore",
   popupSafeModeBanner: "popup-safe-mode-banner",

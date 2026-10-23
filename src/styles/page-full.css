@@ -1,0 +1,38 @@
+/* Full extension pages: Backup & restore and the welcome page. Paper, a
+   column up to 720px, one display title. */
+html, body { margin: 0; background: var(--paper); }
+body { -webkit-font-smoothing: antialiased; }
+a { color: var(--link); text-underline-offset: 2px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.page { max-width: 720px; margin: 0 auto; padding: var(--space-8) var(--space-4) 64px; }
+.page__brand { margin: 0 0 var(--space-6); font-family: var(--font-display); font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -.02em; }
+.page__title { margin: 0 0 var(--space-3); font-family: var(--font-display); font-size: 30px; line-height: 34px; font-weight: 700; letter-spacing: -.02em; }
+.page__lede { max-width: 56ch; margin: 0 0 var(--space-8); color: var(--ink-muted); font-size: 15px; line-height: 22px; }
+
+.panel { margin-bottom: var(--space-4); padding: var(--space-4) var(--space-6) var(--space-6); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-lg); background: var(--paper); }
+.panel h2 { margin: var(--space-2) 0; font-size: 15px; line-height: 22px; font-weight: 700; }
+.panel p { margin: 0 0 var(--space-4); color: var(--ink-muted); }
+.panel ol { margin: 0; padding-left: 20px; }
+.panel ol li { margin-bottom: var(--space-1); }
+
+.banner { margin-bottom: var(--space-6); padding: var(--space-4) var(--space-6); border: var(--stroke-bold) solid var(--ink); border-radius: var(--radius-lg); background: var(--hl-yellow); color: var(--on-primary); box-shadow: var(--sticker-sm); }
+.banner a { color: var(--on-primary); }
+.banner__detail { margin-top: var(--space-2); font-size: 13px; line-height: 18px; }
+
+.result { margin-top: var(--space-3); font-size: 13px; line-height: 18px; }
+.result:empty { display: none; }
+.result.error { color: var(--danger); }
+.result.success { color: var(--ink); }
+.result.success::before { content: "✓ "; font-weight: 700; }
+
+.file { position: relative; display: inline-block; }
+.file input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.file input:focus-visible + .dm-btn { box-shadow: var(--sticker-sm), var(--focus-ring); }
+.file input:disabled + .dm-btn { opacity: .5; cursor: not-allowed; }
+
+.backups { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.backups th { padding: var(--space-2) var(--space-2) var(--space-2) 0; color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .02em; text-align: left; }
+.backups td { padding: var(--space-2) var(--space-2) var(--space-2) 0; border-top: var(--stroke-hair) solid var(--hairline); }
+.backups td.actions { padding-right: 0; text-align: right; white-space: nowrap; }
+.backups .dm-btn + .dm-btn { margin-left: var(--space-1); }

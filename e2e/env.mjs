@@ -1,5 +1,6 @@
 // Where things are for the browser tests (see e2e/README.md). Everything can
 // be overridden with environment variables, which CI sets.
+import puppeteer from "puppeteer-core";
 import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -45,6 +46,18 @@ export const FIXTURES = posix(join(here, "fixtures"));
 
 /** Chrome flags every suite needs on top of its own */
 export const CHROME_FLAGS = process.env.CI ? ["--no-sandbox"] : [];
+
+/**
+ * puppeteer.launch for the Chrome suites: adds CHROME_FLAGS, and in CI copies
+ * Chrome's own output into the suite's log, so a browser that won't start
+ * says why (the suite alone only sees "Target closed").
+ */
+export const launchChrome = (options) =>
+  puppeteer.launch({
+    ...options,
+    args: [...new Set([...CHROME_FLAGS, ...(options.args || [])])],
+    dumpio: Boolean(process.env.CI),
+  });
 
 /**
  * Waits until Docamatic's background has loaded the notes (after installing

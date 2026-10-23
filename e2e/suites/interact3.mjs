@@ -1,16 +1,15 @@
 // The setting, page scrolling with a panel inside a fixed area, notes half
 // over two parts, and notes scrolling out of a panel.
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 
 const URL2 = "http://localhost:8765/app2.html";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const check = (name, ok, detail = "") => console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` (${detail})` : ""}`);
 
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true,
   pipe: true,

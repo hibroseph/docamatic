@@ -85,7 +85,7 @@ const runOnce = (name) =>
     child.on("close", (code) => {
       clearTimeout(timer);
       cleanUp(temp);
-      const failed = code !== 0 || /^FAIL /m.test(output) || /\bFAILED\b|TIMEOUT after/.test(output);
+      const failed = code !== 0 || /^FAIL /m.test(output) || /^\d+ FAILED$|TIMEOUT after/m.test(output);
       const skipped = !failed && /^SKIP /m.test(output);
       const passes = (output.match(/^PASS /gm) || []).length;
       resolve({ output, failed, skipped, passes });
@@ -116,7 +116,7 @@ for (const name of names) {
   const seconds = Math.round((Date.now() - started) / 1000);
   console.log(`${status.padEnd(16)} ${name.padEnd(14)} ${String(result.passes).padStart(3)} checks  ${seconds}s`);
   if (result.failed || result.skipped) {
-    const lines = result.output.split("\n").filter((l) => /^FAIL |Error|TIMEOUT|SKIP /.test(l)).slice(0, 8);
+    const lines = result.output.split("\n").filter((l) => /^FAIL |Error|TIMEOUT|SKIP |FATAL/.test(l)).slice(0, 8);
     lines.forEach((l) => console.log(`    ${l.trim().slice(0, 200)}`));
   }
   results.push({ name, status });

@@ -15,6 +15,10 @@ npm run e2e -- board keys     # just these
 They also run in CI on every push (`.github/workflows/e2e.yml`), with
 Firefox and an update from the store version.
 
+On GitHub's Ubuntu 24.04 runners Chrome quits as it starts unless
+unprivileged user namespaces are allowed (AppArmor); the workflow allows
+them, and checks that Chrome starts before running the suites.
+
 ## What you get
 
 `npm run e2e` serves `e2e/pages` on http://localhost:8765, runs each suite in
@@ -108,6 +112,8 @@ Start from a similar one. `env.mjs` has the paths and helpers:
 - `extensionWorker(browser)` returns the live service worker (not one being
   replaced), for setting up storage.
 - `notesShown(page)` waits for the notes layer on a page.
+- `launchChrome(options)` instead of `puppeteer.launch`: it adds the flags
+  CI needs and, in CI, puts Chrome's own output in the suite's log.
 
 Rules:
 

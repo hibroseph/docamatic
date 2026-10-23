@@ -1,17 +1,16 @@
 // The website's contact form, served as the published site; PostHog is answered here, nothing is sent.
 // Usage: node contactform.mjs <built site folder> <out folder>
-import puppeteer from "puppeteer-core";
 import { readFileSync } from "node:fs";
 import { join, extname } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { CHROME, OUT, SITE_DIST } from "../env.mjs";
+import { CHROME, OUT, SITE_DIST, launchChrome } from "../env.mjs";
 const DIST = SITE_DIST;
 const SITE = "https://hibroseph.github.io/docamatic/";
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); };
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true });
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true });
 const captured = [];
 let captureStatus = 200;
 try {

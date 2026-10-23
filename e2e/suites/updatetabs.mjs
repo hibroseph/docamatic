@@ -1,11 +1,10 @@
 // 5.0.3: a tab open during an update keeps working notes without a reload;
 // notes saved off the left/top edge are drawn on screen.
 // Usage: node updatetabs.mjs <old dist> <new dist>
-import puppeteer from "puppeteer-core";
 import { mkdtempSync, cpSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT as BUILD, OLD_EXT, OUT, backgroundReady, notesShown, extensionWorker } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, OLD_EXT, OUT, EXT as BUILD, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 // The previous store version's build (DOCAMATIC_OLD_EXT), updated to this one
 if (!OLD_EXT) {
   console.log("SKIP no previous version to update from (set DOCAMATIC_OLD_EXT)");
@@ -19,7 +18,7 @@ cpSync(OLD, EXT, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); };
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "updp-")),
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "updp-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--host-resolver-rules=MAP *.posthog.com 127.0.0.1, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1", "--ignore-certificate-errors"] });
 const worker = () => extensionWorker(browser);
 const note = (id, x, y, body) => ({ id, position: { x, y }, size: { width: 240 }, title: id, body, date_created: Date.now() - 86400000, color: { title: "#fff1a3", text: "#000" }, visible: true, tags: [] });

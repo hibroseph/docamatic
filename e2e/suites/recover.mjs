@@ -1,11 +1,10 @@
 // 5.1: when a note can't go on the page, the popup offers to reload and retry,
 // or to keep the note in Docamatic instead
-import puppeteer from "puppeteer-core";
 import https from "node:https";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, launchChrome, notesShown } from "../env.mjs";
 import { TLS } from "../tls.mjs";
 const WEB = "http://localhost:8765/article.html";
 const STORE = "https://chromewebstore.google.com/detail/some-extension/abcdefghijklmnopabcdefghijklmnop";
@@ -16,7 +15,7 @@ const store = https.createServer({ key: TLS.key, cert: TLS.cert }, (req, res) =>
   res.writeHead(200, { "Content-Type": "text/html" });
   res.end("<title>Some extension - Chrome Web Store</title><h1>Some extension</h1>");
 }).listen(8445);
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "rec-")),
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "rec-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--ignore-certificate-errors",
     "--host-resolver-rules=MAP *.posthog.com 127.0.0.1, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1, MAP chromewebstore.google.com 127.0.0.1:8445"] });
 const id = (await browser.waitForTarget((t) => t.url().startsWith("chrome-extension://"))).url().split("/")[2];

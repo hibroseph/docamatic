@@ -49,6 +49,21 @@ jobs:
         npx @puppeteer/browsers install firefox@stable --path "$HOME/.cache/puppeteer"
         echo "FIREFOX_PATH=$(find "$HOME/.cache/puppeteer/firefox" -name firefox -type f -perm -u+x | head -n 1)" >> "$GITHUB_ENV"
 
+    # Ubuntu 24.04 stops programs like Chrome from creating the user
+    # namespaces its sandbox (and the zygote) use, so Chrome quits as soon as
+    # it starts. Allow them on this throwaway machine.
+    - name: Let Chrome start on Ubuntu 24.04
+      run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+    # If Chrome can't start, this says why in the log (the suites only see
+    # "Target closed")
+    - name: Check that Chrome starts
+      run: |
+        CHROME="$(node --input-type=module -e 'import { CHROME } from "./e2e/env.mjs"; console.log(CHROME)')"
+        echo "$CHROME"
+        "$CHROME" --version
+        "$CHROME" --headless --no-sandbox --disable-gpu --dump-dom about:blank
+
     - name: Run the browser tests
       env:
         DOCAMATIC_OLD_EXT: ${{ github.workspace }}/store-version/dist

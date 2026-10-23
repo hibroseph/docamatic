@@ -1,12 +1,11 @@
 // The welcome page's practice area: right-click opens the practice menu,
 // and Add note puts a practice note where it was clicked.
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, launchChrome } from "../env.mjs";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "dm-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", "--host-resolver-rules=MAP *.posthog.com 127.0.0.1, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1", "--ignore-certificate-errors", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],

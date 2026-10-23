@@ -1,11 +1,10 @@
 // Installing with the website and a tagged store listing open: what does extension_installed say?
 // PostHog's host and the two websites resolve to a local HTTPS stand-in; nothing leaves the machine.
-import puppeteer from "puppeteer-core";
 import https from "node:https";
 import { readFileSync, mkdtempSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, FIXTURES, backgroundReady } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, FIXTURES, backgroundReady, launchChrome } from "../env.mjs";
 import { TLS } from "../tls.mjs";
 // Another extension, so Chrome's allow-list has something besides Docamatic
 // at launch (Docamatic itself is installed later, after the tabs are open)
@@ -29,7 +28,7 @@ const run = async (urls) => {
   events.length = 0;
   // Allowed at launch but not there yet, so Chrome can't install it before the tabs are open
   const LATE = join(mkdtempSync(join(tmpdir(), "late-")), "ext").split("\\").join("/");
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "is-")),
+  const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "is-")),
     args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT},${DUMMY}`, `--load-extension=${DUMMY}`, "--ignore-certificate-errors", "--host-resolver-rules=MAP us.i.posthog.com 127.0.0.1:8443, MAP hibroseph.github.io 127.0.0.1:8443, MAP chromewebstore.google.com 127.0.0.1:8443, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1", "--ignore-certificate-errors"] });
   try {
     for (const url of urls) { const p = await browser.newPage(); await p.goto(url).catch(() => {}); }

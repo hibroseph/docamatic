@@ -1,15 +1,14 @@
 // 5.1: Download diagnostic report, from Settings and from the safe mode screen
-import puppeteer from "puppeteer-core";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome } from "../env.mjs";
 const DOWNLOADS = join(mkdtempSync(join(tmpdir(), "dl-")), "downloads");
 mkdirSync(DOWNLOADS, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "PASS" : "FAIL"} ${msg}`); };
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "dg-")),
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "dg-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--ignore-certificate-errors", "--host-resolver-rules=MAP *.posthog.com 127.0.0.1, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1"] });
 const SECRETS = ["Mortgage", "account number 1234", "private-bank", "health", "Dear diary", "Users/me"];
 const seed = async (data) => {

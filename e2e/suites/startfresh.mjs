@@ -1,11 +1,10 @@
 // 5.0.2: unusable saved data with no notes starts fresh and notes can be made;
 // data that may hold a note still goes to safe mode, untouched.
 // Usage: node startfresh.mjs <dist> <popup file>
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, backgroundReady, extensionWorker, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 const POPUP = "popup.html";
 const WEB = "http://localhost:8765/";
 const canon = (v) => JSON.stringify(v, (k, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort()) : x));
@@ -15,7 +14,7 @@ const check = (ok, msg) => { if (!ok) fails++; console.log(`${ok ? "PASS" : "FAI
 
 const run = async (name, seed, expectFresh) => {
   console.log(`-- ${name}`);
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "sf-")),
+  const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "sf-")),
     args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--host-resolver-rules=MAP *.posthog.com 127.0.0.1, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1", "--ignore-certificate-errors"] });
   try {
     const id = await browser.installExtension(EXT); await backgroundReady(browser);

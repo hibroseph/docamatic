@@ -1,16 +1,15 @@
 // Infinite scroll page: off-screen status, Bring here, Keep on screen,
 // collapse, corner resize, right-click spot, and the popup showing it.
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 
 const URLI = "http://localhost:8765/infinite.html";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const check = (name, ok, detail = "") => console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` (${detail})` : ""}`);
 
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "dm-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`,

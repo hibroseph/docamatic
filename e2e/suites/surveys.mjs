@@ -1,10 +1,9 @@
 // 5.1: surveys written in PostHog, shown in the popup. PostHog is a local stand-in.
-import puppeteer from "puppeteer-core";
 import https from "node:https";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome } from "../env.mjs";
 import { TLS } from "../tls.mjs";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
@@ -52,7 +51,7 @@ const THREE = [
   { id: "why", type: "open", question: "Anything else?", optional: true },
 ];
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "sv-")),
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "sv-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, "--ignore-certificate-errors",
     "--host-resolver-rules=MAP us.i.posthog.com 127.0.0.1:8443, MAP *.sentry.io 127.0.0.1, MAP sentry.io 127.0.0.1"] });
 const id = (await browser.waitForTarget((t) => t.url().startsWith("chrome-extension://"))).url().split("/")[2];

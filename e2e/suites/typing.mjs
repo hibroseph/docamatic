@@ -1,13 +1,12 @@
 // Fast typing into a brand-new (empty) note: does every character land in order?
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, backgroundReady, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, backgroundReady, launchChrome, notesShown } from "../env.mjs";
 
 const ARTICLE = "http://localhost:8765/article.html";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true, pipe: true, userDataDir: mkdtempSync(join(tmpdir(), "dm-")),
   args: [...CHROME_FLAGS, "--enable-unsafe-extension-debugging", `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`,

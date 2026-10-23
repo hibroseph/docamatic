@@ -2,12 +2,11 @@
 // here a local stand-in for Wikipedia), the tip in a new note, the popup's
 // pointer to the board once there are a few notes, and All notes' link to the
 // board.
-import puppeteer from "puppeteer-core";
 import https from "node:https";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 import { TLS } from "../tls.mjs";
 
 const PAGE = "https://en.wikipedia.org/wiki/Post-it_note";
@@ -25,7 +24,7 @@ const server = https.createServer({ key: TLS.key, cert: TLS.cert }, (req, res) =
 });
 await new Promise((r) => server.listen(8444, r));
 
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true,
   pipe: true,

@@ -1,14 +1,13 @@
 // The built website, served as if it were the published site; PostHog requests are caught, never sent
-import puppeteer from "puppeteer-core";
 import { readFileSync } from "node:fs";
 import { join, extname } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { CHROME, SITE_DIST } from "../env.mjs";
+import { CHROME, SITE_DIST, launchChrome } from "../env.mjs";
 const DIST = SITE_DIST;
 const SITE = "https://hibroseph.github.io/docamatic/";
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2" };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, pipe: true });
+const browser = await launchChrome({ executablePath: CHROME, headless: true, pipe: true });
 const events = [];
 const otherHosts = new Set();
 let fails = 0;

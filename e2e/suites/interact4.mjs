@@ -1,16 +1,15 @@
 // Marketplace-like layout: feed (page scroll) -> sticky sidebar, fast drags
 // over an iframe, and Find on page.
-import puppeteer from "puppeteer-core";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, notesShown } from "../env.mjs";
+import { CHROME, CHROME_FLAGS, EXT, OUT, backgroundReady, extensionWorker, launchChrome, notesShown } from "../env.mjs";
 
 const URL3 = "http://localhost:8765/fb.html";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const check = (name, ok, detail = "") => console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` (${detail})` : ""}`);
 
-const browser = await puppeteer.launch({
+const browser = await launchChrome({
   executablePath: CHROME,
   headless: true,
   pipe: true,

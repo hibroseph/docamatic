@@ -10,12 +10,15 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
+    "lint:firefox": "npx -y web-ext@8.3.0 lint -s dist/firefox-mv3",
     "site": "vite --config site/vite.config.ts",
     "site:build": "vite build --config site/vite.config.ts",
     "tokens": "node scripts/build-tokens.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "e2e": "node e2e/run.mjs",
+    "e2e:chrome": "node e2e/installChrome.mjs"
   },
   "dependencies": {
     "@sentry/browser": "7.120.4",
@@ -37,6 +40,8 @@
     "@types/react-dom": "18.3.7",
     "@wxt-dev/module-react": "1.2.2",
     "jsdom": "30.1.3",
+    "puppeteer": "25.12.0",
+    "selfsigned": "5.5.0",
     "typescript": "5.9.3",
     "vitest": "^4.1.11",
     "wxt": "0.21.4"

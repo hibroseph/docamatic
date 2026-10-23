@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Marketplace</title>
+<style>
+body{margin:0;font-family:system-ui,sans-serif;background:#f0f2f5}
+#banner{position:fixed;top:0;left:0;right:0;height:56px;background:#fff;box-shadow:0 1px 2px #0003;z-index:5;display:flex;align-items:center;padding:0 16px;font-weight:700}
+#shell{display:flex;padding-top:56px}
+.side{position:sticky;top:56px;height:calc(100vh - 56px);width:360px;flex:none;background:#fff;overflow-y:auto;padding:0 16px;box-sizing:border-box}
+.side input{width:100%;padding:10px;border-radius:20px;border:0;background:#f0f2f5;margin:12px 0}
+.side .f{padding:12px 0;border-bottom:1px solid #eee}
+.feed{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}
+.item{background:#fff;border-radius:8px;height:260px;padding:8px}
+iframe{grid-column:span 2;height:260px;border:0;background:#dde}
+</style></head><body>
+<div id="banner">Example Market</div>
+<div id="shell">
+  <div class="side" role="navigation" aria-label="Marketplace sidebar"><h2>Marketplace</h2><input placeholder="Search Marketplace"><div id="filters"></div></div>
+  <div class="feed" role="main"></div>
+</div>
+<script>
+const f=document.getElementById('filters');for(let i=1;i<=40;i++){const d=document.createElement('div');d.className='f';d.textContent='Category '+i;f.appendChild(d)}
+const feed=document.querySelector('.feed');for(let i=1;i<=60;i++){if(i===3){const fr=document.createElement('iframe');fr.srcdoc='<p>ad</p>';feed.appendChild(fr)}const d=document.createElement('div');d.className='item';d.textContent='Item '+i;feed.appendChild(d)}
+</script></body></html>

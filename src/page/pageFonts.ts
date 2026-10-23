@@ -5,8 +5,12 @@
 // bundled into the notes UI script and handed over as bytes: nothing is
 // fetched (a font url would need the files to be web accessible, which lets
 // sites detect the extension) and a site's font-src policy doesn't apply.
-import figtree from "../../design-system/fonts/Figtree-Variable.woff2?inline";
-import bricolage from "../../design-system/fonts/BricolageGrotesque-Variable.woff2?inline";
+// Being part of the script, they're loaded on every page with notes, so these
+// are cut-down copies: Latin text, the weights notes use, and one optical size
+// for the titles (scripts/subset-page-fonts.py). Other scripts use the system
+// font.
+import figtree from "../../design-system/fonts/page/Figtree-Variable.woff2?inline";
+import bricolage from "../../design-system/fonts/page/BricolageGrotesque-Variable.woff2?inline";
 
 export const PAGE_FONT_BODY = "Docamatic Figtree";
 export const PAGE_FONT_DISPLAY = "Docamatic Bricolage";
@@ -25,7 +29,7 @@ export const loadPageFonts = () => {
   loaded = true;
   const faces = [
     new FontFace(PAGE_FONT_BODY, bytesOf(figtree), { weight: "400 700" }),
-    new FontFace(PAGE_FONT_DISPLAY, bytesOf(bricolage), { weight: "400 800" }),
+    new FontFace(PAGE_FONT_DISPLAY, bytesOf(bricolage), { weight: "600 800" }),
   ];
   for (const face of faces) {
     try {

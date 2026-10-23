@@ -90,6 +90,22 @@
 }
 .note__sync-error .dm-btn { margin-top: var(--space-1); }
 
+/* The first-time tip in a new note (model/hints.ts) */
+.note__hint {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin: 0 var(--space-3) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  /* A shade of the note's own text color, so it works on every note color */
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  font-size: 13px;
+  line-height: 18px;
+}
+.note__hint p { margin: 0; }
+.note__hint svg { vertical-align: -2px; }
+
 /* On a page the undo message sits bottom left, away from the page's own UI */
 .toast-region--page { left: var(--space-4); transform: none; }
 

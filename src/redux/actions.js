@@ -21,6 +21,7 @@ export const REPLACE_STATE = "REPLACE_STATE"
 export const RESTORE_NOTE = "RESTORE_NOTE"
 export const SET_PAGE_TITLE = "SET_PAGE_TITLE"
 export const FILL_NOTE_DETAILS = "FILL_NOTE_DETAILS"
+export const DISMISS_HINT = "DISMISS_HINT"
 export const UPDATE_TAG = "UPDATE_TAG"
 export const DELETE_TAG = "DELETE_TAG"
 export const SET_PREFERENCES = "SET_PREFERENCES"
@@ -270,6 +271,18 @@ export function removeNote(id, url) {
     id,
     url,
   }; 
+}
+
+/**
+ * A first-time hint was seen and put away ("closed"), or what it points at
+ * was used ("used"): not shown again
+ */
+export function dismissHint(name, how = "closed") {
+  return {
+    type: DISMISS_HINT,
+    name,
+    how,
+  };
 }
 
 export function userOnboarded() {

@@ -2,8 +2,8 @@
 // that have notes (see content.ts, the small loader that runs everywhere).
 import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
 import config from "../../config.json";
-import { initSentry } from "../utils/sentry";
-import { createProxyStore } from "../utils/createProxyStore";
+import { relayErrorsToBackground } from "../page/relayErrors";
+import { createPageStore } from "../page/pageStore";
 import { CHROME_MESSAGES } from "../utils/constants";
 import { notifyUrlChange } from "../utils/urlChanges";
 import { PAGE_MOUNT_POINT_PREFIX, mountNotes } from "../page/mountNotes";
@@ -28,21 +28,20 @@ export default defineUnlistedScript(() => {
 });
 
 function start() {
-  initSentry("content_script");
+  // Errors go to the background, which reports them (no Sentry SDK in web pages)
+  relayErrorsToBackground();
 
-  // In MV3 the background service worker can be shut down and restarted at
-  // any time; webext-redux handles that by sending each dispatch as a one-off
-  // message. The one case we can't recover from is the extension itself being
+  // Only this page's notes (page/pageStore.ts). Changes are one-off messages,
+  // so the background being shut down and restarted between them is fine.
+  // The one case we can't recover from is the extension itself being
   // reloaded or updated: this content script is then orphaned, so the notes
   // say the page needs a refresh.
   let markDisconnected = () => {};
-  const store = createProxyStore(() => markDisconnected()) as ReturnType<typeof createProxyStore> & {
-    resync: () => Promise<void>;
-  };
+  const store = createPageStore(() => markDisconnected());
 
   // Pages kept in the back/forward cache, or frozen in the background,
-  // don't receive state updates while they're away. Fetch the whole state
-  // again when they come back, so they don't keep showing outdated notes.
+  // don't receive updates while they're away. Fetch the page's notes again
+  // when they come back, so they don't keep showing outdated ones.
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) store.resync();
   });

@@ -26,6 +26,37 @@ The redesign: the design system in `design-system/` is now used everywhere,
 and the extension is built with WXT so it can ship to Firefox too.
 
 ### Added
+- Browser tests in the repository (`e2e/`, `npm run e2e`; `e2e/README.md`):
+  26 suites that load the built extension into a real Chrome (and Firefox),
+  including an update from the store version (master's build) to this one.
+  Each suite runs in its own process with its own temp folder (deleted
+  afterwards); a failing suite is retried once and reported as "passed on
+  retry". They run in CI on every push (`.github/workflows/e2e.yml`, with
+  Firefox and the store version built from master). Chrome is pinned to 148
+  (`npm run e2e:chrome`): on Chrome 154, an extension that puppeteer
+  reinstalls can't receive messages for about 30 seconds (any extension,
+  even an empty one), which breaks every update test.
+- Welcome page: **Add my first note** (from 5.0.3) in the redesign. It
+  opens a Wikipedia page about sticky notes and puts a note on it through the
+  same path as the popup's New note, titled "My first note", with what to do
+  next. Analytics `onboarding_first_note_clicked` / `_added` / `_failed`
+  (`stage`). Test id `onboarding-first-note`.
+- Ready for Firefox Add-ons and Edge Add-ons (`docs/publishing.md`): the
+  packages (`npm run zip`, `npm run zip:firefox` with the sources zip AMO
+  needs), Mozilla's checks (`npm run lint:firefox`: no errors; the 16
+  warnings are explained there), listing text, and the steps. Not submitted
+  (needs the store accounts), and one decision is open: what to declare for
+  Firefox's required data collection settings.
+- First-time hints (`model/hints.ts`, saved as `metadata.hints`): a tip in a
+  new note on a page (how to move it, fold it, and where the rest is) until
+  "Got it"; and in the popup, once there are 3 notes, a pointer to the board
+  until it's opened (from anywhere) or closed. Analytics `hint_dismissed`
+  (`hint`, `how`: closed or used). Test ids `note-hint`, `note-hint-dismiss`,
+  `board-hint`, `board-hint-open`, `board-hint-dismiss`.
+- The board is easier to find: the popup's header button says "Board", and
+  All notes ends with "See them all on the board" (test id
+  `all-notes-open-board`). `board_opened` says where it was opened from
+  (`from`: header, all_notes, hint, ...; `board.html?from=`).
 - "Download diagnostic report" (Settings, Help; and the safe mode screen,
   which now asks for it instead of a backup of all the notes): a JSON file
   people can attach when they write in. Version, browser, install history,
@@ -235,6 +266,36 @@ and the extension is built with WXT so it can ship to Firefox too.
   width in its own color.
 
 ### Changed
+- Notes are saved per page (schema version 2, `redux/storedLayout.js`):
+  each page's notes under a key of their own, `page:<url>`, instead of all
+  of them under `pages`. A save writes only what changed (the page that was
+  edited), not every note. 5.0/5.1 data is converted on the first start, the
+  usual way: a `before-update` backup first, then the new layout saved and
+  read back, then `pages` removed. Everything that reads storage (loading,
+  backups, the backup download, diagnostics, error reports) joins the keys
+  back into `{ pages }` first, so page addresses never show up as storage
+  key names in reports. A real schema bump: 5.0.x doesn't know the layout,
+  sees a newer version and stays in safe mode without touching anything.
+- Web pages only get their own notes. The notes UI on a page used to get the
+  whole state (webext-redux's proxy store: every note of every site, and
+  every change pushed to every tab). Now it asks the background for its
+  page's view (`background/pageChannel.js`, `background/pageViews.js`): that
+  page's notes, the tags cut down to them, and the note settings; and it's
+  sent a new view only when something it shows changes. Docamatic's own
+  pages (popup, side panel, board, settings) keep the full state, through a
+  bridge that answers only them (`background/extensionPagesBridge.js`).
+  Content scripts can no longer read `storage.local` at all (Chrome:
+  `setAccessLevel` TRUSTED_CONTEXTS; Firefox has no such setting). Tested:
+  a content script's `storage.local.get` is refused.
+- The notes UI script on pages is smaller (470 KB to 313 KB): no Sentry in it
+  (errors go to the background with `REPORT_ERROR`, which reports them with
+  the page's breadcrumbs; `page/relayErrors.ts`, `utils/reporting.js`), and
+  its fonts are Latin subsets with the weights notes use
+  (`design-system/fonts/page/`, from `scripts/subset-page-fonts.py`; 97 KB
+  to 52 KB). Text in other scripts uses the system font. Docamatic's own
+  pages keep the full fonts.
+- A page whose question for its notes went unanswered (the background still
+  starting, after an update) asks again a few times (0.3, 1, 3 and 6 s).
 - Build: webpack, Babel and Jest replaced by WXT (Vite) and Vitest. Output is
   `dist/chrome-mv3/`; pages are `popup.html` (was `index.html`),
   `options.html`, `onboarding.html`, `sidepanel.html`; the content script is

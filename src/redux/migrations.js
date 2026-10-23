@@ -32,12 +32,21 @@
 //      metadata.preferences. 5.0.0 reads such data fine (it ignores them), so
 //      no new version: a version bump would put 5.0.0 into safe mode for no
 //      reason. Older notes keep their colors and positions untouched.
+//   2: 5.1. Same state; stored differently: each page's notes under a key of
+//      their own ("page:<url>") instead of all of them under "pages", so a
+//      save writes only what changed (storedLayout.js). The state itself
+//      doesn't change, so the migration is empty; saving it in the new
+//      layout is what converts it. A real bump this time: 5.0.x only knows
+//      "pages" and would find no notes, so it must see a newer version and
+//      stay in safe mode, leaving the data alone.
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 const MIGRATIONS = {
   // 0 -> 1: no shape change; this only starts recording the version
   1: (state) => state,
+  // 1 -> 2: no shape change; the storage layout changes (see above)
+  2: (state) => state,
 };
 
 export const schemaVersionOf = (state) => state?.metadata?.schema_version ?? 0;

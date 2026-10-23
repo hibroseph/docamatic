@@ -1,5 +1,4 @@
 import notesApp from "../redux/reducer";
-import { createWrapStore } from "webext-redux";
 import deepDiff from "webext-redux/lib/strategies/deepDiff/diff";
 import { applyMiddleware, createStore } from "redux";
 import config from "../../config.json";
@@ -12,6 +11,7 @@ import { installSource } from "./installSource";
 import { noteUrlsFor } from "../utils/noteUrl";
 import { CHROME_MESSAGES, CONTEXT_MENU_ADD_NOTE, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
+import { applyWrite, changedWrite, fullWrite, joinPages } from "../redux/storedLayout";
 import {
   IMPACT,
   addBreadcrumb,
@@ -39,6 +39,8 @@ import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
 import { onEventTracked, sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
 import { recordSurvey, rememberEvent, surveyToAsk } from "./surveys";
 import { buildDiagnosticReport } from "./diagnostics";
+import { createExtensionPagesBridge } from "./extensionPagesBridge";
+import { createPageChannel } from "./pageChannel";
 import { cleanFeedback } from "../model/feedback";
 
 export function startBackground() {
@@ -48,13 +50,22 @@ export function startBackground() {
   // wake-ups; chrome.storage.local is the source of truth.
 
   console.debug(`Starting up Docamatic Background ${config.environment}:${config.release_prefix}:${config.version}`);
+
+  // Content scripts can read chrome.storage.local by default: all the notes,
+  // from inside any web page. Docamatic's never do (a page gets only its own
+  // notes, from the background: pageChannel.js), so close that door for a
+  // page that compromises its renderer. Chrome only (114+); Firefox has no
+  // such setting. Set on every start, as Chrome doesn't promise to keep it.
+  chrome.storage.local.setAccessLevel?.({ accessLevel: "TRUSTED_CONTEXTS" }).catch(() => {});
   let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
 
   // MV3 requires event listeners to be registered synchronously on startup,
-  // otherwise the event that woke the worker can be missed. createWrapStore
-  // registers the messaging listeners now and queues any incoming dispatches
-  // until wrapStore() is called once the state has been loaded from storage.
-  const wrapStore = createWrapStore({ channelName: "NOTES_STORE" });
+  // otherwise the event that woke the worker can be missed. Docamatic's own
+  // pages get the whole store (extensionPagesBridge.js); web pages only their
+  // own notes (pageChannel.js). Both register their listeners now and answer
+  // once the state has been loaded from storage.
+  const wrapStore = createExtensionPagesBridge({ channelName: "NOTES_STORE", diffStrategy: deepDiff });
+  const connectPages = createPageChannel();
 
   // Chrome fires onInstalled soon after the worker starts, on the first run
   // after an install or update. Reports of errors that stop Docamatic working
@@ -307,7 +318,7 @@ export function startBackground() {
     let sizes = {};
     let history = {};
     try {
-      const storage = await chrome.storage.local.get(null);
+      const storage = await readStorage();
       shape = describeStorage(storage);
       sizes = { ...storageSizes(storage), bytes_in_use: await bytesInUse() };
       await track("safe_mode_entered", {
@@ -374,6 +385,10 @@ export function startBackground() {
     return { ...initial, metadata: { ...initial.metadata, safe_mode: safeMode } };
   };
 
+  // Everything in storage, with the notes as { pages } whatever the layout
+  // (redux/storedLayout.js): what loading, backups and reports work with
+  const readStorage = async () => joinPages(await chrome.storage.local.get(null));
+
   // Saves an automatic backup of the notes data currently in storage
   const backupStoredNotes = async (storage, reason) => {
     const entry = createBackupEntry(storage, { reason, extensionVersion: config.version });
@@ -381,23 +396,32 @@ export function startBackground() {
     await chrome.storage.local.set({ [BACKUPS_STORAGE_KEY]: addBackup(backups, entry) });
   };
 
-  // Writes state, then reads it back to confirm it was saved intact
+  // Writes state in full (in the per-page layout, removing the old one's
+  // "pages" and pages that are gone), then reads it back to confirm it was
+  // saved intact
   const saveAndVerify = async (state) => {
-    await chrome.storage.local.set(state);
-    const saved = await chrome.storage.local.get(STATE_KEYS);
+    const storedKeys = Object.keys(await chrome.storage.local.get(null));
+    await applyWrite(chrome.storage.local, fullWrite(state, storedKeys));
+    const stored = await readStorage();
+    const saved = Object.fromEntries(STATE_KEYS.map((key) => [key, stored[key]]));
     validateState(saved);
     assertNoNotesLost(state, saved);
   };
 
+  // Whether the loaded state is what storage holds (not a new install's
+  // starting state, which hasn't been saved yet)
+  let stateIsInStorage = false;
+
   // Throws (and changes nothing) if the stored notes can't be loaded safely
   const loadState = async () => {
     loadStep = "reading storage";
-    const storage = await chrome.storage.local.get(null);
+    const storage = await readStorage();
 
     if (isEmptyStorage(storage)) {
       addBreadcrumb({ category: "startup", message: "No saved notes (new install)" });
       return GetInitialState();
     }
+    stateIsInStorage = true;
     addBreadcrumb({ category: "startup", message: "Read saved notes", data: { keys: describeStorage(storage)["storage.keys"] } });
 
     // Converts older layouts and runs migrations in memory, checking that
@@ -436,7 +460,7 @@ export function startBackground() {
       (backup) => backup.reason === BACKUP_REASONS.DAILY && backup.created_at.startsWith(today)
     );
     if (doneToday) return;
-    await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.DAILY);
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.DAILY);
   };
 
   const LEGACY_IMPORT_DONE_KEY = "legacyLocalStorageImported";
@@ -536,7 +560,7 @@ export function startBackground() {
     if (!backup) throw new Error("That backup no longer exists.");
 
     const { state } = prepareStoredState(backup.storage);
-    await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.BEFORE_RESTORE);
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.BEFORE_RESTORE);
     store.dispatch(replaceState(state));
     await saveAndVerify(store.getState());
     track("backup_restored", { note_count: countNotes(state) });
@@ -547,7 +571,7 @@ export function startBackground() {
   const importBackup = async (store, importedState) => {
     // Checked again here rather than trusting what the page parsed
     const { state } = prepareStoredState(importedState || {});
-    await backupStoredNotes(await chrome.storage.local.get(null), BACKUP_REASONS.BEFORE_IMPORT);
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.BEFORE_IMPORT);
     const before = countNotes(store.getState());
     store.dispatch(importNotes(state.pages, state.tags));
     await saveAndVerify(store.getState());
@@ -595,7 +619,9 @@ export function startBackground() {
       .then(async (store) => {
         if (safeMode) return { ok: false, reason: "safe_mode" };
         const tab = message.tabId ? await chrome.tabs.get(message.tabId) : undefined;
-        return createNoteInTab(store, tab, { placement: message.placement, source: message.source });
+        // Text to start the note with: only the welcome page's first note uses it
+        const text = typeof message.text === "string" ? message.text.slice(0, 2000) : undefined;
+        return createNoteInTab(store, tab, { placement: message.placement, source: message.source, text });
       })
       .then(sendResponse, (err) => {
         captureException(err, { during: "creating a note" });
@@ -691,6 +717,28 @@ export function startBackground() {
     return true; // answered asynchronously
   });
 
+  // Errors from the notes UI on web pages, which doesn't load Sentry itself
+  // (page/relayErrors.ts). Only from Docamatic's content script; reported
+  // with the page's hostname, never its address.
+  chrome.runtime.onMessage.addListener((message, sender) => {
+    if (message?.type !== CHROME_MESSAGES.REPORT_ERROR) return;
+    if (sender.id !== chrome.runtime.id || !sender.tab) return;
+    const tags = { context: "content_script", ...(message.tags && typeof message.tags === "object" ? message.tags : {}) };
+    const extra = {
+      ...(message.extra && typeof message.extra === "object" ? message.extra : {}),
+      page_host: hostnameOf(sender.url),
+      recent_actions: Array.isArray(message.breadcrumbs) ? message.breadcrumbs.slice(-20).map((b) => `${b.at} ${b.category}: ${b.message}`) : undefined,
+    };
+    if (message.kind === "message") {
+      captureMessage(messageWithoutUrls({ message: String(message.message || "") }), extra);
+      return;
+    }
+    const error = new Error(messageWithoutUrls({ message: String(message.error?.message || "") }));
+    error.name = String(message.error?.name || "Error").slice(0, 100);
+    if (typeof message.error?.stack === "string") error.stack = message.error.stack;
+    captureException(error, extra, { level: message.level === "warning" ? "warning" : undefined, tags });
+  });
+
   // The diagnostic report (Settings > Download diagnostic report). Extension
   // pages only. Works in safe mode too: that's when it's needed most.
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -725,8 +773,7 @@ export function startBackground() {
   // backup first. If the backup can't be saved, the delete doesn't happen.
   const backupBeforeDeleteAll = () => (next) => (action) => {
     if (action.type !== NUKE_NOTES) return next(action);
-    return chrome.storage.local
-      .get(null)
+    return readStorage()
       .then((storage) => backupStoredNotes(storage, BACKUP_REASONS.BEFORE_DELETE_ALL))
       .then(() => next(action));
   };
@@ -750,7 +797,9 @@ export function startBackground() {
         )
       );
 
-      let lastSavedState = preloadedState;
+      // Saves write what changed since this; a new install's first save
+      // writes everything
+      let lastSavedState = stateIsInStorage ? preloadedState : null;
       let saveTimer = null;
 
       store.subscribe(() => {
@@ -763,7 +812,8 @@ export function startBackground() {
           // Actions that didn't change anything return the same object
           if (state === lastSavedState) return;
 
-          chrome.storage.local.set(state).then(
+          // Only what changed since the last save (redux/storedLayout.js)
+          applyWrite(chrome.storage.local, changedWrite(lastSavedState, state)).then(
             () => (lastSavedState = state),
             (err) => reportSaveFailure(err, state)
           );
@@ -773,8 +823,11 @@ export function startBackground() {
       // Every open tab receives every state change. With the default shallow
       // diff a single keystroke re-sends the whole `pages` object (every note on
       // every site) to every tab; deepDiff sends only what actually changed.
-      wrapStore(store, { diffStrategy: deepDiff });
+      wrapStore(store);
+      connectPages(store);
       resolveStoreReady(store);
+      // For the browser tests (e2e/env.mjs backgroundReady): notes are loaded
+      self.__DOCAMATIC_READY__ = true;
 
       if (safeMode) return;
 

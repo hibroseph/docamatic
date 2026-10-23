@@ -105,11 +105,11 @@ test("Page titles are saved only for pages with notes, and only when they change
   expect(notesApp(state, setPageTitle("https://other.com/", "Other"))).toBe(state);
 });
 
-test("Preferences are merged, and the saved format stays version 1", () => {
+test("Preferences are merged, and don't change the saved format", () => {
   let state = notesApp(GetInitialState(), setPreferences({ theme: "dark" }));
   state = notesApp(state, setPreferences({ new_note_color: "pink" }));
   expect(state.metadata.preferences).toEqual({ theme: "dark", new_note_color: "pink" });
-  expect(state.metadata.schema_version).toBe(1);
+  expect(state.metadata.schema_version).toBe(GetInitialState().metadata.schema_version);
 });
 
 import { layoutNote, updateNoteSize } from "./actions";
@@ -164,4 +164,13 @@ describe("Details older notes didn't save are filled in when known", () => {
     expect(notesApp(base, fillNoteDetails(url, "n1", { created_on_url: "https://evil.com/post" }))).toBe(base);
     expect(notesApp(base, fillNoteDetails(url, "missing", { created_on_url: "https://a.com/post" }))).toBe(base);
   });
+});
+
+test("A first-time hint, once put away, stays put away; unknown hints are ignored", () => {
+  const { dismissHint } = require("./actions");
+  const start = { pages: {}, tags: [], metadata: { onboarded: true, preferences: { theme: "dark" } } };
+  const once = notesApp(start, dismissHint("board"));
+  expect(once.metadata).toEqual({ onboarded: true, preferences: { theme: "dark" }, hints: { board: true } });
+  expect(notesApp(once, dismissHint("board", "used"))).toBe(once);
+  expect(notesApp(start, dismissHint("something_else"))).toBe(start);
 });

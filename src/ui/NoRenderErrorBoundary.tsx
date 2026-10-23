@@ -1,5 +1,5 @@
 import React from "react";
-import { captureException } from "../utils/sentry";
+import { captureException } from "../utils/reporting";
 
 // Hides a component that failed to render rather than breaking the whole
 // page/popup, and reports the error so it isn't silently lost.

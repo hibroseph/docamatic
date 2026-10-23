@@ -1,4 +1,5 @@
-import { sameSite } from "./authorizeSender";
+import { sameSite } from "../utils/sameSite";
+import { HINTS } from "../model/hints";
 import { INITIAL_NOTE_WIDTH } from "../utils/constants";
 import {
   ADD_NOTE,
@@ -20,6 +21,7 @@ import {
   SET_ANALYTICS_ENABLED,
   SET_PAGE_TITLE,
   FILL_NOTE_DETAILS,
+  DISMISS_HINT,
   SET_PREFERENCES,
   TOGGLE_VISIBILITY,
   UPDATE_TAG,
@@ -405,6 +407,12 @@ const notesApp = (state = GetInitialState(), action) => {
 
     case USER_ONBOARDED:
       return { ...state, metadata: { ...state.metadata, onboarded: true } };
+
+    case DISMISS_HINT: {
+      // First-time hints (model/hints.ts): only known ones
+      if (!HINTS.includes(action.name) || state.metadata?.hints?.[action.name]) return state;
+      return { ...state, metadata: { ...state.metadata, hints: { ...state.metadata?.hints, [action.name]: true } } };
+    }
 
     case SET_ANALYTICS_ENABLED:
       return { ...state, metadata: { ...state.metadata, analytics_enabled: action.enabled } };

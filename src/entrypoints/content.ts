@@ -38,19 +38,33 @@ if (!window.__DOCAMATIC_LOADER__) {
   // Asks the background to inject the notes UI into this tab if this page
   // has notes. (When a page gets its first note, the background injects the
   // UI into open tabs itself.)
-  const requestNotesUi = async () => {
+  // The background may still be starting when the page asks (browser
+  // startup, just after an update: newer Chrome versions take longer), and
+  // then the question is lost. Ask again a few times before giving up.
+  const RETRY_MS = [300, 1000, 3000, 6000];
+
+  const requestNotesUi = async (attempt = 0): Promise<void> => {
     if (uiMounted) return;
+    const askedFor = location.href;
+    let answered = false;
     try {
       const response = await chrome.runtime.sendMessage({ type: CHROME_MESSAGES.MOUNT_NOTES_UI });
+      answered = response !== undefined;
       if (response?.mounted) {
         uiMounted = true;
         // From here on the UI tracks url changes itself
         stopWatchingUrl();
       }
     } catch {
-      // The extension was reloaded or updated; this copy of the script is
-      // orphaned. The page needs a reload to get the new one.
+      // Below: retried unless this copy of the script is orphaned
     }
+    // Orphaned (the extension was reloaded or updated): this copy can't reach
+    // it any more; the new one is injected into open tabs by the background
+    if (answered || !chrome.runtime?.id || attempt >= RETRY_MS.length) return;
+    setTimeout(() => {
+      // Only for the page it asked about (a single page app may have moved on)
+      if (location.href === askedFor) requestNotesUi(attempt + 1);
+    }, RETRY_MS[attempt]);
   };
 
   // Single page apps (x.com, YouTube, ...) change the url without loading a

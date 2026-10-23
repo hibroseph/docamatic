@@ -153,3 +153,23 @@ kbd {
 .site-access { display: grid; gap: var(--space-2); margin: var(--space-2) var(--space-4) 0; padding: var(--space-3); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-md); background: var(--paper-2); font-size: 13px; line-height: 18px; }
 .site-access p { margin: 0; }
 .site-access .dm-btn { justify-self: start; }
+
+/* The board button in the popup's header: an icon and a word, so it's found */
+.dm-btn.board-button { gap: 6px; padding: 0 var(--space-3); }
+.dm-btn.board-button svg { width: 16px; height: 16px; }
+
+/* The first-time pointer to the board (app/BoardHint.tsx), drawn like the survey card */
+.board-hint {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3) var(--space-8) var(--space-3) var(--space-3);
+  border: var(--stroke-hair) solid var(--note-edge, var(--hairline));
+  border-radius: var(--radius-md);
+  background: var(--note-yellow);
+  color: var(--note-ink);
+}
+.board-hint p { display: grid; gap: 2px; margin: 0; font-size: 13px; line-height: 18px; }
+.board-hint__actions { display: flex; gap: var(--space-2); }
+.board-hint .board-hint__close { position: absolute; top: var(--space-2); right: var(--space-2); color: var(--note-ink); }

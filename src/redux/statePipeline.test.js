@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { StateError, isEmptyStorage, mayHoldNotes, noteIdsIn, prepareStoredState, validateState } from "./statePipeline";
 import { CURRENT_SCHEMA_VERSION, migrateState } from "./migrations";
+import { fullWrite, joinPages } from "./storedLayout";
 
 const fixture = (file) => JSON.parse(fs.readFileSync(path.join(__dirname, "__fixtures__", file), "utf8"));
 
@@ -15,11 +16,21 @@ const reasonOf = (fn) => {
     throw new Error("Expected a StateError");
 };
 
-test("Current data loads as is and doesn't need saving", () => {
+test("5.0 data (version 1) is upgraded and marked for saving in the per-page layout", () => {
     const { state, changed, legacyKeys } = prepareStoredState(fixture("storage-schema-v1.json"));
-    expect(changed).toBe(false);
+    expect(changed).toBe(true);
     expect(legacyKeys).toEqual([]);
     expect(state.metadata.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+})
+
+test("Current data loads as is and doesn't need saving", () => {
+    const { state: upgraded } = prepareStoredState(fixture("storage-schema-v1.json"));
+    // As saved: every page under its own key (storedLayout.js)
+    const stored = joinPages(fullWrite(upgraded).set);
+    const { state, changed, legacyKeys } = prepareStoredState(stored);
+    expect(changed).toBe(false);
+    expect(legacyKeys).toEqual([]);
+    expect(state.pages).toEqual(upgraded.pages);
 })
 
 test("Unversioned data is upgraded and marked for saving", () => {

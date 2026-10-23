@@ -19,6 +19,7 @@ import {
   canRetryAfterReload,
   createFailureMessage,
   createNote,
+  openBoard,
   reloadTab,
   openSidePanel,
   sidePanelSupported,
@@ -31,6 +32,7 @@ import {
 import { AllNotesView, FavoritesView, SearchResultsView, TagNotesView, TagsView, ThisPageView } from "./views";
 import { Settings } from "./Settings";
 import { SurveyPrompt } from "./Survey";
+import { BoardHint } from "./BoardHint";
 import { SiteAccess } from "./SiteAccess";
 import { downloadDiagnosticReport } from "./diagnostics";
 
@@ -182,16 +184,13 @@ export const App = ({ surface }: { surface: Surface }) => {
           <span className="bar__spacer" />
           <button
             type="button"
-            className="dm-btn dm-btn--ghost dm-btn--icon"
-            aria-label="Open the board: all notes, grouped by tag"
-            title="Board: all your notes, grouped by tag (preview)"
+            className="dm-btn dm-btn--ghost dm-btn--sm board-button"
+            title="All your notes on one page, grouped by tag or website"
             data-testid={TEST_IDS.popupOpenBoard}
-            onClick={() => {
-              chrome.tabs.create({ url: chrome.runtime.getURL("/board.html") });
-              if (surface === "popup") window.close();
-            }}
+            onClick={() => openBoard("header", surface)}
           >
             <BoardIcon />
+            Board
           </button>
           {surface === "popup" && sidePanelSupported() && (
             <button
@@ -358,6 +357,7 @@ export const App = ({ surface }: { surface: Surface }) => {
             )}
 
             {!searching && <SurveyPrompt surface={surface} />}
+            {!searching && <BoardHint surface={surface} />}
             <main className="content" role={searching ? "region" : "tabpanel"} aria-label={searching ? "Search results" : undefined}>
               {searching ? (
                 <SearchResultsView query={query} />

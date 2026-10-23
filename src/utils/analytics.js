@@ -24,6 +24,7 @@ import {
   UPDATE_TAG,
   TRACK,
   USER_ONBOARDED,
+  DISMISS_HINT,
 } from "../redux/actions";
 import { generateUUID } from "./GenerateUUID";
 
@@ -206,6 +207,8 @@ export const eventForAction = (action) => {
       return { event: "all_notes_deleted" };
     case USER_ONBOARDED:
       return { event: "onboarding_viewed" };
+    case DISMISS_HINT:
+      return { event: "hint_dismissed", properties: { hint: action.name, how: action.how } };
     case ADD_TEXT:
     case ADD_TITLE:
       if (editedNotes.has(action.id)) return null;

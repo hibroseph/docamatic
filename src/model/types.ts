@@ -107,6 +107,8 @@ export interface Metadata {
   schema_version?: number;
   /** Since 5.1 */
   preferences?: Preferences;
+  /** Since 5.1: first-time hints already put away (model/hints.ts) */
+  hints?: Partial<Record<string, boolean>>;
   /** Never saved: set by the background when notes couldn't be loaded safely */
   safe_mode?: { reason: string; message: string } | null;
 }

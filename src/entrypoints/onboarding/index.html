@@ -39,6 +39,15 @@
         <p class="page__lede">Put a note on any page. It stays exactly where you left it, and you can find it again
             from anywhere: search everything you've written, tag notes, keep favorites.</p>
 
+        <!-- The one thing to do here: a first note, on a real page (main.ts) -->
+        <section class="first" aria-labelledby="first-title">
+            <h2 id="first-title" class="first__title">Add your first note</h2>
+            <p>See it on a real page: we'll open Wikipedia's page about sticky notes and put your first note on it.
+                Drag it, write in it, then come back here.</p>
+            <button id="first-note" type="button" class="dm-btn first__button" data-testid="onboarding-first-note">Open a page with my first note</button>
+            <p id="first-status" class="first__status" role="status" aria-live="polite"></p>
+        </section>
+
         <!-- A survey from PostHog, if there's one for this install (main.ts) -->
         <div id="survey" class="welcome-survey"></div>
 

@@ -1,5 +1,6 @@
 import {
   DELETE_TAG,
+  DISMISS_HINT,
   IMPORT_NOTES,
   NUKE_NOTES,
   REPLACE_STATE,
@@ -9,6 +10,9 @@ import {
   UPDATE_TAG,
 } from "./actions";
 import { captureMessage } from "../utils/sentry";
+import { parse, sameSite } from "../utils/sameSite";
+
+export { sameSite };
 
 // Actions that affect every page, or settings/analytics. Only our own
 // extension pages (popup, side panel, onboarding) may send these. Tags are
@@ -24,26 +28,6 @@ const PRIVILEGED_ACTIONS = new Set([
   TRACK,
 ]);
 
-const parse = (url) => {
-  try {
-    return new URL(url);
-  } catch {
-    return null;
-  }
-};
-
-// "https://github.com", or "file:" for local files (which have no host)
-const originOf = (url) => {
-  const parsed = parse(url);
-  if (!parsed) return null;
-  return parsed.protocol === "file:" ? "file:" : parsed.origin;
-};
-
-/** Whether two urls are on the same site (scheme + host; all local files count as one) */
-export const sameSite = (a, b) => {
-  const origin = originOf(a);
-  return Boolean(origin) && origin === originOf(b);
-};
 
 /**
  * Why a content script's action isn't allowed, or null if it is. Content
@@ -59,6 +43,8 @@ export const sameSite = (a, b) => {
 export const reasonToBlock = (action, sender, extensionId) => {
   if (sender.id !== extensionId) return "other_extension";
   if (PRIVILEGED_ACTIONS.has(action.type)) return "privileged_action";
+  // A first-time hint put away: not about any page's notes
+  if (action.type === DISMISS_HINT) return null;
   if (!action.url) return "no_url";
   if (!sameSite(sender.url, action.url)) return "different_site";
   return null;

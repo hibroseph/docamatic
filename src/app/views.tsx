@@ -13,7 +13,7 @@ import { useDismiss, TagPill } from "../ui/NoteParts";
 import { BackIcon, MoreIcon, PencilIcon, TrashIcon } from "../ui/icons";
 import { useUndo } from "../ui/undo";
 import { EmptyState, GroupedNoteList, NoteList } from "./lists";
-import { bringNoteHere, useNotePlaces, useRemembered, type Surface } from "./hooks";
+import { bringNoteHere, openBoard, useNotePlaces, useRemembered, type Surface } from "./hooks";
 
 const NO_TAGS: Tag[] = [];
 
@@ -120,6 +120,14 @@ export const AllNotesView = ({ surface }: { surface: Surface }) => {
       <div className="list-head">
         <span className="list-head__count">
           {records.length} note{records.length === 1 ? "" : "s"}
+          {records.length > 1 && (
+            <>
+              {" · "}
+              <button type="button" className="link-button" data-testid={TEST_IDS.allNotesOpenBoard} onClick={() => openBoard("all_notes", surface)}>
+                See them all on the board
+              </button>
+            </>
+          )}
         </span>
         <label className="sort">
           <span className="visually-hidden">Sort notes</span>

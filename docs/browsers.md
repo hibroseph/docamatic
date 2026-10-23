@@ -47,6 +47,10 @@ Differences handled in the code:
   websites"; same notice and "Allow on this site" as above.
 - **No `storage.local.getBytesInUse`, no client hints:** guarded; usage
   statistics name the browser from the user agent.
+- **No `storage.local.setAccessLevel`:** on Chrome, content scripts can't
+  read storage at all; Firefox has no such setting, so there they still
+  could. Docamatic's page scripts never do (a page gets its notes from the
+  background, only its own), so this only matters for a compromised page.
 - Mozilla's own sites (addons.mozilla.org, accounts and support) are off
   limits to extensions, like the stores.
 

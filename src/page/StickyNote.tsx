@@ -11,7 +11,7 @@
 // behavior, and with the setting off every note is on the page.
 import React, { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { PENDING_TIMEOUT_MS } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { resolveNoteColor } from "../model/colors";
@@ -22,6 +22,7 @@ import { transformFor, useDragResize } from "./useDragResize";
 import { useNoteActions } from "../ui/useNoteActions";
 import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { ChevronIcon, GripIcon, HeartIcon, MoreIcon, PinIcon } from "../ui/icons";
+import { dismissHint } from "../redux/actions";
 
 // Room for the page's vertical scrollbar
 const SCROLLBAR_WIDTH = 17;
@@ -35,6 +36,38 @@ const layerOf = (el: Element | null) => ((el?.getRootNode() as ShadowRoot | unde
 
 /** The "Move notes with scrolling panels" setting (off unless turned on) */
 export const useFollowPanels = () => useSelector((state: State) => state.metadata?.preferences?.follow_panels === true);
+
+/**
+ * The tip in a new note, until someone says "Got it" (model/hints.ts): how to
+ * move it, fold it, and find the rest. Notes are made from the popup, the
+ * right-click menu or the shortcut, and none of those show how a note works.
+ */
+const FirstNoteHint = () => {
+  const dispatch = useDispatch();
+  return (
+    <div className="note__hint" role="note" data-testid={TEST_IDS.noteHint}>
+      <p>
+        Drag the top bar to move this note.{" "}
+        <span role="img" aria-label="Collapse">
+          <ChevronIcon up size={13} />
+        </span>{" "}
+        folds it up, and{" "}
+        <span role="img" aria-label="More options">
+          <MoreIcon size={13} />
+        </span>{" "}
+        has colors, tags and more.
+      </p>
+      <button
+        type="button"
+        className="dm-btn dm-btn--sm"
+        data-testid={TEST_IDS.noteHintDismiss}
+        onClick={() => dispatch(dismissHint("first_note"))}
+      >
+        Got it
+      </button>
+    </div>
+  );
+};
 
 /**
  * Where a note is drawn. A note in a panel is redrawn from the panel's own
@@ -101,6 +134,10 @@ interface Props {
 export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, disconnected, autoFocus }: Props) => {
   const { note } = record;
   const actions = useNoteActions(record);
+  // Only in a note that was just made, until it's put away. autoFocus is
+  // only true on the note's first render, so it's kept from then.
+  const [isNew] = useState(autoFocus);
+  const showHint = useSelector((state: State) => isNew && !state.metadata?.hints?.first_note);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addingTag, setAddingTag] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -406,6 +443,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
           <>
             <BodyField note={note} actions={actions} className="dm-note__body" autoFocus={autoFocus} />
             <TagEditor tags={tags} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
+            {showHint && <FirstNoteHint />}
           </>
         )}
         <NoteMenu

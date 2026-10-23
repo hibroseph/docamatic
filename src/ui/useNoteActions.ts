@@ -23,7 +23,7 @@ import { useUndo } from "./undo";
 
 export const useNoteActions = ({ note, pageUrl }: NoteRecord) => {
   // The proxy store's dispatch returns a promise; failures are reported by
-  // its middleware (utils/sentry.js trackDispatches)
+  // its middleware (utils/reporting.js trackDispatches)
   const dispatch = useDispatch();
   const store = useStore<State>();
   const offerUndo = useUndo();

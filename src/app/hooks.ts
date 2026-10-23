@@ -200,3 +200,9 @@ export const useRemembered = <T extends string>(key: string, initial: T): [T, (v
 
 /** Opens a page in a new tab */
 export const openTab = (url: string) => chrome.tabs.create({ url });
+
+/** Opens the board in a tab; `from` says where (sent with board_opened) */
+export const openBoard = (from: string, surface: Surface) => {
+  chrome.tabs.create({ url: chrome.runtime.getURL(`/board.html?from=${encodeURIComponent(from)}`) });
+  if (surface === "popup") window.close();
+};

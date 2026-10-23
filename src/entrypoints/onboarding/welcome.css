@@ -90,3 +90,23 @@
 .step .step__extra { margin-top: var(--space-2); }
 .link-button { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .welcome-survey .survey { margin: 0 0 var(--space-6); }
+
+/* The first note: the one thing to do on this page, drawn like a note (which
+   stays light in both themes, and so does its button) */
+.first {
+  margin: 0 0 var(--space-8);
+  padding: var(--space-6);
+  border: var(--stroke-bold) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--note-yellow);
+  color: var(--note-ink);
+  box-shadow: var(--sticker);
+  transform: rotate(-.6deg);
+}
+.first p { max-width: 52ch; margin: 0 0 var(--space-4); line-height: 24px; }
+.first__title { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -.01em; }
+.dm-btn.first__button { min-height: 44px; padding: 0 var(--space-6); border-color: #1e2433; background: #1e2433; color: #fffdf5; box-shadow: 3px 3px 0 #1e243366; font-size: 16px; }
+.dm-btn.first__button:hover { box-shadow: 5px 5px 0 #1e243366; }
+.first .first__status { min-height: 24px; margin: var(--space-3) 0 0; font-weight: 600; }
+.first__status:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .first { transform: none; } }

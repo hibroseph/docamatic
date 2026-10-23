@@ -26,7 +26,7 @@ import { UndoProvider } from "../ui/undo";
 import { NoteCard } from "../app/NoteCard";
 import { SurveyPrompt } from "../app/Survey";
 import { findOnPage, useRemembered, useTheme } from "../app/hooks";
-import { trackEvent } from "../redux/actions";
+import { dismissHint, trackEvent } from "../redux/actions";
 import { TEST_IDS } from "../utils/testIds";
 import { EXTERNAL_LINK_PROPS, safeHref } from "../utils/SafeLink";
 
@@ -603,8 +603,13 @@ export const Board = () => {
     [pages, tags, query]
   );
 
+  const boardHintDone = useSelector((state: State) => state.metadata?.hints?.board === true);
   useEffect(() => {
-    track("board_opened", { note_count: records.length, tag_count: tags.length, editing });
+    // Where it was opened from (popup header, All notes, ...): which way people find it
+    const from = new URLSearchParams(location.search).get("from") || "direct";
+    track("board_opened", { note_count: records.length, tag_count: tags.length, editing, from: from.slice(0, 30) });
+    // They've found the board: the popup stops pointing at it (app/BoardHint.tsx)
+    if (!boardHintDone) dispatch(dismissHint("board", "used"));
   }, []);
 
   useEffect(() => {

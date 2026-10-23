@@ -30,6 +30,12 @@ export const CHROME_MESSAGES = {
   SURVEY_EVENT: "survey_event",
   // Settings -> background: the diagnostic report to download
   GET_DIAGNOSTICS: "get_diagnostics",
+  // Web page notes UI <-> background: only that page's notes (background/pageChannel.js)
+  PAGE_STATE_REQUEST: "page_state_request",
+  PAGE_STATE_PUSH: "page_state_push",
+  PAGE_DISPATCH: "page_dispatch",
+  // Web page notes UI -> background: an error to report to Sentry for it
+  REPORT_ERROR: "report_error",
   // Popup / side panel -> background: go to a note on its page ("Find on page")
   FIND_NOTE: "find_note",
   // Background -> page: scroll to this note and point it out

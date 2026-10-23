@@ -12,6 +12,7 @@ import {
   parseBackupFile,
 } from "../../redux/backups";
 import { CHROME_MESSAGES } from "../../utils/constants";
+import { joinPages } from "../../redux/storedLayout";
 import "../../styles/fonts.css";
 import "../../styles/tokens.css";
 import "../../../design-system/components/bundle.css";
@@ -62,7 +63,7 @@ const noteCountText = (count) => (count === null ? "unknown number of notes" : `
 
 $("download-current").addEventListener("click", async () => {
   try {
-    const storage = await chrome.storage.local.get(null);
+    const storage = joinPages(await chrome.storage.local.get(null));
     const file = createBackupFile(storage, { extensionVersion: version });
     downloadJson(file, `docamatic-backup-${dateForFileName(new Date())}.json`);
     showResult($("download-result"), `Downloaded ${noteCountText(file.note_count)}.`, "success");

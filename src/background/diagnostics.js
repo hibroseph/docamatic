@@ -14,6 +14,7 @@ import { messageWithoutUrls } from "../utils/expectedFailures";
 import { knownPreferences, noteStats } from "../model/diagnostics";
 import { SURVEYS_STORAGE_KEY } from "../model/surveys";
 import { CREATE_NOTE_COMMAND } from "../utils/constants";
+import { joinPages } from "../redux/storedLayout";
 
 export const DIAGNOSTICS_FORMAT = "docamatic-diagnostics";
 const DIAGNOSTICS_VERSION = 1;
@@ -32,7 +33,8 @@ const safely = async (read, fallback = "unavailable") => {
  * @param loadStep how far loading the notes got
  */
 export const buildDiagnosticReport = async ({ state, safeMode, loadStep }) => {
-  const storage = await safely(() => chrome.storage.local.get(null), {});
+  // The notes joined into { pages } whatever the layout (redux/storedLayout.js)
+  const storage = await safely(async () => joinPages(await chrome.storage.local.get(null)), {});
   const storageObject = storage && typeof storage === "object" ? storage : {};
   // In safe mode the store only holds a placeholder: describe what's saved
   const source = safeMode || !state ? storageObject : state;

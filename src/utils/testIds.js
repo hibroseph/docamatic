@@ -32,6 +32,8 @@ export const TEST_IDS = {
   diagnosticsDownload: "diagnostics-download",
   // Opens the board page (board.html)
   popupOpenBoard: "popup-open-board",
+  // "See them all on the board" in All notes
+  allNotesOpenBoard: "all-notes-open-board",
   // On the board page: its search box and the "Edit notes" switch
   boardSearch: "board-search",
   boardEditSwitch: "board-edit-switch",
@@ -73,6 +75,13 @@ export const TEST_IDS = {
   noteTag: "note-tag",
   noteAddTag: "note-add-tag",
   noteSyncError: "note-sync-error",
+  // The first-time tip inside a new note on a page, and its "Got it" button
+  noteHint: "note-hint",
+  noteHintDismiss: "note-hint-dismiss",
+  // The popup's first-time pointer to the board, and its buttons
+  boardHint: "board-hint",
+  boardHintOpen: "board-hint-open",
+  boardHintDismiss: "board-hint-dismiss",
 
   settingsBackupRestore: "settings-backup-restore",
   popupSafeModeBanner: "popup-safe-mode-banner",

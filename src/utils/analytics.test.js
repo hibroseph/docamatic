@@ -26,3 +26,9 @@ test("Never includes the page url in note events", () => {
     const { properties } = eventForAction(addNote("n4", 0, "https://private.example/", "https://private.example/?q=1"));
     expect(JSON.stringify(properties || {})).not.toContain("private.example");
 })
+
+test("Putting away a first-time hint says which, and how", () => {
+  const { dismissHint } = require("../redux/actions");
+  expect(eventForAction(dismissHint("first_note"))).toEqual({ event: "hint_dismissed", properties: { hint: "first_note", how: "closed" } });
+  expect(eventForAction(dismissHint("board", "used"))).toEqual({ event: "hint_dismissed", properties: { hint: "board", how: "used" } });
+});

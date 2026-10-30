@@ -14,11 +14,49 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+### Added
+- A note can show on more than one page. **Show on other pages** in a
+  note's menu (on the page, in the popup and the side panel) shows the
+  page's address in parts: the site, each folder, and the page itself (its
+  query, or "this page"). Picking a part shows the note on every page under
+  it, e.g. `facebook.com/marketplace` for a note written on the Marketplace
+  home that should stay while searching. Undo puts it back.
+- **Can't find a note?** in the popup on a page with no notes: the notes
+  from elsewhere on the same site, closest address first, each with **Show
+  on every page of …** (the folders both addresses share) and **Move to
+  this page**.
+- How: a note is saved under a pattern key ending in `/*`
+  (`https://www.facebook.com/marketplace/*`), an ordinary `pages` key, so
+  storage, backups, search and lists need no changes. A pattern covers the
+  pages of its own site whose path starts with it, whatever the query
+  (`utils/noteUrl.js`: `isPagePattern`, `patternMatches`, `pageKeysFor`,
+  `addressParts`, `sharedPattern`). Everything that finds a page's notes
+  (the page's view, injecting the notes UI, pushing changes to open tabs,
+  Find on page, placing new notes) now uses `pageKeysFor`, which adds the
+  patterns covering the page to its own keys. New action `SHOW_NOTE_ON`
+  (same site only, in the reducer and for content scripts in
+  `authorizeSender`). Pattern keys don't save page titles (lists call them
+  "All of facebook.com/marketplace"). Analytics: `note_pages_changed` with
+  `scope` (`page` or `pages`), `depth` (folders deep, 0 for a whole site)
+  and `via` (`picker`, `lost_note`, `undo`); never addresses.
+- Browser test `notepages`: a note on a Marketplace-like page found from a
+  search page through the popup, shown there without a reload, kept off
+  other pages, then narrowed and widened again with the picker. `menufit`
+  now checks that the last note's menu is all in view either way: with the
+  new item it's too tall to open upward in the test's short popup, so it
+  opens downward, scrolled into view (the existing fallback).
+
 ### Fixed
 - Edge's "Blocked" (it won't let extensions script a tab, seen reconnecting a
   YouTube tab after the 5.0.3 update) is an expected scripting error, so it
   isn't reported to Sentry. Only that exact message. (Also on master, for
   the next 5.0.x.)
+- Installing with no browser window open (Chrome OS, installed at sign-in)
+  no longer fails with "No current window" (Sentry 7802430342, 5.0.3): the
+  welcome page opens in a new window instead.
+- The board's "Group by" switch shows which grouping is chosen. The design
+  system's tabs now also highlight radio-style tabs (`aria-checked`), so
+  Settings' Theme and Text size no longer set `aria-selected` on radios.
 
 ## 5.1.0 (not released yet; set the date when it's published)
 

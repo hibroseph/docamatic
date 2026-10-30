@@ -1,6 +1,6 @@
 // Reducer cases added in 5.1 (the earlier ones are in reducer.test.js)
 import notesApp from "./reducer";
-import { fillNoteDetails } from "./actions";
+import { fillNoteDetails, showNoteOn } from "./actions";
 import {
   addNote,
   addTag,
@@ -173,4 +173,36 @@ test("A first-time hint, once put away, stays put away; unknown hints are ignore
   expect(once.metadata).toEqual({ onboarded: true, preferences: { theme: "dark" }, hints: { board: true } });
   expect(notesApp(once, dismissHint("board", "used"))).toBe(once);
   expect(notesApp(start, dismissHint("something_else"))).toBe(start);
+});
+
+describe("Showing a note on other pages (SHOW_NOTE_ON)", () => {
+  const PAGE = "https://www.facebook.com/marketplace/";
+  const PATTERN = "https://www.facebook.com/marketplace/*";
+  const start = () => ({
+    pages: { [PAGE]: { title: "Marketplace", notes: [{ id: "n1", body: "moped", position: { x: 1, y: 2 } }, { id: "n2" }] } },
+    tags: [],
+    metadata: {},
+  });
+
+  test("Moves the note, unchanged, to the new key", () => {
+    const state = notesApp(start(), showNoteOn("n1", PAGE, PATTERN));
+    expect(state.pages[PAGE].notes.map((n) => n.id)).toEqual(["n2"]);
+    expect(state.pages[PAGE].title).toBe("Marketplace");
+    expect(state.pages[PATTERN].notes).toEqual([{ id: "n1", body: "moped", position: { x: 1, y: 2 } }]);
+  });
+
+  test("And back again", () => {
+    const moved = notesApp(start(), showNoteOn("n1", PAGE, PATTERN));
+    const back = notesApp(moved, showNoteOn("n1", PATTERN, PAGE));
+    expect(back.pages[PAGE].notes.map((n) => n.id)).toEqual(["n2", "n1"]);
+    expect(back.pages[PATTERN].notes).toEqual([]);
+  });
+
+  test("Never to another site, a non-web address, or for a note that isn't there", () => {
+    const state = start();
+    expect(notesApp(state, showNoteOn("n1", PAGE, "https://evil.example/*"))).toBe(state);
+    expect(notesApp(state, showNoteOn("n1", PAGE, "javascript:alert(1)//*"))).toBe(state);
+    expect(notesApp(state, showNoteOn("missing", PAGE, PATTERN))).toBe(state);
+    expect(notesApp(state, showNoteOn("n1", PAGE, PAGE))).toBe(state);
+  });
 });

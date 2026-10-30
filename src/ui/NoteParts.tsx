@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { useStoreSyncedText } from "../utils/useStoreSyncedText";
 import { TEST_IDS } from "../utils/testIds";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
+import { addressPartIndex, addressParts, isPagePattern, patternBase, patternMatches } from "../utils/noteUrl";
 import { canHaveNotes } from "../utils/expectedFailures";
 import {
   COLOR_LABELS,
@@ -30,11 +31,116 @@ import {
   ExternalIcon,
   EyeIcon,
   EyeOffIcon,
+  PagesIcon,
   PinIcon,
   TagIcon,
   TargetIcon,
   TrashIcon,
 } from "./icons";
+
+// --- Which pages a note shows on ----------------------------------------------
+
+/**
+ * What a choice in the pages picker means, in words: "Only this page",
+ * "Every page of facebook.com/marketplace", "Every page of facebook.com".
+ */
+const pagesSummary = (parts: { key: string }[], chosen: number) => {
+  if (chosen === parts.length - 1) return "Only this page";
+  const base = patternBase(parts[chosen]!.key).replace(/^[a-z]+:\/\/(www\.)?/, "").replace(/\/$/, "");
+  return `Every page of ${chosen === 0 ? base.replace(/\/.*/, "") : base}`;
+};
+
+/**
+ * The address of a page cut into its parts (utils/noteUrl.js addressParts):
+ * the site, each folder, and what makes it this page. Picking a part shows
+ * the note on every page under it; the parts after it are crossed out. The
+ * last part is this page only.
+ *
+ * `href` is the page the parts come from: the page the note is on, or in
+ * lists the page it was written on.
+ */
+export const PagesPicker = ({
+  record,
+  href,
+  actions,
+  onDone,
+}: {
+  record: NoteRecord;
+  href: string;
+  actions: NoteActions;
+  onDone: () => void;
+}) => {
+  const parts = addressParts(href);
+  const current = (() => {
+    const exact = addressPartIndex(parts, record.pageUrl);
+    if (exact !== -1) return exact;
+    // A pattern broader or narrower than the parts here, or an older key:
+    // start from the narrowest part it covers, else this page
+    if (isPagePattern(record.pageUrl)) {
+      const covered = parts.findIndex((part) => patternMatches(record.pageUrl, patternBase(part.key)));
+      if (covered !== -1) return covered;
+    }
+    return parts.length - 1;
+  })();
+  const [chosen, setChosen] = useState(current);
+  if (parts.length === 0) return null;
+
+  const save = () => {
+    actions.showOn(parts[chosen]!.key);
+    onDone();
+  };
+
+  return (
+    <div className="pages-picker" data-testid={TEST_IDS.pagesPicker}>
+      <div className="pages-picker__label" id={`pages-${record.note.id}`}>
+        Show this note on
+      </div>
+      <div className="pages-picker__address" role="radiogroup" aria-labelledby={`pages-${record.note.id}`}>
+        {parts.map((part, index) => (
+          <React.Fragment key={part.key + index}>
+            {/* Between folders; the query and "this page" follow without one */}
+            {index > 0 && !part.page && !part.text.startsWith("?") && !part.text.startsWith("#") && (
+              <span className={`pages-picker__slash ${index > chosen ? "is-dropped" : ""}`} aria-hidden="true">
+                /
+              </span>
+            )}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={index === chosen}
+              aria-label={`${part.text}: ${pagesSummary(parts, index)}`}
+              className={`pages-picker__part ${part.page ? "pages-picker__part--page" : ""} ${index > chosen ? "is-dropped" : ""} ${
+                index === chosen ? "is-chosen" : ""
+              }`}
+              data-testid={TEST_IDS.pagesPickerPart}
+              data-part-index={index}
+              onClick={() => setChosen(index)}
+            >
+              {part.text}
+            </button>
+          </React.Fragment>
+        ))}
+      </div>
+      <p className="pages-picker__summary" aria-live="polite">
+        {pagesSummary(parts, chosen)}
+      </p>
+      <div className="pages-picker__actions">
+        <button type="button" className="dm-btn dm-btn--sm dm-btn--ghost" data-testid={TEST_IDS.pagesPickerCancel} onClick={onDone}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="dm-btn dm-btn--sm"
+          data-testid={TEST_IDS.pagesPickerSave}
+          disabled={parts[chosen]!.key === record.pageUrl}
+          onClick={save}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // --- Color --------------------------------------------------------------------
 
@@ -448,6 +554,8 @@ export const NoteMenu = React.forwardRef<
     inList?: boolean;
     onDone: () => void;
     onAddTag: () => void;
+    /** Choose which pages it shows on (PagesPicker) */
+    onShowOn?: () => void;
     /** In lists: go to the note on its page */
     onFind?: () => void;
     /** In lists of the page that's open: move the note to what's on screen there */
@@ -455,10 +563,10 @@ export const NoteMenu = React.forwardRef<
     /** On the page itself: keep on screen, collapse */
     page?: { pinned: boolean; collapsed: boolean; onTogglePin: () => void; onToggleCollapsed: () => void };
   }
->(({ open, record, actions, inList = false, onDone, onAddTag, onFind, onBringHere, page }, ref) => {
+>(({ open, record, actions, inList = false, onDone, onAddTag, onShowOn, onFind, onBringHere, page }, ref) => {
   const { note, pageUrl } = record;
   const visible = note.visible !== false;
-  const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
+  const href = safeHref(note.created_on_url) || safeHref(patternBase(pageUrl));
   // Its own handle on the element too, to place it, besides the caller's
   const own = useRef<HTMLDivElement | null>(null);
   const setRef = (el: HTMLDivElement | null) => {
@@ -490,6 +598,21 @@ export const NoteMenu = React.forwardRef<
         <TagIcon />
         Add tag
       </button>
+      {onShowOn && canHaveNotes(patternBase(pageUrl)) && (
+        <button
+          type="button"
+          role="menuitem"
+          className="menu__item"
+          data-testid={TEST_IDS.noteShowOn}
+          onClick={() => {
+            onDone();
+            onShowOn();
+          }}
+        >
+          <PagesIcon />
+          Show on other pages
+        </button>
+      )}
       {/* Not for notes kept for a page notes can't go on (an extension store) */}
       {canHaveNotes(pageUrl) && (
         <button

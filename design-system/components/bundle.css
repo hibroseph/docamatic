@@ -89,7 +89,8 @@
   cursor: pointer;
 }
 .dm-tab:hover { background: var(--paper-2); }
-.dm-tab[aria-selected="true"] { background: var(--primary); color: var(--on-primary); box-shadow: inset 0 0 0 var(--stroke-bold) var(--note-ink); }
+.dm-tab[aria-selected="true"],
+.dm-tab[aria-checked="true"] { background: var(--primary); color: var(--on-primary); box-shadow: inset 0 0 0 var(--stroke-bold) var(--note-ink); }
 .dm-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 /* ---------- Tag ---------- */

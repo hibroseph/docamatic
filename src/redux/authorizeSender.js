@@ -47,6 +47,8 @@ export const reasonToBlock = (action, sender, extensionId) => {
   if (action.type === DISMISS_HINT) return null;
   if (!action.url) return "no_url";
   if (!sameSite(sender.url, action.url)) return "different_site";
+  // Moving a note to other pages (SHOW_NOTE_ON): those must be on the site too
+  if (action.to !== undefined && !sameSite(sender.url, action.to)) return "different_site";
   return null;
 };
 

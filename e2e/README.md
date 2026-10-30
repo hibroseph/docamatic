@@ -78,6 +78,7 @@ its notes a few more times anyway; see `src/entrypoints/content.ts`.)
 |---|---|
 | board | The board page: both views, dragging, remembering, rearranging |
 | boardsites | The board grouped by website |
+| notepages | A note on more than one page: the picker in a note, and the popup's "Can't find a note?" |
 | collapse | Collapsing a note to its title bar and opening it again |
 | contactform | The website's contact form (PostHog is answered locally, nothing is sent) |
 | diagnostics | Download diagnostic report, from Settings and from safe mode |

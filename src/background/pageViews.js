@@ -7,12 +7,13 @@
 // list of notes cut down to this page's), and the note settings. Never the
 // notes of other sites. (Docamatic's own pages, the popup and so on, get
 // the whole state through extensionPagesBridge.js.)
-import { noteUrlsFor } from "../utils/noteUrl";
+import { pageKeysFor, pageShows } from "../utils/noteUrl";
 
 /** The part of the state the page at `href` may see */
 export const pageViewFor = (state, href) => {
   const pages = {};
-  for (const key of noteUrlsFor(href)) {
+  // Its own keys and the patterns covering it (notes shown on many pages)
+  for (const key of pageKeysFor(href, state?.pages)) {
     const page = state?.pages?.[key];
     if (page) pages[key] = page;
   }
@@ -57,4 +58,4 @@ export const changedPages = (previous, next) => {
 };
 
 /** Whether the page at `href` shows any of these page keys */
-export const showsAnyOf = (href, keys) => noteUrlsFor(href).some((key) => keys.has(key));
+export const showsAnyOf = (href, keys) => [...keys].some((key) => pageShows(href, key));

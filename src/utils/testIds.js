@@ -74,6 +74,18 @@ export const TEST_IDS = {
   // An existing tag on a note. Also has data-tag-text="<text>".
   noteTag: "note-tag",
   noteAddTag: "note-add-tag",
+  // "Show on other pages" in a note's menu, and the picker it opens: one
+  // button per part of the address (data-part-index="<n>"), Save and Cancel
+  noteShowOn: "note-show-on",
+  pagesPicker: "pages-picker",
+  pagesPickerPart: "pages-picker-part",
+  pagesPickerSave: "pages-picker-save",
+  pagesPickerCancel: "pages-picker-cancel",
+  // The popup's "Can't find a note?" list on a page without notes: one row
+  // per note elsewhere on the site, and its buttons
+  lostNote: "lost-note",
+  lostNoteShowHere: "lost-note-show-here",
+  lostNoteMoveHere: "lost-note-move-here",
   noteSyncError: "note-sync-error",
   // The first-time tip inside a new note on a page, and its "Got it" button
   noteHint: "note-hint",

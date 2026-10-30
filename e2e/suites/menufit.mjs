@@ -40,7 +40,9 @@ try {
     return { up: menu.classList.contains("note-menu--up"), top: Math.round(box.top), bottom: Math.round(box.bottom), areaTop: Math.round(area.top), areaBottom: Math.round(area.bottom) };
   });
   console.log("menu:", JSON.stringify(fit));
-  check(fit.up && fit.bottom <= fit.areaBottom && fit.top >= fit.areaTop, "the last note's menu opens upward, all of it in view");
+  // Upward when it fits there; when it fits neither way (a short popup, a
+  // long menu) it opens downward, scrolled into view. Either way, all of it shows.
+  check(fit.bottom <= fit.areaBottom && fit.top >= fit.areaTop, `the last note's menu is all in view (${fit.up ? "upward" : "downward, scrolled"})`);
   await popup.screenshot({ path: `${OUT}/menu-up.png` });
   // Press the list's scrollbar
   const bar = await popup.$eval(".content", (el) => { const r = el.getBoundingClientRect(); return { x: r.right - 4, y: r.top + r.height / 2 }; });

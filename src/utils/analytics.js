@@ -25,7 +25,9 @@ import {
   TRACK,
   USER_ONBOARDED,
   DISMISS_HINT,
+  SHOW_NOTE_ON,
 } from "../redux/actions";
+import { isPagePattern, patternBase } from "./noteUrl";
 import { generateUUID } from "./GenerateUUID";
 
 const STORAGE_KEY = "analytics";
@@ -207,6 +209,16 @@ export const eventForAction = (action) => {
       return { event: "all_notes_deleted" };
     case USER_ONBOARDED:
       return { event: "onboarding_viewed" };
+    case SHOW_NOTE_ON: {
+      // How wide, never where: "page", or "pages" with how many folders
+      // deep the pattern is (0 for a whole site)
+      if (!isPagePattern(action.to)) return { event: "note_pages_changed", properties: { scope: "page", via: action.via } };
+      let depth = 0;
+      try {
+        depth = new URL(patternBase(action.to)).pathname.split("/").filter(Boolean).length;
+      } catch {}
+      return { event: "note_pages_changed", properties: { scope: "pages", depth, via: action.via } };
+    }
     case DISMISS_HINT:
       return { event: "hint_dismissed", properties: { hint: action.name, how: action.how } };
     case ADD_TEXT:

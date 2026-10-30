@@ -6,7 +6,7 @@ import { onUrlChange } from "../utils/urlChanges";
 import { notesForPage, tagsOfNote } from "../model/notes";
 import type { NoteRecord, State, Tag } from "../model/types";
 import { fillNoteDetails, setPageTitle } from "../redux/actions";
-import { noteUrlFor, redactUrl } from "../utils/noteUrl";
+import { isPagePattern, noteUrlFor, redactUrl } from "../utils/noteUrl";
 import { NoRenderErrorBoundary } from "../ui/NoRenderErrorBoundary";
 import { StickyNote } from "./StickyNote";
 import { reportNewlyShownNotes } from "./reportShown";
@@ -89,7 +89,8 @@ const usePageNotes = (url: string) => {
 /** Saves the page's title with its notes, so lists can show it instead of the url */
 const useSavePageTitle = (records: NoteRecord[], url: string, enabled: boolean) => {
   const dispatch = useDispatch();
-  const pageUrls = [...new Set(records.map((record) => record.pageUrl))].join(" ");
+  // Not patterns: their notes show on many pages, each with its own title
+  const pageUrls = [...new Set(records.map((record) => record.pageUrl).filter((pageUrl) => !isPagePattern(pageUrl)))].join(" ");
   const titles = useSelector((state: State) => pageUrls.split(" ").map((pageUrl) => state.pages?.[pageUrl]?.title).join("\n"));
   useEffect(() => {
     if (!enabled || !pageUrls) return;

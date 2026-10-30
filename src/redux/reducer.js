@@ -23,6 +23,7 @@ import {
   FILL_NOTE_DETAILS,
   DISMISS_HINT,
   SET_PREFERENCES,
+  SHOW_NOTE_ON,
   TOGGLE_VISIBILITY,
   UPDATE_TAG,
   USER_ONBOARDED,
@@ -380,6 +381,27 @@ const notesApp = (state = GetInitialState(), action) => {
             ...(action.page_title ? { title: String(action.page_title).slice(0, 300) } : {}),
             notes: [...(page?.notes || []), createNote(action)],
           },
+        },
+      };
+    }
+
+    case SHOW_NOTE_ON: {
+      // Which pages a note shows on: it moves to another page key, on the
+      // same site (a page, or a pattern for many: utils/noteUrl.js). The
+      // note itself is unchanged, position and all.
+      const to = action.to;
+      if (typeof to !== "string" || to === action.url || to.length > 4096) return state;
+      if (!/^(https?|file):\/\//.test(to) || !sameSite(action.url, to)) return state;
+      const from = state.pages?.[action.url];
+      const note = from?.notes?.find((n) => n.id === action.id);
+      if (!note) return state;
+      const target = state.pages?.[to];
+      return {
+        ...state,
+        pages: {
+          ...state.pages,
+          [action.url]: { ...from, notes: from.notes.filter((n) => n.id !== action.id) },
+          [to]: { ...target, notes: [...(target?.notes || []).filter((n) => n.id !== action.id), note] },
         },
       };
     }

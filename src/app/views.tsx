@@ -5,10 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { TEST_IDS } from "../utils/testIds";
 import { canHaveNotes } from "../utils/expectedFailures";
 import type { NoteRecord, State, Tag } from "../model/types";
-import { SORT_LABELS, allNotes, domainOf, notesForPage, sortNotes, tagCounts, type SortMode } from "../model/notes";
+import { SORT_LABELS, allNotes, domainOf, lastChanged, notesForPage, pageLabel, plainText, sortNotes, tagCounts, type SortMode } from "../model/notes";
 import { searchNotes, type SearchQuery } from "../model/search";
 import { NOTE_COLOR_NAMES, HIGHLIGHTER, COLOR_LABELS, tagColorName } from "../model/colors";
-import { deleteTag, updateTag } from "../redux/actions";
+import { deleteTag, showNoteOn, updateTag } from "../redux/actions";
+import { noteUrlFor, patternBase, sharedPattern } from "../utils/noteUrl";
+import { sameSite } from "../utils/sameSite";
 import { useDismiss, TagPill } from "../ui/NoteParts";
 import { BackIcon, MoreIcon, PencilIcon, TrashIcon } from "../ui/icons";
 import { useUndo } from "../ui/undo";
@@ -85,6 +87,9 @@ export const ThisPageView = ({
             Add a note
           </button>
         </EmptyState>
+      ) : null}
+      {records.length === 0 ? (
+        <LostNotes url={url} />
       ) : (
         <NoteList
           records={records}
@@ -95,6 +100,93 @@ export const ThisPageView = ({
         />
       )}
     </>
+  );
+};
+
+// --- Can't find a note? --------------------------------------------------------------
+// On a page without notes: the notes from elsewhere on the same site, each
+// with a way to show it here. Notes "disappear" when a site moves the same
+// thing to another address (Marketplace's search, a renamed page), and this
+// is where people look for them.
+
+const LOST_NOTES_SHOWN = 5;
+
+const pathDepth = (pattern: string) => patternBase(pattern).split("/").length;
+
+const LostNotes = ({ url }: { url: string }) => {
+  const dispatch = useDispatch();
+  const pages = useSelector((state: State) => state.pages);
+  const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(LOST_NOTES_SHOWN);
+  // Closest first (most of the address in common), then the newest
+  const candidates = useMemo(
+    () =>
+      allNotes({ pages })
+        .filter(({ pageUrl }) => sameSite(pageUrl, url))
+        .map((record) => {
+          const writtenOn = record.note.created_on_url || patternBase(record.pageUrl);
+          return { record, shared: sharedPattern(writtenOn, url) || "" };
+        })
+        .sort((a, b) => pathDepth(b.shared) - pathDepth(a.shared) || lastChanged(b.record.note) - lastChanged(a.record.note)),
+    [pages, url]
+  );
+  if (candidates.length === 0) return null;
+
+  const site = domainOf(url);
+  const show = (record: NoteRecord, to: string) => dispatch(showNoteOn(record.note.id, record.pageUrl, to, "lost_note"));
+
+  return (
+    <section className="lost-notes" aria-label="Notes elsewhere on this site">
+      <button type="button" className="link-button lost-notes__toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
+        Can't find a note? You have {candidates.length} on other pages of {site}.
+      </button>
+      {open && (
+        <>
+          <p className="lost-notes__text">
+            Sites sometimes show the same thing at a new address. Pick a note to show it here, and on pages like this one.
+          </p>
+          <ul className="lost-notes__list">
+            {candidates.slice(0, shown).map(({ record, shared }) => {
+              const { note } = record;
+              const title = note.title?.trim() || plainText(note.body).split("\n")[0] || "Untitled note";
+              // The pages it and this page have in common; just the site
+              // itself is too broad to suggest first
+              const sharesFolder = pathDepth(shared) > pathDepth(`${new URL(url).origin}/*`);
+              const everyPage = pageLabel(undefined, shared).replace(/^All of /, "every page of ");
+              return (
+                <li key={note.id} className="lost-note" data-testid={TEST_IDS.lostNote} data-note-id={note.id}>
+                  <span className="lost-note__title">{title}</span>
+                  <span className="lost-note__where">On {pageLabel({ pages }, record.pageUrl)}</span>
+                  <span className="lost-note__actions">
+                    <button
+                      type="button"
+                      className={`dm-btn dm-btn--sm ${sharesFolder ? "" : "dm-btn--ghost"}`}
+                      data-testid={TEST_IDS.lostNoteShowHere}
+                      onClick={() => show(record, shared)}
+                    >
+                      Show on {everyPage}
+                    </button>
+                    <button
+                      type="button"
+                      className={`dm-btn dm-btn--sm ${sharesFolder ? "dm-btn--ghost" : ""}`}
+                      data-testid={TEST_IDS.lostNoteMoveHere}
+                      onClick={() => show(record, noteUrlFor(url))}
+                    >
+                      Move to this page
+                    </button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {candidates.length > shown && (
+            <button type="button" className="dm-btn dm-btn--ghost dm-btn--sm" onClick={() => setShown(shown + LOST_NOTES_SHOWN)}>
+              Show {Math.min(LOST_NOTES_SHOWN, candidates.length - shown)} more
+            </button>
+          )}
+        </>
+      )}
+    </section>
   );
 };
 

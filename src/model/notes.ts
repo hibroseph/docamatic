@@ -1,7 +1,7 @@
 // Reading notes out of the saved state. Views use these instead of walking
 // `state.pages` themselves (see model/types.ts).
 import type { Note, NoteRecord, Page, State, Tag } from "./types";
-import { noteUrlsFor } from "../utils/noteUrl";
+import { isPagePattern, pageKeysFor, patternBase } from "../utils/noteUrl";
 
 const EMPTY: NoteRecord[] = [];
 
@@ -23,10 +23,10 @@ export const allNotes = (state: Pick<State, "pages"> | undefined): NoteRecord[] 
   return records;
 };
 
-/** The notes that show on a page (from every url they may be saved under) */
+/** The notes that show on a page (from every url they may be saved under, and patterns covering it) */
 export const notesForPage = (state: Pick<State, "pages"> | undefined, href: string | undefined): NoteRecord[] => {
   if (!href) return EMPTY;
-  return noteUrlsFor(href).flatMap((pageUrl) => (state?.pages?.[pageUrl]?.notes || []).map((note) => ({ note, pageUrl })));
+  return pageKeysFor(href, state?.pages).flatMap((pageUrl) => (state?.pages?.[pageUrl]?.notes || []).map((note) => ({ note, pageUrl })));
 };
 
 export const pageOf = (state: Pick<State, "pages"> | undefined, pageUrl: string): Page | undefined => state?.pages?.[pageUrl];
@@ -83,6 +83,8 @@ export const domainOf = (url: string): string => {
 
 /** The page's title if one was saved, otherwise a readable form of its address */
 export const pageLabel = (state: Pick<State, "pages"> | undefined, pageUrl: string): string => {
+  // Notes on many pages: "All of facebook.com/marketplace"
+  if (isPagePattern(pageUrl)) return `All of ${pageLabel(undefined, patternBase(pageUrl))}`;
   const title = pageOf(state, pageUrl)?.title?.trim();
   if (title) return title;
   try {

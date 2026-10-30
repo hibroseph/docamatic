@@ -47,6 +47,18 @@ try {
   const groups = await page.$$eval(".board-group", (els) => els.map((e) => e.getAttribute("aria-label")));
   console.log("site groups:", groups.join(" | "));
   check(JSON.stringify(groups) === JSON.stringify(["slowbread.blog", "github.com", "youtube.com", "amazon.com", "news.example.com"]), "grouped by website, busiest first");
+  // Off the button, so hovering doesn't count as highlighted
+  await page.mouse.move(5, 300);
+  const highlighted = (name) =>
+    page.$eval(`[data-testid="board-group-by-${name}"]`, (e) => {
+      const primary = getComputedStyle(e).getPropertyValue("--primary").trim();
+      const probe = Object.assign(document.createElement("i"), { style: `color: ${primary}` });
+      document.body.append(probe);
+      const primaryRgb = getComputedStyle(probe).color;
+      probe.remove();
+      return getComputedStyle(e).backgroundColor === primaryRgb;
+    });
+  check((await highlighted("site")) && !(await highlighted("tag")), "the chosen grouping is highlighted");
   await page.screenshot({ path: `${OUT}/board-sites-canvas.png` });
   // Drag a note while grouped by website
   const box = await page.$eval('[data-note-id="n5"]', (e) => { const r = e.getBoundingClientRect(); return { x: r.x + 60, y: r.y + 100 }; });

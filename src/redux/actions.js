@@ -26,6 +26,7 @@ export const UPDATE_TAG = "UPDATE_TAG"
 export const DELETE_TAG = "DELETE_TAG"
 export const SET_PREFERENCES = "SET_PREFERENCES"
 export const LAYOUT_NOTE = "LAYOUT_NOTE"
+export const SHOW_NOTE_ON = "SHOW_NOTE_ON"
 
 /*
  * action creators
@@ -254,6 +255,22 @@ export function layoutNote(id, url, layout) {
     id,
     url,
     ...layout,
+  };
+}
+
+/**
+ * Moves a note to another page key: which pages it shows on. `to` is a page
+ * (noteUrlFor) or a pattern for many pages (isPagePattern, utils/noteUrl.js).
+ * @param url the key it's saved under now
+ * @param via where it was chosen, for analytics: "picker", "lost_note", "undo"
+ */
+export function showNoteOn(id, url, to, via) {
+  return {
+    type: SHOW_NOTE_ON,
+    id,
+    url,
+    to,
+    ...(via ? { via } : {}),
   };
 }
 

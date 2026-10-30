@@ -105,6 +105,45 @@
 .dm-tag:focus-visible, .dm-tag__remove:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus); }
 .dm-tag__remove svg { display: block; }
 
+/* ---------- Which pages a note shows on ---------- */
+.pages-picker {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: var(--stroke-hair) solid var(--note-ink-muted);
+  border-radius: var(--radius-sm);
+  background: #ffffff8c;
+  color: var(--note-ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 18px;
+}
+.pages-picker__label { font-weight: 600; }
+.pages-picker__address { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-width: 0; }
+.pages-picker__part {
+  max-width: 100%;
+  padding: 1px 6px;
+  overflow: hidden;
+  border: var(--stroke-hair) solid var(--note-ink-muted);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pages-picker__part:hover { background: #ffffffb3; }
+.pages-picker__part.is-chosen { border-color: var(--note-ink); border-width: var(--stroke-bold); background: var(--primary); color: var(--on-primary); font-weight: 600; }
+.pages-picker__part.is-dropped,
+.pages-picker__slash.is-dropped { color: var(--note-ink-muted); text-decoration: line-through; border-style: dashed; }
+.pages-picker__part:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus); }
+.pages-picker__slash { color: var(--note-ink-muted); }
+/* "this page": not part of the address, so it's set apart from it */
+.pages-picker__part--page { margin-left: var(--space-1); border-radius: var(--radius-pill); font-style: italic; }
+.pages-picker__summary { margin: 0; font-weight: 600; }
+.pages-picker__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+
 /* ---------- Menus ---------- */
 .menu {
   position: absolute;

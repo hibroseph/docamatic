@@ -4,7 +4,7 @@
 // page first.
 import { toggleVisibility } from "../redux/actions";
 import { CHROME_MESSAGES } from "../utils/constants";
-import { noteUrlsFor } from "../utils/noteUrl";
+import { pageShows, patternBase } from "../utils/noteUrl";
 import { safeHref } from "../utils/SafeLink";
 import { track } from "../utils/analytics";
 
@@ -22,13 +22,13 @@ export const findNote = async (store, pageUrl, noteId) => {
 
   // A tab already showing the page: the one in the focused window first
   const tabs = await chrome.tabs.query({});
-  const showing = tabs.filter((tab) => noteUrlsFor(tab.url).includes(pageUrl));
+  const showing = tabs.filter((tab) => pageShows(tab.url, pageUrl));
   let tab = showing.find((t) => t.active) || showing[0];
   if (tab) {
     await chrome.tabs.update(tab.id, { active: true });
     await chrome.windows.update(tab.windowId, { focused: true }).catch(() => {});
   } else {
-    const href = safeHref(note.created_on_url) || safeHref(pageUrl);
+    const href = safeHref(note.created_on_url) || safeHref(patternBase(pageUrl));
     if (!href) return { ok: false };
     tab = await chrome.tabs.create({ url: href });
   }

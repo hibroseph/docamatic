@@ -20,7 +20,7 @@ import { anchorAt, findAnchorElement, panelMode, placementFor } from "./anchor";
 import { registerNote } from "./noteRegistry";
 import { transformFor, useDragResize } from "./useDragResize";
 import { useNoteActions } from "../ui/useNoteActions";
-import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
+import { BodyField, NoteMenu, PagesPicker, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { ChevronIcon, GripIcon, HeartIcon, MoreIcon, PinIcon } from "../ui/icons";
 import { dismissHint } from "../redux/actions";
 
@@ -140,6 +140,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
   const showHint = useSelector((state: State) => isNew && !state.metadata?.hints?.first_note);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addingTag, setAddingTag] = useState(false);
+  const [choosingPages, setChoosingPages] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const articleRef = useRef<HTMLElement>(null);
@@ -443,6 +444,7 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
           <>
             <BodyField note={note} actions={actions} className="dm-note__body" autoFocus={autoFocus} />
             <TagEditor tags={tags} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
+            {choosingPages && <PagesPicker record={record} href={location.href} actions={actions} onDone={() => setChoosingPages(false)} />}
             {showHint && <FirstNoteHint />}
           </>
         )}
@@ -455,6 +457,10 @@ export const StickyNote = ({ record, tags, windowWidth, zIndex, onBringToFront, 
           onAddTag={() => {
             if (collapsed) actions.setCollapsed(false);
             setAddingTag(true);
+          }}
+          onShowOn={() => {
+            if (collapsed) actions.setCollapsed(false);
+            setChoosingPages(true);
           }}
           page={{
             pinned,

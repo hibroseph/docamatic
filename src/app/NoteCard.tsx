@@ -5,13 +5,14 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { TEST_IDS } from "../utils/testIds";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
+import { patternBase } from "../utils/noteUrl";
 import { resolveNoteColor } from "../model/colors";
 import { pageLabel, tagsOfNote, domainOf } from "../model/notes";
 import { friendlyDate } from "../model/dates";
 import type { NoteRecord, State, Tag } from "../model/types";
 import { useNoteActions } from "../ui/useNoteActions";
 import { findOnPage, type NotePlace } from "./hooks";
-import { BodyField, NoteMenu, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
+import { BodyField, NoteMenu, PagesPicker, TagEditor, TitleField, noteColorProps, useDismiss } from "../ui/NoteParts";
 import { EyeOffIcon, HeartIcon, MoreIcon } from "../ui/icons";
 
 const NO_TAGS: Tag[] = [];
@@ -44,6 +45,7 @@ export const NoteCard = ({
   const label = useSelector((state: State) => pageLabel(state, pageUrl));
   const [menuOpen, setMenuOpen] = useState(false);
   const [addingTag, setAddingTag] = useState(false);
+  const [choosingPages, setChoosingPages] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const bodyWrap = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export const NoteCard = ({
   }, [note.body]);
 
   const color = noteColorProps(resolveNoteColor(note.color));
-  const href = safeHref(note.created_on_url || pageUrl) || safeHref(pageUrl);
+  const href = safeHref(note.created_on_url) || safeHref(patternBase(pageUrl));
   const hidden = note.visible === false;
 
   return (
@@ -107,6 +109,10 @@ export const NoteCard = ({
         <BodyField note={note} actions={actions} className="dm-note__body" />
       </div>
       <TagEditor tags={tagsOfNote(allTags, note)} actions={actions} adding={addingTag} onDoneAdding={() => setAddingTag(false)} />
+      {choosingPages && (
+        // The parts of the address it was written on (lists aren't on a page)
+        <PagesPicker record={record} href={note.created_on_url || patternBase(pageUrl)} actions={actions} onDone={() => setChoosingPages(false)} />
+      )}
       <div className="dm-note__meta note-card__meta">
         {showPage && href && (
           <a className="note-card__page" href={href} title={label} {...EXTERNAL_LINK_PROPS}>
@@ -133,7 +139,7 @@ export const NoteCard = ({
           </span>
         )}
       </div>
-      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} onFind={() => findOnPage(record)} onBringHere={onBringHere} />
+      <NoteMenu ref={menuRef} open={menuOpen} record={record} actions={actions} inList onDone={() => setMenuOpen(false)} onAddTag={() => setAddingTag(true)} onShowOn={() => setChoosingPages(true)} onFind={() => findOnPage(record)} onBringHere={onBringHere} />
     </article>
   );
 };

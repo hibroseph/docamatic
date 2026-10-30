@@ -13,12 +13,14 @@ import {
   removeNote,
   removeTag,
   restoreNote,
+  showNoteOn,
   toggleVisibility,
   updateNotePosition,
   updateNoteSize,
 } from "../redux/actions";
 import type { NoteAnchor, NoteRecord, State } from "../model/types";
-import { tagsOfNote } from "../model/notes";
+import { pageLabel, tagsOfNote } from "../model/notes";
+import { isPagePattern } from "../utils/noteUrl";
 import { useUndo } from "./undo";
 
 export const useNoteActions = ({ note, pageUrl }: NoteRecord) => {
@@ -54,6 +56,13 @@ export const useNoteActions = ({ note, pageUrl }: NoteRecord) => {
       /** position: on screen when pinning, on the page when unpinning */
       setPinned: (pinned: boolean, position: { x: number; y: number }) =>
         dispatch(layoutNote(id, pageUrl, { pinned, position })),
+      /** Which pages it shows on: another page key, or a pattern for many (utils/noteUrl.js) */
+      showOn: (to: string) => {
+        if (to === pageUrl) return;
+        dispatch(showNoteOn(id, pageUrl, to, "picker"));
+        const where = isPagePattern(to) ? pageLabel(undefined, to).replace(/^All of /, "every page of ") : "this page only";
+        offerUndo(`Note now shows on ${where}.`, () => dispatch(showNoteOn(id, to, pageUrl, "undo")));
+      },
       remove: () => {
         // Keep what's needed to put it back exactly as it was
         const state = store.getState();

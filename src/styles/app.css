@@ -173,3 +173,13 @@ kbd {
 .board-hint p { display: grid; gap: 2px; margin: 0; font-size: 13px; line-height: 18px; }
 .board-hint__actions { display: flex; gap: var(--space-2); }
 .board-hint .board-hint__close { position: absolute; top: var(--space-2); right: var(--space-2); color: var(--note-ink); }
+
+/* ---------- Can't find a note? (This page, with no notes) ---------- */
+.lost-notes { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-3); border-top: var(--stroke-hair) solid var(--hairline); font-size: 13px; line-height: 18px; }
+.lost-notes__toggle { justify-self: start; text-align: left; }
+.lost-notes__text { margin: 0; color: var(--ink-muted); }
+.lost-notes__list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.lost-note { display: grid; gap: 2px; padding: var(--space-2) var(--space-3); border: var(--stroke-hair) solid var(--hairline); border-radius: var(--radius-md); background: var(--paper); }
+.lost-note__title { overflow: hidden; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.lost-note__where { overflow: hidden; color: var(--ink-muted); white-space: nowrap; text-overflow: ellipsis; }
+.lost-note__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-1); }

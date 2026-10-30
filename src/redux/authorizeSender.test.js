@@ -1,5 +1,5 @@
 import { authorizeSender, reasonToBlock } from './authorizeSender';
-import { NUKE_NOTES, MOVE_NOTE, UPDATE_TAG, DELETE_TAG, SET_PREFERENCES, RESTORE_NOTE, SET_PAGE_TITLE } from './actions';
+import { NUKE_NOTES, MOVE_NOTE, UPDATE_TAG, DELETE_TAG, SET_PREFERENCES, RESTORE_NOTE, SET_PAGE_TITLE, SHOW_NOTE_ON } from './actions';
 
 const EXTENSION_ID = "abc";
 
@@ -99,4 +99,10 @@ test("Tags and preferences are shared by every site, so only extension pages can
     // Putting a deleted note back and saving the page title are edits of the page's own notes
     expect(run({ type: RESTORE_NOTE, url: "https://a.com/x", _sender: page }).allowed).toBe(true);
     expect(run({ type: SET_PAGE_TITLE, url: "https://b.com/", _sender: page }).allowed).toBe(false);
+})
+
+test("A page can show its notes on other pages of its own site, not on another site", () => {
+    const page = contentScriptOn("https://a.com/x");
+    expect(reasonToBlock({ type: SHOW_NOTE_ON, url: "https://a.com/x", to: "https://a.com/*" }, page, EXTENSION_ID)).toBeNull();
+    expect(reasonToBlock({ type: SHOW_NOTE_ON, url: "https://a.com/x", to: "https://b.com/*" }, page, EXTENSION_ID)).toBe("different_site");
 })

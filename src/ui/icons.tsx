@@ -197,6 +197,14 @@ export const PageIcon = (p: IconProps) => (
   </Svg>
 );
 
+// Two pages, one behind the other: a note on more than one page
+export const PagesIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 4.5h5L13.5 7v7.5H6V4.5Z" />
+    <path d="M10 1.5H3.5v9" />
+  </Svg>
+);
+
 // Two arrows pointing apart: open something bigger
 export const OpenIcon = (p: IconProps) => (
   <Svg {...p}>

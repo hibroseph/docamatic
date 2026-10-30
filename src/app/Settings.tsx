@@ -68,7 +68,6 @@ export const Settings = ({ onBack, surface = "popup" }: { onBack: () => void; su
                 role="radio"
                 className="dm-tab"
                 aria-checked={theme === value}
-                aria-selected={theme === value}
                 onClick={() => dispatch(setPreferences({ theme: value }))}
               >
                 {label}
@@ -127,7 +126,6 @@ export const Settings = ({ onBack, surface = "popup" }: { onBack: () => void; su
                 role="radio"
                 className="dm-tab"
                 aria-checked={textSize === value}
-                aria-selected={textSize === value}
                 onClick={() => dispatch(setPreferences({ note_text_size: value }))}
               >
                 {label}

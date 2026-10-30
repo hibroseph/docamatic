@@ -8,7 +8,7 @@ import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../redux/actions";
 import { createNoteInTab } from "./createNote";
 import { findNote } from "./findNote";
 import { installSource } from "./installSource";
-import { noteUrlsFor } from "../utils/noteUrl";
+import { pageKeysFor, pageShows } from "../utils/noteUrl";
 import { CHROME_MESSAGES, CONTEXT_MENU_ADD_NOTE, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
 import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
 import { applyWrite, changedWrite, fullWrite, joinPages } from "../redux/storedLayout";
@@ -79,7 +79,14 @@ export function startBackground() {
     if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
       // Where it came from is read before the welcome page opens a tab
       installSource().then((source) => track("extension_installed", source));
-      chrome.tabs.create({ url: "/onboarding.html" });
+      // With no browser window open (Chrome OS installs at sign-in, before
+      // one exists) a tab has nowhere to go: "No current window". Open the
+      // welcome page in a window of its own then; if even that can't happen,
+      // skip it rather than report it.
+      chrome.tabs
+        .create({ url: "/onboarding.html" })
+        .catch(() => chrome.windows.create({ url: "/onboarding.html" }))
+        .catch(() => {});
     } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
       track("extension_updated", { previous_version: previousVersion });
       reconnectOpenTabs().catch((err) => captureException(err, { during: "reconnecting open tabs after an update" }));
@@ -137,7 +144,7 @@ export function startBackground() {
     const store = await storeReady;
     // Decided from the url Chrome reports for the sender, not anything in the
     // message, so a page can't probe whether other urls have notes
-    if (!pageHasNotes(store.getState(), noteUrlsFor(sender.url))) return false;
+    if (!pageHasNotes(store.getState(), pageKeysFor(sender.url, store.getState().pages))) return false;
 
     await injectNotesUi(sender.tab.id, sender.frameId);
     return true;
@@ -165,7 +172,7 @@ export function startBackground() {
   // Loads the notes UI into every open tab showing one of these pages
   const showNotesInOpenTabs = async (urls) => {
     const tabs = await chrome.tabs.query({});
-    const matching = tabs.filter((tab) => noteUrlsFor(tab.url).some((key) => urls.includes(key)));
+    const matching = tabs.filter((tab) => urls.some((key) => pageShows(tab.url, key)));
     // Fails for tabs Chrome has unloaded to save memory; they load the UI
     // themselves when they're reopened
     await Promise.all(
@@ -214,7 +221,7 @@ export function startBackground() {
 
     // Pages that only have the small loader get the UI if the new url has notes
     const store = await storeReady;
-    if (pageHasNotes(store.getState(), noteUrlsFor(url))) {
+    if (pageHasNotes(store.getState(), pageKeysFor(url, store.getState().pages))) {
       await injectNotesUi(tabId).catch((err) => reportShowNotesFailure(err, url, "url_change"));
     }
   };

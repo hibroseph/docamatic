@@ -125,6 +125,134 @@ export const noteUrlsFor = (href) => {
   return [...new Set([...keys, ...keys.map(trailingSlashTwin).filter(Boolean)])];
 };
 
+// --- Notes on more than one page ------------------------------------------------
+//
+// A note can be saved under a pattern instead of one page: a key ending in
+// "/*", like "https://www.facebook.com/marketplace/*". It shows on every page
+// of that site whose path starts there, whatever comes after it (more path,
+// any query, any fragment): /marketplace, /marketplace/?ref=bookmark,
+// /marketplace/portland/search/?query=moped. "https://www.facebook.com/*" is
+// the whole site. Since 5.1. Patterns only ever cover their own site.
+//
+// They're ordinary keys in `pages`, so storage, backups and everything that
+// lists notes work unchanged. 5.0 never shows them (no page's address ends in
+// "/*"), and can't read 5.1's storage anyway.
+
+/** Whether a page key is a pattern ("…/*") rather than one page */
+export const isPagePattern = (key) => typeof key === "string" && /^(https?|file):\/\/.*\/\*$/.test(key);
+
+/** The address a pattern starts with: "https://www.facebook.com/marketplace/" */
+export const patternBase = (key) => (isPagePattern(key) ? key.slice(0, -1) : key);
+
+const parseWebUrl = (href) => {
+  try {
+    const url = new URL(href);
+    return ["http:", "https:", "file:"].includes(url.protocol) ? url : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Whether the page at `href` is one of the pages a pattern covers */
+export const patternMatches = (pattern, href) => {
+  if (!isPagePattern(pattern)) return false;
+  const base = parseWebUrl(patternBase(pattern));
+  const url = parseWebUrl(href);
+  if (!base || !url || base.protocol !== url.protocol || base.host !== url.host) return false;
+  // The base path always ends in "/"; the page without it counts too
+  // (/marketplace for /marketplace/*)
+  const path = url.pathname.replace(/\/{2,}/g, "/");
+  return path.startsWith(base.pathname) || path + "/" === base.pathname;
+};
+
+/** Whether notes saved under `key` show on the page at `href` */
+export const pageShows = (href, key) => noteUrlsFor(href).includes(key) || patternMatches(key, href);
+
+// The pattern keys among a `pages` object's keys, looked up once per object
+const patternKeysCache = new WeakMap();
+const patternKeysIn = (pages) => {
+  if (!pages || typeof pages !== "object") return [];
+  let keys = patternKeysCache.get(pages);
+  if (!keys) {
+    keys = Object.keys(pages).filter(isPagePattern);
+    patternKeysCache.set(pages, keys);
+  }
+  return keys;
+};
+
+/**
+ * Every key in `pages` whose notes show on the page at `href`: the page's
+ * own keys (noteUrlsFor) and the patterns that cover it. Use this, not
+ * noteUrlsFor, to find a page's notes.
+ */
+export const pageKeysFor = (href, pages) => {
+  if (!href) return [];
+  return [...noteUrlsFor(href), ...patternKeysIn(pages).filter((pattern) => patternMatches(pattern, href))];
+};
+
+/**
+ * The page's address cut into parts, for choosing which pages a note shows
+ * on. Each part of the address stands for itself and everything under it (a
+ * pattern). The last part is this page only: the query when there is one,
+ * otherwise a "this page" part that isn't in the address (`page: true`).
+ * e.g. https://www.facebook.com/marketplace/portland/search/?query=moped ->
+ *   www.facebook.com   https://www.facebook.com/*
+ *   marketplace        https://www.facebook.com/marketplace/*
+ *   portland           https://www.facebook.com/marketplace/portland/*
+ *   search             https://www.facebook.com/marketplace/portland/search/*
+ *   ?query=moped       https://www.facebook.com/marketplace/portland/search/?query=moped
+ * and https://www.facebook.com/marketplace/?ref=bookmark ->
+ *   www.facebook.com   https://www.facebook.com/*
+ *   marketplace        https://www.facebook.com/marketplace/*
+ *   this page          https://www.facebook.com/marketplace/
+ * Empty for addresses that aren't web pages.
+ * @returns {{ text: string, key: string, page?: boolean }[]}
+ */
+export const addressParts = (href) => {
+  const url = parseWebUrl(href);
+  if (!url) return [];
+  const exactKey = noteUrlFor(href);
+  const origin = `${url.protocol}//${url.host}`;
+  const parts = [{ text: url.protocol === "file:" ? "Files on this computer" : url.host, key: `${origin}/*` }];
+  let path = "/";
+  for (const segment of url.pathname.split("/").filter(Boolean)) {
+    path += segment + "/";
+    parts.push({ text: safeDecode(segment), key: `${origin}${path}*` });
+  }
+  // What identifies the page beyond its path (?query=moped, #/route)
+  const queryStart = exactKey.search(/[?#]/);
+  if (queryStart !== -1) parts.push({ text: safeDecode(exactKey.slice(queryStart)), key: exactKey });
+  else parts.push({ text: "this page", key: exactKey, page: true });
+  return parts;
+};
+
+/** Which of addressParts(href) a note saved under `key` is at, or -1 */
+export const addressPartIndex = (parts, key) => parts.findIndex((part) => part.key === key);
+
+/**
+ * The narrowest pattern covering both pages, e.g. for
+ * …/marketplace/?ref=bookmark and …/marketplace/portland/search/?query=moped:
+ * "https://www.facebook.com/marketplace/*". Null for different sites.
+ */
+export const sharedPattern = (hrefA, hrefB) => {
+  const a = parseWebUrl(hrefA);
+  const b = parseWebUrl(hrefB);
+  if (!a || !b || a.protocol !== b.protocol || a.host !== b.host) return null;
+  const segmentsA = a.pathname.split("/").filter(Boolean);
+  const segmentsB = b.pathname.split("/").filter(Boolean);
+  const shared = [];
+  while (shared.length < segmentsA.length && segmentsA[shared.length] === segmentsB[shared.length]) shared.push(segmentsA[shared.length]);
+  return `${a.protocol}//${a.host}/${shared.map((segment) => segment + "/").join("")}*`;
+};
+
+const safeDecode = (text) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+};
+
 // Parameter names that may hold credentials: tokens, OAuth codes, sessions,
 // keys, signatures, passwords. Deliberately broad (e.g. "author" matches
 // "auth"): dropping a harmless parameter costs nothing, keeping a secret does.

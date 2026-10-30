@@ -43,3 +43,11 @@ test("Which pages a change reaches", () => {
   expect(showsAnyOf("https://a.com/post#x", new Set(["https://a.com/post"]))).toBe(true);
   expect(showsAnyOf("https://bank.example/account", new Set(["https://a.com/post"]))).toBe(false);
 });
+
+test("Notes saved under a pattern reach every page it covers, and only those", () => {
+  const withPattern = { ...state, pages: { ...state.pages, "https://a.com/post/*": { notes: [note("p1")] } } };
+  expect(Object.keys(pageViewFor(withPattern, "https://a.com/post/2/comments").pages)).toEqual(["https://a.com/post/*"]);
+  expect(pageViewFor(withPattern, "https://a.com/other").pages).toEqual({});
+  expect(showsAnyOf("https://a.com/post/2", new Set(["https://a.com/post/*"]))).toBe(true);
+  expect(showsAnyOf("https://a.com/other", new Set(["https://a.com/post/*"]))).toBe(false);
+});

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { NoteRecord, State } from "../model/types";
 import { domainOf, groupByPage, pageLabel } from "../model/notes";
 import { safeHref, EXTERNAL_LINK_PROPS } from "../utils/SafeLink";
+import { patternBase } from "../utils/noteUrl";
 import { NoRenderErrorBoundary } from "../ui/NoRenderErrorBoundary";
 import { NoteCard } from "./NoteCard";
 import type { NotePlace } from "./hooks";
@@ -77,7 +78,7 @@ export const GroupedNoteList = ({ records }: { records: NoteRecord[] }) => {
 export const PageRow = ({ pageUrl, count }: { pageUrl: string; count: number }) => {
   const label = useSelector((state: State) => pageLabel(state, pageUrl));
   const domain = domainOf(pageUrl);
-  const href = safeHref(pageUrl);
+  const href = safeHref(patternBase(pageUrl));
   const content = (
     <>
       <span className="dm-row__icon" aria-hidden="true">

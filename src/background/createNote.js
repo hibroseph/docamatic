@@ -5,7 +5,7 @@
 import { addNote } from "../redux/actions";
 import { CHROME_MESSAGES } from "../utils/constants";
 import { generateUUID } from "../utils/GenerateUUID";
-import { noteUrlFor, noteUrlsFor, redactUrl } from "../utils/noteUrl";
+import { noteUrlFor, pageKeysFor, redactUrl } from "../utils/noteUrl";
 import { canHaveNotes, hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../utils/expectedFailures";
 import { captureMessage } from "../utils/sentry";
 import { track } from "../utils/analytics";
@@ -102,7 +102,7 @@ export const createNoteInTab = async (store, tab, { placement = "page", source =
   const href = info?.page || tab.url;
   const pageUrl = noteUrlFor(href);
   const state = store.getState();
-  const existing = notesOnPage(state, noteUrlsFor(href)).map(({ note }) => note.position).filter(Boolean);
+  const existing = notesOnPage(state, pageKeysFor(href, state.pages)).map(({ note }) => note.position).filter(Boolean);
   // From the right-click menu: where the page was right-clicked
   const position =
     atContextMenu && info?.contextMenuAt

@@ -48,7 +48,15 @@ const inNotes = async (page) => {
     }
     return texts;
   };
-  return { find, click, partTexts, hasNote: async (id) => Boolean(await find((a) => a["data-note-id"] === id)) };
+  // The element's border box: { left, top, right, bottom }
+  const box = async (test) => {
+    const node = await find(test);
+    if (!node) return null;
+    const { model } = await cdp.send("DOM.getBoxModel", { backendNodeId: node.backendNodeId });
+    const q = model.border;
+    return { left: q[0], top: q[1], right: q[4], bottom: q[5] };
+  };
+  return { find, click, partTexts, box, hasNote: async (id) => Boolean(await find((a) => a["data-note-id"] === id)) };
 };
 const part = (index) => (a) => a["data-testid"] === "pages-picker-part" && a["data-part-index"] === String(index);
 
@@ -131,6 +139,15 @@ try {
   const chosen = await searchNotes.find((a) => a["data-testid"] === "pages-picker-part" && a["aria-checked"] === "true");
   check(attrs(chosen || {})["data-part-index"] === "1", "the picker starts at marketplace, where the note is");
   console.log("search parts:", JSON.stringify(await searchNotes.partTexts()));
+  // The longest summary ("Every page of localhost:8765/marketplace/portland/search")
+  // is wider than the note, so it has to wrap
+  await searchNotes.click(part(3), "search");
+  const noteBox = await searchNotes.box((a) => a["data-note-id"] === noteId);
+  // Save sits at the end of the picker's column, so it's where the address
+  // would push things out (the picker's own border stays put)
+  const saveBox = await searchNotes.box((a) => a["data-testid"] === "pages-picker-save");
+  console.log("note:", JSON.stringify(noteBox), "save:", JSON.stringify(saveBox));
+  check(noteBox && saveBox && saveBox.right <= noteBox.right && saveBox.bottom <= noteBox.bottom, "the picker's contents stay inside the note");
   await searchNotes.click(part(4), "?query=moped");
   await search.screenshot({ path: `${OUT}/notepages-picker-search.png` });
   await searchNotes.click((a) => a["data-testid"] === "pages-picker-save", "Save");

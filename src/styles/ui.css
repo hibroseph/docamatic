@@ -107,6 +107,9 @@
 
 /* ---------- Which pages a note shows on ---------- */
 .pages-picker {
+  /* A grid item in the note: without this its longest unbreakable text (an
+     address) sets the note's minimum width and the picker sticks out */
+  min-width: 0;
   display: grid;
   gap: var(--space-2);
   padding: var(--space-2);
@@ -141,7 +144,8 @@
 .pages-picker__slash { color: var(--note-ink-muted); }
 /* "this page": not part of the address, so it's set apart from it */
 .pages-picker__part--page { margin-left: var(--space-1); border-radius: var(--radius-pill); font-style: italic; }
-.pages-picker__summary { margin: 0; font-weight: 600; }
+/* Long addresses have no spaces, so they break anywhere */
+.pages-picker__summary { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
 .pages-picker__actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
 
 /* ---------- Menus ---------- */

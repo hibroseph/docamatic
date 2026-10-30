@@ -20,6 +20,9 @@ const IGNORED_ERRORS = [
   // The extension was updated/reloaded while a tab still had the old content
   // script running. The UI already asks the user to reload the page.
   "Extension context invalidated",
+  // Any browser API call made while the browser quits fails with this. The
+  // work happens again on the next start, so it's never a bug of ours.
+  "The browser is shutting down",
 ];
 
 let hub = null;

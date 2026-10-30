@@ -276,7 +276,9 @@ export function startBackground() {
     });
     return "Thrown. Look for 'Docamatic Sentry test' in Sentry.";
   };
-  chrome.runtime.setUninstallURL(feedbackUrl);
+  // Runs on every worker start, which can be while the browser quits ("The
+  // browser is shutting down"); it's set again on the next start
+  chrome.runtime.setUninstallURL(feedbackUrl)?.catch(() => {});
 
   // Wait this long after the last change before writing to storage. Typing in
   // a note dispatches on every keystroke, and each write serializes every note

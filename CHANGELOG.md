@@ -51,9 +51,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   YouTube tab after the 5.0.3 update) is an expected scripting error, so it
   isn't reported to Sentry. Only that exact message. (Also on master, for
   the next 5.0.x.)
-- Installing with no browser window open (Chrome OS, installed at sign-in)
-  no longer fails with "No current window" (Sentry 7802430342, 5.0.3): the
-  welcome page opens in a new window instead.
+- Installing with no browser window open (Chrome OS, installed at sign-in;
+  a Mac with every window closed) no longer fails with "No current window"
+  (Sentry 7802430342, 5.0.3): the welcome page opens in a new window instead.
+- "The browser is shutting down" (Sentry 7815392543, 5.0.3) isn't reported:
+  any browser call made while Chrome quits fails with it, and the work runs
+  again on the next start. `setUninstallURL`, which runs on every worker
+  start and had nothing catching it, now ignores its failure.
+- **Show on other pages** stays inside the note: a long address in "Every
+  page of …" sets the minimum width of the picker's column, pushing the text and Save past
+  the note's edge. It now wraps anywhere. The `notepages` browser test
+  checks it.
 - The board's "Group by" switch shows which grouping is chosen. The design
   system's tabs now also highlight radio-style tabs (`aria-checked`), so
   Settings' Theme and Text size no longer set `aria-selected` on radios.

@@ -1,0 +1,289 @@
+# Builds, tests and publishes a release in one run: build -> (approval) ->
+# Chrome Web Store + GitHub Release -> website.
+#
+# Start it from the Actions tab ("release", Run workflow, from master: it
+# refuses any other branch). The build job
+# runs right away; the publish job then waits for an approval on its
+# environment ("Review deployments" on the run's page, or the GitHub mobile
+# app). Look at the build summary first: it says what is about to go out.
+#
+# Replaces running "build extension", "publish extension" and "publish
+# homepage" one after another with copied run ids. Those still work and are
+# kept as they are.
+#
+# Setup (once, in Settings > Environments):
+#   production: required reviewers = you (that's the approval gate).
+#     Secrets it already has: CHROME_WEBSTORE_CLIENT_ID, _CLIENT_SECRET,
+#     _REFRESH_TOKEN, SENTRY_AUTH_TOKEN, PROD_CHROME_WEBSTORE_ITEM_ID.
+#     Optional variable CHROME_EXTENSION_ID (the id isn't secret; it's in
+#     the store's address), used instead of PROD_CHROME_WEBSTORE_ITEM_ID.
+#   uat: variable CHROME_EXTENSION_ID, the test listing's id.
+#   github-pages: only master may deploy (already set).
+
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Where it goes
+        type: choice
+        options: [production, uat]
+        default: production
+      version:
+        description: Version to build (leave empty to use the one in package.json)
+        required: false
+      publish_website:
+        description: Also publish the website (production only)
+        type: boolean
+        default: true
+
+# One release at a time
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      # Releases (UAT or production) are only made from master, so what's
+      # released is always what's merged. Every commit on every branch is
+      # still built and tested by "development build".
+      - name: Only from master
+        if: github.ref != 'refs/heads/master'
+        run: |
+          echo "::error::Releases are made from master only. Run this workflow with \"Use workflow from: master\" (this run is on $GITHUB_REF_NAME)."
+          exit 1
+
+      - uses: actions/checkout@v5
+
+      - name: Use Node.js (version from .nvmrc)
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: ./setup-env.sh
+
+      # The version comes from package.json unless one was typed in, so it's
+      # normally never typed by hand
+      - name: Version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          VERSION="${INPUT_VERSION:-$(node -p "require('./package.json').version")}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building $VERSION"
+
+      # A production version can only be released once: the store refuses a
+      # version it already has, and the GitHub Release tag would clash.
+      # Failing here, before the build, saves an approval that can't work.
+      - name: Check the version is new
+        if: inputs.environment == 'production'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            echo "::error::v$VERSION is already released. Bump the version in package.json first."
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: ./build.sh ${{ steps.version.outputs.version }} ${{ inputs.environment }}
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: extension
+          path: ./dist/app.zip
+          if-no-files-found: error
+
+      - name: Upload Firefox artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: extension-firefox
+          path: ./dist/app-firefox.zip
+          if-no-files-found: error
+
+      - name: Upload sentry artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: sentry
+          path: ./dist/sentry
+          if-no-files-found: error
+
+      - name: Upload homepage artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: homepage
+          path: ./dist/homepage
+          if-no-files-found: error
+
+      # What the approver sees on the run's page before approving
+      - name: Summary
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TARGET: ${{ inputs.environment }}
+        run: |
+          {
+            echo "## Docamatic $VERSION for $TARGET"
+            echo
+            echo "- Commit: \`${GITHUB_SHA::7}\` on \`$GITHUB_REF_NAME\`"
+            echo "- Package: $(du -h dist/app.zip | cut -f1) ($(unzip -l dist/app.zip | tail -1 | awk '{print $2}') files)"
+            echo "- Name: $(jq -r .name dist/chrome-mv3/manifest.json)"
+            echo "- Summary: $(jq -r .description dist/chrome-mv3/manifest.json)"
+            echo
+            echo "Approve the **publish** job to upload it to the Chrome Web Store."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-extension:
+    needs: build
+    runs-on: ubuntu-22.04
+    # The gate: with required reviewers on this environment, the job waits
+    # here for an approval
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: write # create the GitHub Release and its tag
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - name: Download extension artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: extension
+
+      - name: Download sentry artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: sentry
+          path: ./sentry
+
+      # The bundles were given debug ids at build time (see build.sh), which is
+      # how Sentry matches a stack trace to its source map.
+      - name: Upload source maps to Sentry
+        env:
+          SENTRY_ORG: "joe-patrol"
+          SENTRY_PROJECT: "docamatic"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_RELEASE: "docamatic@${{ needs.build.outputs.version }}"
+        run: |
+          npx --yes @sentry/cli@2 releases new "$SENTRY_RELEASE"
+          npx --yes @sentry/cli@2 sourcemaps upload --release "$SENTRY_RELEASE" ./sentry
+          # Not finalized: the build still has to go through Chrome Web Store review
+
+      # Keep the exact package users get, attached to a GitHub Release tagged
+      # v<version> on the commit this run built. The upgrade test downloads the
+      # previous release's app.zip from here. Created before the Web Store
+      # upload because that step may need to be done by hand.
+      - name: Create GitHub Release
+        if: inputs.environment == 'production'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "v$VERSION" ./app.zip \
+            --target "$GITHUB_SHA" \
+            --title "Docamatic $VERSION" \
+            --notes "Package uploaded to the Chrome Web Store. Built by workflow run $GITHUB_RUN_ID."
+
+      # Exchanges the stored refresh token for a short-lived access token.
+      # pipefail + the check below make a bad/expired refresh token fail here
+      # with a clear message.
+      - name: Chrome Webstore Access Token
+        env:
+          CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          RESPONSE=$(curl --silent --show-error "https://oauth2.googleapis.com/token" \
+            --data-urlencode "client_id=$CLIENT_ID" \
+            --data-urlencode "client_secret=$CLIENT_SECRET" \
+            --data-urlencode "refresh_token=$REFRESH_TOKEN" \
+            --data-urlencode "grant_type=refresh_token")
+          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token // empty')
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "::error::Couldn't get a Chrome Web Store access token: $(echo "$RESPONSE" | jq -r '.error + ": " + (.error_description // "")')"
+            echo "::error::The refresh token has probably expired or been revoked. See 'Releasing' in the README to make a new one."
+            exit 1
+          fi
+          echo "::add-mask::$ACCESS_TOKEN"
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> "$GITHUB_ENV"
+
+      # Uploads the package as the item's new draft. It still has to be
+      # submitted for review in the developer dashboard.
+      # The API answers HTTP 200 even when the upload is rejected (e.g.
+      # ITEM_NOT_UPDATABLE while a review is pending), with the result in
+      # uploadState, so that is checked rather than the HTTP status.
+      - name: Chrome Webstore Upload
+        env:
+          # The environment's CHROME_EXTENSION_ID variable; production also
+          # has its id as a secret from before
+          EXTENSION_ID: ${{ vars.CHROME_EXTENSION_ID || secrets.PROD_CHROME_WEBSTORE_ITEM_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EXTENSION_ID" ]; then
+            echo "::error::No extension id for the ${{ inputs.environment }} environment. Add a CHROME_EXTENSION_ID variable to it (Settings > Environments)."
+            exit 1
+          fi
+          RESPONSE=$(curl --silent --show-error --fail-with-body \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -X PUT \
+            -T ./app.zip \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/$EXTENSION_ID")
+          echo "$RESPONSE" | jq .
+          STATE=$(echo "$RESPONSE" | jq -r '.uploadState // "UNKNOWN"')
+          case "$STATE" in
+            SUCCESS)
+              echo "Uploaded. Submit it for review in the Chrome Web Store developer dashboard."
+              echo "Uploaded $VERSION to the Chrome Web Store. **Submit it for review** in the developer dashboard." >> "$GITHUB_STEP_SUMMARY" ;;
+            IN_PROGRESS)
+              echo "::warning::The Web Store is still processing the upload. Check the developer dashboard to see whether it succeeded." ;;
+            *)
+              echo "$RESPONSE" | jq -r '.itemError[]? | "::error::\(.error_code): \(.error_detail)"'
+              echo "::error::Upload failed (uploadState $STATE)."
+              exit 1 ;;
+          esac
+
+  publish-website:
+    needs: publish-extension
+    if: inputs.environment == 'production' && inputs.publish_website
+    runs-on: ubuntu-22.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    steps:
+      - name: Download homepage artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: homepage
+          path: ./homepage
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./homepage
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -29,6 +29,19 @@ Notes are saved in `chrome.storage.local` with a `metadata.schema_version`. Any 
 # Test hooks
 UI elements that automated browser tests interact with have `data-testid` attributes, defined in `src/utils/testIds.js`. Never rename or remove a shipped id: the upgrade test drives the previously published version with them.
 
+# Releasing
+Releases are made from **master** only, with the **release** workflow (Actions → release → Run workflow, from master):
+
+1. Bump `version` in `package.json` (the store refuses a version it already has; the workflow checks before building).
+2. Run **release**, choosing `production` or `uat`. The build job typechecks, tests and builds, and its summary shows the version, commit, name and store summary of the package.
+3. The **publish-extension** job waits for an approval (the run's page, "Review deployments"). Approving uploads the source maps to Sentry, creates the GitHub Release `v<version>` with `app.zip` (production), and uploads the package to the Chrome Web Store.
+4. Submit it for review in the Chrome Web Store developer dashboard.
+5. For production, the website is published after the upload (uncheck "Also publish the website" to skip it).
+
+Setup for the gate: Settings → Environments → **production** → Required reviewers (yourself). For **uat**, add a `CHROME_EXTENSION_ID` variable with the test listing's id.
+
+Every commit on every branch, master included, is built and tested by **development build** (Chrome, Firefox and the website). The older **build extension**, **publish extension** and **publish homepage** workflows still work (copying the build's run id into the publish ones) and are kept as a fallback.
+
 # Releasing: Chrome Web Store credentials
 The **publish extension** workflow uploads with three repository/environment secrets: `CHROME_WEBSTORE_CLIENT_ID`, `CHROME_WEBSTORE_CLIENT_SECRET` and `CHROME_WEBSTORE_REFRESH_TOKEN`. If it fails with "Couldn't get a Chrome Web Store access token", make a new refresh token:
 1. In Google Cloud Console (the project with the OAuth client): **APIs & Services → OAuth consent screen**. Make sure the publishing status is **In production**, not Testing; in Testing, refresh tokens expire after 7 days.

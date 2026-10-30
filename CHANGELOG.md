@@ -15,6 +15,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 ## Unreleased
 
 ### Changed
+- One **release** workflow (`.github/workflows/release.yml`) from build to
+  store: build and test, then an approval on the `production` (or `uat`)
+  environment, then Sentry source maps, the GitHub Release and the Chrome
+  Web Store upload, then the website. Artifacts pass between its jobs, so no
+  run ids are copied; the version comes from `package.json` and is checked
+  to be new before building; the build's summary shows what's about to go
+  out. Releases only from master. The old build/publish workflows are kept.
+  How to release is in the README.
+- **development build** now runs on every commit, master included, and
+  builds what a release builds: Chrome, Firefox and the website.
 - Store listing: name "Docamatic - Sticky Notes for Any Website" (was
   "Docamatic - Add Sticky Notes to the Web") and a new summary, both from
   the manifest (`wxt.config.ts`), plus a new description in

@@ -3,11 +3,12 @@
 
 name: development build
 
+# Every commit on every branch, master included: anything merged has been
+# built and tested. (Releases are made from master by "release".)
 on:
   push:
     branches:
       - '**'
-      - '!master'
 
 jobs:
   build:
@@ -24,4 +25,7 @@ jobs:
     - run: npm ci
     - run: npm run typecheck
     - run: npm test
+    # Everything a release builds (build.sh): Chrome, Firefox and the website
     - run: npm run build
+    - run: npm run build:firefox
+    - run: npm run site:build

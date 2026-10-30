@@ -14,6 +14,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+### Changed
+- Store listing: name "Docamatic - Sticky Notes for Any Website" (was
+  "Docamatic - Add Sticky Notes to the Web") and a new summary, both from
+  the manifest (`wxt.config.ts`), plus a new description in
+  `docs/publishing.md` that covers 5.1. Written for the
+  store's search: what it is first ("Free sticky notes for any web page"),
+  then what sets it apart (no account, notes stay on your computer). Not in
+  the 5.1.0 package (made after it was built); the store shows them from
+  the next version.
+
+## 5.1.0 (2026-10-30)
+
+Submitted to the Chrome Web Store on 2026-10-30; it goes out when the review
+approves it. Built by the publish workflow from `254335f` (tag `v5.1.0`).
+
+The redesign: the design system in `design-system/` is now used everywhere,
+and the extension is built with WXT so it can ship to Firefox too.
+
 ### Added
 - A note can show on more than one page. **Show on other pages** in a
   note's menu (on the page, in the popup and the side panel) shows the
@@ -45,33 +63,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/).
   now checks that the last note's menu is all in view either way: with the
   new item it's too tall to open upward in the test's short popup, so it
   opens downward, scrolled into view (the existing fallback).
-
-### Fixed
-- Edge's "Blocked" (it won't let extensions script a tab, seen reconnecting a
-  YouTube tab after the 5.0.3 update) is an expected scripting error, so it
-  isn't reported to Sentry. Only that exact message. (Also on master, for
-  the next 5.0.x.)
-- Installing with no browser window open (Chrome OS, installed at sign-in;
-  a Mac with every window closed) no longer fails with "No current window"
-  (Sentry 7802430342, 5.0.3): the welcome page opens in a new window instead.
-- "The browser is shutting down" (Sentry 7815392543, 5.0.3) isn't reported:
-  any browser call made while Chrome quits fails with it, and the work runs
-  again on the next start. `setUninstallURL`, which runs on every worker
-  start and had nothing catching it, now ignores its failure.
-- **Show on other pages** stays inside the note: a long address in "Every
-  page of …" sets the minimum width of the picker's column, pushing the text and Save past
-  the note's edge. It now wraps anywhere. The `notepages` browser test
-  checks it.
-- The board's "Group by" switch shows which grouping is chosen. The design
-  system's tabs now also highlight radio-style tabs (`aria-checked`), so
-  Settings' Theme and Text size no longer set `aria-selected` on radios.
-
-## 5.1.0 (not released yet; set the date when it's published)
-
-The redesign: the design system in `design-system/` is now used everywhere,
-and the extension is built with WXT so it can ship to Firefox too.
-
-### Added
 - Browser tests in the repository (`e2e/`, `npm run e2e`; `e2e/README.md`):
   26 suites that load the built extension into a real Chrome (and Firefox),
   including an update from the store version (master's build) to this one.
@@ -452,6 +443,24 @@ and the extension is built with WXT so it can ship to Firefox too.
   new tab, so the site stays open. Privacy policy updated.
 
 ### Fixed
+- Edge's "Blocked" (it won't let extensions script a tab, seen reconnecting a
+  YouTube tab after the 5.0.3 update) is an expected scripting error, so it
+  isn't reported to Sentry. Only that exact message. (Also on master, for
+  the next 5.0.x.)
+- Installing with no browser window open (Chrome OS, installed at sign-in;
+  a Mac with every window closed) no longer fails with "No current window"
+  (Sentry 7802430342, 5.0.3): the welcome page opens in a new window instead.
+- "The browser is shutting down" (Sentry 7815392543, 5.0.3) isn't reported:
+  any browser call made while Chrome quits fails with it, and the work runs
+  again on the next start. `setUninstallURL`, which runs on every worker
+  start and had nothing catching it, now ignores its failure.
+- **Show on other pages** stays inside the note: a long address in "Every
+  page of …" sets the minimum width of the picker's column, pushing the text and Save past
+  the note's edge. It now wraps anywhere. The `notepages` browser test
+  checks it.
+- The board's "Group by" switch shows which grouping is chosen. The design
+  system's tabs now also highlight radio-style tabs (`aria-checked`), so
+  Settings' Theme and Text size no longer set `aria-selected` on radios.
 - Escape didn't close a note's menu on web pages (notes stop keys at their
   edge so sites don't see them, so the menu's listener never heard it); it
   listens in the capture phase now. Chrome and Firefox.

@@ -104,41 +104,68 @@ needs Firefox 128 or newer (the ESR).
 
 ## Listing text
 
-**Name:** Docamatic - Add Sticky Notes to the Web
+**Name:** Docamatic - Sticky Notes for Any Website (from the manifest, `wxt.config.ts`)
 
-**Summary** (AMO: 250 characters max; Edge: short description)
+**Summary** (from the manifest's `description`: 132 characters max, and the
+Chrome Web Store dashboard can't change it; AMO summary, Edge short
+description)
 
-> Sticky notes for the web. Put a note on any page, right next to what you're
-> reading. It's still there when you come back, and everything you've
-> written is one search away. No account; your notes stay on your computer.
+> Free sticky notes for any web page. No account: your notes stay on your computer. Find them again with search, tags and a board.
 
-**Description**
+**Description** (Chrome: Developer Dashboard, Store listing; no new version
+needed to change it. Only describe what the extension does today.)
 
-> Put a note on any page, right next to what you're reading. It's still there
-> when you come back, and everything you've written is one search away.
+> Sticky notes for any website. Put a note right next to what you're reading:
+> a recipe, an article, a listing, a pull request, a video. Come back
+> tomorrow and it's waiting in the same spot.
+>
+> Free. No account, no sign-in. Your notes stay on your computer.
+>
+> Docamatic is note taking for the web, without switching to another app.
+> Write on the page itself, and every note you've written is one search away.
 >
 > How it works
-> 1. Open any page: a recipe, a paper, a pull request, a video.
-> 2. Add a note: click Docamatic and New note, press Alt+Shift+D, or
->    right-click where you want it. Drag it beside the part it's about.
-> 3. Come back to it: next time you open the page, your note is waiting in
->    the same spot.
+> 1. Open any web page.
+> 2. Add a note: click Docamatic and choose New note, press Alt+Shift+D, or
+>    right-click where you want it.
+> 3. Drag it next to the part it's about. Next time you open the page, it's
+>    still there.
 >
-> Stays with what it's about: in web apps that scroll one part of the screen
-> (your inbox, a chat, a document's sidebar), a note can scroll with that
-> part and tuck away with the content it's next to.
+> New in this version
+> - A fresh, cleaner design, with dark mode.
+> - Notes on more than one page: show a note on every page of a section of a
+>   site. A note on Facebook Marketplace can follow you into your searches,
+>   or a note on a docs site can show on every page of the docs.
+> - "Can't find a note?" If a site moved something to a new address,
+>   Docamatic shows your notes from elsewhere on the site and brings them
+>   back with one click.
+> - The board: every note on one page, grouped by tag or by website. Drag
+>   them around to think things through.
+> - Notes in web apps (your inbox, chats, documents) can scroll with the
+>   part of the screen they're on.
 >
-> Find it again
-> - Search everything: titles, text, tags and page names, even with a typo.
-> - Tag notes to group them across sites: "recipes", "to read", "thesis".
-> - Favorites for the few you keep coming back to.
-> - The board: all your notes laid out by tag or by website.
+> Find anything you've written
+> - Search all your notes: titles, text, tags and page names, even with a
+>   typo.
+> - Tags group notes across sites: "recipes", "to read", "gift ideas",
+>   "thesis".
+> - Favorites keep the notes you come back to one click away.
+> - Find on page: jump straight to a note on the page it's on.
+>
+> Make them yours
+> - Six note colors, collapse a note to its title, or keep it on screen
+>   while you scroll.
+> - Hide a note from the page and keep it in Docamatic.
 >
 > Private by design
-> - No account. Your notes are stored in your browser, on your computer.
-> - Backup & restore to a file, and automatic daily backups.
-> - Anonymous usage statistics (never your notes or the pages they're on),
->   which you can turn off in Settings.
+> - Your notes are stored in your browser, on your computer, not on a
+>   server. Nobody else can read them, including us.
+> - Backup & restore to a file, plus automatic daily backups.
+> - Anonymous usage statistics, never your notes or the pages they're on.
+>   You can turn them off in Settings.
+>
+> Great for studying, research, shopping comparisons, recipes, code reviews,
+> job hunting and anything else you read on the web and want to remember.
 
 **Permissions, explained** (for reviewers and the listing's notes):
 

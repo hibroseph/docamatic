@@ -17,8 +17,11 @@ export default defineConfig({
   manifest: ({ browser, mode }) => {
     const isFirefox = browser === "firefox";
     return {
-      name: mode === "development" ? "[DEV] Docamatic - Add Sticky Notes to the Web" : "Docamatic - Add Sticky Notes to the Web",
-      description: "Want to add your own sticky notes to any webpage? Docamatic is your solution",
+      // The name and description are the store listing's name and summary
+      // (the summary can't be edited in the store's dashboard). Keep the
+      // description to 132 characters, and in step with docs/publishing.md.
+      name: mode === "development" ? "[DEV] Docamatic - Sticky Notes for Any Website" : "Docamatic - Sticky Notes for Any Website",
+      description: "Free sticky notes for any web page. No account: your notes stay on your computer. Find them again with search, tags and a board.",
       // offscreen (Chrome only) reads notes saved by the 2019-2022 version;
       // the side panel permission is added by WXT for the sidepanel entrypoint
       // contextMenus: "Add a note here" when right-clicking a page (no install warning)

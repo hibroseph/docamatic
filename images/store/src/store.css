@@ -1,0 +1,60 @@
+/* Chrome Web Store images. Rendered by scripts in the redesign session at
+   exact sizes (see README.md); built from the design system, with real
+   captures of the extension in raw/. */
+@import url("../../../src/styles/fonts.css");
+@import url("../../../src/styles/tokens.css");
+@import url("../../../design-system/components/bundle.css");
+
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+.canvas { position: relative; overflow: hidden; background: var(--paper); }
+
+/* Highlighter blocks behind things, as in the design system's cover */
+.block { position: absolute; border-radius: var(--radius-lg); }
+.block--yellow { background: var(--hl-yellow); }
+.block--blue { background: var(--hl-blue); }
+.block--pink { background: var(--hl-pink); }
+.block--green { background: var(--hl-green); }
+.block--ink { background: var(--ink); }
+
+.wordmark { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; }
+.headline { margin: 0; font-family: var(--font-display); font-weight: 700; letter-spacing: -.03em; line-height: 1.02; }
+.sub { margin: 0; color: var(--ink-muted); line-height: 1.4; }
+.dm-swipe { white-space: nowrap; }
+
+/* A browser window around a real capture */
+.browser {
+  position: absolute;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: #fffaf2;
+  box-shadow: 10px 10px 0 var(--ink);
+}
+.browser__bar { display: flex; align-items: flex-end; gap: 14px; height: 40px; padding: 0 16px; background: #ebe8df; }
+.browser__dots { display: flex; gap: 7px; padding-bottom: 14px; }
+.browser__dots i { width: 11px; height: 11px; border-radius: 50%; background: #c9c4b8; }
+.browser__tab { height: 30px; padding: 0 16px; border-radius: 9px 9px 0 0; background: #fdfcf8; font-size: 13px; line-height: 30px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.browser__toolbar { display: flex; align-items: center; gap: 12px; height: 42px; padding: 0 14px; background: #fdfcf8; border-bottom: 1px solid #e3ded2; }
+.browser__url { flex: 1; height: 28px; padding: 0 14px; border-radius: 14px; background: #f1eee6; color: #4b5263; font-size: 13px; line-height: 28px; }
+.browser__ext { width: 22px; height: 22px; border-radius: 5px; box-shadow: 0 0 0 3px var(--hl-yellow); }
+.browser__page { display: block; width: 100%; }
+
+/* The popup, as it opens from the toolbar */
+.popup { position: absolute; overflow: hidden; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 10px 10px 0 var(--ink); background: var(--paper); }
+.popup img { display: block; width: 100%; }
+
+/* A note drawn with the design system, for mock-ups */
+.note-mock { position: absolute; width: 250px; }
+.note-mock .dm-note { width: 100%; }
+
+/* A browser right-click menu, for the "Add a note here" picture */
+.ctx { position: absolute; width: 250px; padding: 6px 0; border-radius: 8px; background: #fff; box-shadow: 0 6px 24px #1e243340, 0 0 0 1px #1e24331f; font: 14px/20px "Segoe UI", system-ui, sans-serif; color: #1f1f1f; }
+.ctx div { display: flex; align-items: center; gap: 10px; padding: 5px 16px; }
+.ctx hr { margin: 5px 0; border: 0; border-top: 1px solid #e3e3e3; }
+.ctx .on { background: #e8eefc; }
+.ctx img { width: 16px; height: 16px; border-radius: 3px; }
+.ctx .muted { color: #9a9a9a; }
+
+.chip { display: inline-block; padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); box-shadow: 3px 3px 0 var(--ink); font-weight: 700; font-size: 16px; }
+.selected-text { background: #b4d3ff; }

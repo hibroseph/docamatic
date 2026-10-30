@@ -12,7 +12,7 @@ app.zip
 
 # testing
 /coverage
-/test
+
 # production
 /build
 
@@ -31,3 +31,11 @@ yarn-debug.log*
 yarn-error.log*
 
 TODOS
+
+# WXT
+.wxt
+.output
+web-ext.config.ts
+
+# Browser test output (screenshots, logs, a throwaway certificate)
+e2e/output/

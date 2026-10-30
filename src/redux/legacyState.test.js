@@ -60,7 +60,7 @@ test("Leaves the current layout alone", () => {
 })
 
 test("Reports corrupt legacy data instead of throwing", () => {
-    const onError = jest.fn();
+    const onError = vi.fn();
     expect(normalizeState({ notes: "{not json" }, onError).pages).toEqual({});
     expect(onError).toHaveBeenCalled();
 })

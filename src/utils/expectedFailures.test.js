@@ -4,7 +4,7 @@ import { browserName } from "./analytics";
 test("Knows which pages can't have notes", () => {
     expect(canHaveNotes("https://github.com/")).toBe(true);
     expect(canHaveNotes("file:///C:/notes.html")).toBe(true);
-    for (const url of ["chrome://extensions", "edge://settings", "about:blank", "https://chromewebstore.google.com/detail/x", undefined]) {
+    for (const url of ["chrome://extensions", "edge://settings", "about:blank", "https://chromewebstore.google.com/detail/x", "https://addons.mozilla.org/en-US/firefox/", "moz-extension://abc/popup.html", undefined]) {
         expect(canHaveNotes(url)).toBe(false);
     }
 })
@@ -31,5 +31,6 @@ test("Names the browser from its client hints", () => {
     expect(browserName([{ brand: "Chromium" }, { brand: "Google Chrome" }, { brand: "Not_A Brand" }])).toBe("Google Chrome");
     expect(browserName([{ brand: "Not A(Brand" }, { brand: "Microsoft Edge" }, { brand: "Chromium" }])).toBe("Microsoft Edge");
     expect(browserName([{ brand: "Chromium" }, { brand: "Not/A)Brand" }])).toBe("Chromium");
-    expect(browserName(undefined)).toBe("unknown");
+    expect(browserName(undefined, "Mozilla/5.0 jsdom")).toBe("unknown");
+    expect(browserName(undefined, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0")).toBe("Firefox");
 })

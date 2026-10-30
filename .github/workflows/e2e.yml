@@ -1,0 +1,74 @@
+# The browser tests (e2e/README.md): the built extension in a real Chrome and
+# Firefox, including an update from the version on the stores (built from
+# master) to this one.
+
+name: browser tests
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!master'
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Use Node.js (version from .nvmrc)
+      uses: actions/setup-node@v5
+      with:
+        node-version-file: .nvmrc
+        cache: 'npm'
+    - run: npm ci
+
+    - name: Build the extension and the site
+      run: |
+        npm run build
+        npm run build:firefox
+        npm run site:build
+
+    # The version people have now, for the update test (updatetabs)
+    - name: Check out the store version (master)
+      uses: actions/checkout@v5
+      with:
+        ref: master
+        path: store-version
+    - name: Build the store version
+      working-directory: store-version
+      run: |
+        npm ci
+        npm run build
+
+    - name: Get the browsers
+      run: |
+        npm run e2e:chrome
+        npx @puppeteer/browsers install firefox@stable --path "$HOME/.cache/puppeteer"
+        echo "FIREFOX_PATH=$(find "$HOME/.cache/puppeteer/firefox" -name firefox -type f -perm -u+x | head -n 1)" >> "$GITHUB_ENV"
+
+    # If Chrome can't start, this says why in the log (the suites only see
+    # "Target closed")
+    - name: Check that Chrome starts
+      run: |
+        CHROME="$(node --input-type=module -e 'import { CHROME } from "./e2e/env.mjs"; console.log(CHROME)')"
+        echo "$CHROME"
+        "$CHROME" --version
+        "$CHROME" --headless --no-sandbox --disable-gpu --dump-dom about:blank
+
+    - name: Run the browser tests
+      env:
+        DOCAMATIC_OLD_EXT: ${{ github.workspace }}/store-version/dist
+      run: npm run e2e
+
+    - name: Keep the logs and screenshots
+      if: always()
+      uses: actions/upload-artifact@v6
+      with:
+        name: e2e-output
+        path: |
+          e2e/output/logs
+          e2e/output/*.png
+        if-no-files-found: ignore

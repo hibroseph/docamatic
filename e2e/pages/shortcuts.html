@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Shortcuts</title>
+<script>
+// Like PostHog: window capture listener, registered in <head>, eats single letters
+window.shortcutHits = [];
+window.addEventListener("keydown", (e) => {
+  const t = e.target;
+  if (t.isContentEditable || /INPUT|TEXTAREA/.test(t.tagName)) return;
+  if (e.key.length === 1) { window.shortcutHits.push(e.key); e.preventDefault(); }
+}, true);
+document.addEventListener("keydown", (e) => { if (e.key === "e") window.shortcutHits.push("doc-e"); });
+</script></head>
+<body><h1>Shortcut page</h1><p style="height:2000px">Press e to edit.</p></body></html>

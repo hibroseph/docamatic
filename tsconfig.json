@@ -1,12 +1,12 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "module": "es6",
-    "jsx": "react",
-    "target": "es2020",
-    "allowJs": true
-  },
-  "include": ["./src/"]
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "types": ["chrome", "vite/client", "vitest/globals", "node"]
+  }
 }

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Docamatic</title>
+</head>
+
+<body class="dm-root">
+    <!-- Points up at the browser toolbar. Where the extension buttons are
+         differs (pinned extensions, the profile picture, other browsers), so
+         it brackets the whole right end of the toolbar rather than one spot. -->
+    <aside id="toolbar-tip" class="toolbar-tip" aria-labelledby="toolbar-tip-title">
+        <svg class="toolbar-tip__arrow" viewBox="0 0 300 120" aria-hidden="true">
+            <path class="bracket" d="M6 26 Q 8 10, 24 10 L 276 10 Q 292 10, 294 26" />
+            <path d="M150 116 C 140 90, 160 62, 150 22" />
+            <path d="M136 36 L 150 18 L 164 36" />
+        </svg>
+        <div class="toolbar-tip__card">
+            <p id="toolbar-tip-title" class="toolbar-tip__title">Docamatic is up in your toolbar</p>
+            <p>At the right end, next to the address bar. Look for <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>. Don't see it? Click the puzzle
+                piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span> next to Docamatic.</p>
+            <div class="toolbar-mock" aria-hidden="true">
+                <span class="toolbar-mock__url"></span>
+                <span class="toolbar-mock__btn is-docamatic"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span>
+                <span class="toolbar-mock__btn"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span>
+                <span class="toolbar-mock__avatar"></span>
+                <span class="toolbar-mock__more"><i></i><i></i><i></i></span>
+            </div>
+            <p class="toolbar-tip__note">The order may be different in your browser.</p>
+            <button id="toolbar-tip-close" type="button" class="dm-btn dm-btn--sm">Got it</button>
+        </div>
+    </aside>
+
+    <main class="page welcome">
+        <p class="page__brand">Docamatic</p>
+        <h1 class="page__title welcome__title">Sticky notes for <span class="dm-swipe">the web</span>.</h1>
+        <p class="page__lede">Put a note on any page. It stays exactly where you left it, and you can find it again
+            from anywhere: search everything you've written, tag notes, keep favorites.</p>
+
+        <!-- The one thing to do here: a first note, on a real page (main.ts) -->
+        <section class="first" aria-labelledby="first-title">
+            <h2 id="first-title" class="first__title">Add your first note</h2>
+            <p>See it on a real page: we'll open Wikipedia's page about sticky notes and put your first note on it.
+                Drag it, write in it, then come back here.</p>
+            <button id="first-note" type="button" class="dm-btn first__button" data-testid="onboarding-first-note">Open a page with my first note</button>
+            <p id="first-status" class="first__status" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- A survey from PostHog, if there's one for this install (main.ts) -->
+        <div id="survey" class="welcome-survey"></div>
+
+        <section class="panel try" aria-labelledby="try-title">
+            <h2 id="try-title">Try it here: two ways to add a note</h2>
+            <p>Practice notes are real notes: drag one by its top edge, type in it, give it a tag. They disappear
+                when you close this tab.</p>
+            <div class="try__ways">
+                <div id="practice-area" class="practice-area" tabindex="0"
+                    aria-label="Practice area. Press the menu key or Shift+F10 to open the menu.">
+                    <span class="practice-area__label">
+                        <svg class="practice-area__mouse" viewBox="0 0 28 40" aria-hidden="true">
+                            <rect x="1.5" y="1.5" width="25" height="37" rx="12.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" />
+                            <path class="right" d="M14 2.75h0a11.25 11.25 0 0 1 11.25 11.25V17H14z" />
+                            <path d="M14 2v15M2 17h24" stroke="var(--ink)" stroke-width="2.5" fill="none" />
+                        </svg>
+                        <span><strong>Right-click</strong> anywhere in here,<br>then choose <strong>Add a note here</strong></span>
+                    </span>
+                </div>
+                <div class="try__button">
+                    <p>Or the way you would from the toolbar: click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> Docamatic, then <strong>New note on this
+                            page</strong><span id="shortcut-hint"></span>.</p>
+                    <button id="try-note" type="button" class="dm-btn dm-btn--primary">New note on this page</button>
+                </div>
+            </div>
+        </section>
+
+        <ol class="steps">
+            <li class="step">
+                <span class="step__number" aria-hidden="true">1</span>
+                <div>
+                    <h2>Keep it handy</h2>
+                    <p>Click the puzzle piece <span class="ui-chip ui-chip--puzzle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3a2 2 0 0 1 4 0v2h4a1 1 0 0 1 1 1v4h-1.5a2 2 0 0 0 0 4H19v4a1 1 0 0 1-1 1h-4v-1.5a2 2 0 0 0-4 0V19H6a1 1 0 0 1-1-1v-4h1.5a2 2 0 0 0 0-4H5V6a1 1 0 0 1 1-1h4z" /></svg></span> at the right end of the toolbar, then the pin <span class="ui-chip ui-chip--pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" /></svg></span>
+                        next to Docamatic. Now <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> is always one click away.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">2</span>
+                <div>
+                    <h2>Add a note</h2>
+                    <p>On any website, click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> in the toolbar, then <strong>New note on this page</strong><span
+                            class="shortcut-hint"></span>. Or right-click where you want it and choose <strong>Add a
+                            note here</strong>; any text you selected goes in the note.</p>
+                    <p id="shortcut-missing" class="step__extra" hidden>Want a keyboard shortcut for this?
+                        <button type="button" class="link-button" id="set-shortcut">Set one in your browser</button>.</p>
+                </div>
+            </li>
+            <li class="step">
+                <span class="step__number" aria-hidden="true">3</span>
+                <div>
+                    <h2>Find it again</h2>
+                    <p>Click <span class="ui-chip" aria-hidden="true"><img src="/icons/docamatic-icon-16.png" alt="" width="16" height="16"></span> to see the notes on the page you're on, and search all the others. Notes you
+                        made with earlier versions are all still here, in the same spots.</p>
+                </div>
+            </li>
+        </ol>
+
+        <p class="welcome__foot">Your notes stay on this computer.
+            <a href="https://hibroseph.github.io/docamatic/privacy.html" target="_blank" rel="noopener noreferrer">Privacy
+                policy</a></p>
+    </main>
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

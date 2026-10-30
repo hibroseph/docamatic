@@ -1,5 +1,5 @@
 import { authorizeSender, reasonToBlock } from './authorizeSender';
-import { NUKE_NOTES, MOVE_NOTE } from './actions';
+import { NUKE_NOTES, MOVE_NOTE, UPDATE_TAG, DELETE_TAG, SET_PREFERENCES, RESTORE_NOTE, SET_PAGE_TITLE, SHOW_NOTE_ON } from './actions';
 
 const EXTENSION_ID = "abc";
 
@@ -17,7 +17,7 @@ afterAll(() => {
 });
 
 const run = (action) => {
-    const next = jest.fn(() => "passed");
+    const next = vi.fn(() => "passed");
     const result = authorizeSender()(next)(action);
     return { allowed: next.mock.calls.length === 1, result };
 };
@@ -88,4 +88,21 @@ test("Says why an action was blocked", () => {
     expect(reasonToBlock({ type: MOVE_NOTE }, page, EXTENSION_ID)).toBe("no_url");
     expect(reasonToBlock({ type: MOVE_NOTE, url: "https://b.com/" }, page, EXTENSION_ID)).toBe("different_site");
     expect(reasonToBlock({ type: MOVE_NOTE, url: "https://a.com/x" }, page, EXTENSION_ID)).toBeNull();
+})
+
+test("Tags and preferences are shared by every site, so only extension pages can change them", () => {
+    const page = contentScriptOn("https://a.com/");
+    for (const type of [UPDATE_TAG, DELETE_TAG, SET_PREFERENCES]) {
+        expect(run({ type, url: "https://a.com/", _sender: page }).allowed).toBe(false);
+        expect(run({ type, _sender: popup }).allowed).toBe(true);
+    }
+    // Putting a deleted note back and saving the page title are edits of the page's own notes
+    expect(run({ type: RESTORE_NOTE, url: "https://a.com/x", _sender: page }).allowed).toBe(true);
+    expect(run({ type: SET_PAGE_TITLE, url: "https://b.com/", _sender: page }).allowed).toBe(false);
+})
+
+test("A page can show its notes on other pages of its own site, not on another site", () => {
+    const page = contentScriptOn("https://a.com/x");
+    expect(reasonToBlock({ type: SHOW_NOTE_ON, url: "https://a.com/x", to: "https://a.com/*" }, page, EXTENSION_ID)).toBeNull();
+    expect(reasonToBlock({ type: SHOW_NOTE_ON, url: "https://a.com/x", to: "https://b.com/*" }, page, EXTENSION_ID)).toBe("different_site");
 })

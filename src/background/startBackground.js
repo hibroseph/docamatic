@@ -1,0 +1,856 @@
+import notesApp from "../redux/reducer";
+import deepDiff from "webext-redux/lib/strategies/deepDiff/diff";
+import { applyMiddleware, createStore } from "redux";
+import config from "../../config.json";
+import { GetInitialState } from "../utils/GetInitialState";
+import { authorizeSender } from "../redux/authorizeSender";
+import { importNotes, replaceState, NUKE_NOTES, TRACK } from "../redux/actions";
+import { createNoteInTab } from "./createNote";
+import { findNote } from "./findNote";
+import { installSource } from "./installSource";
+import { pageKeysFor, pageShows } from "../utils/noteUrl";
+import { CHROME_MESSAGES, CONTEXT_MENU_ADD_NOTE, CREATE_NOTE_COMMAND, NOTES_UI_FILE } from "../utils/constants";
+import { STATE_KEYS, pagesFromLegacy } from "../redux/legacyState";
+import { applyWrite, changedWrite, fullWrite, joinPages } from "../redux/storedLayout";
+import {
+  IMPACT,
+  addBreadcrumb,
+  captureException,
+  captureMessage,
+  initSentry,
+  reportReducerErrors,
+  tagReportsFromStorage,
+} from "../utils/sentry";
+import { describeNotesValue, describeStorage, storageSizes } from "../redux/storageShape";
+import { LIFECYCLE_STORAGE_KEY, lifecycleContext, recordInstallEvent } from "../utils/lifecycle";
+import { hostnameOf, isExpectedScriptingError, messageWithoutUrls } from "../utils/expectedFailures";
+import { noteShownEvent } from "../redux/noteShown";
+import { migrateState } from "../redux/migrations";
+import {
+  assertNoNotesLost,
+  countNotes,
+  isEmptyStorage,
+  StateError,
+  prepareStoredState,
+  validateState,
+} from "../redux/statePipeline";
+import { BACKUPS_STORAGE_KEY, BACKUP_REASONS, addBackup, createBackupEntry } from "../redux/backups";
+import { pageHasNotes, urlsThatGainedNotes } from "../redux/pageNotes";
+import { onEventTracked, sendFeedback, setInternalInstall, track, trackActions, trackDailyActive, useStoreForAnalyticsSetting } from "../utils/analytics";
+import { recordSurvey, rememberEvent, surveyToAsk } from "./surveys";
+import { buildDiagnosticReport } from "./diagnostics";
+import { createExtensionPagesBridge } from "./extensionPagesBridge";
+import { createPageChannel } from "./pageChannel";
+import { cleanFeedback } from "../model/feedback";
+
+export function startBackground() {
+  // This runs as a Manifest V3 service worker. Chrome will shut it down when it
+  // is idle and start it again when an event comes in, so this file runs from
+  // the top on every wake-up. Any state held only in memory is lost between
+  // wake-ups; chrome.storage.local is the source of truth.
+
+  console.debug(`Starting up Docamatic Background ${config.environment}:${config.release_prefix}:${config.version}`);
+
+  // Content scripts can read chrome.storage.local by default: all the notes,
+  // from inside any web page. Docamatic's never do (a page gets only its own
+  // notes, from the background: pageChannel.js), so close that door for a
+  // page that compromises its renderer. Chrome only (114+); Firefox has no
+  // such setting. Set on every start, as Chrome doesn't promise to keep it.
+  chrome.storage.local.setAccessLevel?.({ accessLevel: "TRUSTED_CONTEXTS" }).catch(() => {});
+  let feedbackUrl = "https://forms.gle/Wn3GFbDQwq4YqzFs9";
+
+  // MV3 requires event listeners to be registered synchronously on startup,
+  // otherwise the event that woke the worker can be missed. Docamatic's own
+  // pages get the whole store (extensionPagesBridge.js); web pages only their
+  // own notes (pageChannel.js). Both register their listeners now and answer
+  // once the state has been loaded from storage.
+  const wrapStore = createExtensionPagesBridge({ channelName: "NOTES_STORE", diffStrategy: deepDiff });
+  const connectPages = createPageChannel();
+
+  // Chrome fires onInstalled soon after the worker starts, on the first run
+  // after an install or update. Reports of errors that stop Docamatic working
+  // wait briefly for it, so they can say which version the user came from.
+  let resolveInstallEventSeen;
+  const installEventSeen = new Promise((resolve) => (resolveInstallEventSeen = resolve));
+  const waitForInstallEvent = (ms = 3000) => Promise.race([installEventSeen, new Promise((resolve) => setTimeout(resolve, ms))]);
+
+  chrome.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
+    // Only show onboarding on a fresh install, not on every worker restart
+    if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
+      // Where it came from is read before the welcome page opens a tab
+      installSource().then((source) => track("extension_installed", source));
+      // With no browser window open (Chrome OS installs at sign-in, before
+      // one exists) a tab has nowhere to go: "No current window". Open the
+      // welcome page in a window of its own then; if even that can't happen,
+      // skip it rather than report it.
+      chrome.tabs
+        .create({ url: "/onboarding.html" })
+        .catch(() => chrome.windows.create({ url: "/onboarding.html" }))
+        .catch(() => {});
+    } else if (reason === chrome.runtime.OnInstalledReason.UPDATE) {
+      track("extension_updated", { previous_version: previousVersion });
+      reconnectOpenTabs().catch((err) => captureException(err, { during: "reconnecting open tabs after an update" }));
+    }
+
+    if (reason !== chrome.runtime.OnInstalledReason.INSTALL && reason !== chrome.runtime.OnInstalledReason.UPDATE) {
+      resolveInstallEventSeen();
+      return;
+    }
+    recordInstallEvent({ reason, previousVersion }, { version: config.version })
+      .then(() => tagReportsFromStorage())
+      .catch((err) => captureException(err, { during: "recording install event" }))
+      .finally(resolveInstallEventSeen);
+  });
+
+  // After an update, tabs that were already open still run the previous
+  // version's page scripts, which can't reach this version: their notes stop
+  // saving until the page is reloaded (Chrome updates extensions silently, so
+  // that's every open tab). Give each open web page the new content script; on
+  // pages with notes it brings in the new notes UI, which hides the old one
+  // (page/mountNotes.tsx). Tabs Chrome has unloaded to save memory are
+  // skipped: they load everything fresh when reopened.
+  const reconnectOpenTabs = async (patterns = ["http://*/*", "https://*/*", "file:///*"], stage = "reconnect_after_update") => {
+    const tabs = await chrome.tabs.query({ url: patterns });
+    const files = chrome.runtime.getManifest().content_scripts?.[0]?.js || [];
+    await Promise.all(
+      tabs
+        .filter((tab) => !tab.discarded && tab.id !== undefined)
+        .map((tab) =>
+          chrome.scripting
+            .executeScript({ target: { tabId: tab.id }, files })
+            .catch((err) => reportShowNotesFailure(err, tab.url, stage))
+        )
+    );
+  };
+
+  // Docamatic was just allowed on more sites ("Allow on this site" in the
+  // popup, or the browser's own site access settings): show notes in the tabs
+  // already open there, without a reload. Done here because Firefox closes
+  // the popup while its permission prompt is up.
+  chrome.permissions?.onAdded?.addListener(({ origins }) => {
+    if (!origins?.length) return;
+    reconnectOpenTabs(origins, "site_access_granted").catch((err) => captureException(err, { during: "showing notes after site access was allowed" }));
+  });
+
+  // Resolves with the redux store once the state has been loaded from storage
+  let resolveStoreReady;
+  const storeReady = new Promise((resolve) => (resolveStoreReady = resolve));
+
+  // The loader content script (apps/script/loader.js) asks for the notes UI to
+  // be injected into its tab. Injecting from here rather than having the page
+  // load it means the UI bundle doesn't need to be web accessible, so websites
+  // can't use it to detect the extension.
+  const mountNotesUi = async (sender) => {
+    const store = await storeReady;
+    // Decided from the url Chrome reports for the sender, not anything in the
+    // message, so a page can't probe whether other urls have notes
+    if (!pageHasNotes(store.getState(), pageKeysFor(sender.url, store.getState().pages))) return false;
+
+    await injectNotesUi(sender.tab.id, sender.frameId);
+    return true;
+  };
+
+  // The notes UI guards against being injected twice, so this is safe to repeat
+  function injectNotesUi(tabId, frameId = 0) {
+    return chrome.scripting.executeScript({
+      target: { tabId, frameIds: [frameId] },
+      files: [NOTES_UI_FILE],
+    });
+  }
+
+  // Failing to show notes on a page is only a bug when Chrome didn't have a good
+  // reason (closed or unloaded tab, page that can't be scripted). Report the rest.
+  const reportShowNotesFailure = (error, pageUrl, stage) => {
+    if (isExpectedScriptingError(error)) return;
+    captureMessage("Couldn't show notes on a page", {
+      stage,
+      page_host: hostnameOf(pageUrl),
+      error: messageWithoutUrls(error),
+    });
+  };
+
+  // Loads the notes UI into every open tab showing one of these pages
+  const showNotesInOpenTabs = async (urls) => {
+    const tabs = await chrome.tabs.query({});
+    const matching = tabs.filter((tab) => urls.some((key) => pageShows(tab.url, key)));
+    // Fails for tabs Chrome has unloaded to save memory; they load the UI
+    // themselves when they're reopened
+    await Promise.all(
+      matching.map((tab) => injectNotesUi(tab.id).catch((err) => reportShowNotesFailure(err, tab.url, "new_note_open_tabs")))
+    );
+  };
+
+  // The page reports when a note it was just asked to show is visible (the
+  // last step of the note-creation funnel). The background checks the report
+  // against its own data and builds the analytics event itself, so a web page
+  // can't invent events or properties (see redux/noteShown.js).
+  const reportedShownNotes = new Set();
+
+  chrome.runtime.onMessage.addListener((message, sender) => {
+    if (message?.type !== CHROME_MESSAGES.NOTE_SHOWN) return;
+    if (sender.id !== chrome.runtime.id || !sender.tab) return;
+
+    storeReady.then((store) => {
+      const properties = noteShownEvent({
+        state: store.getState(),
+        noteId: message.noteId,
+        senderUrl: sender.url,
+        now: Date.now(),
+        alreadyReported: reportedShownNotes,
+      });
+      if (!properties) return;
+      reportedShownNotes.add(message.noteId);
+      track("note_shown", properties);
+    });
+  });
+
+  // Single page apps (GitHub, X, YouTube, ...) change the url with
+  // history.pushState instead of loading a new page. Chrome reports every url
+  // change here, including those, which is more reliable than detecting it
+  // inside the page (where e.g. GitHub only updates the url after fetching the
+  // next page). Listened to at the top level so it works when the worker wakes.
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (!changeInfo.url) return;
+    handleUrlChange(tabId, changeInfo.url).catch((err) => captureException(err, { during: "handling url change" }));
+  });
+
+  const handleUrlChange = async (tabId, url) => {
+    // A notes UI already on the page switches to the new page's notes. Fails
+    // harmlessly when there isn't one (or the page is still loading).
+    chrome.tabs.sendMessage(tabId, { action: CHROME_MESSAGES.URL_CHANGED }).catch(() => {});
+
+    // Pages that only have the small loader get the UI if the new url has notes
+    const store = await storeReady;
+    if (pageHasNotes(store.getState(), pageKeysFor(url, store.getState().pages))) {
+      await injectNotesUi(tabId).catch((err) => reportShowNotesFailure(err, url, "url_change"));
+    }
+  };
+
+  // When a page gets its first note (created, imported or restored), show the
+  // notes UI in every tab that has that page open. Otherwise those tabs, which
+  // only have the small loader, wouldn't show the note until they reload.
+  const showNotesWhenPagesGainNotes = (store) => (next) => (action) => {
+    const before = store.getState();
+    const result = next(action);
+    const urls = urlsThatGainedNotes(before, store.getState());
+    if (urls.length > 0) {
+      showNotesInOpenTabs(urls).catch((err) => captureException(err, { during: "showing notes in open tabs" }));
+    }
+    return result;
+  };
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.MOUNT_NOTES_UI) return;
+    // Only our own content scripts, and only into the tab they are running in
+    if (sender.id !== chrome.runtime.id || !sender.tab) return;
+
+    mountNotesUi(sender).then(
+      (mounted) => sendResponse({ mounted }),
+      (err) => {
+        reportShowNotesFailure(err, sender.url, "page_request");
+        sendResponse({ mounted: false });
+      }
+    );
+    return true; // responding asynchronously
+  });
+
+  initSentry("background");
+
+  // For the developer's own Web Store install: run docamaticMarkInternal() in
+  // the service worker's DevTools console so its analytics events are marked
+  // internal and filtered out of the numbers (unpacked installs always are).
+  // docamaticMarkInternal(false) undoes it.
+  self.docamaticMarkInternal = async (internal = true) => {
+    await setInternalInstall(internal);
+    return internal ? "This install's events are now marked internal." : "This install's events are no longer marked internal.";
+  };
+
+  // For checking that error reporting works: run docamaticSentryTest() in the
+  // service worker's DevTools console. Throwing an error directly in the console
+  // doesn't test anything: Chrome doesn't pass console errors to error
+  // handlers, and only errors from the extension's own code are reported. This
+  // throws an uncaught error from the extension's code, like a real bug would.
+  self.docamaticSentryTest = () => {
+    setTimeout(() => {
+      throw new Error("Docamatic Sentry test (uncaught error in the background)");
+    });
+    return "Thrown. Look for 'Docamatic Sentry test' in Sentry.";
+  };
+  // Runs on every worker start, which can be while the browser quits ("The
+  // browser is shutting down"); it's set again on the next start
+  chrome.runtime.setUninstallURL(feedbackUrl)?.catch(() => {});
+
+  // Wait this long after the last change before writing to storage. Typing in
+  // a note dispatches on every keystroke, and each write serializes every note
+  // on every page. The worker stays alive for 30s after the last event, so a
+  // pending write can't be lost to the worker shutting down.
+  const SAVE_DELAY_MS = 500;
+
+  // --- Keeping notes safe -----------------------------------------------------
+  //
+  // The rule: stored notes are never changed unless the change is known to be
+  // good. Before converting or migrating stored data, an untouched copy is
+  // saved as an automatic backup; the new data is written and read back to
+  // confirm every note survived; only then are old keys removed. If any of that
+  // fails, or the data can't be understood, the extension runs in safe mode:
+  // read-only, nothing is written, and the Backup & restore page explains what
+  // to do. A failure must never lead to starting with empty notes and saving
+  // that over the user's data.
+
+  // How much storage is used, for error reports. Firefox has no
+  // getBytesInUse for storage.local (calling it would throw, not reject).
+  const bytesInUse = () =>
+    chrome.storage.local.getBytesInUse ? chrome.storage.local.getBytesInUse(null).catch(() => "unknown") : Promise.resolve("unknown");
+
+  // Set when stored notes couldn't be loaded safely: { reason, message }
+  let safeMode = null;
+
+  // Which step of loading the notes is running, so a failure's report says
+  // where it stopped (prepareStoredState only reads; the later steps write)
+  let loadStep = "not started";
+
+  const enterSafeMode = (err) => {
+    safeMode = { reason: err?.reason || "load_failed", message: err?.message || String(err) };
+    console.error("Docamatic is in safe mode; notes will not be changed", err);
+    // Not awaited: starting the (read-only) store mustn't wait for the report
+    reportSafeMode(err, safeMode.reason, loadStep);
+  };
+
+  /**
+   * Reports safe mode with everything needed to fix it without having to ask
+   * the user: the shape of the stored data (never its contents), how big it
+   * is, and how this install got to this version. The data isn't changed in
+   * safe mode, so reading it again here sees what loading saw.
+   */
+  const reportSafeMode = async (err, reason, step) => {
+    let shape = {};
+    let sizes = {};
+    let history = {};
+    try {
+      const storage = await readStorage();
+      shape = describeStorage(storage);
+      sizes = { ...storageSizes(storage), bytes_in_use: await bytesInUse() };
+      await track("safe_mode_entered", {
+        reason,
+        step,
+        pages_type: shape["pages.type"],
+        pages_json_type: shape["pages.json.type"],
+        schema_version: shape["metadata.schema_version"],
+        notes_found_anywhere: shape.notes_found_anywhere,
+        storage_keys: shape["storage.keys"],
+      });
+      // Tags it with the install id (created by the event above) and, on the
+      // first run after an update, the version it came from
+      await waitForInstallEvent();
+      await tagReportsFromStorage();
+      history = lifecycleContext((await chrome.storage.local.get(LIFECYCLE_STORAGE_KEY))[LIFECYCLE_STORAGE_KEY]);
+    } catch (diagnosticsErr) {
+      shape = { ...shape, diagnostics_error: String(diagnosticsErr?.message || diagnosticsErr) };
+    }
+    // Always sent, with whatever could be gathered
+    captureException(
+      err,
+      { during: "loading notes", safe_mode_reason: reason, load_step: step },
+      {
+        level: "fatal",
+        tags: { impact: IMPACT.UNUSABLE, safe_mode_reason: reason, load_step: step },
+        contexts: { stored_data: shape, storage_size: sizes, install_history: history },
+      }
+    );
+  };
+
+  // Saved data that couldn't be used but held no notes was replaced with a
+  // clean start (the original is in the backups). Reported, as a warning, so
+  // formats like it can be handled properly.
+  const reportStartedFresh = (storage, { reason, message }) => {
+    const shape = describeStorage(storage);
+    track("started_fresh", { reason, pages_type: shape["pages.type"], storage_keys: shape["storage.keys"] });
+    captureException(
+      new StateError(reason, message),
+      { during: "loading notes", recovered: "started fresh, no notes to lose" },
+      { level: "warning", tags: { safe_mode_avoided: reason, load_step: "preparing" }, contexts: { stored_data: shape } }
+    );
+  };
+
+  // A failed save means changes made since the last good save will be lost
+  // when the worker stops
+  const reportSaveFailure = async (err, state) => {
+    const bytes = await bytesInUse();
+    captureException(
+      err,
+      { during: "saving state" },
+      {
+        level: "error",
+        tags: { impact: IMPACT.NOTES_NOT_SAVED },
+        contexts: { unsaved_state: describeStorage(state), storage_size: { ...storageSizes(state), bytes_in_use: bytes } },
+      }
+    );
+  };
+
+  // What the store shows in safe mode: no notes (they couldn't be read safely)
+  // and a flag the popup uses to show the safe mode message. Never saved.
+  const safeModeState = () => {
+    const initial = GetInitialState();
+    return { ...initial, metadata: { ...initial.metadata, safe_mode: safeMode } };
+  };
+
+  // Everything in storage, with the notes as { pages } whatever the layout
+  // (redux/storedLayout.js): what loading, backups and reports work with
+  const readStorage = async () => joinPages(await chrome.storage.local.get(null));
+
+  // Saves an automatic backup of the notes data currently in storage
+  const backupStoredNotes = async (storage, reason) => {
+    const entry = createBackupEntry(storage, { reason, extensionVersion: config.version });
+    const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+    await chrome.storage.local.set({ [BACKUPS_STORAGE_KEY]: addBackup(backups, entry) });
+  };
+
+  // Writes state in full (in the per-page layout, removing the old one's
+  // "pages" and pages that are gone), then reads it back to confirm it was
+  // saved intact
+  const saveAndVerify = async (state) => {
+    const storedKeys = Object.keys(await chrome.storage.local.get(null));
+    await applyWrite(chrome.storage.local, fullWrite(state, storedKeys));
+    const stored = await readStorage();
+    const saved = Object.fromEntries(STATE_KEYS.map((key) => [key, stored[key]]));
+    validateState(saved);
+    assertNoNotesLost(state, saved);
+  };
+
+  // Whether the loaded state is what storage holds (not a new install's
+  // starting state, which hasn't been saved yet)
+  let stateIsInStorage = false;
+
+  // Throws (and changes nothing) if the stored notes can't be loaded safely
+  const loadState = async () => {
+    loadStep = "reading storage";
+    const storage = await readStorage();
+
+    if (isEmptyStorage(storage)) {
+      addBreadcrumb({ category: "startup", message: "No saved notes (new install)" });
+      return GetInitialState();
+    }
+    stateIsInStorage = true;
+    addBreadcrumb({ category: "startup", message: "Read saved notes", data: { keys: describeStorage(storage)["storage.keys"] } });
+
+    // Converts older layouts and runs migrations in memory, checking that
+    // every note is still there. Throws instead of returning partial data.
+    loadStep = "preparing";
+    const { state, changed, legacyKeys, startedFresh } = prepareStoredState(storage);
+    addBreadcrumb({ category: "startup", message: "Prepared saved notes", data: { changed, legacy_keys: legacyKeys.join(",") } });
+
+    if (changed) {
+      // 1. Keep an untouched copy of the data as it was
+      loadStep = "backing up before converting";
+      await backupStoredNotes(storage, BACKUP_REASONS.BEFORE_UPDATE);
+      // 2. Save the converted data and confirm it saved correctly
+      loadStep = "saving converted notes";
+      await saveAndVerify(state);
+      // 3. Only now remove the old layout's keys
+      if (legacyKeys.length > 0) {
+        loadStep = "removing old keys";
+        await chrome.storage.local.remove(legacyKeys);
+      }
+      addBreadcrumb({ category: "startup", message: "Saved converted notes" });
+    }
+
+    if (startedFresh) reportStartedFresh(storage, startedFresh);
+
+    loadStep = "loaded";
+    return state;
+  };
+
+  // One automatic backup per day, so a bug that damages notes later can be
+  // undone from the Backup & restore page
+  const backupDaily = async () => {
+    const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+    const today = new Date().toISOString().slice(0, 10);
+    const doneToday = (backups || []).some(
+      (backup) => backup.reason === BACKUP_REASONS.DAILY && backup.created_at.startsWith(today)
+    );
+    if (doneToday) return;
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.DAILY);
+  };
+
+  const LEGACY_IMPORT_DONE_KEY = "legacyLocalStorageImported";
+  const OFFSCREEN_URL = "offscreen.html";
+
+  // Opens the offscreen document and waits for it to send the MV2 notes
+  // (a JSON string, or null if there are none). The offscreen API needs
+  // Chrome 109+, which is why manifest.json sets minimum_chrome_version.
+  const readLegacyLocalStorage = async () => {
+    const fromOffscreen = new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(listener);
+        reject(new Error("Timed out reading legacy localStorage"));
+      }, 10000);
+
+      const listener = (message, sender) => {
+        if (message?.type !== "DOCAMATIC_LEGACY_LOCAL_STORAGE") return;
+        if (sender.url !== chrome.runtime.getURL(OFFSCREEN_URL)) return;
+        clearTimeout(timeout);
+        chrome.runtime.onMessage.removeListener(listener);
+        resolve(message.notes);
+      };
+      chrome.runtime.onMessage.addListener(listener);
+    });
+
+    // Only one offscreen document may exist; one could be left over from a
+    // worker that was shut down mid-migration
+    await chrome.offscreen.closeDocument().catch(() => {});
+    await chrome.offscreen.createDocument({
+      url: OFFSCREEN_URL,
+      reasons: [chrome.offscreen.Reason.LOCAL_STORAGE],
+      justification: "Move notes saved by an older version of the extension into chrome.storage",
+    });
+
+    try {
+      return await fromOffscreen;
+    } finally {
+      await chrome.offscreen.closeDocument().catch(() => {});
+    }
+  };
+
+  /**
+   * One time import of notes from the Manifest V2 version (format 1 in
+   * redux/legacyState.js). Runs once per install; IMPORT_NOTES only adds notes
+   * that don't already exist, so running it again could never duplicate notes.
+   * The old localStorage copy is left in place as a backup.
+   */
+  const importLegacyLocalStorage = async (store) => {
+    if (safeMode) return;
+    // Only Chrome had the 2019-2022 version, and only Chrome has offscreen documents
+    if (!chrome.offscreen) return;
+    const { [LEGACY_IMPORT_DONE_KEY]: done } = await chrome.storage.local.get(LEGACY_IMPORT_DONE_KEY);
+    if (done) return;
+
+    let stage = "reading localStorage";
+    let legacyNotes;
+    try {
+      legacyNotes = await readLegacyLocalStorage();
+      // pagesFromLegacy produces version 0 notes; run them through the
+      // migrations so they match the current format before merging them in
+      stage = "converting";
+      const legacyPages = legacyNotes ? pagesFromLegacy(legacyNotes) : {};
+      const pages = migrateState({ pages: legacyPages, tags: [], metadata: { schema_version: 0 } }).pages;
+
+      const noteCount = Object.values(pages).reduce((count, page) => count + page.notes.length, 0);
+
+      if (noteCount > 0) {
+        stage = "saving";
+        store.dispatch(importNotes(pages));
+        // Save right away and confirm it, so the notes are safely in
+        // chrome.storage before the import is marked as done (the old copy in
+        // localStorage is never deleted either way)
+        await saveAndVerify(store.getState());
+        track("legacy_notes_imported", { note_count: noteCount, page_count: Object.keys(pages).length });
+      }
+
+      stage = "marking done";
+      await chrome.storage.local.set({ [LEGACY_IMPORT_DONE_KEY]: true });
+    } catch (err) {
+      // Not marked as done, so it is retried the next time the worker starts
+      captureException(
+        err,
+        { during: "legacy localStorage import", stage, offscreen_api: typeof chrome.offscreen?.createDocument },
+        {
+          tags: { impact: IMPACT.OLD_NOTES_MISSING, import_stage: stage },
+          contexts: { old_notes: legacyNotes === undefined ? { read: false } : describeNotesValue(legacyNotes) },
+        }
+      );
+    }
+  };
+
+  // Restores an automatic backup, replacing the current notes. The current
+  // notes are backed up first, so a restore can itself be undone.
+  const restoreBackup = async (store, backupId) => {
+    const { [BACKUPS_STORAGE_KEY]: backups } = await chrome.storage.local.get(BACKUPS_STORAGE_KEY);
+    const backup = (backups || []).find((entry) => entry.id === backupId);
+    if (!backup) throw new Error("That backup no longer exists.");
+
+    const { state } = prepareStoredState(backup.storage);
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.BEFORE_RESTORE);
+    store.dispatch(replaceState(state));
+    await saveAndVerify(store.getState());
+    track("backup_restored", { note_count: countNotes(state) });
+    return { noteCount: countNotes(state) };
+  };
+
+  // Merges notes from a backup file into the current notes (only adds)
+  const importBackup = async (store, importedState) => {
+    // Checked again here rather than trusting what the page parsed
+    const { state } = prepareStoredState(importedState || {});
+    await backupStoredNotes(await readStorage(), BACKUP_REASONS.BEFORE_IMPORT);
+    const before = countNotes(store.getState());
+    store.dispatch(importNotes(state.pages, state.tags));
+    await saveAndVerify(store.getState());
+    const added = countNotes(store.getState()) - before;
+    track("backup_imported", { note_count: countNotes(state), added_count: added });
+    return { noteCount: countNotes(state), addedCount: added };
+  };
+
+  // Messages from the Backup & restore page (extension pages only)
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    const handlers = {
+      [CHROME_MESSAGES.GET_BACKUP_STATUS]: async () => ({ safeMode }),
+      [CHROME_MESSAGES.IMPORT_BACKUP]: async (store) => importBackup(store, message.state),
+      [CHROME_MESSAGES.RESTORE_BACKUP]: async (store) => restoreBackup(store, message.backupId),
+    };
+    const handler = handlers[message?.type];
+    if (!handler) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+
+    storeReady
+      .then((store) => {
+        if (safeMode && message.type !== CHROME_MESSAGES.GET_BACKUP_STATUS) {
+          throw new Error("Docamatic is in safe mode, so it won't change your notes. Download a backup and contact us.");
+        }
+        return handler(store);
+      })
+      .then(
+        (result) => sendResponse({ ok: true, ...result }),
+        (err) => {
+          captureException(err, { during: message.type });
+          sendResponse({ ok: false, error: err?.message || String(err) });
+        }
+      );
+    return true; // responding asynchronously
+  });
+
+  // Adding a note (from the popup, the side panel or the keyboard shortcut).
+  // Done here rather than in the popup so all three share one path, and so it
+  // finishes even though the popup closes as soon as the page gets focus.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.CREATE_NOTE) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+
+    storeReady
+      .then(async (store) => {
+        if (safeMode) return { ok: false, reason: "safe_mode" };
+        const tab = message.tabId ? await chrome.tabs.get(message.tabId) : undefined;
+        // Text to start the note with: only the welcome page's first note uses it
+        const text = typeof message.text === "string" ? message.text.slice(0, 2000) : undefined;
+        return createNoteInTab(store, tab, { placement: message.placement, source: message.source, text });
+      })
+      .then(sendResponse, (err) => {
+        captureException(err, { during: "creating a note" });
+        sendResponse({ ok: false, reason: "error" });
+      });
+    return true; // responding asynchronously
+  });
+
+  // "Find on page" from the popup or side panel
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.FIND_NOTE) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+
+    storeReady
+      .then((store) => findNote(store, message.pageUrl, message.noteId))
+      .then(sendResponse, (err) => {
+        captureException(err, { during: "finding a note" });
+        sendResponse({ ok: false });
+      });
+    return true; // responding asynchronously
+  });
+
+  // "Add a note here" in the right-click menu: where the page was clicked,
+  // starting with the selected text if there is any. Menu items persist, so
+  // they're (re)created when the extension is installed or updated.
+  chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus?.removeAll(() => {
+      chrome.contextMenus.create({
+        id: CONTEXT_MENU_ADD_NOTE,
+        title: "Add a note here",
+        contexts: ["page", "selection", "link", "image"],
+      });
+    });
+  });
+  chrome.contextMenus?.onClicked.addListener((info, tab) => {
+    if (info.menuItemId !== CONTEXT_MENU_ADD_NOTE || !tab) return;
+    storeReady
+      .then(async (store) => {
+        if (safeMode) return;
+        await createNoteInTab(store, tab, {
+          placement: "page",
+          source: "context_menu",
+          // Only the page itself records where it was right-clicked; in a
+          // frame inside it (an embedded video, comments) that would be an
+          // older right-click, so the note goes where new notes go
+          atContextMenu: info.frameId === 0 || info.frameId === undefined,
+          text: info.selectionText,
+        });
+      })
+      .catch((err) => captureException(err, { during: "creating a note from the right-click menu" }));
+  });
+
+  // Feedback from the popup (model/feedback.ts). Only from the extension's
+  // own pages; only the cleaned message and email, plus a few counts.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.SEND_FEEDBACK) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    const feedback = cleanFeedback(message);
+    if (!feedback) {
+      sendResponse({ ok: false });
+      return;
+    }
+    storeReady
+      .then((store) =>
+        sendFeedback({
+          ...feedback,
+          prompted: message.prompted === true,
+          surface: message.surface === "sidepanel" ? "sidepanel" : "popup",
+          note_count: countNotes(store.getState()),
+        })
+      )
+      .then((ok) => sendResponse({ ok }), () => sendResponse({ ok: false }));
+    return true; // answered asynchronously
+  });
+
+  // Surveys written in PostHog, shown on Docamatic's pages (background/surveys.js)
+  const SURVEY_SURFACES = ["popup", "sidepanel", "board", "welcome"];
+  onEventTracked((name) => rememberEvent(name).catch(() => {}));
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.GET_SURVEY && message?.type !== CHROME_MESSAGES.SURVEY_EVENT) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    storeReady
+      .then((store) => {
+        if (safeMode) return message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false };
+        return message.type === CHROME_MESSAGES.GET_SURVEY
+          ? surveyToAsk(store.getState(), SURVEY_SURFACES.includes(message.surface) ? message.surface : "popup").then((survey) => ({ survey }))
+          : recordSurvey(message);
+      })
+      .then(sendResponse, (err) => {
+        captureException(err, { during: "surveys" });
+        sendResponse(message.type === CHROME_MESSAGES.GET_SURVEY ? { survey: null } : { ok: false });
+      });
+    return true; // answered asynchronously
+  });
+
+  // Errors from the notes UI on web pages, which doesn't load Sentry itself
+  // (page/relayErrors.ts). Only from Docamatic's content script; reported
+  // with the page's hostname, never its address.
+  chrome.runtime.onMessage.addListener((message, sender) => {
+    if (message?.type !== CHROME_MESSAGES.REPORT_ERROR) return;
+    if (sender.id !== chrome.runtime.id || !sender.tab) return;
+    const tags = { context: "content_script", ...(message.tags && typeof message.tags === "object" ? message.tags : {}) };
+    const extra = {
+      ...(message.extra && typeof message.extra === "object" ? message.extra : {}),
+      page_host: hostnameOf(sender.url),
+      recent_actions: Array.isArray(message.breadcrumbs) ? message.breadcrumbs.slice(-20).map((b) => `${b.at} ${b.category}: ${b.message}`) : undefined,
+    };
+    if (message.kind === "message") {
+      captureMessage(messageWithoutUrls({ message: String(message.message || "") }), extra);
+      return;
+    }
+    const error = new Error(messageWithoutUrls({ message: String(message.error?.message || "") }));
+    error.name = String(message.error?.name || "Error").slice(0, 100);
+    if (typeof message.error?.stack === "string") error.stack = message.error.stack;
+    captureException(error, extra, { level: message.level === "warning" ? "warning" : undefined, tags });
+  });
+
+  // The diagnostic report (Settings > Download diagnostic report). Extension
+  // pages only. Works in safe mode too: that's when it's needed most.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== CHROME_MESSAGES.GET_DIAGNOSTICS) return;
+    if (sender.id !== chrome.runtime.id || !sender.url?.startsWith(chrome.runtime.getURL(""))) return;
+    Promise.race([storeReady, new Promise((resolve) => setTimeout(() => resolve(null), 3000))])
+      .then((store) => buildDiagnosticReport({ state: store?.getState(), safeMode, loadStep }))
+      .then((report) => sendResponse({ report }), (err) => sendResponse({ error: messageWithoutUrls(err) }));
+    return true; // answered asynchronously
+  });
+
+  // The "Add a note to this page" shortcut (Alt+Shift+D by default)
+  chrome.commands?.onCommand.addListener((command, tab) => {
+    if (command !== CREATE_NOTE_COMMAND) return;
+    storeReady
+      .then(async (store) => {
+        if (safeMode) return;
+        const [active] = tab?.id ? [tab] : await chrome.tabs.query({ active: true, currentWindow: true });
+        await createNoteInTab(store, active, { placement: "page", source: "shortcut" });
+      })
+      .catch((err) => captureException(err, { during: "creating a note from the shortcut" }));
+  });
+
+  // In safe mode nothing may change the notes (the store holds a placeholder,
+  // not the real notes). Analytics events are still allowed through.
+  const blockChangesInSafeMode = () => (next) => (action) => {
+    if (safeMode && action.type !== TRACK) return;
+    return next(action);
+  };
+
+  // Deleting every note is the one destructive thing users can do, so keep a
+  // backup first. If the backup can't be saved, the delete doesn't happen.
+  const backupBeforeDeleteAll = () => (next) => (action) => {
+    if (action.type !== NUKE_NOTES) return next(action);
+    return readStorage()
+      .then((storage) => backupStoredNotes(storage, BACKUP_REASONS.BEFORE_DELETE_ALL))
+      .then(() => next(action));
+  };
+
+  loadState()
+    .catch((err) => {
+      enterSafeMode(err);
+      return safeModeState();
+    })
+    .then((preloadedState) => {
+      const store = createStore(
+        notesApp,
+        preloadedState,
+        applyMiddleware(
+          authorizeSender,
+          blockChangesInSafeMode,
+          backupBeforeDeleteAll,
+          reportReducerErrors,
+          showNotesWhenPagesGainNotes,
+          trackActions
+        )
+      );
+
+      // Saves write what changed since this; a new install's first save
+      // writes everything
+      let lastSavedState = stateIsInStorage ? preloadedState : null;
+      let saveTimer = null;
+
+      store.subscribe(() => {
+        // Never write in safe mode: storage still holds the user's real notes
+        if (safeMode) return;
+
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          const state = store.getState();
+          // Actions that didn't change anything return the same object
+          if (state === lastSavedState) return;
+
+          // Only what changed since the last save (redux/storedLayout.js)
+          applyWrite(chrome.storage.local, changedWrite(lastSavedState, state)).then(
+            () => (lastSavedState = state),
+            (err) => reportSaveFailure(err, state)
+          );
+        }, SAVE_DELAY_MS);
+      });
+
+      // Every open tab receives every state change. With the default shallow
+      // diff a single keystroke re-sends the whole `pages` object (every note on
+      // every site) to every tab; deepDiff sends only what actually changed.
+      wrapStore(store);
+      connectPages(store);
+      resolveStoreReady(store);
+      // For the browser tests (e2e/env.mjs backgroundReady): notes are loaded
+      self.__DOCAMATIC_READY__ = true;
+
+      if (safeMode) return;
+
+      // Read the analytics opt-out from the live state from now on (not in safe
+      // mode, where the store only holds a placeholder)
+      useStoreForAnalyticsSetting(store.getState);
+
+      importLegacyLocalStorage(store)
+        .then(() => backupDaily())
+        .catch((err) => captureException(err, { during: "startup backups" }))
+        .finally(() => trackDailyActive(store.getState()).finally(() => tagReportsFromStorage()));
+    })
+    .catch((err) =>
+      // Creating the store failed: nothing in Docamatic will respond
+      captureException(err, { during: "starting the background", load_step: loadStep }, { level: "fatal", tags: { impact: IMPACT.UNUSABLE } })
+    );
+}

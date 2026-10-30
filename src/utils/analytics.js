@@ -17,11 +17,17 @@ import {
   ADD_TAG,
   ADD_TEXT,
   ADD_TITLE,
+  DELETE_TAG,
   NUKE_NOTES,
   REMOVE_NOTE,
+  RESTORE_NOTE,
+  UPDATE_TAG,
   TRACK,
   USER_ONBOARDED,
+  DISMISS_HINT,
+  SHOW_NOTE_ON,
 } from "../redux/actions";
+import { isPagePattern, patternBase } from "./noteUrl";
 import { generateUUID } from "./GenerateUUID";
 
 const STORAGE_KEY = "analytics";
@@ -29,9 +35,12 @@ const STORAGE_KEY = "analytics";
 // Which Chromium browser this is (Chrome, Edge, Brave, Opera, ...), from the
 // browser's own client hints, for spotting browser-specific problems.
 // Brands include generic entries ("Chromium", "Not A(Brand") to skip.
-export const browserName = (brands = globalThis.navigator?.userAgentData?.brands) => {
+export const browserName = (brands = globalThis.navigator?.userAgentData?.brands, userAgent = globalThis.navigator?.userAgent || "") => {
   const specific = (brands || []).map((b) => b.brand).filter((name) => !/chromium|not.?a.?brand/i.test(name));
-  return specific[0] || (brands?.length ? "Chromium" : "unknown");
+  if (specific[0]) return specific[0];
+  if (brands?.length) return "Chromium";
+  // Firefox has no client hints
+  return /\bFirefox\//.test(userAgent) ? "Firefox" : "unknown";
 };
 
 const isConfigured = () => Boolean(config.posthog_api_key && config.posthog_host);
@@ -110,32 +119,62 @@ export const setInternalInstall = async (internal) => {
   internalPromise = null;
 };
 
+// One event to PostHog's capture endpoint; resolves with the response
+const send = async (event, properties) => {
+  const installId = await getInstallId();
+  const internal = await isInternalInstall();
+  return fetch(`${config.posthog_host}/i/v0/e/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      api_key: config.posthog_api_key,
+      event,
+      distinct_id: installId,
+      timestamp: new Date().toISOString(),
+      properties: {
+        ...properties,
+        extension_version: config.version,
+        browser: browserName(),
+        internal,
+        environment: config.environment,
+        // No PostHog person profile is created for the install id
+        $process_person_profile: false,
+      },
+    }),
+  });
+};
+
+/**
+ * Feedback someone wrote and chose to send (the popup's "Tell us", or
+ * Settings). Unlike usage events it's sent even with usage statistics off:
+ * the person pressed Send. It's the only event with text they wrote in it;
+ * the privacy policy says so. Resolves true when PostHog accepted it.
+ */
+export const sendFeedback = async (properties) => {
+  if (!isConfigured()) return false;
+  try {
+    const response = await send("feedback_submitted", properties);
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+// Told about each event that's sent (surveys can wait for one; see
+// background/surveys.js)
+let eventListener = null;
+export const onEventTracked = (listener) => {
+  eventListener = listener;
+};
+
+/** Whether usage statistics can be sent: set up, and not turned off in Settings */
+export const analyticsAllowed = async () => isConfigured() && (await isEnabled());
+
 export const track = async (event, properties = {}) => {
   try {
     if (!isConfigured() || !(await isEnabled())) return;
-
-    const installId = await getInstallId();
-    const internal = await isInternalInstall();
-
-    await fetch(`${config.posthog_host}/i/v0/e/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        api_key: config.posthog_api_key,
-        event,
-        distinct_id: installId,
-        timestamp: new Date().toISOString(),
-        properties: {
-          ...properties,
-          extension_version: config.version,
-          browser: browserName(),
-          internal,
-          environment: config.environment,
-          // No PostHog person profile is created for the install id
-          $process_person_profile: false,
-        },
-      }),
-    });
+    eventListener?.(event);
+    await send(event, properties);
   } catch (err) {
     // Analytics must never break the extension (offline, blocked by an ad
     // blocker, ...)
@@ -158,12 +197,30 @@ export const eventForAction = (action) => {
       return { event: "note_created", properties: { note_id: action.id } };
     case REMOVE_NOTE:
       return { event: "note_deleted" };
+    case RESTORE_NOTE:
+      return { event: "note_restored" };
     case ADD_TAG:
       return { event: "tag_added" };
+    case UPDATE_TAG:
+      return { event: "tag_edited" };
+    case DELETE_TAG:
+      return { event: "tag_deleted" };
     case NUKE_NOTES:
       return { event: "all_notes_deleted" };
     case USER_ONBOARDED:
       return { event: "onboarding_viewed" };
+    case SHOW_NOTE_ON: {
+      // How wide, never where: "page", or "pages" with how many folders
+      // deep the pattern is (0 for a whole site)
+      if (!isPagePattern(action.to)) return { event: "note_pages_changed", properties: { scope: "page", via: action.via } };
+      let depth = 0;
+      try {
+        depth = new URL(patternBase(action.to)).pathname.split("/").filter(Boolean).length;
+      } catch {}
+      return { event: "note_pages_changed", properties: { scope: "pages", depth, via: action.via } };
+    }
+    case DISMISS_HINT:
+      return { event: "hint_dismissed", properties: { hint: action.name, how: action.how } };
     case ADD_TEXT:
     case ADD_TITLE:
       if (editedNotes.has(action.id)) return null;
@@ -203,13 +260,17 @@ export const trackDailyActive = async (state) => {
 
   await chrome.storage.local.set({ [STORAGE_KEY]: { ...analytics, lastDailyActive: today() } });
 
-  const pages = Object.values(state.pages || {}).filter((page) => page.notes?.length > 0);
-  const notes = pages.flatMap((page) => page.notes);
+  await track("daily_active", usageCounts(state));
+};
 
-  await track("daily_active", {
+/** How much someone has: counts only, never what's in the notes */
+export const usageCounts = (state) => {
+  const pages = Object.values(state?.pages || {}).filter((page) => page.notes?.length > 0);
+  const notes = pages.flatMap((page) => page.notes);
+  return {
     note_count: notes.length,
     page_count: pages.length,
-    tag_count: state.tags?.length || 0,
+    tag_count: state?.tags?.length || 0,
     favorite_count: notes.filter((note) => note.heart).length,
-  });
+  };
 };

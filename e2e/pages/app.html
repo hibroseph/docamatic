@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Inbox - Example Mail</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,sans-serif}
+header{position:fixed;top:0;left:0;right:0;height:56px;background:#2b3a55;color:#fff;display:flex;align-items:center;padding:0 20px;font-weight:600}
+aside{position:fixed;top:56px;left:0;bottom:0;width:240px;background:#eef1f6;padding:16px;box-sizing:border-box}
+main{position:absolute;top:56px;left:240px;right:0;bottom:0;overflow:auto;padding:24px}
+.msg{padding:14px 0;border-bottom:1px solid #ddd}
+</style></head><body>
+<header>Example Mail</header>
+<aside><p>Inbox</p><p>Starred</p><p>Sent</p></aside>
+<main id="messages"></main>
+<script>
+const m=document.getElementById('messages');
+for(let i=1;i<=80;i++){const d=document.createElement('div');d.className='msg';d.textContent='Message '+i+': quarterly planning notes and follow ups';m.appendChild(d)}
+</script></body></html>

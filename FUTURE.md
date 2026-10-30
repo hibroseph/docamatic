@@ -1,0 +1,18 @@
+Project Description:
+- I want to add an extension page which opens in the browser tab. I want this to be a place where you can see all your notes in a visual space and you can organize them in different ways. 1 way would be on a board or canvas. Maybe pregroup them if they have tags, if they have multiple tabs put them closer together.
+
+Another view could be a plane tags view where they show in a grid pattern according to a tag.
+Status (October 2026): a first, simple version is in 5.1 as a preview: `board.html`, opened from the
+popup's board button.
+- Board: a canvas with notes grouped by their tags (notes with several tags next to their main tag's
+  group, untagged last), drag notes anywhere, drag the background to pan, "Arrange by tag" to reset.
+- By tag: a section per tag.
+- Search in both views (non-matches fade on the canvas), and an "Edit notes" switch: off, the page is
+  read only; on, notes can be edited on the canvas and in By tag.
+- Usage analytics (board_* events) to see which views and features get used.
+
+Ideas for next steps: zoom, filter by tag on the board, grouping by website, positions saved with
+the notes (so they're in backups and sync), drawing connections between notes, tags and colors editable on the canvas cards.
+
+Not built yet, on purpose: notes that show on every page of a website (instead of the exact page). Wait for
+what people say through the new feedback prompt before adding a setting like that.

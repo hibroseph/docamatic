@@ -1,0 +1,29 @@
+/* A survey from PostHog (app/Survey.tsx), on any of Docamatic's pages
+   (popup, side panel, board, welcome page): drawn like a note. */
+.survey {
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-3);
+  border: var(--stroke-hair) solid var(--note-edge, var(--hairline));
+  border-radius: var(--radius-md);
+  background: var(--note-yellow);
+  color: var(--note-ink);
+}
+.survey { display: grid; gap: var(--space-2); }
+/* Notes stay light in the dark theme; so does the survey card, controls too */
+.survey { color-scheme: light; }
+.survey .dm-input { border-color: var(--note-ink); background: #fffdf5; color: var(--note-ink); }
+.survey .dm-input::placeholder { color: var(--note-ink); opacity: .55; }
+.survey__question { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; }
+.survey__description { margin: 0; font-size: 12px; line-height: 16px; opacity: .8; }
+.survey .dm-btn--ghost { color: var(--note-ink); }
+.survey__text { min-height: 64px; resize: vertical; font: inherit; }
+.survey__buttons { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.survey__step { margin-left: auto; font-size: 12px; opacity: .7; }
+.survey__scale { display: flex; flex-wrap: wrap; gap: 4px; }
+.survey__point { min-width: 28px; height: 28px; padding: 0 6px; border: var(--stroke-hair) solid var(--note-ink); border-radius: var(--radius-sm); background: #ffffffa6; color: var(--note-ink); font: inherit; font-weight: 600; cursor: pointer; }
+.survey__point[aria-checked="true"] { background: var(--note-ink); color: var(--note-yellow); }
+.survey__point:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.survey__bounds { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; line-height: 14px; opacity: .8; }
+.survey__choices { display: grid; gap: 4px; }
+.survey__choice { display: flex; align-items: center; gap: var(--space-2); font-size: 13px; line-height: 18px; }
+.survey__other { flex: 1; min-width: 0; padding: 2px 6px; }

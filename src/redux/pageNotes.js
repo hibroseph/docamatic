@@ -17,7 +17,7 @@ export const urlsThatGainedNotes = (before, after) => {
  * The notes to show on a page, from every url they may be saved under (see
  * noteUrlsFor). Each comes with the `pageUrl` it is saved under, which is
  * the url edits to it must use.
- * @param keys from noteUrlsFor(location.href)
+ * @param keys from pageKeysFor(location.href, state.pages)
  */
 export const notesOnPage = (state, keys) =>
   keys.flatMap((pageUrl) => (state?.pages?.[pageUrl]?.notes || []).map((note) => ({ note, pageUrl })));
